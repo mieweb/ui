@@ -49,8 +49,11 @@ change it for every consumer: its visual baselines are the regression check.
   `renderActions` resolve to their dark-theme values. Raw `black` is only for
   the letterbox behind the clip and the scrims over it (`bg-black/xx`), which
   must read over any frame. The library's own text over the scrim (author,
-  title, caption) is white on purpose; host content (`renderActions`) gets
-  its colours from the tokens, so it needs no overrides.
+  title, caption) is white on purpose. Host content (`renderActions`) gets
+  its colours from the dark tokens, which is not enough over a bright frame:
+  a ghost button's muted text loses contrast there. Give overlay actions the
+  player's white, as the stories do (`actionClassName` in
+  `MediaFeed.stories.tsx`), and keep that override when touching them.
 - **The viewer is opt-in in the overlay.** `allowFullscreen` defaults to
   `layout !== 'overlay'`: the overlay already fills its space and the player
   has its own full screen. Opening the viewer brings a floating clip back

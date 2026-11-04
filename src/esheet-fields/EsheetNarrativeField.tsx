@@ -19,7 +19,11 @@ import DOMPurify from 'dompurify';
 import type { FieldComponentProps, FieldResponse } from '@esheet/core';
 import { getFieldComponent, registerCustomFieldTypes } from '@esheet/fields';
 import type { MacroGroup } from '../components/MacroLibrary';
-import { TextAreaRich } from '../components/TextAreaRich';
+// The esheet entry is Kerebron-aware (EncounterVisit's RichEdit mode already
+// requires the peers + `@mieweb/ui/kerebron.css`), so narrative fields ride
+// the Kerebron-backed TextAreaRich surface rather than the legacy engine
+// exported from the main bundle.
+import { TextAreaRichKerebron as TextAreaRich } from '../components/TextAreaRich/TextAreaRichKerebron';
 import { useMessages } from '../utils/messages';
 import {
   applyNarrativeFinding,
@@ -249,14 +253,11 @@ export function EsheetNarrativeField({
   };
 
   React.useEffect(() => {
+    // `dir` is inherited, so localizing the wrapper localizes the editable
+    // region too; the ARIA wiring travels as props so each editor surface
+    // can place it on its own textbox element.
     editorRef.current?.setAttribute('dir', 'auto');
-    editorRef.current?.setAttribute('aria-readonly', String(readOnly));
-    editorRef.current?.setAttribute('aria-labelledby', labelId);
-    editorRef.current?.setAttribute(
-      'aria-required',
-      String(isRequired || isSoftRequired)
-    );
-  }, [isRequired, isSoftRequired, labelId, readOnly]);
+  }, []);
 
   return (
     <div data-slot={slot} className="min-w-0">
@@ -308,7 +309,11 @@ export function EsheetNarrativeField({
           return true;
         }}
         aria-label={question}
-        disabled={readOnly}
+        aria-labelledby={labelId}
+        aria-required={isRequired || isSoftRequired}
+        // Read-only (not disabled): a previewed narrative stays selectable
+        // and announces aria-readonly, matching the native textarea field.
+        readOnly={readOnly}
         enableDictation={false}
         macros={readOnly ? undefined : macros}
         // The field rests as a plain one-line input; the findings panel

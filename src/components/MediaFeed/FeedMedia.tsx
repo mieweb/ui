@@ -98,8 +98,13 @@ function NativeFeedMedia({
       // gesture. Playback state still comes from native events, never intent.
       await element.play();
       // A delayed request must not start a card that has since left the active
-      // surface. A newer request for the same active element can finish normally.
-      if (!activeRef.current || element !== mediaElementRef.current)
+      // surface — unless the viewer floated it into picture in picture while it
+      // was starting, which plays on as it does when the feed moves. A newer
+      // request for the same active element can finish normally.
+      if (
+        (!activeRef.current || element !== mediaElementRef.current) &&
+        !isInPictureInPicture(element)
+      )
         element.pause();
     } catch (error) {
       if (!activeRef.current || attempt !== attemptId.current) return;

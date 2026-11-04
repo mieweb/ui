@@ -16,10 +16,13 @@ const meta: Meta<typeof Textarea> = {
 The default multi-line field — and it is **rich text underneath**. \`Textarea\`
 keeps the classic plain-text contract (\`value\`, \`defaultValue\` and
 \`onChange\`'s \`event.target.value\` are plain strings, \`name\` posts plain
-text, \`ref.current.value\` reads plain text) while rendering \`TextAreaRich\`:
-toolbar hidden until requested, markdown block shortcuts (\`##\` + space →
-heading), and the Notion-style block gutter menu. Every note field gets
-formatting for free without changing its data layer.
+text, \`ref.current.value\` reads plain text) while rendering
+[TextAreaRich](?path=/docs/editors-textarearich-kerebron--docs) — the Kerebron
+(ProseMirror) engine: toolbar hidden until requested, markdown block shortcuts
+(\`##\` + space → heading), and the Notion-style block gutter menu. Every note
+field gets formatting for free without changing its data layer. Load
+\`@mieweb/ui/kerebron.css\` alongside \`styles.css\` — the \`@kerebron/*\`
+packages are required peers since 0.12.
 
 Field anatomy follows \`Input\`: \`label\` (+ \`hideLabel\`), \`helperText\`,
 \`error\`, \`required\` + \`requiredVariant\`, \`size\`, \`hasError\`, and
@@ -39,8 +42,8 @@ Field anatomy follows \`Input\`: \`label\` (+ \`hideLabel\`), \`helperText\`,
   native validation/autofill, drag-resize, floating labels — use
   \`TextAreaPlain\`.
 - The value fits on one line — \`Input\`.
-- The text needs the always-on toolbar, merge variables or dictation —
-  \`RichTextEditor\`.
+- The text is a full document — headings, tables, code, collaboration —
+  \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 
 ### Example
 
@@ -91,8 +94,8 @@ formatting, no HTML. See the escape-hatch stories below.`,
       relationships: [
         {
           type: 'alternative to',
-          target: 'editors-textarearich',
-          why: 'Textarea is TextAreaRich with a plain-text value contract and Input-style field chrome; TextAreaRich when the host persists the HTML.',
+          target: 'editors-textarearich-kerebron',
+          why: 'Textarea is the same Kerebron surface with a plain-text value contract and Input-style field chrome; TextAreaRich when the host persists the HTML.',
         },
         {
           type: 'alternative to',
@@ -101,13 +104,8 @@ formatting, no HTML. See the escape-hatch stories below.`,
         },
         {
           type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'RichTextEditor when the host persists HTML and needs the always-on toolbar, merge variables or dictation; Textarea keeps a plain-text contract.',
-        },
-        {
-          type: 'alternative to',
           target: 'editors-richeditor',
-          why: 'RichEditor when the text needs Markdown, links/tables/code or collaboration; Textarea for plain multi-line text.',
+          why: 'RichEditor when the text is a document — Markdown, links/tables/code, real undo history or collaboration; Textarea keeps a plain-text contract.',
         },
       ],
     },

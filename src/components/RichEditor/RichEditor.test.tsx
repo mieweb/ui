@@ -26,6 +26,9 @@ const editorMock = {
   run: { changeRoom },
   view: {
     setProps,
+    hasFocus: () => false,
+    focus: vi.fn(),
+    dom: document.createElement('div'),
     get state() {
       return { doc: docMock.current };
     },
@@ -81,6 +84,20 @@ const { extensionMediaUpload } = vi.hoisted(() => ({
 vi.mock('@kerebron/extension-basic-editor/ExtensionMediaUpload', () => ({
   ExtensionMediaUpload: extensionMediaUpload,
 }));
+// Imported statically by editorKits.ts for `modifyMenu` support.
+const { extensionCustomMenu } = vi.hoisted(() => ({
+  extensionCustomMenu: vi.fn(function (
+    this: Record<string, unknown>,
+    config: unknown
+  ) {
+    this.name = 'customMenu';
+    this.config = config;
+  }),
+}));
+vi.mock('@kerebron/extension-menu', () => ({
+  ExtensionCustomMenu: extensionCustomMenu,
+  MenuItem: vi.fn(),
+}));
 vi.mock('@kerebron/wasm/web', () => ({
   createAssetLoad: vi.fn(() => vi.fn()),
 }));
@@ -113,6 +130,9 @@ describe('RichEditor', () => {
     vi.clearAllMocks();
     collabKitLoadError = null;
     docMock.current = { id: 'doc-0' };
+    // A fresh editable element per test: attribute writes (tabindex
+    // ownership) must not leak between cases.
+    editorMock.view.dom = document.createElement('div');
   });
 
   it('renders without throwing', async () => {
@@ -670,6 +690,38 @@ describe('RichEditor', () => {
       .filter(Boolean)
       .pop();
     expect(editable?.()).toBe(false);
+    expect(editorMock.view.dom.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('readOnly announces aria-readonly on the textbox surface, not the host', async () => {
+    const { container } = renderWithTheme(
+      <RichEditor readOnly id="note-body" aria-label="Note body" />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    // `aria-readonly` is only valid alongside a role that supports it; the
+    // host div is roleless, so it belongs on the textbox surface instead.
+    expect(container.querySelector('#note-body')).not.toHaveAttribute(
+      'aria-readonly'
+    );
+    const attributes = setProps.mock.calls
+      .map(
+        ([props]) =>
+          (props as { attributes?: Record<string, string> }).attributes
+      )
+      .filter(Boolean)
+      .pop();
+    expect(attributes).toMatchObject({
+      role: 'textbox',
+      'aria-readonly': 'true',
+    });
+    const editable = setProps.mock.calls
+      .map(([props]) => (props as { editable?: () => boolean }).editable)
+      .filter(Boolean)
+      .pop();
+    expect(editable?.()).toBe(false);
+    // Losing contenteditable costs keyboard focusability; the surface gets
+    // it back with an owned tabindex (disabled surfaces must not).
+    expect(editorMock.view.dom.getAttribute('tabindex')).toBe('0');
   });
 
   it('follows dark mode changes without remounting the editor', async () => {

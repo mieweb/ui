@@ -143,6 +143,8 @@ function inventorySection(manifest) {
   const annotate = (e) => {
     const notes = [];
     if (e.maturity !== 'stable') notes.push(e.maturity);
+    // Storybook-documented components without a public export yet.
+    if (e.unexported) notes.push('not exported yet');
     // Components not importable from the root carry their entry point.
     if (e.entry && e.entry !== '@mieweb/ui')
       notes.push(`\`${e.entry.replace('@mieweb/ui', '')}\``);
@@ -269,7 +271,7 @@ ${ENTRY_POINTS.map(([e, d]) => `| ${e} | ${d} |`).join('\n')}
 
 ## Inventory
 
-Components by tier and family. Annotations: maturity when not stable, and the import entry when it is not the root (e.g. _(\`/datavis\`)_).
+Components by tier and family. Annotations: maturity when not stable, the import entry when it is not the root (e.g. _(\`/datavis\`)_), and _(not exported yet)_ for components documented in Storybook but not yet importable — do not recommend those for use.
 
 ${inventorySection(manifest)}
 

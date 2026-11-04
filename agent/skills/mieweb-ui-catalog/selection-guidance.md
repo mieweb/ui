@@ -258,27 +258,28 @@ lists of options in [Choice inputs](https://ui.mieweb.org/?path=/docs/inputs-cho
 # Editors
 
 > **What is the stored format, and who edits it?** Markdown that people write (and maybe
-> co-write) → `RichEditor`. HTML for templated letters with merge fields and dictation →
-> `RichTextEditor`. A **multi-section guided document** — referral letters, support tickets —
-> where an eSheet definition supplies the sections and memory aids → `RichTextEsheet`.
-> HTML in a surface that should look like a plain textarea until asked →
-> `TextAreaRich`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
+> co-write) → `RichEditor`. HTML in a surface that should look like a plain textarea until
+> asked → `TextAreaRich`. A **multi-section guided document** — referral letters, support
+> tickets — where an eSheet definition supplies the sections and memory aids →
+> `RichTextEsheet`. An **email** laid out from blocks and compiled to MJML → `EmailEditor`.
 > Markdown that is only **read** → `MarkdownRenderer`. A structured agent
 > configuration with a YAML/JSON pane → `Q`. Plain text storage with rich composing →
 > [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) (Text inputs) — it renders `TextAreaRich`
-> but keeps a plain-text `value`.
+> but keeps a plain-text `value`. The legacy `RichTextEditor` (HTML letters with merge
+> fields and dictation) is **deprecated** — no new usages (mieweb/ui#692).
 
 ## Which one?
 
 | Component | Use it when | Not when |
 | --- | --- | --- |
-| [RichEditor](https://ui.mieweb.org/?path=/docs/editors-richeditor--docs) | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source | The stored format is HTML or you need merge variables/dictation — `RichTextEditor`; the host cannot add the Kerebron peers and WASM assets |
-| [RichTextEditor](https://ui.mieweb.org/?path=/docs/editors-richtexteditor--docs) | The document is **HTML**: bold/italic/underline, lists, alignment, opt-in markdown block shortcuts (H1–H3, lists, quote), `variableGroups` inserting `{{tokens}}`, Web Speech dictation; no peers | You need Markdown, real undo history, links/tables/code or collaboration — `RichEditor`; plain text — `Textarea`; a textarea-like surface with the toolbar hidden — `TextAreaRich` |
-| [TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs) | A **textarea-like** HTML surface: starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full document with an always-on toolbar, variables or dictation — `RichTextEditor` |
-| [RichTextEsheet](https://ui.mieweb.org/?path=/docs/editors-richtextesheet--docs) | A **multi-section guided document** — referral letters, support tickets, incident write-ups — where an eSheet definition drives section prompts, memory-aid phrases and party macros; exports portable MDY | One free-form HTML letter with merge fields and dictation — `RichTextEditor`; a single rich input — `TextAreaRich`; arbitrary native `FormDefinition` forms — EsheetRenderer (Composite forms); coded clinical visits — EncounterVisit (Encounter & orders) |
-| [EmailEditor](https://ui.mieweb.org/?path=/docs/editors-emaileditor--docs) | The document is an **email**: hero, columns, buttons, images, social, footer blocks on a drag-to-reorder canvas; `renderEmailMjml` serialises it | A single formatted body — `RichTextEditor`; sending, recipients and templates are the host's |
-| [Markdown](https://ui.mieweb.org/?path=/docs/editors-markdown--docs) | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor` / `RichTextEditor`; the source is HTML |
+| [RichEditor](https://ui.mieweb.org/?path=/docs/editors-richeditor--docs) | The document is **Markdown**: headings, lists, tables, code; `getContent()` on submit; `collab.room` for Yjs co-editing; `CodeEditor` for source | The stored format is HTML — `TextAreaRich` (same entry); plain text — `Textarea` |
+| [TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich-kerebron--docs) | A **textarea-like** HTML surface on the Kerebron engine (`@mieweb/ui/kerebron`): starts one Input row tall and auto-grows, toolbar hidden until asked, markdown block shortcuts, a Notion-style `+` gutter menu, `.shortcut` macros | The value must be **plain text** (form posts, bindings) — `Textarea` (this surface with a plain-text contract); a full Markdown document with an always-on toolbar — `RichEditor` |
+| [RichTextEsheet](https://ui.mieweb.org/?path=/docs/editors-richtextesheet--docs) | A **multi-section guided document** — referral letters, support tickets, incident write-ups — where an eSheet definition drives section prompts, memory-aid phrases and party macros; exports portable MDY | One free-form letter — `RichEditor` (Markdown) or `TextAreaRich` (HTML); a single rich input — `TextAreaRich`; arbitrary native `FormDefinition` forms — EsheetRenderer (Composite forms); coded clinical visits — EncounterVisit (Encounter & orders) |
+| [EmailEditor](https://ui.mieweb.org/?path=/docs/editors-emaileditor--docs) | The document is an **email**: hero, columns, buttons, images, social, footer blocks on a drag-to-reorder canvas; `renderEmailMjml` serialises it | A single formatted body — `RichEditor` (Markdown) or `TextAreaRich` (HTML); sending, recipients and templates are the host's |
+| [Markdown](https://ui.mieweb.org/?path=/docs/editors-markdown--docs) | **Displaying** Markdown: sanitised HTML, code highlighting, `mermaid` / `csv` / `survey` / `html` fences, `streaming` for token-by-token AI output | The user edits the text — `RichEditor`; the source is HTML |
 | [Q](https://ui.mieweb.org/?path=/docs/editors-q--docs) | Admins configure an **agent** (prompt, tools, telephony) through a schema-generated form and see the YAML/JSON; `onSubmit(yaml)`, `onConfigChange` | Free-form prose — `RichEditor`; general clinical/business forms — ESheet (Composite forms) |
+| [RichTextEditor (Legacy)](https://ui.mieweb.org/?path=/docs/deprecated-richtexteditor--docs) _(deprecated)_ | Never for new work — the `document.execCommand` engine behind templated HTML letters with `{{variables}}` and dictation; use [TextAreaRich (Kerebron)](https://ui.mieweb.org/?path=/docs/editors-textarearich-kerebron--docs) for HTML with `variableGroups` and dictation, or [RichEditor](https://ui.mieweb.org/?path=/docs/editors-richeditor--docs) for Markdown (mieweb/ui#692) | — |
+| [TextAreaRich (Legacy)](https://ui.mieweb.org/?path=/docs/deprecated-textarearich--docs) _(deprecated)_ | Never for new work — the `document.execCommand` engine; use [TextAreaRich (Kerebron)](https://ui.mieweb.org/?path=/docs/editors-textarearich-kerebron--docs) | — |
 
 ---
 
@@ -652,7 +653,7 @@ executive summary (numbers as lettermark icons) and outlook, and `LeadFormSectio
 | Component | Use it when | Not when |
 | --- | --- | --- |
 | [Input](https://ui.mieweb.org/?path=/docs/text-inputs-input--docs) | One line of free text or a native type (`email`, `password`, `number`) | Phone / URL / date / fixed options — see the specialists |
-| [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) | A sentence or more stored as **plain text** — rich formatting while composing ([TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs) underneath), plain string through `onChange` | The host **persists** HTML — [TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich--docs); native `<textarea>` behaviours (hard `maxLength`, validation, drag-resize, floating label) — `TextAreaPlain` (documented on the Textarea page); full documents — `RichEditor` / `RichTextEditor` |
+| [Textarea](https://ui.mieweb.org/?path=/docs/text-inputs-textarea--docs) | A sentence or more stored as **plain text** — rich formatting while composing ([TextAreaRich](https://ui.mieweb.org/?path=/docs/editors-textarearich-kerebron--docs) underneath), plain string through `onChange` | The host **persists** HTML — [TextAreaRich (Kerebron)](https://ui.mieweb.org/?path=/docs/editors-textarearich-kerebron--docs); native `<textarea>` behaviours (hard `maxLength`, validation, drag-resize, floating label) — `TextAreaPlain` (documented on the Textarea page); full documents — `RichEditor` |
 | [Label](https://ui.mieweb.org/?path=/docs/text-inputs-label--docs) | Labelling a control with no `label` prop (raw `<select>`, custom) | The control already takes `label` |
 | [PhoneInput](https://ui.mieweb.org/?path=/docs/text-inputs-phoneinput--docs) | Exactly one US/Canada number stored as 10 digits | Several typed numbers — `PhoneInputGroup`; international |
 | [PhoneInputGroup](https://ui.mieweb.org/?path=/docs/text-inputs-phoneinputgroup--docs) | A record holds several numbers and the type (cell, work, fax) matters | One number; rows need extra fields |

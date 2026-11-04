@@ -290,8 +290,14 @@ describe('Textarea (native parity hardening)', () => {
     );
     const editor = screen.getByRole('textbox', { name: 'Notes' });
     expect(editor.className).toContain('whitespace-pre-wrap');
-    expect(editor.className).toContain('text-sm');
-    expect(editor.className).not.toContain('text-base');
+    // Size rides CSS variables (unlayered kerebron.css outranks text-sm/lg
+    // utilities on the editable — see Textarea's editorStyle).
+    expect(editor.style.getPropertyValue('--textarea-rich-font-size')).toBe(
+      '0.875rem'
+    );
+    expect(editor.style.getPropertyValue('--textarea-rich-line-height')).toBe(
+      '1.25rem'
+    );
     // 4 rows × 20px sm line height + 14px block padding.
     expect(editor.style.minHeight).toBe('94px');
   });

@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
-import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
+import {
+  RichTextEditor,
+  RichTextEditorBase,
+  type RichTextVariableGroup,
+} from './RichTextEditor';
 import type { MacroGroup } from '../MacroLibrary';
 import {
   processDictation,
@@ -65,6 +69,44 @@ describe('isHtmlEmpty', () => {
 
   it('detects visible text', () => {
     expect(isHtmlEmpty('<p>hello</p>')).toBe(false);
+  });
+});
+
+// Must run before any other test mounts the public <RichTextEditor>: the
+// deprecation warning fires once per module load (`didWarnDeprecated`), so
+// later mounts can no longer observe it. Declaration order sets run order.
+describe('deprecation warning', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it('does not warn in production builds', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    renderWithTheme(<RichTextEditor value="" onChange={() => {}} />);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not warn for internal consumers on RichTextEditorBase', () => {
+    // EmailEditor and TextAreaRichLegacy render RichTextEditorBase so the
+    // library does not warn about its own supported surfaces.
+    renderWithTheme(<RichTextEditorBase value="" onChange={() => {}} />);
+    expect(console.warn).not.toHaveBeenCalled();
+  });
+
+  it('warns once in development across multiple mounts', () => {
+    renderWithTheme(<RichTextEditor value="" onChange={() => {}} />);
+    renderWithTheme(<RichTextEditor value="" onChange={() => {}} />);
+    const deprecationWarns = vi
+      .mocked(console.warn)
+      .mock.calls.filter(([message]) =>
+        String(message).includes('RichTextEditor is deprecated')
+      );
+    expect(deprecationWarns).toHaveLength(1);
   });
 });
 

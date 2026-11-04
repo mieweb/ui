@@ -697,7 +697,10 @@ test('narratives use the phone width and grow with entered content', async ({
   const hpiField = page
     .locator('[data-slot=encounter-narrative]')
     .filter({ has: narrative });
-  const bold = hpiField.getByRole('button', { name: 'Bold', exact: true });
+  const bold = hpiField.getByRole('button', {
+    name: 'Toggle bold',
+    exact: true,
+  });
   await expect(bold).toBeHidden();
   const paragraphs = Array.from(
     { length: 12 },
@@ -783,17 +786,22 @@ test('expanded translated controls fit a phone and keep section navigation below
     '/iframe.html?id=encounter-orders-encountervisit--localized&viewMode=story'
   );
   await expect(page.getByText('Paciente anónimo')).toBeVisible();
-  // The go-to-section scroll measures sticky chrome, so wait for the
-  // async-mounted narrative toolbar before navigating.
-  await expect(page.locator('.kb-custom-menu')).toBeVisible();
+  // Every rich Textarea mounts a (hidden) toolbar now, so target the
+  // narrative's — the only visible one. The go-to-section scroll measures
+  // sticky chrome, so wait for the async-mounted toolbar before navigating.
+  const narrativeToolbar = page.locator('.kb-custom-menu:visible');
+  await expect(narrativeToolbar).toBeVisible();
   const navigation = page.getByRole('combobox', {
     name: 'Ir a la sección del documento clínico',
   });
   await navigation.selectOption('vitals');
   await expect(navigation).toBeInViewport();
-  // The toolbar can momentarily report no box while the scroll settles.
-  await expect(page.locator('.kb-custom-menu')).toBeVisible();
-  const toolbar = await page.locator('.kb-custom-menu').boundingBox();
+  // The toolbar can momentarily report no box (overflow recalc zero-sizes
+  // it) while the scroll settles — poll until it has one again.
+  let toolbar: Awaited<ReturnType<typeof narrativeToolbar.boundingBox>> = null;
+  await expect
+    .poll(async () => (toolbar = await narrativeToolbar.boundingBox()))
+    .not.toBeNull();
   const nav = await page
     .getByRole('navigation', { name: 'Visit sections' })
     .boundingBox();

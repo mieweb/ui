@@ -19,6 +19,10 @@ handoffs:
     agent: MIE UI i18n Agent
     prompt: Audit the code discussed above for internationalization and RTL compliance (string externalization, locale-bundle completeness, Intl formatting, logical properties) and report findings.
     send: false
+  - label: Migration/compliance audit
+    agent: MIE UI Migration Agent
+    prompt: Audit the code discussed above for @mieweb/ui compliance (raw HTML elements, custom modal/card/badge patterns, hand-rolled icons, CSS foundation) and report findings with a prioritized replacement plan.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -48,14 +52,16 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 
 ## Route to specialists
 
-| Question is about…                                  | Delegate to          |
-| --------------------------------------------------- | -------------------- |
-| install / peer deps / preset / safelist / `@source` | MIE UI Install Agent |
-| tokens, CSS vars, Tailwind classes, brands, dark    | MIE UI Styling Agent |
-| ARIA, keyboard nav, screen readers, contrast        | MIE UI A11y Agent    |
-| translations, locale bundles, Intl formats, RTL     | MIE UI i18n Agent    |
+| Question is about…                                   | Delegate to            |
+| ---------------------------------------------------- | ---------------------- |
+| install / peer deps / preset / safelist / `@source`  | MIE UI Install Agent   |
+| wiring headless modules (ViewSet, SuperChat) to data | MIE UI Install Agent   |
+| tokens, CSS vars, Tailwind classes, brands, dark     | MIE UI Styling Agent   |
+| ARIA, keyboard nav, screen readers, contrast         | MIE UI A11y Agent      |
+| translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
+| migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
 
-More specialists (Migration, Grids, DataVis, Views,
+More specialists (Grids, DataVis, Views,
 SuperChat, Rich Text) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
