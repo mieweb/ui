@@ -324,8 +324,17 @@ export interface ComposerAttachment {
   name: string;
   /** MIME type, e.g. `image/png`. */
   type: string;
-  /** Base64 `data:` URL of the file contents. */
+  /**
+   * Base64 `data:` URL of the file contents. Empty when the panel's
+   * `attachmentDataUrls` is `false`: read {@link file} then.
+   */
   dataUrl: string;
+  /**
+   * The file as the user picked, pasted or dropped it. Set by SuperChat;
+   * optional so attachments a host builds itself stay valid. Upload this
+   * rather than decoding `dataUrl`: it holds no copy of the bytes.
+   */
+  file?: File;
 }
 
 /**

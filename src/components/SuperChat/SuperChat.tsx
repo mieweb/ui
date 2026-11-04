@@ -154,6 +154,14 @@ export interface SuperChatProps {
    */
   onComposerError?: (message: string, context?: ChatComposerError) => void;
   /**
+   * Whether `onMessageSent`'s attachments carry a base64 `dataUrl`. Set
+   * `false` when the host uploads each attachment's `file` itself: the read is
+   * skipped, so a large video doesn't become a string bigger than a browser —
+   * let alone a phone's WebView — can hold. `dataUrl` is then empty.
+   * @default true
+   */
+  attachmentDataUrls?: boolean;
+  /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
    *   classic messenger (auto-scrolls to the newest message).
@@ -359,6 +367,7 @@ export function SuperChat({
   acceptedFileTypes,
   maxFileSize = 25 * 1024 * 1024,
   onComposerError,
+  attachmentDataUrls = true,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -1092,7 +1101,8 @@ export function SuperChat({
   }, []);
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
-  // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  // SuperChat's host callback (mentions + attachments: each one's File, and
+  // its base64 `data:` URL unless `attachmentDataUrls` is off).
   const composerRef = React.useRef<ChatComposerHandle>(null);
   // The conversations a send is pending in: SuperChatInbox reuses this panel
   // (and its composer) for every conversation, and only those are busy. Each
@@ -1109,7 +1119,8 @@ export function SuperChat({
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
-          message.attachments ?? []
+          message.attachments ?? [],
+          { dataUrls: attachmentDataUrls }
         );
         // The declared type is `void` for backward compatibility, but a
         // returned promise (e.g. an async host callback) is awaited so its
@@ -1144,7 +1155,7 @@ export function SuperChat({
         });
       }
     },
-    [conversation, onMessageSent]
+    [conversation, onMessageSent, attachmentDataUrls]
   );
 
   return (

@@ -375,7 +375,7 @@ uncontrolled).
 
 It also passes `view`, `defaultView`, `onViewChange`, `mediaFeedProps`,
 `mediaLabels`, `renderMessageMedia`, `mediaMaxSize`, `acceptedFileTypes`,
-`maxFileSize` and `onComposerError` to the panel; see
+`attachmentDataUrls`, `maxFileSize` and `onComposerError` to the panel; see
 [`SuperChat`](#superchat-panel).
 
 ### `SuperChat` (panel)
@@ -419,6 +419,7 @@ Renders exactly one conversation.
 | `mediaMaxSize`         | `number \| string`                                                        | `'18rem'`                            | The box an attachment card fits in, both ways.                                                                                                                                                                                                                                   |
 | `acceptedFileTypes`    | `AttachmentKind[]`                                                        | `['image', 'video', 'audio', 'pdf']` | File types the composer takes; see [Attaching files](#attaching-files).                                                                                                                                                                                                          |
 | `maxFileSize`          | `number` (bytes)                                                          | 25 MB                                | Largest file the composer takes.                                                                                                                                                                                                                                                 |
+| `attachmentDataUrls`   | `boolean`                                                                 | `true`                               | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                                                                                                                                            |
 | `onComposerError`      | `(message, context?) => void`                                             | —                                    | Fired when the composer refuses a file or a send fails; `context.reason` says why.                                                                                                                                                                                               |
 
 #### Composer agent & model selectors
@@ -602,7 +603,7 @@ the text instead:
 
 ```tsx
 onMessageSent={(text, { conversation, mentions, attachments }) => {
-  // attachments: { id, name, type, dataUrl }[]
+  // attachments: { id, name, type, dataUrl, file }[]
   const images = attachments
     .filter((a) => a.type.startsWith('image/'))
     .map((a) => `![${a.name}](${a.dataUrl})`)
@@ -621,6 +622,14 @@ Each `ComposerAttachment` carries a base64 `dataUrl`. To render inline `data:` (
 `rehype-sanitize` allow-list to permit those protocols on `<img src>` (safe, since
 scripts inside an SVG loaded via `src` do not execute). For production you'll
 typically upload the file and swap in the hosted URL instead of the `data:` URL.
+
+To upload, send each attachment's `file` — the `File` as picked — rather than
+decoding `dataUrl`. A host that only uploads can set `attachmentDataUrls={false}`
+to skip the base64 read altogether (`dataUrl` is then empty): base64 makes a file a
+third larger again in memory, and past a few hundred MB it is more than a browser
+string can hold, so large videos need it off. Pair it with a per-file cap: `composerProps.maxFileSize`
+also takes a function, e.g.
+`(file) => (file.type.startsWith('video/') ? 500 : 100) * 1024 * 1024`.
 
 ### Rendering video / audio / PDF inline
 

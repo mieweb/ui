@@ -211,8 +211,12 @@ export interface ChatComposerProps {
   allowAttachments?: boolean;
   /** Accepted file types for the picker/paste validation (native `accept` tokens). */
   acceptedFileTypes?: string[];
-  /** Maximum file size in bytes. */
-  maxFileSize?: number;
+  /**
+   * Largest file the composer takes, in bytes; a larger one is refused
+   * (`onError`, reason `'file-size'`). A function sets the cap per file, e.g.
+   * a higher one for videos than for photos; `undefined` from it means no cap.
+   */
+  maxFileSize?: number | ((file: File) => number | undefined);
   /** Maximum number of staged attachments. @default 10 */
   maxAttachments?: number;
 
@@ -595,7 +599,11 @@ export const ChatComposer = React.forwardRef<
           });
           continue;
         }
-        const sizeCheck = validateFile(file, undefined, maxFileSize);
+        const sizeCheck = validateFile(
+          file,
+          undefined,
+          typeof maxFileSize === 'function' ? maxFileSize(file) : maxFileSize
+        );
         if (!sizeCheck.valid) {
           onError?.(`${file.name}: ${sizeCheck.error}`, {
             reason: 'file-size',
