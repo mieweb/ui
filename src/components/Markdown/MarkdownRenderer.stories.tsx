@@ -23,7 +23,7 @@ const meta: Meta<typeof MarkdownRenderer> = {
 
 ### Don't use it when
 
-- The user **edits** the text — \`RichEditor\` (Markdown) or \`RichTextEditor\` (HTML).
+- The user **edits** the text — \`RichEditor\`.
 - The source is HTML, not Markdown — sanitise and render it yourself; this component parses Markdown syntax.
 - You cannot accept the optional peers for the fences you use: \`mermaid\` (diagrams), \`papaparse\` (CSV), \`js-yaml\` (survey). Plain Markdown and code blocks need none of them.
 

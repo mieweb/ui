@@ -42,8 +42,8 @@ Field anatomy follows \`Input\`: \`label\` (+ \`hideLabel\`), \`helperText\`,
   native validation/autofill, drag-resize, floating labels — use
   \`TextAreaPlain\`.
 - The value fits on one line — \`Input\`.
-- The text needs the always-on toolbar, merge variables or dictation —
-  \`RichTextEditor\`.
+- The text is a full document — headings, tables, code, collaboration —
+  \`RichEditor\` (\`@mieweb/ui/kerebron\`).
 
 ### Example
 
@@ -104,13 +104,8 @@ formatting, no HTML. See the escape-hatch stories below.`,
         },
         {
           type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'RichTextEditor when the host persists HTML and needs the always-on toolbar, merge variables or dictation; Textarea keeps a plain-text contract.',
-        },
-        {
-          type: 'alternative to',
           target: 'editors-richeditor',
-          why: 'RichEditor when the text needs Markdown, links/tables/code or collaboration; Textarea for plain multi-line text.',
+          why: 'RichEditor when the text is a document — Markdown, links/tables/code, real undo history or collaboration; Textarea keeps a plain-text contract.',
         },
       ],
     },

@@ -25,7 +25,7 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 
 ### Don't use it when
 
-- The stored format is **HTML**, or you need template-variable insertion and dictation from a toolbar — \`RichTextEditor\` (main barrel, no peers).
+- The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
@@ -103,9 +103,9 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
         },
         {
-          type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'RichEditor stores Markdown on ProseMirror via the @mieweb/ui/kerebron entry with Yjs collab; RichTextEditor stores HTML from a contentEditable div on the main barrel with variables and dictation.',
+          type: 'supersedes',
+          target: 'deprecated-richtexteditor',
+          why: 'RichEditor is the supported rich-text surface — Markdown on the ProseMirror/Kerebron engine with real undo history and Yjs collab; the legacy RichTextEditor (HTML, document.execCommand) is deprecated (mieweb/ui#692).',
         },
         {
           type: 'composes with',
@@ -116,6 +116,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           type: 'alternative to',
           target: 'editors-q',
           why: 'RichEditor edits free-form Markdown prose; Q edits a structured agent configuration through a generated form plus YAML/JSON view.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-emaileditor',
+          why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
         },
       ],
     },
