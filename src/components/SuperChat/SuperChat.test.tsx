@@ -623,6 +623,30 @@ describe('SuperChat', () => {
     expect(input).toHaveValue('newer draft');
   });
 
+  it('takes a larger file when maxFileSize allows it, per file', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        maxFileSize={(file) =>
+          (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024
+        }
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const video = new File(['x'], 'long.mp4', { type: 'video/mp4' });
+    Object.defineProperty(video, 'size', { value: 400 * 1024 * 1024 });
+    const photo = new File(['x'], 'huge.png', { type: 'image/png' });
+    Object.defineProperty(photo, 'size', { value: 25 * 1024 * 1024 + 1 });
+    await user.upload(fileInput, [video, photo]);
+    await screen.findByLabelText('Remove long.mp4');
+    expect(screen.queryByLabelText('Remove huge.png')).toBeNull();
+  });
+
   it('rejects files over the 25 MiB cap', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();

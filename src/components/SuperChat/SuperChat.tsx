@@ -142,12 +142,6 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
-   * Largest file the composer takes, in bytes; a larger one is refused
-   * (reported through `onComposerError`).
-   * @default 26214400 (25 MB)
-   */
-  maxFileSize?: number;
-  /**
    * Called when the composer refuses a file (too large, a type not accepted,
    * over the attachment limit) or a send fails, so the host can say why.
    * `message` is English; `context.reason` lets hosts word it themselves.
@@ -161,6 +155,14 @@ export interface SuperChatProps {
    * @default true
    */
   attachmentDataUrls?: boolean;
+  /**
+   * Largest file the composer takes, in bytes; a larger one is refused. A
+   * function sets the cap per file, e.g. a higher one for videos than photos
+   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
+   * A refused file is reported through `onComposerError`.
+   * @default 26214400 (25 MB)
+   */
+  maxFileSize?: ChatComposerProps['maxFileSize'];
   /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
@@ -365,9 +367,9 @@ export function SuperChat({
   readOnly,
   composerProps,
   acceptedFileTypes,
-  maxFileSize = 25 * 1024 * 1024,
   onComposerError,
   attachmentDataUrls = true,
+  maxFileSize = 25 * 1024 * 1024,
   order = 'asc',
   virtualized = false,
   linkBuilder,
