@@ -276,7 +276,8 @@ export const GroupNeedsAttention: Story = {
 /**
  * Hosts can name each call in the user's words with `displayName`. The row
  * shows it as plain text, and the row's details repeat it in full (the row
- * truncates) above the raw `toolName` under `labels.toolId`.
+ * truncates) above the raw `toolName` under `labels.toolId`. The call awaiting
+ * approval keeps the group and its row open.
  */
 export const GroupDisplayNames: Story = {
   render: () => (
@@ -286,16 +287,23 @@ export const GroupDisplayNames: Story = {
           displayName: 'Looked at files in src/',
         }),
         groupCall('d2', 'read_file', 'success', {
-          displayName: 'Read index.ts',
+          displayName: 'Read src/components/AI/MCPToolCallGroup.tsx',
           parameters: [
-            { name: 'filePath', type: 'string', value: 'src/index.ts' },
+            {
+              name: 'filePath',
+              type: 'string',
+              value: 'src/components/AI/MCPToolCallGroup.tsx',
+            },
           ],
         }),
-        groupCall('d3', 'bash', 'success', {
-          displayName: 'Ran a command',
-          parameters: [{ name: 'command', type: 'string', value: 'pnpm test' }],
+        groupCall('d3', 'delete_file', 'awaiting-approval', {
+          displayName: 'Delete the build folder',
+          parameters: [{ name: 'path', type: 'string', value: 'build/' }],
+          result: undefined,
         }),
       ]}
+      onApprove={fn()}
+      onDeny={fn()}
     />
   ),
 };
