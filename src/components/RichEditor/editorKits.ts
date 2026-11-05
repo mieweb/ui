@@ -282,7 +282,7 @@ export async function createEditorKits(
   }
 
   try {
-    const { HuddleYjsKit, defaultWsUrl } = await import('./collabKit');
+    const { createHuddleYjsKit, defaultWsUrl } = await import('./collabKit');
     const url = config.wsUrl ?? defaultWsUrl();
     return {
       kits: [
@@ -292,7 +292,7 @@ export async function createEditorKits(
           modifyMenu,
           omitExtensions
         ),
-        new HuddleYjsKit(
+        await createHuddleYjsKit(
           url,
           config.params ?? {},
           config.WebSocketPolyfill,
