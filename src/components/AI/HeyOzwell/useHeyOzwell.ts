@@ -516,8 +516,9 @@ export function useHeyOzwell(
   // phrase off the AUDIO before transcribing — Whisper mishears it differently every time, so text-stripping
   // alone leaks it; a button stop has no phrase, so trimming would clip real speech. `lateSeconds` is how
   // long after the phrase the stop came (the doctor check); that audio is dropped before the phrase cut.
+  // `phraseSeconds` is the phrase length measured when it was heard (read now if not given).
   const stopDictation = React.useCallback(
-    (viaPhrase = false, lateSeconds = 0) => {
+    (viaPhrase = false, lateSeconds = 0, phraseSeconds?: number) => {
       const rec = recRef.current;
       if (!rec) return;
       stopLive(); // tear down the live-caption loop; the final full-clip transcription follows
@@ -533,7 +534,8 @@ export function useHeyOzwell(
           // it works even with no pause before the phrase), snapped to a nearby pause. Best-effort: keep the
           // original clip on failure.
           if (viaPhrase) {
-            const dur = wakeRef.current?.getLastWakeDuration() ?? 0;
+            const dur =
+              phraseSeconds ?? wakeRef.current?.getLastWakeDuration() ?? 0;
             const hint = dur > 0 ? dur + stopTrimLeadIn() : 0;
             try {
               blob = await trimTrailingStopPhrase(blob, hint, lateSeconds);
@@ -621,11 +623,23 @@ export function useHeyOzwell(
         // dictation. The WHAT phrase-print check in verified() is the false-stop guard.) `true` = trim the
         // phrase off the audio before transcribing, allowing for the time the check took.
         const heardAt = performance.now();
-        // Only the recording that heard the phrase may be stopped by it.
+        // Read before awaiting: a later detection replaces the phrase length.
+        const phraseSeconds = wakeRef.current?.getLastWakeDuration() ?? 0;
+        // Only the recording that heard the phrase, for the same user, may be stopped by it.
         const rec = recRef.current;
+        const epoch = wakeEpochRef.current;
         void verified("ozwell-i'm-done").then((ok) => {
-          if (ok && recRef.current === rec && phaseRef.current === 'dictating')
-            stopDictation(true, (performance.now() - heardAt) / 1000);
+          if (
+            ok &&
+            recRef.current === rec &&
+            wakeEpochRef.current === epoch &&
+            phaseRef.current === 'dictating'
+          )
+            stopDictation(
+              true,
+              (performance.now() - heardAt) / 1000,
+              phraseSeconds
+            );
         });
       }
     },

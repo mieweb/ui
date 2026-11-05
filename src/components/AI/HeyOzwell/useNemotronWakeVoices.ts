@@ -80,27 +80,35 @@ export function useNemotronWakeVoices({
   voiceprintNamespace,
 }: UseNemotronWakeVoicesOptions = {}): NemotronWakeVoices {
   const model = useNemotronModel();
-  const [prints, setPrints] = React.useState<NemotronVoiceprint[] | null>(null);
+  // Tagged with the namespace they were read for, so a user switch never exposes the previous user's voices.
+  const [loaded, setLoaded] = React.useState<{
+    namespace?: string;
+    prints: NemotronVoiceprint[];
+  } | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const prints =
+    enabled && loaded && loaded.namespace === voiceprintNamespace
+      ? loaded.prints
+      : null;
 
   // Reload after any save, including one made by another surface (Voice Setup, Voice Manager).
   React.useEffect(() => {
-    setPrints(null);
+    setLoaded(null);
     setError(null);
     if (!enabled) return;
     let cancelled = false;
     // A failed read leaves `prints` null (not ready), so the doctor check stays closed.
     const reload = () =>
       void load(voiceprintNamespace).then(
-        (loaded) => {
+        (stored) => {
           if (cancelled) return;
-          setPrints(loaded);
+          setLoaded({ namespace: voiceprintNamespace, prints: stored });
           setError(null);
         },
         (e: unknown) => {
           console.error('[nemotron] could not load the doctor-check voices', e);
           if (cancelled) return;
-          setPrints(null);
+          setLoaded(null);
           setError('Couldn’t load the enrolled voices; reload to try again');
         }
       );
@@ -157,6 +165,7 @@ export function useNemotronWakeVoices({
         const others = (await load(voiceprintNamespace)).filter(
           (p) => p.voiceId !== voiceId
         );
+        if (cancelled()) return;
         if (
           others.filter((p) => isUsableWith(p, model.variant)).length >=
           MAX_VOICES
