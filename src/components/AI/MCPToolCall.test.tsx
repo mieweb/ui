@@ -48,4 +48,29 @@ describe('MCPToolCallDisplay', () => {
     expect(label).toHaveTextContent('· 1.2s');
     expect(label?.querySelector('bdi')).toBeNull();
   });
+
+  it.each([
+    [
+      'a display name hides',
+      'Looked up flu shots',
+      'Looked up flu shots · 1.2s',
+    ],
+    ['no display name keeps', undefined, '· "flu shot"'],
+    ['an empty display name keeps', '', '· "flu shot"'],
+  ])('%s the parameter summary while running', (_, displayName, expected) => {
+    const { container } = renderWithTheme(
+      <MCPToolCallDisplay
+        toolCall={call({
+          toolName: 'search_services',
+          status: 'running',
+          displayName,
+          parameters: [{ name: 'query', type: 'string', value: 'flu shot' }],
+        })}
+      />
+    );
+
+    const label = pillLabel(container);
+    expect(label).toHaveTextContent(expected);
+    if (displayName) expect(label).not.toHaveTextContent('flu shot"');
+  });
 });
