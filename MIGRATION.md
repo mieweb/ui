@@ -23,10 +23,30 @@ and `@kerebron/wasm` (tested together at 0.8.12). Import `@mieweb/ui/kerebron.cs
 and serve `@kerebron/wasm/assets` at `/kerebron-wasm`. Apply the Kerebron patches
 described by the RichEditor documentation for its toolbar and Markdown marks.
 
-**Required for Kerebron 0.8.12:** configure the consuming application's package
-manager to resolve every `prosemirror-view` dependency to **1.42.3**. Kerebron
-pins 1.40.0, while the protected MDY link bridge uses 1.42.3. Two view instances
-can make decorations incompatible and leave the older view's behavior active.
+**Required for Kerebron 0.8.12:** install the `@kerebron/*` peers at **exactly
+0.8.12** (the tested set) and configure the consuming application's package
+manager to resolve every ProseMirror core package to a **single version**.
+Without this, a fresh install loads multiple copies of `prosemirror-model`
+and typing throws:
+
+```
+RangeError: Can not convert <…> to a Fragment
+(looks like multiple versions of prosemirror-model were loaded)
+```
+
+Two mechanisms split the versions (mieweb/ui#709). First, `@mieweb/ui` and
+Kerebron 0.8.12 both pin `prosemirror-model` 1.25.9 / `prosemirror-state`
+1.4.3 exactly, but Kerebron 0.8.13 pins different versions — a `^0.8.12`
+range drifts onto it, and the exact pins can never dedupe. Second, even with
+matching pins, ProseMirror's own `^`-ranged internal dependencies (for
+example `prosemirror-state → prosemirror-model ^1.0.0`) resolve to the
+newest release on any fresh install; this repository is only protected by
+its frozen lockfile. `pnpm dedupe` cannot fix either case, so overrides are
+required. (`prosemirror-view` additionally needs 1.42.3 rather than
+Kerebron's pinned 1.40.0: the protected MDY link bridge uses 1.42.3, and two
+view instances can make decorations incompatible and leave the older view's
+behavior active.)
+
 The overrides in this library's checkout do not propagate to installed apps.
 
 For pnpm 10, add to the host's `pnpm-workspace.yaml`:
@@ -34,6 +54,9 @@ For pnpm 10, add to the host's `pnpm-workspace.yaml`:
 ```yaml
 overrides:
   prosemirror-view: "1.42.3"
+  prosemirror-model: "1.25.9"
+  prosemirror-state: "1.4.3"
+  prosemirror-transform: "1.10.4"
 ```
 
 For npm, add to the host's `package.json`:
@@ -41,7 +64,10 @@ For npm, add to the host's `package.json`:
 ```json
 {
   "overrides": {
-    "prosemirror-view": "1.42.3"
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
   }
 }
 ```
@@ -51,16 +77,20 @@ For Yarn, add to the host's `package.json`:
 ```json
 {
   "resolutions": {
-    "prosemirror-view": "1.42.3"
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
   }
 }
 ```
 
-If the host also declares `prosemirror-view` directly, pin that dependency to
-1.42.3. Reinstall and inspect `pnpm why prosemirror-view`,
-`npm ls prosemirror-view` or `yarn why prosemirror-view`: every resolved instance
-must be 1.42.3. Keep this requirement until a tested Kerebron release shares the
-same view version without an override.
+If the host also declares any of these packages directly, pin those
+dependencies to the same versions. Reinstall and inspect
+`pnpm why prosemirror-model` / `pnpm why prosemirror-view` (or the
+`npm ls` / `yarn why` equivalents): every resolved instance of each package
+must be a single version. Keep this requirement until a tested Kerebron
+release shares the same ProseMirror versions without an override.
 
 **Recommended for EncounterVisit hosts:** resolve `js-yaml` to **4.3.2 or
 newer**. `@mieweb/templit` 0.2.0 (a direct dependency used by
@@ -87,8 +117,9 @@ peers** (only the Yjs collaboration peers — `@kerebron/extension-yjs`,
 `yjs`, `y-protocols` — remain optional):
 
 ```sh
-npm install @kerebron/editor @kerebron/editor-kits \
-  @kerebron/extension-basic-editor @kerebron/extension-menu @kerebron/wasm
+npm install @kerebron/editor@0.8.12 @kerebron/editor-kits@0.8.12 \
+  @kerebron/extension-basic-editor@0.8.12 @kerebron/extension-menu@0.8.12 \
+  @kerebron/wasm@0.8.12
 ```
 
 ```ts
@@ -102,8 +133,8 @@ serve `@kerebron/wasm`'s `assets/` directory at that path (or pass your own
 `<Textarea richText={false}>` or `TextAreaPlain` — but the peers must be
 installable for the package to resolve.
 
-Because every consumer now resolves Kerebron, the **`prosemirror-view`
-1.42.3 override and the Kerebron patches** described under
+Because every consumer now resolves Kerebron, the **ProseMirror version
+overrides and the Kerebron patches** described under
 [eSheet and EncounterVisit](#esheet-and-encountervisit) above also apply to
 every consumer — previously only EncounterVisit RichEdit hosts needed them.
 Note that package managers that auto-install peers (npm 7+, pnpm 8+ by
