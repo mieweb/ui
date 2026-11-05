@@ -221,6 +221,30 @@ describe('MCPToolCallGroup', () => {
     ).toBeInTheDocument();
   });
 
+  it('prefers an error result’s detail over its summary', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'error', {
+            result: {
+              type: 'error',
+              summary: 'Request failed',
+              data: 'HTTP 502 from upstream: connection reset',
+            },
+          }),
+          call('b', 'error', {
+            result: { type: 'error', summary: 'Timed out', data: null },
+          }),
+        ]}
+      />
+    );
+
+    expect(
+      screen.getByText('HTTP 502 from upstream: connection reset')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Timed out')).toBeInTheDocument();
+  });
+
   it('offers the full error alongside a partial result', () => {
     renderWithTheme(
       <MCPToolCallGroup

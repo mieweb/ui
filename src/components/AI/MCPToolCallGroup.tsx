@@ -230,13 +230,23 @@ function formatParameters(toolCall: MCPToolCall): string {
   );
 }
 
+function formatData(data: unknown): string {
+  return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+}
+
 function formatResult(toolCall: MCPToolCall): string | null {
   const { result } = toolCall;
   if (!result) return null;
-  if (result.summary) return result.summary;
-  return typeof result.data === 'string'
-    ? result.data
-    : JSON.stringify(result.data, null, 2);
+  return result.summary || formatData(result.data);
+}
+
+/** The failure text: `error`, else an error result's detail, else its summary. */
+function formatError(toolCall: MCPToolCall): string | null {
+  if (toolCall.error) return toolCall.error;
+  const { result } = toolCall;
+  if (result?.type !== 'error') return null;
+  if (result.data != null && result.data !== '') return formatData(result.data);
+  return result.summary || null;
 }
 
 /** A row's own collapsed block of output text, such as a result or error. */
@@ -293,10 +303,9 @@ function ToolCallRow({
   const focusInActionsRef = React.useRef(false);
   const isAwaitingApproval = toolCall.status === 'awaiting-approval';
   // An `error` result is failure text, the same as `toolCall.error`.
-  const isErrorResult = toolCall.result?.type === 'error';
-  const formattedResult = formatResult(toolCall);
-  const result = isErrorResult ? null : formattedResult;
-  const errorText = toolCall.error || (isErrorResult ? formattedResult : null);
+  const result =
+    toolCall.result?.type === 'error' ? null : formatResult(toolCall);
+  const errorText = formatError(toolCall);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasDetails =
     toolCall.parameters.length > 0 || Boolean(result) || hasLinks;
