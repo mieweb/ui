@@ -241,7 +241,7 @@ function AttachmentPreviewItem({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            <span className="absolute inset-x-0 top-1/2 mt-4 truncate px-1 text-center text-xs">
+            <span className="absolute inset-x-0 top-1/2 mt-4 truncate px-0.5 text-center text-[11px] leading-tight">
               {processing ? processingLabel : `${progress}%`}
             </span>
           </div>

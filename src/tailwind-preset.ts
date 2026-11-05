@@ -1153,6 +1153,7 @@ export const miewebUISafelist = [
   'mb-1',
   'mt-2',
   'mt-4',
+  'px-0.5',
   'm-auto',
   'normal-case',
   'outline-none',
