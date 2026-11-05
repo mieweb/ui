@@ -1152,6 +1152,8 @@ export const miewebUISafelist = [
   'leading-snug',
   'mb-1',
   'mt-2',
+  'mt-4',
+  'm-auto',
   'normal-case',
   'outline-none',
   'p-0',

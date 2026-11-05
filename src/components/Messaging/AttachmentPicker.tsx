@@ -172,7 +172,8 @@ function AttachmentPreviewItem({
                 )}
               />
             )}
-            {isVideo && (
+            {/* The play mark, only at rest: the upload's spinner takes its place. */}
+            {isVideo && !isUploading && !isFailed && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <svg
                   aria-hidden="true"
@@ -217,33 +218,32 @@ function AttachmentPreviewItem({
             aria-valuemax={100}
             aria-valuenow={progress}
             aria-valuetext={processing ? processingLabel : `${progress}%`}
-            className="absolute inset-0 flex items-center justify-center bg-black/50"
+            className="absolute inset-0 bg-black/50 text-white"
           >
-            <div className="text-center text-white">
-              <svg
-                aria-hidden="true"
-                className="mx-auto h-6 w-6 animate-spin"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-              <span className="mt-1 text-xs">
-                {processing ? processingLabel : `${progress}%`}
-              </span>
-            </div>
+            {/* Centred on the tile, as the play mark is; the label sits below it. */}
+            <svg
+              aria-hidden="true"
+              className="absolute inset-0 m-auto h-6 w-6 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+            <span className="absolute inset-x-0 top-1/2 mt-4 truncate px-1 text-center text-xs">
+              {processing ? processingLabel : `${progress}%`}
+            </span>
           </div>
         )}
 

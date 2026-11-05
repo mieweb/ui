@@ -668,6 +668,8 @@ module.exports = {
     'mb-1',
     'mb-1.5',
     'mt-2',
+    'mt-4',
+    'm-auto',
     'normal-case',
     'outline-none',
     'p-0',
