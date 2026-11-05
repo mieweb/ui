@@ -117,7 +117,7 @@ peers** (only the Yjs collaboration peers — `@kerebron/extension-yjs`,
 `yjs`, `y-protocols` — remain optional):
 
 ```sh
-npm install @kerebron/editor@0.8.12 @kerebron/editor-kits@0.8.12 \
+npm install --save-exact @kerebron/editor@0.8.12 @kerebron/editor-kits@0.8.12 \
   @kerebron/extension-basic-editor@0.8.12 @kerebron/extension-menu@0.8.12 \
   @kerebron/wasm@0.8.12
 ```
