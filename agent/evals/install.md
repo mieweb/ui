@@ -28,12 +28,12 @@ format and scoring.
 
 - **Ask:** "Is there a one-import setup?"
 - **Expect:** Almost — the TW4 quick start is **three** lines in your own CSS
-  entry: `@import 'tailwindcss'`, `@import '@mieweb/ui/init.css'` (dark variant
-  - `@theme` fallbacks + default brand + base styles), then
-    `@source "../node_modules/@mieweb/ui/dist"`. Both `@import`s must come first
-    and be consecutive — `@source` between them makes PostCSS silently drop the
-    `init.css` import (#705). `init.css` is Tailwind input, not standalone; for
-    no-Tailwind apps the one-import answer is `styles.css`.
+  entry: `@import 'tailwindcss'`, `@import '@mieweb/ui/init.css'` (dark
+  variant + `@theme` fallbacks + default brand + base styles), then
+  `@source "../node_modules/@mieweb/ui/dist"`. Both `@import`s must come first
+  and be consecutive — `@source` between them makes PostCSS silently drop the
+  `init.css` import (#705). `init.css` is Tailwind input, not standalone; for
+  no-Tailwind apps the one-import answer is `styles.css`.
 - **Agent:** MIE UI Install Agent
 - **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — CSS entry, Option A; src/styles/init.css usage header
 
