@@ -365,7 +365,9 @@ function ToolCallRow({
               </span>
             )}
             {toolCall.displayName ? (
-              <span className="min-w-0 truncate">{toolCall.displayName}</span>
+              // Host text may be in another script than the page; isolate it so
+              // neutral characters such as a trailing "/" keep their place.
+              <bdi className="min-w-0 truncate">{toolCall.displayName}</bdi>
             ) : (
               <code className="min-w-0 truncate font-mono text-xs">
                 {toolCall.toolName}
@@ -397,7 +399,7 @@ function ToolCallRow({
                   data-slot="ai-tool-call-display-name"
                   className="break-words"
                 >
-                  {toolCall.displayName}
+                  <bdi>{toolCall.displayName}</bdi>
                 </p>
                 <p
                   data-slot="ai-tool-call-id"
