@@ -121,6 +121,14 @@ export interface RichEditorProps {
    */
   modifyMenu?: ModifyMenu;
   /**
+   * Schema extensions to remove by name (e.g. `['task_list', 'task_item']`).
+   * The toolbar, input rules and paste handling are all schema-driven, so
+   * dropping a node here removes the whole feature in one move. Read once,
+   * when the editor mounts — like {@link collab}, remount via `key` to
+   * change it.
+   */
+  omitExtensions?: readonly string[];
+  /**
    * MIME type of the `value`/`onChange` contract (`'text/x-markdown'` by
    * default; pass `'text/html'` for an HTML-valued surface). Governs both
    * how `value` is parsed and what `onChange`/`getContent()` emit.
@@ -174,6 +182,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       mediaUpload,
       editorKits: additionalEditorKits,
       modifyMenu,
+      omitExtensions,
       valueType = MARKDOWN_TYPE,
       strictValue = false,
     },
@@ -446,7 +455,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         const { kits: editorKits, collaborative } = await createEditorKits(
           collab,
           mediaUpload,
-          modifyMenu
+          modifyMenu,
+          omitExtensions
         );
         if (disposed) return;
 
