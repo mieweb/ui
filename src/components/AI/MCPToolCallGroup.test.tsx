@@ -494,6 +494,20 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).queryByText('Tool ID')).toBeNull();
   });
 
+  it('treats an empty display name as unset', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success', { displayName: '' })]}
+      />
+    );
+
+    const [row] = rows();
+    expect(within(row).getByRole('group')).toHaveAccessibleName(
+      'Tool call: tool_a'
+    );
+    expect(within(row).getByText('tool_a')).toBeInTheDocument();
+  });
+
   it('uses label overrides, merging status labels per key', () => {
     renderWithTheme(
       <MCPToolCallGroup

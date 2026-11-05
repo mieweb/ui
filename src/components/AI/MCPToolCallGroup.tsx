@@ -92,7 +92,7 @@ export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
     expired: 'Expired',
   },
   callLabel: (toolCall) => {
-    const name = toolCall.displayName ?? toolCall.toolName;
+    const name = toolCall.displayName || toolCall.toolName;
     return toolCall.serverName
       ? `Tool call: ${name} from ${toolCall.serverName}`
       : `Tool call: ${name}`;

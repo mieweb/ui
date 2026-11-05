@@ -696,7 +696,7 @@ export function MCPToolCallDisplay({
   };
 
   const friendlyName =
-    toolCall.displayName ??
+    toolCall.displayName ||
     getToolFriendlyName(toolCall.toolName, toolCall.status);
   const durationLabel = formatDuration(toolCall.duration);
   // A host-supplied display name already names what the call acted on.
