@@ -30,13 +30,15 @@ In a Tailwind consumer, missing `@source` (TW4) or content/safelist coverage (TW
 
 ## CSS entry — quick start vs manual
 
-**Option A (quick start)** — three lines, all in **your own** CSS entry (the first two resolve relative to your file, so they cannot live inside the package):
+**Option A (quick start)** — three lines, all in **your own** CSS entry (the `@source` path resolves relative to your file, so it cannot live inside the package):
 
 ```css
 @import 'tailwindcss';
-@source "../node_modules/@mieweb/ui/dist"; /* path relative to THIS file */
 @import '@mieweb/ui/init.css'; /* dark variant + @theme fallbacks + default brand + base styles */
+@source "../node_modules/@mieweb/ui/dist"; /* path relative to THIS file */
 ```
+
+The two `@import`s must come first and be consecutive — CSS requires `@import` to precede all other statements, and `@tailwindcss/postcss` silently **drops** a late `@import` with only a build warning, so `@source` between them loses all of `init.css` (no dark variant, no brand tokens — mieweb/ui#705).
 
 **Option B (manual, full control)** — every line matters, in this order:
 
@@ -114,6 +116,7 @@ Filters/selection/pagination state is yours (usually the URL); `ViewSet` owns on
 | PostCSS does nothing | TW3 plugin configured | `@tailwindcss/postcss`, not `tailwindcss` |
 | `var()` renders transparent | Variable undefined | Fallback: `var(--token, #hex)` |
 | Peer-dep install errors | Required vs optional confusion | react/react-dom + the five @kerebron/* runtime peers are required; match optional peers to imported entries |
+| Dark variant + brand tokens missing; build warns `@import statements must precede…` | `@source` placed between the `@import`s — PostCSS silently drops the late `init.css` import (mieweb/ui#705) | Both `@import`s first and consecutive, `@source` after them |
 | Module shows failed action as success | `on*` promise swallowed | Return the real promise (`mutateAsync` / `callAsync`) |
 | Views regroup on every render | Unstable `accessors` | Module scope or `useMemo` |
 | `transition-*` utilities stop working after theme/brand CSS | The brand CSS's unlayered `*` transition shorthand resets `transition-property` on every element and beats layered utilities, even though it lists only color properties (mieweb/ui#460, #682) | Move the transition rule into `@layer base` (or remove/narrow it) so component transitions win; keep brand token declarations unlayered |

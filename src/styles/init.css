@@ -5,12 +5,16 @@
  * Add these three lines to your main CSS entry point:
  *
  *   @import 'tailwindcss';
- *   @source "../node_modules/@mieweb/ui/dist";
  *   @import '@mieweb/ui/init.css';
+ *   @source "../node_modules/@mieweb/ui/dist";
  *
- * The first two lines MUST live in your own CSS file (not inside a
- * package) because the paths resolve relative to your project root.
- * The third line imports this file, which includes:
+ * Keep both @import lines FIRST and CONSECUTIVE — CSS requires @import
+ * to precede all other statements, and @tailwindcss/postcss silently
+ * drops a late @import (only a build warning), losing this entire file:
+ * no dark variant, no brand tokens (mieweb/ui#705). These lines must
+ * live in your own CSS file (not inside a package) because the @source
+ * path resolves relative to your project root.
+ * The second line imports this file, which includes:
  *
  *   - Dark mode custom variant (data-theme="dark")
  *   - @theme with all color scales + fallback values
