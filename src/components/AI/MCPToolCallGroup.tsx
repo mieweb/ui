@@ -406,7 +406,7 @@ function ToolCallRow({
                 </p>
                 <p
                   data-slot="ai-tool-call-id"
-                  className="text-xs text-neutral-600 dark:text-neutral-400"
+                  className="text-xs break-words text-neutral-600 dark:text-neutral-400"
                 >
                   <span className="font-medium">{labels.toolId}</span>{' '}
                   <code className="font-mono">{toolCall.toolName}</code>
