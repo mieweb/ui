@@ -103,22 +103,21 @@ vi.mock('@kerebron/wasm/web', () => ({
 }));
 // The collab kit is lazy-imported by editorKits.ts only when `collab` is set;
 // mock it so the yjs optional peers aren't needed under jsdom.
-const huddleYjsKit = vi.fn(function (
-  this: Record<string, unknown>,
-  url: string,
-  params: Record<string, string>
-) {
-  this.name = 'yjs-editor';
-  this.url = url;
-  this.params = params;
-  this.getExtensions = () => [];
-});
-// Set to simulate the lazy chunk failing to load: reading the export throws
-// where the real `await import('./collabKit')` would reject. Cleared between
-// tests by `beforeEach`.
+const huddleYjsKit = vi.fn(
+  async (url: string, params: Record<string, string>) => ({
+    name: 'yjs-editor',
+    url,
+    params,
+    getExtensions: () => [],
+  })
+);
+// Set to simulate the lazy chunk (or its optional peers, loaded inside
+// createHuddleYjsKit) failing to load: reading the export throws where the
+// real `await import('./collabKit')` would reject. Cleared between tests by
+// `beforeEach`.
 let collabKitLoadError: Error | null = null;
 vi.mock('./collabKit', () => ({
-  get HuddleYjsKit() {
+  get createHuddleYjsKit() {
     if (collabKitLoadError) throw collabKitLoadError;
     return huddleYjsKit;
   },

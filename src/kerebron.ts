@@ -23,4 +23,5 @@ export * from './components/RichEditor';
 // deprecated in its favor — upgrading is an import-path change:
 // `import { TextAreaRich } from '@mieweb/ui/kerebron'`.
 export { TextAreaRichKerebron as TextAreaRich } from './components/TextAreaRich/TextAreaRichKerebron';
+export type { TextAreaRichKerebronProps } from './components/TextAreaRich/TextAreaRichKerebron';
 export type { TextAreaRichProps } from './components/TextAreaRich';

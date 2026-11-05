@@ -298,11 +298,12 @@ describe('EmailEditor', () => {
       ...createEmailBlock('text'),
       content: '<p style="text-align: center;">x</p>',
     };
+    // Controlled round-trip: the Kerebron surface is strictly controlled, so
+    // an edit only sticks once the host echoes it back into `value` — the
+    // caret-preservation guarantee under test is that the echoed value never
+    // rewrites the editor's own DOM.
     renderWithTheme(
-      <EmailEditor
-        value={{ version: '1.0', blocks: [aligned] }}
-        onChange={vi.fn()}
-      />
+      <Harness doc={{ version: '1.0', blocks: [heading, aligned] }} />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
     const editor = screen.getByRole('textbox', { name: 'Content' });

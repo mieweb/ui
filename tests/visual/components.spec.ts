@@ -775,6 +775,180 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  test('MCPToolCallGroup - Settled run collapses to one line and expands', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-mcptoolcall--group');
+    const header = page.getByRole('button', { name: 'Used 5 tools' });
+    const rows = page.locator("[data-slot='ai-tool-call-row']");
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(rows).toHaveCount(0);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-collapsed.png');
+
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(rows).toHaveCount(5);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-expanded.png');
+  });
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Pinned approval and error rows${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-needs-attention', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Collapsing by hand leaves the approval and failed calls listed.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await header.click();
+      await expect(header).toHaveAttribute('aria-expanded', 'false');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(2);
+      await expect(
+        page.getByText('ENOENT: no such file or directory, open notes.txt')
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      // The status badge sits at the row's inline end: physically right of
+      // the tool name in LTR and left of it in RTL.
+      const approvalRow = rows.filter({ hasText: 'delete_file' });
+      const [toolName, badge] = await Promise.all([
+        approvalRow.locator('code').boundingBox(),
+        approvalRow.getByText('Needs approval', { exact: true }).boundingBox(),
+      ]);
+      if (isRtl) {
+        expect(badge!.x + badge!.width).toBeLessThan(toolName!.x);
+      } else {
+        expect(badge!.x).toBeGreaterThan(toolName!.x + toolName!.width);
+      }
+
+      // The list's guide rule is on the inline-start side.
+      const rule = await page.getByRole('list').evaluate((el) => ({
+        left: getComputedStyle(el).borderLeftWidth,
+        right: getComputedStyle(el).borderRightWidth,
+      }));
+      expect(rule).toEqual(
+        isRtl ? { left: '0px', right: '1px' } : { left: '1px', right: '0px' }
+      );
+
+      // Parameter JSON is an LTR island even in an RTL document.
+      const paramsDirection = await approvalRow
+        .locator('pre')
+        .first()
+        .evaluate((el) => getComputedStyle(el).direction);
+      expect(paramsDirection).toBe('ltr');
+
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-needs-attention${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`MCPToolCallGroup - Translated labels at narrow width${name}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      await gotoStory(page, 'chat-mcptoolcall--group-labels', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      const header = page.getByRole('button', {
+        name: '5 herramientas usadas',
+      });
+      await header.click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(5);
+
+      // Longer labels must not push the badge out of its row.
+      for (const row of await rows.all()) {
+        const [trigger, badge] = await Promise.all([
+          row.getByRole('button').first().boundingBox(),
+          row.getByText('Hecho', { exact: true }).boundingBox(),
+        ]);
+        expect(badge!.x).toBeGreaterThanOrEqual(trigger!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          trigger!.x + trigger!.width + 0.5
+        );
+      }
+      const scrollWidth = await page.evaluate(
+        () => document.documentElement.scrollWidth
+      );
+      expect(scrollWidth).toBeLessThanOrEqual(320);
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-labels-narrow${name}.png`
+      );
+    });
+  }
+
+  for (const [name, reducedMotion] of [
+    ['', 'no-preference'],
+    ['-reduced-motion', 'reduce'],
+  ] as const) {
+    test(`MCPToolCallGroup - Live run collapses when it settles${name}`, async ({
+      page,
+    }) => {
+      // A fake, paused clock drives both the story's 700ms call cadence and
+      // the motion runtime's rAF loop, so each frame is stepped explicitly.
+      await page.emulateMedia({ reducedMotion });
+      await page.clock.install({ time: new Date('2026-01-15T12:00:00') });
+      await page.clock.pauseAt(new Date('2026-01-15T12:00:01'));
+      await gotoStory(page, 'chat-mcptoolcall--group-motion');
+
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await page.getByRole('button', { name: 'Play run' }).click();
+      await expect(rows).toHaveCount(1);
+      for (let count = 2; count <= 5; count++) {
+        await page.clock.runFor(700);
+        await expect(rows).toHaveCount(count);
+      }
+      const header = page.getByRole('button', { name: /^Running 5 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      await page.clock.runFor(300); // let the fifth row finish entering
+      const fullHeight = (await rows.first().boundingBox())!.height;
+
+      // The fifth call settles 700ms after it arrived; the group collapses.
+      await page.clock.runFor(400);
+      const settled = page.getByRole('button', { name: 'Used 5 tools' });
+      await expect(settled).toHaveAttribute('aria-expanded', 'false');
+
+      if (reducedMotion === 'reduce') {
+        // No exit animation: rows go without the clock advancing a frame.
+        await expect(rows).toHaveCount(0);
+      } else {
+        // Midway through the 200ms collapse the rows are still shrinking.
+        await page.clock.runFor(100);
+        const midHeight = (await rows.first().boundingBox())!.height;
+        expect(midHeight).toBeGreaterThan(0);
+        expect(midHeight).toBeLessThan(fullHeight);
+        await page.clock.runFor(400);
+        await expect(rows).toHaveCount(0);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-live-settled${name}.png`
+      );
+    });
+  }
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
@@ -855,6 +1029,76 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - RTL island on an LTR page keeps its direction', async ({
+    page,
+  }) => {
+    // The panel portals to <body>, so without the carried `dir` it would
+    // inherit the LTR document direction and `bottom-start` would anchor to
+    // the physical left. Inside a local dir="rtl" island both must follow
+    // the trigger: panel direction rtl, start edge = right.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands');
+    const trigger = page
+      .locator('[data-testid="rtl-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'rtl');
+    await expect(menu).toHaveCSS('direction', 'rtl');
+    // Closeness, not one-sided: `right <= trigger.right` would also pass for
+    // a left-anchored panel. Poll so the open animation settles first.
+    const triggerRight = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().right - expected),
+          triggerRight
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - LTR island on an RTL page keeps its direction', async ({
+    page,
+  }) => {
+    // The inverse island: on a dir="rtl" document the LTR island's menu must
+    // stay LTR and `bottom-start` must anchor to the physical left.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands', {
+      globals: 'direction:rtl',
+    });
+    // Guard the premise: the island sets dir="ltr" itself, so every assertion
+    // below would also pass on an LTR page if the global stopped applying.
+    await expectDocumentDirection(page, 'rtl');
+    const trigger = page
+      .locator('[data-testid="ltr-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'ltr');
+    await expect(menu).toHaveCSS('direction', 'ltr');
+    const triggerLeft = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().left
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) => Math.abs(el.getBoundingClientRect().left - expected),
+          triggerLeft
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-ltr.png', {
       animations: 'disabled',
     });
   });
@@ -2086,6 +2330,103 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoEditor(page);
     await expect(page).toHaveScreenshot('emaileditor-mobile.png');
+  });
+
+  test('EmailEditor - Text block rides Kerebron and round-trips merge tags', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    // The Kerebron editor mounts asynchronously.
+    const editor = page.locator('.kb-editor');
+    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    // Merge tags render as atomic chips that keep their braces.
+    await expect(editor).toContainText('{{first_name}}');
+    await expect(page).toHaveScreenshot('emaileditor-text-block-kerebron.png');
+    // Typing round-trips through onChange onto the canvas with tags intact.
+    // Click past the end of the last line — a centred click would land on the
+    // atomic merge-tag chip and select it instead of placing the caret.
+    const lastPara = editor.locator('p').last();
+    const paraBox = (await lastPara.boundingBox())!;
+    await lastPara.click({
+      position: { x: paraBox.width - 2, y: paraBox.height / 2 },
+    });
+    await page.keyboard.press('End');
+    await page.keyboard.type(' Cheers!');
+    const canvas = page.getByRole('region', { name: 'Email canvas' });
+    await expect(canvas).toContainText('in October. Cheers!');
+    await expect(canvas).toContainText('{{company_name}}');
+    // In-editor undo reverts the typing and echoes back out.
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect(canvas).not.toContainText('Cheers!');
+  });
+
+  test('EmailEditor - Variables menu inserts a merge tag', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    await editor.click();
+    const direct = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await direct.count()) {
+      await direct.first().click();
+    } else {
+      await page
+        .locator('.kb-custom-menu button[aria-label="More tools"]')
+        .click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    await page
+      .locator('[data-slot="dropdown-menu"]')
+      .getByRole('menuitem', { name: 'Sender' })
+      .click();
+    await expect(editor).toContainText('{{sender_name}}');
+    await expect(
+      page.getByRole('region', { name: 'Email canvas' })
+    ).toContainText('{{sender_name}}');
+  });
+
+  test('EmailEditor - Pasted image files route through the host uploader', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.locator('p').first().click();
+    // Paste a real image file. The story's onUploadImage returns an object
+    // URL, so the inserted <img> must be blob: — never the stock pipeline's
+    // base64 data: URL, which the email policy would strip on render.
+    await page.evaluate(() => {
+      const bytes = Uint8Array.from(
+        atob(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ),
+        (c) => c.charCodeAt(0)
+      );
+      const data = new DataTransfer();
+      data.items.add(new File([bytes], 'pixel.png', { type: 'image/png' }));
+      // `.kb-editor` IS the ProseMirror editable (createView's attributes).
+      document.querySelector('.kb-editor')!.dispatchEvent(
+        new ClipboardEvent('paste', {
+          clipboardData: data,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    await expect(editor.getByRole('img', { name: 'pixel.png' })).toHaveAttribute(
+      'src',
+      /^blob:/
+    );
   });
 });
 
