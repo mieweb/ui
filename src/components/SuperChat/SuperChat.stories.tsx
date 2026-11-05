@@ -162,6 +162,11 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
           why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
         },
         {
+          type: 'uses',
+          target: 'media-dictationbutton',
+          why: 'The `dictation` prop puts DictationButton in the composer and appends its transcript to the draft; use DictationButton directly only for host-owned inputs.',
+        },
+        {
           type: 'composes with',
           target: 'foundations-motion',
           why: 'MotionProvider fades the jump-to-bottom button in and out, which the CSS path cannot do because the button unmounts once the thread is back at the bottom.',
@@ -901,10 +906,10 @@ const mockTranscribe = (_audio: Blob, signal: AbortSignal) =>
 
 export const Dictation: Story = {
   args: {
-    conversation,
     currentParticipantId: 'u1',
     dictation: { transcribe: mockTranscribe },
   },
+  render: (args) => <InteractivePanel {...args} initial={conversation} />,
   parameters: {
     docs: {
       description: {

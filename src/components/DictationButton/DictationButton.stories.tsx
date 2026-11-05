@@ -151,6 +151,7 @@ const meta: Meta<typeof DictationButton> = {
 
 - A chat composer or text field needs **voice typing** that the user reviews and edits before sending.
 - A chat composer needs **voice typing** — put \`DictationButton\` in \`ChatComposer\`'s \`micSlot\` as its **only** mic (see *In Chat Composer*). Recording or capturing audio belongs in a separate menu, not a second mic.
+- A host-owned input (your own composer or text field) needs voice typing. If you already render a [SuperChat](?path=/docs/superchat-superchat-panel--docs) panel, pass its \`dictation\` prop instead — it wires this button into the composer and the draft for you.
 - Audio must stay on the device by default, with an opt-in server provider chosen by the host.
 
 ### Don't use it when
@@ -213,6 +214,11 @@ The host owns the composer value and the send; the button owns the microphone an
           type: 'composes with',
           target: 'chat-chatcomposer',
           why: 'Goes in micSlot as the composer’s only mic; onText appends to the controlled composer value and the user still presses Send.',
+        },
+        {
+          type: 'composes with',
+          target: 'superchat-superchat-panel',
+          why: 'SuperChat’s `dictation` prop renders this button in its composer and appends the transcript to the draft — prefer it over manual micSlot wiring inside SuperChat.',
         },
       ],
     },
