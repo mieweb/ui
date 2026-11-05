@@ -775,6 +775,180 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  test('MCPToolCallGroup - Settled run collapses to one line and expands', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-mcptoolcall--group');
+    const header = page.getByRole('button', { name: 'Used 5 tools' });
+    const rows = page.locator("[data-slot='ai-tool-call-row']");
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(rows).toHaveCount(0);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-collapsed.png');
+
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(rows).toHaveCount(5);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-expanded.png');
+  });
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Pinned approval and error rows${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-needs-attention', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Collapsing by hand leaves the approval and failed calls listed.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await header.click();
+      await expect(header).toHaveAttribute('aria-expanded', 'false');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(2);
+      await expect(
+        page.getByText('ENOENT: no such file or directory, open notes.txt')
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      // The status badge sits at the row's inline end: physically right of
+      // the tool name in LTR and left of it in RTL.
+      const approvalRow = rows.filter({ hasText: 'delete_file' });
+      const [toolName, badge] = await Promise.all([
+        approvalRow.locator('code').boundingBox(),
+        approvalRow.getByText('Needs approval', { exact: true }).boundingBox(),
+      ]);
+      if (isRtl) {
+        expect(badge!.x + badge!.width).toBeLessThan(toolName!.x);
+      } else {
+        expect(badge!.x).toBeGreaterThan(toolName!.x + toolName!.width);
+      }
+
+      // The list's guide rule is on the inline-start side.
+      const rule = await page.getByRole('list').evaluate((el) => ({
+        left: getComputedStyle(el).borderLeftWidth,
+        right: getComputedStyle(el).borderRightWidth,
+      }));
+      expect(rule).toEqual(
+        isRtl ? { left: '0px', right: '1px' } : { left: '1px', right: '0px' }
+      );
+
+      // Parameter JSON is an LTR island even in an RTL document.
+      const paramsDirection = await approvalRow
+        .locator('pre')
+        .first()
+        .evaluate((el) => getComputedStyle(el).direction);
+      expect(paramsDirection).toBe('ltr');
+
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-needs-attention${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`MCPToolCallGroup - Translated labels at narrow width${name}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      await gotoStory(page, 'chat-mcptoolcall--group-labels', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      const header = page.getByRole('button', {
+        name: '5 herramientas usadas',
+      });
+      await header.click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(5);
+
+      // Longer labels must not push the badge out of its row.
+      for (const row of await rows.all()) {
+        const [trigger, badge] = await Promise.all([
+          row.getByRole('button').first().boundingBox(),
+          row.getByText('Hecho', { exact: true }).boundingBox(),
+        ]);
+        expect(badge!.x).toBeGreaterThanOrEqual(trigger!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          trigger!.x + trigger!.width + 0.5
+        );
+      }
+      const scrollWidth = await page.evaluate(
+        () => document.documentElement.scrollWidth
+      );
+      expect(scrollWidth).toBeLessThanOrEqual(320);
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-labels-narrow${name}.png`
+      );
+    });
+  }
+
+  for (const [name, reducedMotion] of [
+    ['', 'no-preference'],
+    ['-reduced-motion', 'reduce'],
+  ] as const) {
+    test(`MCPToolCallGroup - Live run collapses when it settles${name}`, async ({
+      page,
+    }) => {
+      // A fake, paused clock drives both the story's 700ms call cadence and
+      // the motion runtime's rAF loop, so each frame is stepped explicitly.
+      await page.emulateMedia({ reducedMotion });
+      await page.clock.install({ time: new Date('2026-01-15T12:00:00') });
+      await page.clock.pauseAt(new Date('2026-01-15T12:00:01'));
+      await gotoStory(page, 'chat-mcptoolcall--group-motion');
+
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await page.getByRole('button', { name: 'Play run' }).click();
+      await expect(rows).toHaveCount(1);
+      for (let count = 2; count <= 5; count++) {
+        await page.clock.runFor(700);
+        await expect(rows).toHaveCount(count);
+      }
+      const header = page.getByRole('button', { name: /^Running 5 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      await page.clock.runFor(300); // let the fifth row finish entering
+      const fullHeight = (await rows.first().boundingBox())!.height;
+
+      // The fifth call settles 700ms after it arrived; the group collapses.
+      await page.clock.runFor(400);
+      const settled = page.getByRole('button', { name: 'Used 5 tools' });
+      await expect(settled).toHaveAttribute('aria-expanded', 'false');
+
+      if (reducedMotion === 'reduce') {
+        // No exit animation: rows go without the clock advancing a frame.
+        await expect(rows).toHaveCount(0);
+      } else {
+        // Midway through the 200ms collapse the rows are still shrinking.
+        await page.clock.runFor(100);
+        const midHeight = (await rows.first().boundingBox())!.height;
+        expect(midHeight).toBeGreaterThan(0);
+        expect(midHeight).toBeLessThan(fullHeight);
+        await page.clock.runFor(400);
+        await expect(rows).toHaveCount(0);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-live-settled${name}.png`
+      );
+    });
+  }
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');

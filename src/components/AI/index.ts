@@ -39,6 +39,16 @@ export {
   type ResourceLinkProps,
 } from './MCPToolCall';
 
+// MCP Tool Call Group — a run of calls as compact rows under one header
+export {
+  MCPToolCallGroup,
+  defaultMCPToolCallGroupLabels,
+  type MCPToolCallGroupProps,
+  type MCPToolCallGroupOptions,
+  type MCPToolCallGroupLabels,
+  type MCPToolCallGroupLabelOverrides,
+} from './MCPToolCallGroup';
+
 // AI Message Display
 export {
   AIMessageDisplay,

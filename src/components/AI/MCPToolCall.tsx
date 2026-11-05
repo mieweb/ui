@@ -26,10 +26,13 @@ const statusIconVariants = cva(
     variants: {
       status: {
         pending: 'bg-neutral-200 dark:bg-neutral-700',
+        'awaiting-approval': 'bg-amber-100 dark:bg-amber-900/50',
         running: 'bg-primary-100 dark:bg-primary-900/50',
         success: 'bg-green-100 dark:bg-green-900/50',
         error: 'bg-red-100 dark:bg-red-900/50',
         cancelled: 'bg-neutral-200 dark:bg-neutral-700',
+        denied: 'bg-neutral-200 dark:bg-neutral-700',
+        expired: 'bg-neutral-200 dark:bg-neutral-700',
       },
     },
     defaultVariants: {
@@ -57,6 +60,22 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
           viewBox="0 0 20 20"
         >
           <circle cx="10" cy="10" r="3" />
+        </svg>
+      )}
+      {status === 'awaiting-approval' && (
+        <svg
+          aria-hidden="true"
+          className="h-3 w-3 text-amber-600 dark:text-amber-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="3"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 7v6m0 4h.01"
+          />
         </svg>
       )}
       {status === 'running' && (
@@ -113,7 +132,9 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
           />
         </svg>
       )}
-      {status === 'cancelled' && (
+      {(status === 'cancelled' ||
+        status === 'denied' ||
+        status === 'expired') && (
         <svg
           aria-hidden="true"
           className="h-3 w-3 text-neutral-500"
@@ -478,6 +499,25 @@ function ToolResultDisplay({
         </p>
       )}
 
+      <ToolResultLinks result={result} onLinkClick={onLinkClick} />
+    </div>
+  );
+}
+
+/** True when a result carries a `link` or `resources` to render. */
+export function hasToolResultLinks(result: MCPToolResult | undefined): boolean {
+  return Boolean(result?.link || result?.resources?.length);
+}
+
+interface ToolResultLinksProps {
+  result: MCPToolResult;
+  onLinkClick?: (link: MCPResourceLink) => void;
+}
+
+/** A result's `link` and `resources` as {@link ResourceLink}s. */
+export function ToolResultLinks({ result, onLinkClick }: ToolResultLinksProps) {
+  return (
+    <>
       {result.link && <ResourceLink link={result.link} onClick={onLinkClick} />}
 
       {result.resources && result.resources.length > 0 && (
@@ -495,7 +535,7 @@ function ToolResultDisplay({
           ))}
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -600,6 +640,8 @@ function getParameterSummary(
 const statusPillClasses: Record<MCPToolStatus, string> = {
   pending:
     'bg-neutral-100 border-neutral-200 text-neutral-600 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
+  'awaiting-approval':
+    'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300',
   running:
     'bg-primary-50 border-primary-200 text-primary-800 dark:bg-primary-900/20 dark:border-primary-800 dark:text-primary-300',
   success:
@@ -607,6 +649,10 @@ const statusPillClasses: Record<MCPToolStatus, string> = {
   error:
     'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
   cancelled:
+    'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
+  denied:
+    'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
+  expired:
     'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
 };
 
