@@ -247,6 +247,11 @@ export interface NewMessage {
   content: string;
   /** Attachments to include */
   attachments?: File[];
+  /**
+   * Set when the composer uploaded each file on attach (ChatComposer
+   * `uploadAttachment`): every file with what its upload resolved to.
+   */
+  uploads?: { file: File; result: unknown }[];
   /** Reply-to message ID */
   replyToId?: string;
   /** Custom metadata */

@@ -627,7 +627,17 @@ To upload, send each attachment's `file` — the `File` as picked — rather tha
 decoding `dataUrl`. A host that only uploads can set `attachmentDataUrls={false}`
 to skip the base64 read altogether (`dataUrl` is then empty): base64 makes a file a
 third larger again in memory, and past a few hundred MB it is more than a browser
-string can hold, so large videos need it off. Pair it with a per-file cap: `maxFileSize`
+string can hold, so large videos need it off.
+
+To upload each file **as soon as it's attached**, pass
+`composerProps.uploadAttachment(file, { signal, onProgress })`. The composer
+starts it on attach and shows its progress on the tile, aborts `signal` when
+the tile is removed, offers Retry when it fails, and calls
+`composerProps.discardAttachment(result, file)` for a finished upload taken off
+before sending. Send stays enabled: pressed while files upload, it waits for
+them, then `onMessageSent` gets each attachment's `result`; nothing to upload
+at send. If the send fails, the files go back as uploaded. The same lifecycle
+is exported as `useAttachmentUploads` for composers of your own. Pair it with a per-file cap: `maxFileSize`
 also takes a function, e.g.
 `(file) => (file.type.startsWith('video/') ? 500 : 100) * 1024 * 1024`.
 

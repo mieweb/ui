@@ -7,7 +7,20 @@ export {
   type ChatComposerSendOption,
   type ChatComposerSendMeta,
   type ChatComposerAgentOption,
+  type ChatComposerUploadLabels,
 } from './ChatComposer';
+export {
+  useAttachmentUploads,
+  hasBusyUpload,
+  type AttachmentUpload,
+  type AttachmentUploadState,
+  type AttachmentUploadContext,
+  type AttachmentUploads,
+  type UploadAttachment,
+  type DiscardAttachment,
+  type UploadedAttachment,
+  type UseAttachmentUploadsOptions,
+} from './useAttachmentUploads';
 // Mention candidates live in the shared Messaging mention module;
 // re-exported here so ChatComposer hosts don't need to know where the type
 // lives.

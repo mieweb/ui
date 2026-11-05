@@ -1120,10 +1120,18 @@ export function SuperChat({
       try {
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
-        const attachments = await filesToComposerAttachments(
+        const converted = await filesToComposerAttachments(
           message.attachments ?? [],
           { dataUrls: attachmentDataUrls }
         );
+        // Uploaded on attach (composerProps.uploadAttachment): each file
+        // carries what its upload resolved to, in the same order.
+        const attachments = message.uploads
+          ? converted.map((attachment, index) => ({
+              ...attachment,
+              result: message.uploads?.[index]?.result,
+            }))
+          : converted;
         // The declared type is `void` for backward compatibility, but a
         // returned promise (e.g. an async host callback) is awaited so its
         // rejection follows the same restore path as a synchronous throw.
@@ -1144,7 +1152,12 @@ export function SuperChat({
         // newer draft while this send was pending.
         if (conversationRef.current.id === conversationId) {
           if (draftEpochRef.current === epoch) setDraft(message.content);
-          composerRef.current?.addFiles(message.attachments ?? []);
+          // Files uploaded on attach go back as uploaded, not to upload again.
+          if (message.uploads) {
+            composerRef.current?.restoreAttachments(message.uploads);
+          } else {
+            composerRef.current?.addFiles(message.attachments ?? []);
+          }
         }
         // Rethrown so the composer reports it (`onComposerError`, reason
         // 'send-failed'); it has nothing of its own to restore.

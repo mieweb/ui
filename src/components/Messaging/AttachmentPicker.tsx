@@ -100,6 +100,14 @@ export interface AttachmentPreviewItemProps {
   onRetry?: () => void;
   /** Disables the remove/retry actions. */
   disabled?: boolean;
+  /** Accessible name of the progress bar while uploading. @default `Uploading ${file.name}` */
+  progressLabel?: string;
+  /** Shown instead of the percent once progress reaches 100 while still uploading (the host finishing). */
+  processingLabel?: string;
+  /** The retry button's text. @default 'Retry' */
+  retryLabel?: string;
+  /** The remove button's accessible name. @default `Remove ${file.name}` */
+  removeLabel?: string;
   className?: string;
 }
 
@@ -111,9 +119,15 @@ function AttachmentPreviewItem({
   onRemove,
   onRetry,
   disabled = false,
+  progressLabel,
+  processingLabel,
+  retryLabel = 'Retry',
+  removeLabel,
   className,
 }: AttachmentPreviewItemProps) {
   const { file, previewUrl, type, state, progress } = attachment;
+  const processing =
+    processingLabel !== undefined && progress !== undefined && progress >= 100;
   const isImage = type === 'image';
   const isVideo = type === 'video';
   const isUploading = state === 'uploading';
@@ -192,7 +206,15 @@ function AttachmentPreviewItem({
 
       {/* Upload progress overlay */}
       {isUploading && progress !== undefined && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+        <div
+          role="progressbar"
+          aria-label={progressLabel ?? `Uploading ${file.name}`}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+          aria-valuetext={processing ? processingLabel : `${progress}%`}
+          className="absolute inset-0 flex items-center justify-center bg-black/50"
+        >
           <div className="text-center text-white">
             <svg
               aria-hidden="true"
@@ -214,7 +236,9 @@ function AttachmentPreviewItem({
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
               />
             </svg>
-            <span className="mt-1 text-xs">{progress}%</span>
+            <span className="mt-1 text-xs">
+              {processing ? processingLabel : `${progress}%`}
+            </span>
           </div>
         </div>
       )}
@@ -244,7 +268,7 @@ function AttachmentPreviewItem({
                 disabled={disabled}
                 className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
               >
-                Retry
+                {retryLabel}
               </button>
             )}
           </div>
@@ -260,12 +284,13 @@ function AttachmentPreviewItem({
           'absolute -end-1 -top-1 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
-          'opacity-0 group-hover:opacity-100',
+          // Shown on hover or focus, and always where there's no hover (touch).
+          'opacity-0 group-hover:opacity-100 [@media(hover:none)]:opacity-100',
           'focus:ring-primary-500 focus:opacity-100 focus:ring-2 focus:outline-none',
           'transition-opacity',
           'disabled:cursor-not-allowed disabled:group-hover:opacity-0'
         )}
-        aria-label={`Remove ${file.name}`}
+        aria-label={removeLabel ?? `Remove ${file.name}`}
       >
         <svg
           aria-hidden="true"
