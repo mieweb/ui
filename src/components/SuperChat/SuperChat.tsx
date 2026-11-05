@@ -1035,6 +1035,8 @@ export function SuperChat({
             <DictationButton
               key={conversation.id}
               showStatus
+              // Pulse rings overflow the composer row; the caption shows it's live.
+              showPulse={false}
               {...dictationProps}
               onText={appendDictation}
             />
