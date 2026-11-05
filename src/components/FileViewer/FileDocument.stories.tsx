@@ -52,7 +52,7 @@ Draft and mode can each be controlled (\`draft\` + \`onDraftChange\`, \`mode\` +
 - Guarding other ways out (closing a panel, opening another file, leaving the page) is the host's job — use \`onDirtyChange\`.
 - The editor is a plain \`<textarea>\`: no line numbers, highlighting or undo history beyond the browser's.
 - RTL: logical spacing throughout; the editor uses \`dir="auto"\`. i18n: every string is in \`labels\` (English defaults), including the viewer's.
-- Entry \`@mieweb/ui/components/FileViewer\`, with the same Markdown peers as \`FileViewer\`.`,
+- Entry \`@mieweb/ui/components/FileViewer\`, with the same Markdown peers as \`FileViewer\`; import \`@mieweb/ui/markdown.css\` once for code colours.`,
       },
     },
     catalog: {

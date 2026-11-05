@@ -51,7 +51,7 @@ Pass \`renderMarkdown\` to reuse your app's own Markdown renderer (for example o
 
 - Accessibility: the view is a \`role="region"\` named by \`labels.region(path)\` with \`tabIndex={0}\`, so keyboard users can scroll long files. An empty file renders \`labels.empty\` instead of the region.
 - RTL: code is an LTR island (\`dir="ltr"\`) because source reads left to right; Markdown uses \`dir="auto"\` so prose follows its own script.
-- Highlighting covers rehype-highlight's default language set; unknown extensions are plain text. Very large files skip highlighting entirely.
+- Highlighting covers rehype-highlight's default language set; unknown extensions are plain text. Very large files skip highlighting entirely. Code colours come from \`@mieweb/ui/markdown.css\`; import it once, as for \`MarkdownRenderer\`.
 - Markdown is sanitised (the SuperChat renderer's default), so raw HTML in a file does not render.
 - i18n: two strings, both overridable through \`labels\` (English defaults).
 - Entry \`@mieweb/ui/components/FileViewer\` (not the main entry) because it needs the Markdown peers.`,

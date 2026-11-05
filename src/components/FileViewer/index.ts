@@ -3,7 +3,7 @@
  * `@mieweb/ui/components/FileViewer`. It renders Markdown with the SuperChat
  * renderer, so it needs the same optional peers (`react-markdown`,
  * `remark-gfm`, `rehype-sanitize`, `rehype-highlight`) and is not part of the
- * main entry.
+ * main entry. Code colours come from `@mieweb/ui/markdown.css`.
  */
 
 export {

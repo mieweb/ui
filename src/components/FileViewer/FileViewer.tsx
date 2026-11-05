@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
+import '../Markdown/styles.css';
 import { createCodePlugin } from '../SuperChat/plugins/code';
 import { createMarkdownRenderer } from '../SuperChat/render/createMarkdownRenderer';
 import {
