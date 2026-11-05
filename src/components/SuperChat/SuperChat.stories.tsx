@@ -162,7 +162,7 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
           why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
         },
         {
-          type: 'uses',
+          type: 'composes with',
           target: 'media-dictationbutton',
           why: 'The `dictation` prop puts DictationButton in the composer and appends its transcript to the draft; use DictationButton directly only for host-owned inputs.',
         },
