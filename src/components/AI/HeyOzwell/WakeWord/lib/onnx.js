@@ -11,7 +11,9 @@ if (typeof ort !== "undefined") {
     // onnxruntime-web is a real dependency here, so let the bundler resolve it.
     // (The original also had a local-file fallback "./onnxruntime-web/ort.mjs" that Vite can't
     // resolve at build time — removed; not needed when the package is installed.)
-    import("onnxruntime-web").then((module) => {
+    // The `/wasm` entry (CPU-only; sessions here are wasm-only anyway) keeps the bundler from emitting the
+    // ~27 MiB JSEP/WebGPU binary, which exceeds Cloudflare Pages' 25 MiB per-file limit.
+    import("onnxruntime-web/wasm").then((module) => {
         try {
             // The engine's .wasm files aren't served by the bundler, so fetch them from the CDN
             // matching the installed version — but ONLY if a host hasn't already configured wasmPaths
