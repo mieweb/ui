@@ -65,6 +65,20 @@ export function laneNames(
   return names;
 }
 
+/** The lane that talks most (summed active probability), or null when nobody is heard. */
+export function dominantLane({
+  probabilities,
+  numSpeakers,
+}: LaneFrames): number | null {
+  const totals = new Float32Array(numSpeakers);
+  for (let i = 0; i < probabilities.length; i++)
+    if (probabilities[i] > ACTIVE) totals[i % numSpeakers] += probabilities[i];
+  let best = 0;
+  for (let lane = 1; lane < numSpeakers; lane++)
+    if (totals[lane] > totals[best]) best = lane;
+  return totals[best] > 0 ? best : null;
+}
+
 /** The `[from, to)` frames a word spans; at least one frame when there are any. */
 function wordFrameRange(
   { probabilities, numSpeakers, frameDurationSeconds }: LaneFrames,
