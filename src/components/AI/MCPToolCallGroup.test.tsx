@@ -61,25 +61,111 @@ describe('MCPToolCallGroup', () => {
     await waitFor(() => expect(rows()).toHaveLength(0));
   });
 
-  it('stays open while focus is in a row as the run settles', () => {
+  it('holds the rows open under focus and collapses once focus leaves', async () => {
     const { rerender } = renderWithTheme(
-      <MCPToolCallGroup
-        toolCalls={[call('a', 'success'), call('b', 'running')]}
-      />
+      <>
+        <MCPToolCallGroup
+          toolCalls={[call('a', 'success'), call('b', 'running')]}
+        />
+        <button type="button">Elsewhere</button>
+      </>
     );
     const rowTrigger = screen.getByRole('button', { name: /tool_a/ });
     act(() => rowTrigger.focus());
 
     rerender(
-      <MCPToolCallGroup
-        toolCalls={[call('a', 'success'), call('b', 'success')]}
-      />
+      <>
+        <MCPToolCallGroup
+          toolCalls={[call('a', 'success'), call('b', 'success')]}
+        />
+        <button type="button">Elsewhere</button>
+      </>
     );
 
     expect(header()).toHaveAccessibleName(/Used 2 tools/);
     expect(header()).toHaveAttribute('aria-expanded', 'true');
     expect(rows()).toHaveLength(2);
     expect(rowTrigger).toHaveFocus();
+
+    act(() => screen.getByRole('button', { name: 'Elsewhere' }).focus());
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(rows()).toHaveLength(0));
+  });
+
+  it('lets the header collapse a group held open by focus', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'running')]}
+      />
+    );
+    act(() => screen.getByRole('button', { name: /tool_a/ }).focus());
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'success')]}
+      />
+    );
+
+    // Pressing the header moves focus there before the click lands.
+    act(() => header().focus());
+    expect(header()).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(header());
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps a focused pinned row when the user had collapsed the group', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'awaiting-approval')]}
+      />
+    );
+    fireEvent.click(header());
+    const pinnedTrigger = screen.getByRole('button', { name: /tool_b/ });
+    act(() => pinnedTrigger.focus());
+
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success'), call('b', 'expired')]}
+      />
+    );
+
+    expect(pinnedTrigger).toBeInTheDocument();
+    expect(pinnedTrigger).toHaveFocus();
+  });
+
+  it('moves focus to the row when its approval buttons go', async () => {
+    const calls = (status: MCPToolStatus) => [
+      call('a', 'success'),
+      call('b', status),
+    ];
+    const { rerender } = renderWithTheme(
+      <>
+        <MCPToolCallGroup
+          toolCalls={calls('awaiting-approval')}
+          onApprove={vi.fn()}
+        />
+        <button type="button">Elsewhere</button>
+      </>
+    );
+    act(() => screen.getByRole('button', { name: 'Allow once' }).focus());
+
+    rerender(
+      <>
+        <MCPToolCallGroup toolCalls={calls('running')} onApprove={vi.fn()} />
+        <button type="button">Elsewhere</button>
+      </>
+    );
+    expect(screen.getByRole('button', { name: /tool_b/ })).toHaveFocus();
+
+    // Focus leaving after the run settles still collapses the group.
+    rerender(
+      <>
+        <MCPToolCallGroup toolCalls={calls('success')} onApprove={vi.fn()} />
+        <button type="button">Elsewhere</button>
+      </>
+    );
+    act(() => screen.getByRole('button', { name: 'Elsewhere' }).focus());
+    expect(header()).toHaveAttribute('aria-expanded', 'false');
+    await waitFor(() => expect(rows()).toHaveLength(0));
   });
 
   it('starts collapsed for a finished run loaded from history', () => {

@@ -152,31 +152,45 @@ function summarize(toolCalls: MCPToolCall[]): ToolGroupSummary {
   };
 }
 
+/** Where keyboard focus sits within a group, if anywhere. */
+type GroupFocus = 'header' | 'rows' | null;
+
 /**
  * Open while any call is active, closed once every call has settled. A manual
  * toggle holds until the group's signature changes (a call arrives or changes
- * status), at which point the automatic state returns. While `holdOpen` is set
- * (focus is in the rows) an automatic change never closes the group, so the
- * focused row is not removed from under the user.
+ * status), at which point the automatic state returns.
+ *
+ * Focus in the rows holds them in view: an automatic change made then opens
+ * the group rather than removing the focused row, and the automatic state is
+ * applied once focus leaves the group. Leaving for the header does not count,
+ * so clicking the header still toggles from what the user sees.
  */
 function useAutoCollapse(
   isActive: boolean,
   signature: string,
-  holdOpen: boolean
+  focus: GroupFocus
 ): [boolean, (expanded: boolean) => void] {
   const [state, setState] = React.useState(() => ({
     signature,
     expanded: isActive,
+    deferred: false,
   }));
-  const isStale = state.signature !== signature;
-  const automatic = isActive || (holdOpen && state.expanded);
-  if (isStale) setState({ signature, expanded: automatic });
+
+  let next = state;
+  if (state.signature !== signature) {
+    const expanded = isActive || focus === 'rows';
+    next = { signature, expanded, deferred: expanded !== isActive };
+  } else if (state.deferred && focus === null) {
+    next = { signature, expanded: isActive, deferred: false };
+  }
+  if (next !== state) setState(next);
 
   const setExpanded = React.useCallback(
-    (expanded: boolean) => setState((current) => ({ ...current, expanded })),
+    (expanded: boolean) =>
+      setState((current) => ({ ...current, expanded, deferred: false })),
     []
   );
-  return [isStale ? automatic : state.expanded, setExpanded];
+  return [next.expanded, setExpanded];
 }
 
 function progressAnnouncement(
@@ -275,6 +289,8 @@ function ToolCallRow({
   // leaves running, so the row honours the preference itself.
   const prefersReducedMotion = usePrefersReducedMotion();
   const [acting, setActing] = React.useState(false);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const focusInActionsRef = React.useRef(false);
   const isAwaitingApproval = toolCall.status === 'awaiting-approval';
   // An `error` result is failure text, the same as `toolCall.error`.
   const isErrorResult = toolCall.result?.type === 'error';
@@ -296,6 +312,17 @@ function ToolCallRow({
     }
   };
 
+  // Browsers fire no blur when a focused element is removed, so when the
+  // approval buttons go with focus in them, focus would drop to the body.
+  // Keep it on the row instead.
+  React.useLayoutEffect(() => {
+    if (isAwaitingApproval || !focusInActionsRef.current) return;
+    focusInActionsRef.current = false;
+    if (!document.activeElement || document.activeElement === document.body) {
+      triggerRef.current?.focus();
+    }
+  }, [isAwaitingApproval]);
+
   return (
     <Animated
       preset="collapse"
@@ -308,7 +335,10 @@ function ToolCallRow({
     >
       <div role="group" aria-label={labels.callLabel(toolCall)}>
         <Collapsible defaultOpen={isAwaitingApproval && hasDetails}>
-          <CollapsibleTrigger className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800">
+          <CollapsibleTrigger
+            ref={triggerRef}
+            className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
+          >
             <span
               aria-hidden="true"
               className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-neutral-500 [&_svg]:h-3.5 [&_svg]:w-3.5"
@@ -373,7 +403,17 @@ function ToolCallRow({
         )}
 
         {isAwaitingApproval && (onApprove || onDeny) && (
-          <div className="ms-6 mt-1 flex flex-wrap gap-2 pb-1">
+          <div
+            className="ms-6 mt-1 flex flex-wrap gap-2 pb-1"
+            onFocus={() => {
+              focusInActionsRef.current = true;
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                focusInActionsRef.current = false;
+              }
+            }}
+          >
             {onApprove && (
               <>
                 <Button
@@ -470,11 +510,11 @@ export function MCPToolCallGroup({
   );
   const listId = React.useId();
   const summary = summarize(toolCalls);
-  const [focusInRows, setFocusInRows] = React.useState(false);
+  const [focus, setFocus] = React.useState<GroupFocus>(null);
   const [expanded, setExpanded] = useAutoCollapse(
     summary.isActive,
     summary.signature,
-    focusInRows
+    focus
   );
 
   // A lone call needs no header. The list keeps its place in the tree either
@@ -484,13 +524,20 @@ export function MCPToolCallGroup({
     !hasHeader || expanded ? toolCalls : toolCalls.filter(needsAttention);
 
   return (
-    <div data-slot="ai-tool-call-group" className={className}>
+    <div
+      data-slot="ai-tool-call-group"
+      className={className}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocus(null);
+      }}
+    >
       {hasHeader && (
         <button
           type="button"
           aria-expanded={expanded}
           aria-controls={listId}
           onClick={() => setExpanded(!expanded)}
+          onFocus={() => setFocus('header')}
           className="focus-visible:ring-primary-500 flex max-w-full items-center gap-2 rounded px-1.5 py-1 text-start text-sm text-neutral-600 hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none dark:text-neutral-400 dark:hover:bg-neutral-800"
         >
           {summary.isActive ? (
@@ -527,12 +574,7 @@ export function MCPToolCallGroup({
       <div
         role="list"
         id={listId}
-        onFocus={() => setFocusInRows(true)}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setFocusInRows(false);
-          }
-        }}
+        onFocus={() => setFocus('rows')}
         className={cn(
           hasHeader &&
             'ms-3 border-s border-neutral-200 ps-2 dark:border-neutral-700'
