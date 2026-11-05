@@ -407,6 +407,8 @@ module.exports = {
     'me-auto',
     'ms-auto',
     '-end-1',
+    '-end-1.5',
+    '-top-1.5',
     'start-0',
     'end-0',
     'ps-4',

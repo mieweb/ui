@@ -134,122 +134,63 @@ function AttachmentPreviewItem({
   const isFailed = state === 'failed';
 
   return (
+    // The remove button sits over the corner, outside the clipped frame.
     <div
-      className={cn(
-        'group relative overflow-hidden rounded-lg',
-        'bg-neutral-100 dark:bg-neutral-800',
-        'border border-neutral-200 dark:border-neutral-700',
-        isFailed && 'border-red-500',
-        className
-      )}
+      data-slot="attachment-preview"
+      className={cn('group relative', className)}
     >
-      {/* Image/Video preview */}
-      {(isImage || isVideo) && previewUrl ? (
-        <div className="relative h-20 w-20">
-          {isVideo ? (
-            <video
-              src={previewUrl}
-              aria-label={file.name}
-              muted
-              playsInline
-              preload="metadata"
-              className={cn(
-                'h-full w-full object-cover',
-                (isUploading || isFailed) && 'opacity-50'
-              )}
-            />
-          ) : (
-            <img
-              src={previewUrl}
-              alt={file.name}
-              className={cn(
-                'h-full w-full object-cover',
-                (isUploading || isFailed) && 'opacity-50'
-              )}
-            />
-          )}
-          {isVideo && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <svg
-                aria-hidden="true"
-                className="h-6 w-6 text-white drop-shadow"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          )}
-        </div>
-      ) : (
-        /* File preview */
-        <div className="flex h-20 w-20 flex-col items-center justify-center p-2">
-          <svg
-            aria-hidden="true"
-            className="h-8 w-8 text-neutral-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-          <span className="mt-1 max-w-full truncate px-1 text-xs text-neutral-600 dark:text-neutral-400">
-            {file.name.split('.').pop()?.toUpperCase()}
-          </span>
-        </div>
-      )}
-
-      {/* Upload progress overlay */}
-      {isUploading && progress !== undefined && (
-        <div
-          role="progressbar"
-          aria-label={progressLabel ?? `Uploading ${file.name}`}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progress}
-          aria-valuetext={processing ? processingLabel : `${progress}%`}
-          className="absolute inset-0 flex items-center justify-center bg-black/50"
-        >
-          <div className="text-center text-white">
-            <svg
-              aria-hidden="true"
-              className="mx-auto h-6 w-6 animate-spin"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-lg',
+          'bg-neutral-100 dark:bg-neutral-800',
+          'border border-neutral-200 dark:border-neutral-700',
+          isFailed && 'border-red-500'
+        )}
+      >
+        {/* Image/Video preview */}
+        {(isImage || isVideo) && previewUrl ? (
+          <div className="relative h-20 w-20">
+            {isVideo ? (
+              <video
+                src={previewUrl}
+                aria-label={file.name}
+                muted
+                playsInline
+                preload="metadata"
+                className={cn(
+                  'h-full w-full object-cover',
+                  (isUploading || isFailed) && 'opacity-50'
+                )}
               />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ) : (
+              <img
+                src={previewUrl}
+                alt={file.name}
+                className={cn(
+                  'h-full w-full object-cover',
+                  (isUploading || isFailed) && 'opacity-50'
+                )}
               />
-            </svg>
-            <span className="mt-1 text-xs">
-              {processing ? processingLabel : `${progress}%`}
-            </span>
+            )}
+            {isVideo && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg
+                  aria-hidden="true"
+                  className="h-6 w-6 text-white drop-shadow"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-
-      {/* Error overlay */}
-      {isFailed && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-          <div className="text-center">
+        ) : (
+          /* File preview */
+          <div className="flex h-20 w-20 flex-col items-center justify-center p-2">
             <svg
               aria-hidden="true"
-              className="mx-auto h-6 w-6 text-red-400"
+              className="h-8 w-8 text-neutral-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -258,22 +199,98 @@ function AttachmentPreviewItem({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
               />
             </svg>
-            {onRetry && (
-              <button
-                type="button"
-                onClick={onRetry}
-                disabled={disabled}
-                className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
-              >
-                {retryLabel}
-              </button>
-            )}
+            <span className="mt-1 max-w-full truncate px-1 text-xs text-neutral-600 dark:text-neutral-400">
+              {file.name.split('.').pop()?.toUpperCase()}
+            </span>
           </div>
+        )}
+
+        {/* Upload progress overlay */}
+        {isUploading && progress !== undefined && (
+          <div
+            role="progressbar"
+            aria-label={progressLabel ?? `Uploading ${file.name}`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            aria-valuetext={processing ? processingLabel : `${progress}%`}
+            className="absolute inset-0 flex items-center justify-center bg-black/50"
+          >
+            <div className="text-center text-white">
+              <svg
+                aria-hidden="true"
+                className="mx-auto h-6 w-6 animate-spin"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              <span className="mt-1 text-xs">
+                {processing ? processingLabel : `${progress}%`}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Error overlay */}
+        {isFailed && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+            <div className="text-center">
+              <svg
+                aria-hidden="true"
+                className="mx-auto h-6 w-6 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              {onRetry && (
+                <button
+                  type="button"
+                  onClick={onRetry}
+                  disabled={disabled}
+                  className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
+                >
+                  {retryLabel}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* File name tooltip on hover */}
+        <div
+          className={cn(
+            'absolute start-0 end-0 bottom-0',
+            'bg-black/70 px-1 py-0.5',
+            'opacity-0 group-hover:opacity-100',
+            'transition-opacity'
+          )}
+        >
+          <p className="truncate text-xs text-white">{file.name}</p>
         </div>
-      )}
+      </div>
 
       {/* Remove button */}
       <button
@@ -281,7 +298,7 @@ function AttachmentPreviewItem({
         onClick={onRemove}
         disabled={disabled}
         className={cn(
-          'absolute -end-1 -top-1 z-10',
+          'absolute -end-1.5 -top-1.5 z-10',
           'rounded-full p-1',
           'bg-neutral-900 text-white',
           // Shown on hover or focus, and always where there's no hover (touch).
@@ -307,18 +324,6 @@ function AttachmentPreviewItem({
           />
         </svg>
       </button>
-
-      {/* File name tooltip on hover */}
-      <div
-        className={cn(
-          'absolute start-0 end-0 bottom-0',
-          'bg-black/70 px-1 py-0.5',
-          'opacity-0 group-hover:opacity-100',
-          'transition-opacity'
-        )}
-      >
-        <p className="truncate text-xs text-white">{file.name}</p>
-      </div>
     </div>
   );
 }

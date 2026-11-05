@@ -216,6 +216,10 @@ export interface CircularProgressProps extends VariantProps<
   /** Whether the progress is indeterminate */
   indeterminate?: boolean;
   /** Additional class name */
+  /** Accessible name. @default 'Progress' */
+  srLabel?: string;
+  /** Human-readable `aria-valuetext` announced instead of the raw value. */
+  valueText?: string;
   className?: string;
 }
 
@@ -236,6 +240,8 @@ function CircularProgress({
   strokeWidth = 4,
   showValue = false,
   indeterminate = false,
+  srLabel = 'Progress',
+  valueText,
   className,
 }: CircularProgressProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
@@ -261,7 +267,8 @@ function CircularProgress({
       aria-valuenow={indeterminate ? undefined : value}
       aria-valuemin={0}
       aria-valuemax={max}
-      aria-label="Progress"
+      aria-valuetext={indeterminate ? undefined : valueText}
+      aria-label={srLabel}
       className={cn(circularProgressVariants({ size }), className)}
     >
       <svg
