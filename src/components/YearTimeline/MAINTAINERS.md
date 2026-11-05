@@ -11,7 +11,7 @@
   is omitted it's inferred — `months` set ⇒ `scheduled`, else `continuous`
   (`cadenceOf`). Changing that inference is a breaking API change.
 - **The playhead is SSR-safe.** `current` defaults to the viewer's month
-  *resolved after mount* (no `new Date()` during render), `null` hides the
+  _resolved after mount_ (no `new Date()` during render), `null` hides the
   marker. Keep `resolveCurrent` pure — it's exported and unit-tested.
 - **Colors are brand tokens, not hexes**: bar fills come from CSS variables
   with `color-mix` tints (accent/info fall back to primary scales). New

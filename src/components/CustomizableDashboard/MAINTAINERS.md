@@ -56,7 +56,7 @@ generalized for library use.
 
 - At `max-lg` widths in 3-column mode, logical columns are flattened with
   `display: contents` so portlets flow into the responsive grid — dropping
-  into an *empty* column doesn't work at those widths (the droppable has no
+  into an _empty_ column doesn't work at those widths (the droppable has no
   box).
 - Drag-and-drop is pointer/keyboard via dnd-kit sensors; the keyboard
   coordinate getter provides arrow-key sorting once a handle is focused and

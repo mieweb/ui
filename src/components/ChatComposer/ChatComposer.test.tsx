@@ -1413,7 +1413,40 @@ describe('ChatComposer uploads on attach', () => {
       file,
     });
     expect(getInput()).toHaveValue('Demo');
-    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Retry clip.mp4' })
+    ).toBeInTheDocument();
+  });
+
+  it('sends nothing when every tile is taken off while Send waits', async () => {
+    const { onSend, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('stops waiting for a removed upload even if it ignores its signal', async () => {
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    // Never settles, whatever its signal says.
+    const upload = vi.fn(() => new Promise<unknown>(() => {}));
+    renderWithTheme(
+      <ChatComposer ref={ref} onSend={onSend} uploadAttachment={upload} />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'Text too' } });
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Text too', uploads: [] })
+    );
   });
 
   it('restoreAttachments stages uploaded files without uploading them', async () => {

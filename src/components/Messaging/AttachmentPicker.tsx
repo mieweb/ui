@@ -249,7 +249,14 @@ function AttachmentPreviewItem({
 
         {/* Error overlay */}
         {isFailed && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+          // Why it failed: on hover, and read out with the tile.
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black/50"
+            title={attachment.error}
+          >
+            {attachment.error && (
+              <span className="sr-only">{`${file.name}: ${attachment.error}`}</span>
+            )}
             <div className="text-center">
               <svg
                 aria-hidden="true"
@@ -270,6 +277,7 @@ function AttachmentPreviewItem({
                   type="button"
                   onClick={onRetry}
                   disabled={disabled}
+                  aria-label={`${retryLabel} ${file.name}`}
                   className="mt-1 text-xs text-white underline hover:no-underline disabled:no-underline disabled:opacity-50"
                 >
                   {retryLabel}

@@ -23,6 +23,7 @@ import {
   type UploadAttachment,
   type UploadedAttachment,
 } from './useAttachmentUploads';
+import { UploadAnnouncer } from './UploadAnnouncer';
 import {
   MentionMenu,
   useMentionAutocomplete,
@@ -63,6 +64,8 @@ export interface ChatComposerUploadLabels {
   retry: string;
   /** The remove button while a file is uploading. */
   cancel: (name: string) => string;
+  /** The remove button once a file has uploaded or failed. */
+  remove: (name: string) => string;
 }
 
 /** How each upload state shows on its tile (processing is still a busy tile). */
@@ -81,6 +84,7 @@ const DEFAULT_UPLOAD_LABELS: ChatComposerUploadLabels = {
   failed: (name) => `${name} didn't upload`,
   retry: 'Retry',
   cancel: (name) => `Cancel upload of ${name}`,
+  remove: (name) => `Remove ${name}`,
 };
 
 /** An entry in the composer's `+` menu. */
@@ -532,40 +536,6 @@ export const ChatComposer = React.forwardRef<
   const [awaitingUploads, setAwaitingUploads] = React.useState(false);
   const showSending = isSending || awaitingUploads;
 
-  // What's announced as files upload: a start, a finish (politely) and a
-  // failure (as an alert) — never each percent.
-  const [uploadStatus, setUploadStatus] = React.useState({
-    polite: '',
-    alert: '',
-  });
-  const announcedStates = React.useRef(new Map<string, string>());
-  React.useEffect(() => {
-    if (!uploadAttachment) return;
-    const seen = new Map<string, string>();
-    let polite = '';
-    let alert = '';
-    for (const item of attachments) {
-      const before = announcedStates.current.get(item.id);
-      seen.set(item.id, item.state);
-      if (before === item.state) continue;
-      const name = item.file.name;
-      if (item.state === 'uploading' && before !== 'processing') {
-        polite = labels.uploading(name);
-      } else if (item.state === 'uploaded' && before !== undefined) {
-        polite = labels.uploaded(name);
-      } else if (item.state === 'failed') {
-        alert = labels.failed(name);
-      }
-    }
-    announcedStates.current = seen;
-    if (polite || alert) {
-      setUploadStatus((prev) => ({
-        polite: polite || prev.polite,
-        alert: alert || prev.alert,
-      }));
-    }
-  }, [attachments, labels, uploadAttachment]);
-
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -770,9 +740,14 @@ export const ChatComposer = React.forwardRef<
   // Sending
   // --------------------------------------------------------------------
 
-  // The draft as of now, for a send that goes out once its uploads finish.
+  // A send that waits for its uploads goes out with the draft as it is when
+  // they finish: the text, reply and send handler as of then, read here.
   const valueRef = React.useRef(value);
   valueRef.current = value;
+  const replyToRef = React.useRef(replyTo);
+  replyToRef.current = replyTo;
+  const onSendRef = React.useRef(onSend);
+  onSendRef.current = onSend;
   const alive = React.useRef(true);
   React.useEffect(() => {
     alive.current = true;
@@ -788,8 +763,18 @@ export const ChatComposer = React.forwardRef<
     });
 
   const deliver = (sendOption?: string) => {
-    if (!onSend) return;
+    const send = onSendRef.current;
+    if (!send) return;
+    // Every tile taken off while waiting, and no text: nothing to send.
+    if (
+      !valueRef.current.trim() &&
+      uploads.current().length === 0 &&
+      !canSendWhenEmpty
+    ) {
+      return;
+    }
     const staged = uploads.take();
+    const reply = replyToRef.current;
     const message: NewMessage = {
       content: valueRef.current.trim(),
       attachments: staged.map((attachment) => attachment.file),
@@ -800,7 +785,7 @@ export const ChatComposer = React.forwardRef<
           }
         : {}),
       // Only add the key when replying — hosts may key-check the payload.
-      ...(replyTo ? { replyToId: replyTo.id } : {}),
+      ...(reply ? { replyToId: reply.id } : {}),
     };
     setValue('');
     // The draft is cleared optimistically; hosts own retry/restore. Both a
@@ -810,8 +795,8 @@ export const ChatComposer = React.forwardRef<
       // `meta` only for an option send, so plain-send payloads stay unchanged.
       const sent =
         sendOption === undefined
-          ? onSend(message)
-          : onSend(message, { sendOption });
+          ? send(message)
+          : send(message, { sendOption });
       Promise.resolve(sent).catch(() => {
         onError?.(sendFailedLabel, { reason: 'send-failed' });
       });
@@ -989,21 +974,38 @@ export const ChatComposer = React.forwardRef<
                 attachment={{
                   ...attachment,
                   state: TILE_STATE[attachment.state],
-                  progress: busy
-                    ? Math.round(attachment.progress * 100)
-                    : undefined,
+                  // Processing is the state's, not a rounded 100%.
+                  progress:
+                    attachment.state === 'processing'
+                      ? 100
+                      : busy
+                        ? Math.min(99, Math.round(attachment.progress * 100))
+                        : undefined,
                 }}
-                onRemove={() => uploads.remove(attachment.id)}
+                // The button goes with the tile (or the retry): focus back to the text.
+                onRemove={() => {
+                  uploads.remove(attachment.id);
+                  textareaRef.current?.focus();
+                }}
                 onRetry={
                   uploadAttachment
-                    ? () => uploads.retry(attachment.id)
+                    ? () => {
+                        uploads.retry(attachment.id);
+                        textareaRef.current?.focus();
+                      }
                     : undefined
                 }
                 disabled={disabled}
                 progressLabel={labels.uploading(name)}
                 processingLabel={labels.processing}
                 retryLabel={labels.retry}
-                removeLabel={busy ? labels.cancel(name) : undefined}
+                removeLabel={
+                  busy
+                    ? labels.cancel(name)
+                    : uploadAttachment
+                      ? labels.remove(name)
+                      : undefined
+                }
               />
             );
           })}
@@ -1011,14 +1013,7 @@ export const ChatComposer = React.forwardRef<
       )}
 
       {uploadAttachment && (
-        <>
-          <span role="status" className="sr-only">
-            {uploadStatus.polite}
-          </span>
-          <span role="alert" className="sr-only">
-            {uploadStatus.alert}
-          </span>
-        </>
+        <UploadAnnouncer items={attachments} labels={labels} />
       )}
 
       <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]">

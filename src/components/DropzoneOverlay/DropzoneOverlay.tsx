@@ -175,8 +175,29 @@ export function useDropzone({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const dragCounter = React.useRef(0);
 
+  // Only a drag that carries files is the dropzone's: dragged text or links
+  // go on to whatever they're over (an editor reordering its own text).
+  const carriesFiles = (e: React.DragEvent) =>
+    Array.from(e.dataTransfer?.types ?? []).includes('Files');
+
+  // A drop or drag that ends somewhere else (a child that handles it itself,
+  // outside the window) still ends this one.
+  React.useEffect(() => {
+    const reset = () => {
+      dragCounter.current = 0;
+      setIsDragging(false);
+    };
+    window.addEventListener('drop', reset, true);
+    window.addEventListener('dragend', reset, true);
+    return () => {
+      window.removeEventListener('drop', reset, true);
+      window.removeEventListener('dragend', reset, true);
+    };
+  }, []);
+
   const handleDragEnter = React.useCallback(
     (e: React.DragEvent) => {
+      if (!carriesFiles(e)) return;
       e.preventDefault();
       e.stopPropagation();
       if (disabled) return;
@@ -189,14 +210,16 @@ export function useDropzone({
   );
 
   const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    if (!carriesFiles(e)) return;
     e.preventDefault();
     e.stopPropagation();
   }, []);
 
   const handleDragLeave = React.useCallback((e: React.DragEvent) => {
+    if (!carriesFiles(e)) return;
     e.preventDefault();
     e.stopPropagation();
-    dragCounter.current--;
+    dragCounter.current = Math.max(0, dragCounter.current - 1);
     if (dragCounter.current === 0) {
       setIsDragging(false);
     }
@@ -204,6 +227,7 @@ export function useDropzone({
 
   const handleDrop = React.useCallback(
     (e: React.DragEvent) => {
+      if (!carriesFiles(e)) return;
       e.preventDefault();
       e.stopPropagation();
       dragCounter.current = 0;

@@ -1,6 +1,6 @@
 # FloatingWindow — Maintainer Notes
 
-> **Provider notes** — how to *change* the FloatingWindow shell. Consumers should
+> **Provider notes** — how to _change_ the FloatingWindow shell. Consumers should
 > read the Storybook autodocs. General conventions:
 > [CONTRIBUTING.md](../../../CONTRIBUTING.md).
 

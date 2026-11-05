@@ -158,13 +158,21 @@ export function useAttachmentUploads<R = unknown>({
     [commit]
   );
 
-  const discardResult = React.useCallback((item: AttachmentUpload<R>) => {
-    if (item.state !== 'uploaded' || !discardRef.current) return;
-    // Best effort: the user already took it off.
+  /** Undo a finished upload, best effort: the user already took it off. */
+  const discardFinished = React.useCallback((result: R, file: File) => {
+    if (!discardRef.current) return;
     void Promise.resolve()
-      .then(() => discardRef.current?.(item.result as R, item.file))
+      .then(() => discardRef.current?.(result, file))
       .catch(() => {});
   }, []);
+
+  const discardResult = React.useCallback(
+    (item: AttachmentUpload<R>) => {
+      if (item.state === 'uploaded')
+        discardFinished(item.result as R, item.file);
+    },
+    [discardFinished]
+  );
 
   const start = React.useCallback(
     (item: AttachmentUpload<R>) => {
@@ -199,8 +207,9 @@ export function useAttachmentUploads<R = unknown>({
           (result) => {
             if (controller.signal.aborted) return;
             if (!mounted.current) {
-              // Finished after the composer went away: nothing will send it.
-              discardRef.current?.(result, item.file);
+              // Finished after the composer went away: nothing will send it,
+              // unless it lands where it's going by itself.
+              if (!keepRef.current) discardFinished(result, item.file);
               return;
             }
             patch(item.id, { state: 'uploaded', progress: 1, result });
@@ -222,9 +231,16 @@ export function useAttachmentUploads<R = unknown>({
             inFlight.current.delete(item.id);
           }
         });
-      inFlight.current.set(item.id, done);
+      // Settles on an abort too, so a removed upload stops holding up
+      // `settle` even if the host's upload ignores its signal.
+      const aborted = new Promise<void>((resolve) =>
+        controller.signal.addEventListener('abort', () => resolve(), {
+          once: true,
+        })
+      );
+      inFlight.current.set(item.id, Promise.race([done, aborted]));
     },
-    [patch]
+    [patch, discardFinished]
   );
 
   const add = React.useCallback(
@@ -318,13 +334,18 @@ export function useAttachmentUploads<R = unknown>({
     return () => {
       mounted.current = false;
       for (const item of itemsRef.current) {
-        if (!keepRef.current) controllersAtMount.get(item.id)?.abort();
         revoke(item);
+        if (keepRef.current) continue;
+        controllersAtMount.get(item.id)?.abort();
         discardResult(item);
       }
       controllersAtMount.clear();
       inFlightAtMount.clear();
+      // The list goes with them, on screen too: effects that run again
+      // without a real unmount (Fast Refresh, a hidden <Activity>) must not
+      // keep tiles whose previews and uploads are gone.
       itemsRef.current = [];
+      setItems([]);
     };
   }, [discardResult]);
 

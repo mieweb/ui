@@ -637,8 +637,10 @@ the tile is removed, offers Retry when it fails, and calls
 before sending. Send stays enabled: pressed while files upload, it waits for
 them, then `onMessageSent` gets each attachment's `result`; nothing to upload
 at send. If the send fails, the files go back as uploaded. The same lifecycle
-is exported as `useAttachmentUploads` for composers of your own. Pair it with a per-file cap: `maxFileSize`
-also takes a function, e.g.
+is exported as `useAttachmentUploads` for composers of your own, and its
+screen-reader announcements as `UploadAnnouncer`.
+
+Pair it with a per-file cap: `maxFileSize` also takes a function, e.g.
 `(file) => (file.type.startsWith('video/') ? 500 : 100) * 1024 * 1024`.
 
 ### Rendering video / audio / PDF inline

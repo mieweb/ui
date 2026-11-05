@@ -10,6 +10,11 @@ export {
   type ChatComposerUploadLabels,
 } from './ChatComposer';
 export {
+  UploadAnnouncer,
+  type UploadAnnouncerLabels,
+  type UploadAnnouncerProps,
+} from './UploadAnnouncer';
+export {
   useAttachmentUploads,
   hasBusyUpload,
   type AttachmentUpload,

@@ -151,14 +151,18 @@ describe('useAttachmentUploads', () => {
     expect(discard).toHaveBeenCalledWith({ id: 'm1' }, expect.any(File));
   });
 
-  it('keeps uploads running after unmount with keepUploadingOnUnmount', async () => {
+  it('keeps uploads running, and what they land, after unmount with keepUploadingOnUnmount', async () => {
     const { upload, calls } = fakeUpload();
+    const discard = vi.fn();
     const { result, unmount } = renderHook(() =>
-      useAttachmentUploads({ upload, keepUploadingOnUnmount: true })
+      useAttachmentUploads({ upload, discard, keepUploadingOnUnmount: true })
     );
-    act(() => void result.current.add([clip()]));
+    act(() => void result.current.add([clip(), clip()]));
+    await act(async () => calls[0].resolve({ id: 'landed' }));
     await act(async () => unmount());
-    expect(calls[0].ctx.signal.aborted).toBe(false);
+    expect(calls[1].ctx.signal.aborted).toBe(false);
+    await act(async () => calls[1].resolve({ id: 'late' }));
+    expect(discard).not.toHaveBeenCalled();
   });
 
   it('restore stages uploaded files without uploading them', () => {

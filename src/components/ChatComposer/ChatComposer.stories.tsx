@@ -167,7 +167,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
 ### Limitations
 
 - The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Use \`leadingSlot\` for a host control before the \`+\` menu. Both slots are constrained to a 32px-tall row so they line up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. \`selectorsEndSlot\` renders after the model selector in the row below the card and shows that row on its own. Interaction state is yours — disable your own control when the composer is \`disabled\`.
-- Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
+- Attachments are handed over on send as \`File[]\`, unless the host passes \`uploadAttachment(file, { signal, onProgress })\`: then each file uploads as it's attached, with progress on its tile, cancel on remove, Retry on failure, and Send waits for the rest (see *Upload On Attach*). The lifecycle is exported as \`useAttachmentUploads\`, its announcements as \`UploadAnnouncer\`.
 - i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`, \`mentionListLabel\`, \`dropFilesLabel\`, \`replyingToLabel\`, \`cancelReplyLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`, the reply preview's \`border-s-4\` accent) throughout.
 - Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`; with \`mentionOptions\` it gains \`aria-autocomplete="list"\` plus \`aria-controls\` / \`aria-activedescendant\` into the mention \`listbox\` (labelled via \`mentionListLabel\`).
 - Types exported: \`ChatComposerProps\`, \`ChatComposerHandle\`, \`ChatComposerError\`, \`ChatComposerMenuItem\`, \`ChatComposerAgentOption\`, \`MentionOption\` (shared with Messaging); the send payload reuses \`NewMessage\` from the Messaging module. Entry \`@mieweb/ui\`.`,
@@ -256,6 +256,36 @@ export const WithAttachments: Story = {
         new File(['report'], 'lab-results.pdf', { type: 'application/pdf' }),
         new File(['notes'], 'visit-notes.txt', { type: 'text/plain' }),
       ]}
+    />
+  ),
+};
+
+/**
+ * `uploadAttachment` uploads each file as it's attached. This fake takes about
+ * four seconds and fails any file named `fail…`: attach one, press Send early,
+ * remove a tile mid-upload, or Retry a failed one.
+ */
+export const UploadOnAttach: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      uploadAttachment={(file, { signal, onProgress }) =>
+        new Promise((resolve, reject) => {
+          let sent = 0;
+          const tick = window.setInterval(() => {
+            sent = Math.min(1, sent + 0.05);
+            onProgress(sent);
+            if (sent < 1) return;
+            window.clearInterval(tick);
+            window.setTimeout(() => {
+              if (file.name.startsWith('fail'))
+                reject(new Error('The server said no.'));
+              else resolve({ id: file.name });
+            }, 800);
+          }, 160);
+          signal.addEventListener('abort', () => window.clearInterval(tick));
+        })
+      }
     />
   ),
 };

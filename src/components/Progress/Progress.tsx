@@ -215,11 +215,11 @@ export interface CircularProgressProps extends VariantProps<
   showValue?: boolean;
   /** Whether the progress is indeterminate */
   indeterminate?: boolean;
-  /** Additional class name */
   /** Accessible name. @default 'Progress' */
   srLabel?: string;
   /** Human-readable `aria-valuetext` announced instead of the raw value. */
   valueText?: string;
+  /** Additional class name */
   className?: string;
 }
 

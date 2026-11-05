@@ -40,7 +40,7 @@ calls `usePrefersReducedMotion()` itself and passes `enabled={!prefersReducedMot
 Any future preset that animates `height` needs the same treatment — see
 [Motion](../../motion/MAINTAINERS.md).
 
-## Focus must be captured *before* the panel goes
+## Focus must be captured _before_ the panel goes
 
 `focusWasInsideRef` exists because by the time an effect can observe the
 collapse, the browser has already moved focus and `document.activeElement` is
@@ -50,10 +50,10 @@ ordering.
 
 There are **two** recorders and both are load-bearing:
 
-| Recorder | Covers | Why it alone is not enough |
-| --- | --- | --- |
-| `captureFocusInside()` in `handleToggle` | the group's own trigger | cannot see collapses it did not initiate |
-| `focusin` listener | accordion siblings, controlled `groupId`, rail collapse | focus events are **suppressed while the window is unfocused**, so this path silently no-ops there — which is the normal state of an automated browser |
+| Recorder                                 | Covers                                                  | Why it alone is not enough                                                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `captureFocusInside()` in `handleToggle` | the group's own trigger                                 | cannot see collapses it did not initiate                                                                                                              |
+| `focusin` listener                       | accordion siblings, controlled `groupId`, rail collapse | focus events are **suppressed while the window is unfocused**, so this path silently no-ops there — which is the normal state of an automated browser |
 
 That second row is why the toggle-time capture is not redundant: a
 `focusin`-only implementation passes in jsdom and fails in Playwright. There is
@@ -104,7 +104,7 @@ Sequencing `hidden` around the animation is the real fix if anyone wants both;
 until then, not animating is the safe answer. Same reasoning and same trade-off
 as `CollapsibleContent`'s prop of the same name — keep the two consistent.
 
-`forceMount` still needs focus restoration. It avoids *remounting*, not the need
+`forceMount` still needs focus restoration. It avoids _remounting_, not the need
 to move focus: the browser blurs a focused element inside a `display: none`
 subtree just as surely as one that was removed.
 
