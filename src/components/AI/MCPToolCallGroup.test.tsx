@@ -481,6 +481,9 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).queryByText('tool_a')).toBeNull();
 
     fireEvent.click(within(row).getByRole('button', { name: /Read notes.md/ }));
+    expect(
+      row.querySelector('[data-slot="ai-tool-call-display-name"]')
+    ).toHaveTextContent('Read notes.md');
     expect(within(row).getByText('Tool ID')).toBeInTheDocument();
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
   });

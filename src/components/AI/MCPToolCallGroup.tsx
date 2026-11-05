@@ -391,13 +391,22 @@ function ToolCallRow({
 
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
             {toolCall.displayName && (
-              <p
-                data-slot="ai-tool-call-id"
-                className="text-xs text-neutral-600 dark:text-neutral-400"
-              >
-                <span className="font-medium">{labels.toolId}</span>{' '}
-                <code className="font-mono">{toolCall.toolName}</code>
-              </p>
+              <>
+                {/* The row truncates the name; here it wraps so it can be read in full. */}
+                <p
+                  data-slot="ai-tool-call-display-name"
+                  className="break-words"
+                >
+                  {toolCall.displayName}
+                </p>
+                <p
+                  data-slot="ai-tool-call-id"
+                  className="text-xs text-neutral-600 dark:text-neutral-400"
+                >
+                  <span className="font-medium">{labels.toolId}</span>{' '}
+                  <code className="font-mono">{toolCall.toolName}</code>
+                </p>
+              </>
             )}
             {toolCall.result && hasLinks && (
               <ToolResultLinks
