@@ -3,7 +3,7 @@ import { cn } from '../../utils/cn';
 import { ChevronIcon } from './icons';
 
 export interface CollapsiblePillProps {
-  label: string;
+  label: React.ReactNode;
   leadingIcon?: React.ReactNode;
   density?: 'standard' | 'condensed';
   defaultOpen?: boolean;
