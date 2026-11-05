@@ -59,6 +59,13 @@ export interface UseAttachmentUploadsOptions<R> {
   upload?: UploadAttachment<R>;
   /** Called for a finished upload removed (or left behind on unmount) before it was sent. */
   discard?: DiscardAttachment<R>;
+  /**
+   * Leave uploads in flight running when the component unmounts, instead of
+   * aborting them: for an upload that lands where it's going by itself (a
+   * server that attaches it on arrival), with nothing left for a send to do.
+   * @default false
+   */
+  keepUploadingOnUnmount?: boolean;
 }
 
 export interface AttachmentUploads<R> {
@@ -118,6 +125,7 @@ function stage<R>(file: File, fields: Partial<AttachmentUpload<R>>) {
 export function useAttachmentUploads<R = unknown>({
   upload,
   discard,
+  keepUploadingOnUnmount = false,
 }: UseAttachmentUploadsOptions<R> = {}): AttachmentUploads<R> {
   const [items, setItems] = React.useState<AttachmentUpload<R>[]>([]);
   // The list as of now, for reads between renders (two adds in one batch).
@@ -128,8 +136,10 @@ export function useAttachmentUploads<R = unknown>({
   // The latest callbacks, so an upload started earlier calls the current ones.
   const uploadRef = React.useRef(upload);
   const discardRef = React.useRef(discard);
+  const keepRef = React.useRef(keepUploadingOnUnmount);
   uploadRef.current = upload;
   discardRef.current = discard;
+  keepRef.current = keepUploadingOnUnmount;
 
   const commit = React.useCallback((next: AttachmentUpload<R>[]) => {
     itemsRef.current = next;
@@ -308,7 +318,7 @@ export function useAttachmentUploads<R = unknown>({
     return () => {
       mounted.current = false;
       for (const item of itemsRef.current) {
-        controllersAtMount.get(item.id)?.abort();
+        if (!keepRef.current) controllersAtMount.get(item.id)?.abort();
         revoke(item);
         discardResult(item);
       }

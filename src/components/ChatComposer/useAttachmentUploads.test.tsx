@@ -151,6 +151,16 @@ describe('useAttachmentUploads', () => {
     expect(discard).toHaveBeenCalledWith({ id: 'm1' }, expect.any(File));
   });
 
+  it('keeps uploads running after unmount with keepUploadingOnUnmount', async () => {
+    const { upload, calls } = fakeUpload();
+    const { result, unmount } = renderHook(() =>
+      useAttachmentUploads({ upload, keepUploadingOnUnmount: true })
+    );
+    act(() => void result.current.add([clip()]));
+    await act(async () => unmount());
+    expect(calls[0].ctx.signal.aborted).toBe(false);
+  });
+
   it('restore stages uploaded files without uploading them', () => {
     const { upload } = fakeUpload();
     const { result } = renderHook(() => useAttachmentUploads({ upload }));
