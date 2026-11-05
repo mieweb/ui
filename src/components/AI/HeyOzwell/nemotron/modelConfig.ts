@@ -55,12 +55,27 @@ export interface CheckpointConfig {
   processor: ProcessorConfig;
 }
 
+/** Fetches a checkpoint file; the worker passes one that caches. */
+export type Fetcher = (url: string) => Promise<Response>;
+
+export async function fetchOk(url: string): Promise<Response> {
+  const response = await fetch(url);
+  if (!response.ok)
+    throw new Error(
+      `Failed to fetch ${url}: ${response.status} ${response.statusText}`
+    );
+  return response;
+}
+
 export async function loadCheckpointConfig(
-  baseUrl: string
+  baseUrl: string,
+  fetcher: Fetcher = fetchOk
 ): Promise<CheckpointConfig> {
+  const json = async <T>(file: string) =>
+    (await (await fetcher(`${baseUrl}/${file}`)).json()) as T;
   const [model, processor] = await Promise.all([
-    fetchJson<ModelConfig>(`${baseUrl}/config.json`),
-    fetchJson<ProcessorConfig>(`${baseUrl}/processor_config.json`),
+    json<ModelConfig>('config.json'),
+    json<ProcessorConfig>('processor_config.json'),
   ]);
   return { model, processor };
 }
@@ -95,13 +110,4 @@ export function streamingConfigFor(
     fifo_length: config.model.fifo_length,
     speaker_cache_update_period: config.model.speaker_cache_update_period,
   };
-}
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok)
-    throw new Error(
-      `Failed to fetch ${url}: ${response.status} ${response.statusText}`
-    );
-  return response.json() as Promise<T>;
 }
