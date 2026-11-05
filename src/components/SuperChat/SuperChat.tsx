@@ -133,6 +133,8 @@ export interface SuperChatProps {
   agentSelectorLabel?: string;
   /** Props for the composer's model selector (shown when provided). */
   modelSelectorProps?: ComposerModelSelectorProps;
+  /** Extra controls at the end of the composer's agent/model row (e.g. a display setting). */
+  composerSelectorsEndSlot?: React.ReactNode;
   /** While true, the send button becomes a stop button (requires `onStop`). */
   isStreaming?: boolean;
   onStop?: () => void;
@@ -211,6 +213,7 @@ export function SuperChat({
   onAgentChange,
   agentSelectorLabel,
   modelSelectorProps,
+  composerSelectorsEndSlot,
   isStreaming,
   onStop,
   stopLabel,
@@ -1026,6 +1029,7 @@ export function SuperChat({
         agentSelectorLabel={agentSelectorLabel}
         showModelSelector={!!modelSelectorProps}
         modelSelectorProps={modelSelectorProps}
+        selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
