@@ -187,8 +187,9 @@ describe('Encounter coded clinical fields', () => {
     );
     const dialog = within(screen.getByRole('dialog'));
     const sig = dialog.getByLabelText('Sig (patient directions)');
-    sig.innerHTML = '<p>1 tablet by mouth daily</p>';
-    fireEvent.input(sig);
+    fireEvent.change(sig, {
+      target: { value: '1 tablet by mouth daily' },
+    });
     fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toMatchObject({
       medications: [
@@ -197,7 +198,7 @@ describe('Encounter coded clinical fields', () => {
           code: { system: 'RxNORM', code: '314076' },
           route: 'oral',
           frequency: 'Once daily',
-          sig: '1 tablet by mouth daily',
+          patientSig: '1 tablet by mouth daily',
         },
       ],
     });
@@ -276,8 +277,9 @@ describe('Encounter coded clinical fields', () => {
     );
     const dialog = within(screen.getByRole('dialog'));
     const sig = dialog.getByLabelText('Sig (patient directions)');
-    sig.innerHTML = '<p>Continue prior directions</p>';
-    fireEvent.input(sig);
+    fireEvent.change(sig, {
+      target: { value: 'Continue prior directions' },
+    });
     fireEvent.click(dialog.getByRole('button', { name: 'Save' }));
     expect(latest()).toEqual({
       medications: [
@@ -285,7 +287,7 @@ describe('Encounter coded clinical fields', () => {
           id: 'legacy',
           name: 'Imported drug',
           status: 'taking',
-          sig: 'Continue prior directions',
+          patientSig: 'Continue prior directions',
         },
       ],
     });
