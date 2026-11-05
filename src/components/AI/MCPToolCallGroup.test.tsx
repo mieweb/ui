@@ -511,6 +511,27 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
   });
 
+  it('opens a zero-argument approval row to show its name and tool id', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'awaiting-approval', {
+            displayName: 'Clear the cache',
+            parameters: [],
+          }),
+        ]}
+        onApprove={vi.fn()}
+      />
+    );
+
+    const [row] = rows();
+    expect(
+      within(row).getByRole('button', { name: /Clear the cache/ })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(within(row).getByText('Tool ID')).toBeInTheDocument();
+    expect(within(row).getByText('tool_a')).toBeInTheDocument();
+  });
+
   it('uses label overrides, merging status labels per key', () => {
     renderWithTheme(
       <MCPToolCallGroup

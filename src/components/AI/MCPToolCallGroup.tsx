@@ -313,7 +313,10 @@ function ToolCallRow({
   const errorText = formatError(toolCall);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasDetails =
-    toolCall.parameters.length > 0 || Boolean(result) || hasLinks;
+    Boolean(toolCall.displayName) ||
+    toolCall.parameters.length > 0 ||
+    Boolean(result) ||
+    hasLinks;
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
