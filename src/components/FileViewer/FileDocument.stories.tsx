@@ -24,7 +24,7 @@ const meta: Meta<typeof FileDocument> = {
 ### Don't use it when
 
 - Nobody edits the file — use \`FileViewer\` on its own.
-- Users need rich-text formatting, syntax-aware editing, or collaboration — use \`RichEditor\` (\`@mieweb/ui/kerebron\`) or \`RichTextEditor\`.
+- Users need rich Markdown formatting or live collaboration — use \`RichEditor\`; syntax-highlighted source editing — use \`CodeEditor\` (both from \`@mieweb/ui/kerebron\`, see [RichEditor](?path=/docs/editors-richeditor--docs)).
 - The text is a form field inside a larger form — use \`Textarea\`.
 
 ### Example
