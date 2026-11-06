@@ -177,12 +177,21 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
       }
     };
 
+    // Only one Cancel may wait on confirmDiscard; a late duplicate could
+    // otherwise erase edits made after the first one finished.
+    const cancelling = React.useRef(false);
     const cancel = async () => {
-      if (dirty && confirmDiscard && !(await confirmDiscard())) return;
-      setDraft(contentRef.current);
-      setSaveFailed(false);
-      setMode('view');
-      onCancel?.();
+      if (cancelling.current) return;
+      cancelling.current = true;
+      try {
+        if (dirty && confirmDiscard && !(await confirmDiscard())) return;
+        setDraft(contentRef.current);
+        setSaveFailed(false);
+        setMode('view');
+        onCancel?.();
+      } finally {
+        cancelling.current = false;
+      }
     };
 
     return (

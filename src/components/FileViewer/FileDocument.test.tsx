@@ -144,6 +144,26 @@ describe('FileDocument', () => {
     expect(screen.queryByRole('status')).toBeNull();
   });
 
+  it('ignores Cancel clicks while a discard confirmation is open', async () => {
+    let confirm = (_ok: boolean) => {};
+    const confirmDiscard = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          confirm = resolve;
+        })
+    );
+    const onCancel = vi.fn();
+    renderDocument({ defaultMode: 'edit', confirmDiscard, onCancel });
+    fireEvent.change(editor(), { target: { value: '# Draft' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(confirmDiscard).toHaveBeenCalledTimes(1);
+
+    confirm(true);
+    await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
+  });
+
   it('cancels a clean draft without asking', async () => {
     const confirmDiscard = vi.fn();
     renderDocument({ defaultMode: 'edit', confirmDiscard });
