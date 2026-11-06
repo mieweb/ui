@@ -115,8 +115,9 @@ export const FileViewer = React.forwardRef<HTMLDivElement, FileViewerProps>(
     }
 
     const markdown = isMarkdownPath(path);
+    const plain = text.length > highlightLimit;
     let body: React.ReactNode;
-    if (text.length > highlightLimit) {
+    if (plain) {
       body = (
         <pre
           data-slot="file-viewer-plain"
@@ -144,6 +145,8 @@ export const FileViewer = React.forwardRef<HTMLDivElement, FileViewerProps>(
         className={cn(
           'border-border min-h-0 overflow-auto rounded-md border p-3 text-sm',
           'focus-visible:ring-primary-500 focus-visible:ring-2 focus-visible:outline-none',
+          // Fenced code inside right-to-left prose still reads left to right.
+          markdown && !plain && '[&_pre]:[direction:ltr]',
           className
         )}
         {...rest}

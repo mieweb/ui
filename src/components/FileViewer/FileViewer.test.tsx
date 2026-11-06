@@ -34,6 +34,16 @@ describe('FileViewer', () => {
     expect(code?.querySelector('[class*="hljs-"]')).not.toBeNull();
   });
 
+  it('keeps fenced code left to right inside automatic-direction Markdown', () => {
+    renderWithTheme(
+      <FileViewer
+        path="notes/ar.md"
+        text={'# ملاحظات\n\n```ts\nlet a = 1;\n```'}
+      />
+    );
+    expect(screen.getByRole('region')).toHaveClass('[&_pre]:[direction:ltr]');
+  });
+
   it('shows text over the highlight limit as plain text', () => {
     const { container } = renderWithTheme(
       <FileViewer path="data.json" text={'{"a": 1}'} highlightLimit={4} />
@@ -41,6 +51,15 @@ describe('FileViewer', () => {
     const plain = container.querySelector('[data-slot="file-viewer-plain"]');
     expect(plain).toHaveTextContent('{"a": 1}');
     expect(container.querySelector('code')).toBeNull();
+  });
+
+  it('lets plain-text Markdown follow its own direction', () => {
+    renderWithTheme(
+      <FileViewer path="notes/ar.md" text="# ملاحظات" highlightLimit={4} />
+    );
+    expect(screen.getByRole('region')).not.toHaveClass(
+      '[&_pre]:[direction:ltr]'
+    );
   });
 
   it('shows the empty message for an empty file', () => {
