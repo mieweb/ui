@@ -38,7 +38,7 @@ const { confirm } = useConfirm();
   path={path}
   content={text}
   onSave={(draft) => save(draft)} // resolve after the new text is stored
-  confirmDiscard={() => confirm(t('files.discard'))}
+  confirmDiscard={() => confirm({ title: t('files.discard') })}
   onDirtyChange={setHasUnsavedEdits} // guard navigation in your app
   labels={{ view: t('files.view'), edit: t('files.edit'), save: t('common.save') }}
 />
