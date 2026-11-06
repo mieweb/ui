@@ -22,6 +22,12 @@ describe('fileViewLanguage', () => {
     expect(fileViewLanguage('LICENSE')).toBeUndefined();
     expect(fileViewLanguage('.env')).toBeUndefined();
   });
+
+  it('ignores names inherited from Object.prototype', () => {
+    expect(fileViewLanguage('constructor')).toBeUndefined();
+    expect(fileViewLanguage('file.__proto__')).toBeUndefined();
+    expect(fileViewLanguage('a.toString')).toBeUndefined();
+  });
 });
 
 describe('toCodeFence', () => {

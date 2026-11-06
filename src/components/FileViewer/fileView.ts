@@ -9,58 +9,60 @@ export const FILE_VIEWER_HIGHLIGHT_LIMIT = 200_000;
 const MARKDOWN_EXTENSIONS = new Set(['md', 'markdown']);
 
 /** Extension → highlight.js language from rehype-highlight's default (`common`) set. */
-const LANGUAGE_BY_EXTENSION: Record<string, string> = {
-  ts: 'typescript',
-  tsx: 'typescript',
-  mts: 'typescript',
-  cts: 'typescript',
-  js: 'javascript',
-  jsx: 'javascript',
-  mjs: 'javascript',
-  cjs: 'javascript',
-  json: 'json',
-  jsonc: 'json',
-  py: 'python',
-  sh: 'bash',
-  bash: 'bash',
-  zsh: 'bash',
-  yml: 'yaml',
-  yaml: 'yaml',
-  css: 'css',
-  scss: 'scss',
-  less: 'less',
-  html: 'xml',
-  htm: 'xml',
-  xml: 'xml',
-  svg: 'xml',
-  sql: 'sql',
-  go: 'go',
-  rs: 'rust',
-  rb: 'ruby',
-  java: 'java',
-  kt: 'kotlin',
-  c: 'c',
-  h: 'c',
-  cpp: 'cpp',
-  cc: 'cpp',
-  hpp: 'cpp',
-  cs: 'csharp',
-  php: 'php',
-  swift: 'swift',
-  lua: 'lua',
-  r: 'r',
-  ini: 'ini',
-  toml: 'ini',
-  cfg: 'ini',
-  diff: 'diff',
-  patch: 'diff',
-  graphql: 'graphql',
-  gql: 'graphql',
-};
+const LANGUAGE_BY_EXTENSION = new Map<string, string>(
+  Object.entries({
+    ts: 'typescript',
+    tsx: 'typescript',
+    mts: 'typescript',
+    cts: 'typescript',
+    js: 'javascript',
+    jsx: 'javascript',
+    mjs: 'javascript',
+    cjs: 'javascript',
+    json: 'json',
+    jsonc: 'json',
+    py: 'python',
+    sh: 'bash',
+    bash: 'bash',
+    zsh: 'bash',
+    yml: 'yaml',
+    yaml: 'yaml',
+    css: 'css',
+    scss: 'scss',
+    less: 'less',
+    html: 'xml',
+    htm: 'xml',
+    xml: 'xml',
+    svg: 'xml',
+    sql: 'sql',
+    go: 'go',
+    rs: 'rust',
+    rb: 'ruby',
+    java: 'java',
+    kt: 'kotlin',
+    c: 'c',
+    h: 'c',
+    cpp: 'cpp',
+    cc: 'cpp',
+    hpp: 'cpp',
+    cs: 'csharp',
+    php: 'php',
+    swift: 'swift',
+    lua: 'lua',
+    r: 'r',
+    ini: 'ini',
+    toml: 'ini',
+    cfg: 'ini',
+    diff: 'diff',
+    patch: 'diff',
+    graphql: 'graphql',
+    gql: 'graphql',
+  })
+);
 
-const LANGUAGE_BY_FILENAME: Record<string, string> = {
-  makefile: 'makefile',
-};
+const LANGUAGE_BY_FILENAME = new Map<string, string>([
+  ['makefile', 'makefile'],
+]);
 
 function fileName(path: string): string {
   return path.slice(path.lastIndexOf('/') + 1).toLowerCase();
@@ -80,8 +82,8 @@ export function isMarkdownPath(path: string): boolean {
 /** The highlight language for a path, or `undefined` to show it as plain text. */
 export function fileViewLanguage(path: string): string | undefined {
   return (
-    LANGUAGE_BY_FILENAME[fileName(path)] ??
-    LANGUAGE_BY_EXTENSION[extension(path)]
+    LANGUAGE_BY_FILENAME.get(fileName(path)) ??
+    LANGUAGE_BY_EXTENSION.get(extension(path))
   );
 }
 
