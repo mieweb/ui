@@ -900,6 +900,114 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   }
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 640 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Display names with tool ids${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-display-names', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Host-supplied names are direction-isolated, so English text keeps
+      // its trailing "/" in place inside an RTL document.
+      const firstLabel = page.getByText('Looked at files in src/', {
+        exact: true,
+      });
+      expect(
+        await firstLabel.evaluate((el) => getComputedStyle(el).direction)
+      ).toBe('ltr');
+
+      // The call awaiting approval keeps the group and its own row open.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(3);
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      const longName = 'Read src/components/AI/MCPToolCallGroup.tsx';
+      const readRow = rows.filter({ hasText: longName });
+      await readRow.getByRole('button').first().click();
+
+      const rowNames = [
+        ['Looked at files in src/', 'Done'],
+        [longName, 'Done'],
+        ['Delete the build folder', 'Needs approval'],
+      ] as const;
+      for (const [index, [displayName, status]] of rowNames.entries()) {
+        const trigger = rows.nth(index).getByRole('button').first();
+        // The row shows the display name as plain text, not the tool id.
+        await expect(trigger.locator('code')).toHaveCount(0);
+        const [triggerBox, label, badge] = await Promise.all([
+          trigger.boundingBox(),
+          trigger.getByText(displayName, { exact: true }).boundingBox(),
+          trigger.getByText(status, { exact: true }).boundingBox(),
+        ]);
+        // The badge stays inside the row, at its inline end, and leaves the
+        // name room to show.
+        expect(label!.width).toBeGreaterThan(40);
+        expect(badge!.x).toBeGreaterThanOrEqual(triggerBox!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          triggerBox!.x + triggerBox!.width + 0.5
+        );
+        if (isRtl) {
+          expect(badge!.x + badge!.width).toBeLessThan(label!.x);
+        } else {
+          expect(badge!.x).toBeGreaterThan(label!.x + label!.width);
+        }
+      }
+
+      // Expanded rows show the full name and the raw tool id.
+      for (const [row, toolName] of [
+        [readRow, 'read_file'],
+        [rows.nth(2), 'delete_file'],
+      ] as const) {
+        await expect(row.locator("[data-slot='ai-tool-call-id']")).toHaveText(
+          `Tool ID ${toolName}`
+        );
+      }
+      const fullName = readRow.locator(
+        "[data-slot='ai-tool-call-display-name']"
+      );
+      await expect(fullName).toHaveText(longName);
+
+      if (viewport) {
+        // The row truncates the long name; its details wrap it instead.
+        const [rowLabel, details] = await Promise.all([
+          readRow
+            .getByRole('button')
+            .first()
+            .getByText(longName, { exact: true })
+            .evaluate((el) => ({
+              scrollWidth: el.scrollWidth,
+              clientWidth: el.clientWidth,
+            })),
+          fullName.evaluate((el) => ({
+            scrollWidth: el.scrollWidth,
+            clientWidth: el.clientWidth,
+          })),
+        ]);
+        expect(rowLabel.scrollWidth).toBeGreaterThan(rowLabel.clientWidth);
+        expect(details.scrollWidth).toBeLessThanOrEqual(details.clientWidth);
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-display-names${name}.png`
+      );
+    });
+  }
+
   for (const [name, reducedMotion] of [
     ['', 'no-preference'],
     ['-reduced-motion', 'reduce'],
@@ -1093,7 +1201,8 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect
       .poll(() =>
         menu.evaluate(
-          (el, expected) => Math.abs(el.getBoundingClientRect().left - expected),
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().left - expected),
           triggerLeft
         )
       )
@@ -2340,7 +2449,10 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await page.getByText('Here is what shipped').click();
     // The Kerebron editor mounts asynchronously.
     const editor = page.locator('.kb-editor');
-    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
     // Merge tags render as atomic chips that keep their braces.
     await expect(editor).toContainText('{{first_name}}');
     await expect(page).toHaveScreenshot('emaileditor-text-block-kerebron.png');
@@ -2367,7 +2479,10 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await gotoEditor(page);
     await page.getByText('Here is what shipped').click();
     const editor = page.locator('.kb-editor');
-    await editor.locator('p').first().waitFor({ state: 'visible', timeout: 30000 });
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
     await editor.click();
     const direct = page.locator('.kb-custom-menu .tar-menu-variables');
     if (await direct.count()) {
@@ -2423,10 +2538,9 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
         })
       );
     });
-    await expect(editor.getByRole('img', { name: 'pixel.png' })).toHaveAttribute(
-      'src',
-      /^blob:/
-    );
+    await expect(
+      editor.getByRole('img', { name: 'pixel.png' })
+    ).toHaveAttribute('src', /^blob:/);
   });
 });
 
@@ -2722,9 +2836,7 @@ test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () 
     await expect(
       menu.getByRole('menuitem', { name: 'Full Name' })
     ).toBeVisible();
-    await expect(
-      menu.getByPlaceholder('Search variables…')
-    ).toBeFocused();
+    await expect(menu.getByPlaceholder('Search variables…')).toBeFocused();
     await expect(page).toHaveScreenshot(
       'textarearich-kerebron-variables-menu.png',
       { animations: 'disabled' }

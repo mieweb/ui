@@ -27,9 +27,9 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
       description: {
         component: `### What it's for
 
-**A status pill for one MCP tool invocation that expands into its result, error and parameters.** \`MCPToolCallDisplay\` takes \`toolCall: MCPToolCall\` (\`toolName\`, \`parameters: { name, type, value }[]\`, \`status\` \`pending\` | \`running\` | \`success\` | \`error\` | \`cancelled\`, optional \`duration\`, \`result: { type, data, summary, link, resources }\`, \`error\`). The pill label is a friendly verb phrase derived from \`toolName\` (a built-in map such as \`create_patient\` → "Creating patient" → "Created patient" on success; unknown names fall back to the snake_case name with underscores replaced) plus a detail bit — a parameter summary while running (\`firstName lastName\`, \`"query"\`, \`patientName on date\`, \`service near zipcode\`) or the formatted duration once done. When there is anything to show, the pill becomes a \`CollapsiblePill\` (\`collapsible\`, default \`true\`) whose box holds \`result.summary\`, a \`ResourceLink\` for \`result.link\` and each \`result.resources[]\`, the error text, and the raw parameter list (\`showParameters\`, default \`true\`). \`defaultCollapsed\` defaults to open for completed calls and collapsed while pending/running; \`compact\` tightens the pill; \`hidden\` renders nothing; \`onLinkClick(link)\` intercepts resource links. Also exported: \`ResourceLink\`, \`ToolStatusIcon\`, \`getToolIcon\`, and the shared \`CollapsiblePill\`.
+**A status pill for one MCP tool invocation that expands into its result, error and parameters.** \`MCPToolCallDisplay\` takes \`toolCall: MCPToolCall\` (\`toolName\`, \`parameters: { name, type, value }[]\`, \`status\` \`pending\` | \`running\` | \`success\` | \`error\` | \`cancelled\`, optional \`duration\`, \`result: { type, data, summary, link, resources }\`, \`error\`). The pill label is \`displayName\` when the host sets one; otherwise it is a friendly verb phrase derived from \`toolName\` (a built-in map such as \`create_patient\` → "Creating patient" → "Created patient" on success; unknown names fall back to the snake_case name with underscores replaced) plus a detail bit — a parameter summary while running (\`firstName lastName\`, \`"query"\`, \`patientName on date\`, \`service near zipcode\`) or the formatted duration once done. When there is anything to show, the pill becomes a \`CollapsiblePill\` (\`collapsible\`, default \`true\`) whose box holds \`result.summary\`, a \`ResourceLink\` for \`result.link\` and each \`result.resources[]\`, the error text, and the raw parameter list (\`showParameters\`, default \`true\`). \`defaultCollapsed\` defaults to open for completed calls and collapsed while pending/running; \`compact\` tightens the pill; \`hidden\` renders nothing; \`onLinkClick(link)\` intercepts resource links. Also exported: \`ResourceLink\`, \`ToolStatusIcon\`, \`getToolIcon\`, and the shared \`CollapsiblePill\`.
 
-**\`MCPToolCallGroup\`** renders a run of consecutive calls as compact rows (icon, \`serverName\`, \`toolName\`, status badge) under one "Used N tools" header. It stays open while any call is \`pending\`, \`running\` or \`awaiting-approval\`, and collapses once every call has settled, so a finished run takes one line. While keyboard focus is in its rows, an automatic change never removes a row: the group stays open and collapses once focus leaves. Calls that are \`awaiting-approval\` or \`error\` stay listed while collapsed, with **Allow once / Always allow / Deny** (\`onApprove(toolCall, { always })\`, \`onDeny(toolCall)\`) and the error text. A manual toggle holds until a call arrives or changes status. Each row discloses its result links (\`result.link\` and \`result.resources\` as \`ResourceLink\`s; \`onLinkClick(link)\` intercepts them), parameters and result. A lone call renders as a bare row. Every string is in \`labels\` (English defaults in \`defaultMCPToolCallGroupLabels\`; counts are functions so the host pluralises). \`AIMessageDisplay\` and \`AIChat\` render it for each run of \`tool_use\` blocks when you pass \`toolCallGroup\`.
+**\`MCPToolCallGroup\`** renders a run of consecutive calls as compact rows (icon, \`serverName\`, \`displayName\` or else \`toolName\`, status badge) under one "Used N tools" header. It stays open while any call is \`pending\`, \`running\` or \`awaiting-approval\`, and collapses once every call has settled, so a finished run takes one line. While keyboard focus is in its rows, an automatic change never removes a row: the group stays open and collapses once focus leaves. Calls that are \`awaiting-approval\` or \`error\` stay listed while collapsed, with **Allow once / Always allow / Deny** (\`onApprove(toolCall, { always })\`, \`onDeny(toolCall)\`) and the error text. A manual toggle holds until a call arrives or changes status. Each row discloses the full \`displayName\` and the raw \`toolName\` under \`labels.toolId\` when \`displayName\` is set, its result links (\`result.link\` and \`result.resources\` as \`ResourceLink\`s; \`onLinkClick(link)\` intercepts them), parameters and result. A lone call renders as a bare row. Every string is in \`labels\` (English defaults in \`defaultMCPToolCallGroupLabels\`; counts are functions so the host pluralises). \`AIMessageDisplay\` and \`AIChat\` render it for each run of \`tool_use\` blocks when you pass \`toolCallGroup\`.
 
 ### Use it when
 
@@ -263,6 +263,41 @@ export const GroupNeedsAttention: Story = {
         }),
         groupCall('a3', 'delete_file', 'awaiting-approval', {
           serverName: 'Workspace',
+          parameters: [{ name: 'path', type: 'string', value: 'build/' }],
+          result: undefined,
+        }),
+      ]}
+      onApprove={fn()}
+      onDeny={fn()}
+    />
+  ),
+};
+
+/**
+ * Hosts can name each call in the user's words with `displayName`. The row
+ * shows it as plain text, and the row's details repeat it in full (the row
+ * truncates) above the raw `toolName` under `labels.toolId`. The call awaiting
+ * approval keeps the group and its row open.
+ */
+export const GroupDisplayNames: Story = {
+  render: () => (
+    <MCPToolCallGroup
+      toolCalls={[
+        groupCall('d1', 'list_dir', 'success', {
+          displayName: 'Looked at files in src/',
+        }),
+        groupCall('d2', 'read_file', 'success', {
+          displayName: 'Read src/components/AI/MCPToolCallGroup.tsx',
+          parameters: [
+            {
+              name: 'filePath',
+              type: 'string',
+              value: 'src/components/AI/MCPToolCallGroup.tsx',
+            },
+          ],
+        }),
+        groupCall('d3', 'delete_file', 'awaiting-approval', {
+          displayName: 'Delete the build folder',
           parameters: [{ name: 'path', type: 'string', value: 'build/' }],
           result: undefined,
         }),
