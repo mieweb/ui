@@ -23,6 +23,10 @@ handoffs:
     agent: MIE UI Migration Agent
     prompt: Audit the code discussed above for @mieweb/ui compliance (raw HTML elements, custom modal/card/badge patterns, hand-rolled icons, CSS foundation) and report findings with a prioritized replacement plan.
     send: false
+  - label: Rich text editors
+    agent: MIE UI Rich Text Agent
+    prompt: Handle the rich-text question above (Kerebron editors, install legs, WASM/patches, collaboration, markdown round-trip, EmailEditor) and report the minimal fix.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -60,9 +64,10 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | ARIA, keyboard nav, screen readers, contrast         | MIE UI A11y Agent      |
 | translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
 | migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
+| rich text editors (RichEditor, TextAreaRich, EmailEditor), Kerebron peers/WASM/patches, collab, Markdown rendering | MIE UI Rich Text Agent |
 
 More specialists (Grids, DataVis, Views,
-SuperChat, Rich Text) land in later phases; until one ships, answer its domain
+SuperChat) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
 **Tie-breakers:**
