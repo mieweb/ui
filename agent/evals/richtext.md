@@ -115,12 +115,14 @@ format and scoring.
 ### RT-12 — Collab silently local
 
 - **Ask:** "I pass `collab={{ room }}` but edits don't sync between users, and there's no error."
-- **Expect:** Best-effort degrade: if the Yjs kit can't load (optional peers
-  `@kerebron/extension-yjs`, `yjs`, `y-protocols` missing, or relay
-  unreachable) the editor mounts as a local one and `collab.onUnavailable`
-  fires — install the peers, check the `/yjs` websocket relay (`wsUrl`
-  default `<ws|wss>://<location.host>/yjs`), and pass `onUnavailable` to
-  surface it.
+- **Expect:** `onUnavailable` reports **kit-load failures only** (optional
+  peers `@kerebron/extension-yjs`, `yjs`, `y-protocols` missing): the editor
+  mounts as a local one and the callback fires once, before the editor is
+  created. A reachable-but-disconnected relay is different — the kit stays
+  loaded and the provider retries on its own, with no callback. Fix: install
+  the peers and pass `collab.onUnavailable` to surface load failures; for
+  connectivity, check the `/yjs` websocket relay (`wsUrl` default
+  `<ws|wss>://<location.host>/yjs`).
 - **Agent:** MIE UI Rich Text Agent
 - **Source:** RichEditor collab docs; collabKit.ts; kerebron skill — Collaboration
 
@@ -150,7 +152,8 @@ format and scoring.
 - **Expect:** Since 0.12 `Textarea` renders the Kerebron engine: no visible
   `<textarea>` — a ProseMirror `contenteditable` (`role="textbox"`, class
   `kb-editor`) plus a hidden mirror `[data-slot="textarea-mirror"]` carrying
-  `name`/`value`. Target `[data-slot="textarea-*"]`; `getByRole('textbox')`
+  `name`/`value`. Target the `data-slot` hooks (`[data-slot^="textarea-"]`
+  or a concrete slot); `getByRole('textbox')`
   keeps working; `TextAreaPlain` / `richText={false}` restores the native
   element.
 - **Agent:** MIE UI Rich Text Agent
@@ -197,10 +200,11 @@ format and scoring.
 
 - **Ask:** "What renders the markdown a RichEditor produced, in a read-only record view with mermaid diagrams?"
 - **Expect:** `MarkdownRenderer` (main barrel, `@mieweb/ui/markdown.css`) —
-  sanitised HTML, code highlighting, `mermaid`/`csv`/`survey`/`html` fences
-  (each fence needs its optional dep, e.g. `mermaid`), `streaming` for
-  token-by-token AI output. Legacy `RichTextEditor` HTML does **not** go
-  through it.
+  sanitised HTML, code highlighting, `mermaid`/`csv`/`survey`/`html` fences,
+  `streaming` for token-by-token AI output. Conditional deps: `mermaid` for
+  the mermaid fence, `papaparse` for csv, `js-yaml` only for YAML-input
+  surveys (JSON surveys and the html fence need none). Legacy
+  `RichTextEditor` HTML does **not** go through it.
 - **Agent:** MIE UI Rich Text Agent
 - **Source:** src/catalog/Editors.mdx — Markdown row + "Markdown closes the loop"
 

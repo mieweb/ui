@@ -77,8 +77,10 @@ evidence and report a minimal fix — you do not edit files (offer the
    surfaces and flag any new usage you encounter.
 3. Respect read-once props: any answer that changes `collab`, `mediaUpload`,
    `modifyMenu` or `omitExtensions` at runtime must say "remount via `key`".
-4. If documents persist anywhere, insist on `mediaUpload.uploadHandler` —
-   base64 embedding is a data-size defect, not a style choice.
+4. If documents persist anywhere, insist on an upload hook — base64
+   embedding is a data-size defect, not a style choice. The hook is
+   `mediaUpload.uploadHandler` on the surfaces that expose it (`RichEditor`,
+   Kerebron `TextAreaRich`); `EmailEditor`'s is `onUploadImage`.
 5. Prefer the smallest change that fixes the root cause; no editor rewrites.
 6. The installed `mieweb-ui.instructions.md` rules apply to any code you
    recommend.

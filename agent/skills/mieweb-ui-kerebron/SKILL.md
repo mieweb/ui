@@ -119,9 +119,12 @@ its own filenames and `node_modules/…` paths). What breaks without each:
 the `/yjs` websocket relay (default `<ws|wss>://<location.host>/yjs`;
 `params` for auth tokens). Requires the optional peers
 `@kerebron/extension-yjs` + `yjs` + `y-protocols`. **Best-effort degrade:**
-if the Yjs kit can't load, the editor still mounts locally and
-`collab.onUnavailable` fires — pass it when users must know they're editing
-unshared. The kit lazy-loads via dynamic `import` so plain-mode consumers
+if the Yjs **kit fails to load** (e.g. the optional peers are absent), the
+editor still mounts locally and `collab.onUnavailable` fires once, before
+the editor is created — pass it when users must know they're editing
+unshared. `onUnavailable` is **not for connection trouble**: a reachable
+room that is currently disconnected still has the kit loaded, and the
+provider retries on its own. The kit lazy-loads via dynamic `import` so plain-mode consumers
 never pull Yjs code (versions before the mieweb/ui#706 fix had static named
 imports in the lazy chunk — rolldown-Vite builds failed with
 `MISSING_EXPORT`; fix: upgrade, or externalize
@@ -138,8 +141,9 @@ is uncontrolled — remount via `key` to switch rooms.
 - **DOM shape:** no visible `<textarea>` — a ProseMirror `contenteditable`
   (`role="textbox"`, class `kb-editor`) plus hidden mirror
   `[data-slot="textarea-mirror"]` carrying `name`/`value`. `textarea { … }`
-  CSS and element refs no longer match; target `[data-slot="textarea-*"]`.
-  `getByRole('textbox')` tests keep working.
+  CSS and element refs no longer match; target the `data-slot` hooks
+  (`[data-slot^="textarea-"]` prefix selector, or a concrete slot like
+  `textarea-wrapper`). `getByRole('textbox')` tests keep working.
 - Controlled transforms of `event.target.value` reset formatting (the
   reported value is flattened plain text).
 
@@ -164,6 +168,6 @@ peer). Sending, recipients and templates are the host's concern.
 | axe: `select-name` on code blocks | Host missing the `extension-codecrock` patch | Apply the `extension-codecrock` patch |
 | Pasted screenshot balloons the document / image dies on reload | No `mediaUpload.uploadHandler` — base64/blob embedding | Provide `uploadHandler` returning a hosted URL |
 | Edits revert while typing in a controlled host | Host `onChange` doesn't echo into `value` and `strictValue` is set — or the host echoes flattened text back into a rich surface | Echo the value correctly, or drop `strictValue` for read-once + `getContent()` on submit |
-| `collab` set but edits don't sync, no error | Yjs kit unavailable → silent local degrade | Install the collab peers; pass `collab.onUnavailable` to surface it; check the `/yjs` relay |
+| `collab` set but edits don't sync, no error | Yjs kit failed to load (missing optional peers) → silent local degrade; or the relay is disconnected (kit loaded, provider retrying) | Install the collab peers and pass `collab.onUnavailable` to surface load failures; for connectivity, check the `/yjs` relay — the provider retries on its own |
 | `<label htmlFor>` doesn't focus/name the editor | Editor host is a `div`, not a labelable control | `aria-label` / `aria-labelledby` via the `id` anchor |
 | Checklist items vanish in EmailEditor | By design — `task_list`/`task_item` are email-unsafe (mieweb/ui#695) | Use a different block structure; not a bug |
