@@ -72,7 +72,7 @@ window.__ozwellWhisperHost = config.whisperHost;      // Whisper weights (must s
 
 ### Limitations
 
-- **Model downloads and hosting.** First activation fetches ~6 MB of wake models (ONNX, \`onnxruntime-web\` 1.19 loaded from jsDelivr with a bundled fallback), ~50 MB of sherpa-onnx/TitaNet when \`requireDoctor\` or \`conversationMode\` is on, Transformers.js from a CDN and Whisper turbo (~1.3 GB, WebGPU; \`base.en\` ~75 MB WASM fallback). Defaults point at a personal HuggingFace repo and an R2 bucket — override \`assetBase\` / \`window.__ozwellAssets\`, \`window.__ozwellWhisperHost\`, \`window.__ozwellTransformersUrl\` for production. Caching uses OPFS, the Cache API and a service worker that this repo serves only from Storybook (\`/ozwell-model-sw.js\`); a consumer must host that file or pass \`registerServiceWorker: false\`. Strict CSP needs \`worker-src blob:\` and the model origins.
+- **Model downloads and hosting.** First activation fetches ~6 MB of wake models (ONNX, \`onnxruntime-web\` 1.30 loaded from jsDelivr with a bundled fallback), Nemotron (~121–398 MB) when \`requireDoctor\` is on, ~50 MB of sherpa-onnx/TitaNet when \`conversationMode\` is on, Transformers.js from a CDN and Whisper turbo (~1.3 GB, WebGPU; \`base.en\` ~75 MB WASM fallback). Defaults point at a personal HuggingFace repo and an R2 bucket — override \`assetBase\` / \`window.__ozwellAssets\`, \`window.__ozwellWhisperHost\`, \`window.__ozwellTransformersUrl\` for production. Caching uses OPFS, the Cache API and a service worker that this repo serves only from Storybook (\`/ozwell-model-sw.js\`); a consumer must host that file or pass \`registerServiceWorker: false\`. Strict CSP needs \`worker-src blob:\` and the model origins.
 - **Browser requirements:** secure context, microphone permission, AudioWorklet, Web Workers, WASM, IndexedDB (voiceprints), ideally WebGPU. A denied mic shows "Microphone unavailable" on the toggle after ~8 s.
 - **Backend config is runtime and browser-visible.** Without \`onSend\`, replies come from \`localStorage.ozwellConfig\` / \`window.__ozwell\` (\`{ apiKey, baseURL, model, system, temperature }\`); with no key a canned reply is used. A Bearer key in the browser is readable by users — proxy it for public deploys.
 - **Accessibility as implemented:** the toggle is a \`<button aria-pressed>\` with English \`aria-label\`/\`title\` and a visual-only load ring; wake/dictate/transcribe phase changes are conveyed by the composer placeholder text and octopus animation, not a live region; the floating chat is \`FloatingAIChat\` (dialog, focus trap, Escape). Long-press is pointer-based; keyboard users open settings via the context-menu key.
@@ -90,7 +90,7 @@ window.__ozwellWhisperHost = config.whisperHost;      // Whisper weights (must s
         {
           type: 'uses',
           target: 'voice-speaker-verify',
-          why: 'requireDoctor gates each wake through useSpeakerVerify against the enrolled voiceprints.',
+          why: 'conversationMode names speakers with TitaNet through useDiarization; requireDoctor now checks Nemotron voiceprints.',
         },
         {
           type: 'uses',

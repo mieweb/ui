@@ -296,6 +296,23 @@ const config: StorybookConfig = {
       ...config.optimizeDeps.esbuildOptions,
       jsx: 'automatic',
       jsxImportSource: 'react',
+      plugins: [
+        ...(config.optimizeDeps.esbuildOptions?.plugins ?? []),
+        // Pre-bundled packages that import @mieweb/ui pull in its source, and esbuild cannot build
+        // `?worker` imports; leave those to Vite's worker plugin.
+        {
+          name: 'vite-worker-imports',
+          setup(build) {
+            build.onResolve({ filter: /\?worker\b/ }, ({ path: id, resolveDir }) => {
+              const [file, query] = id.split('?');
+              const resolved = path.resolve(resolveDir, file);
+              const withExtension =
+                ['.ts', '.js', ''].map((ext) => resolved + ext).find(existsSync) ?? resolved;
+              return { path: `/@fs${withExtension}?${query}`, external: true };
+            });
+          },
+        },
+      ],
     };
 
     return config;

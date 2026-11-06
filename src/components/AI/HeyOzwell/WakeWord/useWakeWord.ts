@@ -12,7 +12,11 @@
  * Needs `onnxruntime-web` (pnpm add) and the VAD model at /wakeword/silero-vad.onnx.
  */
 import * as React from 'react';
-import { registerModelServiceWorker } from '../../modelCache';
+import {
+  onnxRuntimeBase,
+  readAssetGlobal,
+  registerModelServiceWorker,
+} from '../../modelCache';
 import { getModelBytes } from './lib/opfs.js';
 
 export interface UseWakeWordOpts {
@@ -76,22 +80,6 @@ const PHRASES = ['hey-ozwell', "ozwell-i'm-done"];
 // (a base URL string, or { base, wakeword }) → `DEFAULT_ASSET` (the hosted HuggingFace base above). The
 // default fetches the ~6 MB of models from the hosted repo so a fresh clone runs with no config; override
 // the prop/global to point elsewhere (a local copy or a mieweb-owned host).
-type AssetGlobal =
-  | string
-  | { base?: string; wakeword?: string; svRuntime?: string };
-// Storybook runs stories in an iframe; a console-set window.__ozwellAssets often lands on the parent
-// frame, so check current → parent → top (all same-origin).
-function readAssetGlobal(): AssetGlobal | undefined {
-  if (typeof window === 'undefined') return undefined; // SSR / Node — no window
-  const get = (w?: Window | null): AssetGlobal | undefined => {
-    try {
-      return (w as unknown as { __ozwellAssets?: AssetGlobal })?.__ozwellAssets;
-    } catch {
-      return undefined;
-    }
-  };
-  return get(window) || get(window.parent) || get(window.top);
-}
 function resolveAssetBase(override?: string): string {
   const strip = (s: string) => s.replace(/\/$/, '');
   // The `assetBase` prop is a ROOT base (same shape as the string `window.__ozwellAssets`), so append
@@ -174,11 +162,8 @@ export function warmWakeModels(assetBase?: string): Promise<void> {
   return warmPromise;
 }
 
-// Load the SAME onnxruntime-web build the working demo uses (1.19.0), as a global `ort`.
-// The detector's onnx.js prefers a global `ort` over the bundled package — matching the demo's
-// pinned version fixes the slow/choppy inference and behavior diffs the newer npm version caused.
-const ORT_URL =
-  'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.19.0/dist/ort.min.js';
+// Load onnxruntime-web as a global `ort`, which the detector's onnx.js prefers over the bundled package.
+// Same version as Nemotron, so the two share one cached runtime.
 let ortPromise: Promise<void> | null = null;
 function ensureOrt(): Promise<void> {
   if (typeof (window as unknown as { ort?: unknown }).ort !== 'undefined')
@@ -186,7 +171,7 @@ function ensureOrt(): Promise<void> {
   if (ortPromise) return ortPromise; // dedupe: concurrent useWakeWord mounts share one <script> load
   ortPromise = new Promise<void>((resolve) => {
     const s = document.createElement('script');
-    s.src = ORT_URL;
+    s.src = `${onnxRuntimeBase()}ort.min.js`;
     s.onload = () => resolve();
     // Best-effort: if the CDN is blocked (CSP/offline), don't hard-fail — lib/onnx.js falls back to the
     // bundled onnxruntime-web ESM when `window.ort` is undefined.
@@ -252,7 +237,7 @@ export function useWakeWord(
         // streams + echo-cancellation/AGC conflict). The detector's getUserMedia also triggers the
         // permission prompt on first run, so this isn't needed.
 
-        // load the demo's exact onnxruntime (1.19.0) as a global BEFORE the detector imports onnx.js
+        // load onnxruntime as a global BEFORE the detector imports onnx.js
         await ensureOrt();
         if (cancelled) return;
 
