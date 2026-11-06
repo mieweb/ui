@@ -53,6 +53,21 @@ describe('FileDocument', () => {
     expect(onSave).toHaveBeenCalledWith('# Saved');
   });
 
+  it('locks the editor while a save is pending', async () => {
+    let finishSave = () => {};
+    const onSave = () =>
+      new Promise<void>((resolve) => {
+        finishSave = resolve;
+      });
+    renderDocument({ onSave, defaultMode: 'edit' });
+    fireEvent.change(editor(), { target: { value: '# Saving' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(editor()).toHaveAttribute('readonly');
+    finishSave();
+    await waitFor(() => expect(screen.getByTestId('rendered')).toBeVisible());
+  });
+
   it('stays in Edit and shows an error when saving fails', async () => {
     renderDocument({
       defaultMode: 'edit',

@@ -74,10 +74,10 @@ export interface FileDocumentProps extends Omit<
   defaultMode?: FileDocumentMode;
   onModeChange?: (mode: FileDocumentMode) => void;
   /**
-   * Save the draft. While the promise is pending the Save button is busy; on
-   * success the document returns to View, and on rejection it stays in Edit
-   * and shows `labels.saveFailed`. The host should update `content` before
-   * resolving.
+   * Save the draft. While the promise is pending the Save button is busy and
+   * the editor is read-only; on success the document returns to View, and on
+   * rejection it stays in Edit and shows `labels.saveFailed`. The host should
+   * update `content` before resolving.
    */
   onSave: (draft: string) => void | Promise<void>;
   /**
@@ -255,6 +255,8 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
           <textarea
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
+            // Edits made during a save could be overwritten when it lands.
+            readOnly={saving}
             aria-label={labels.editor(path)}
             spellCheck={false}
             dir="auto"
