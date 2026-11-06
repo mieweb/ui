@@ -890,6 +890,8 @@ module.exports = {
     '[&_svg]:w-7',
     '[background:linear-gradient(160deg,color-mix(in_srgb,var(--mieweb-accent,var(--mieweb-primary-700))_70%,#000)_0%,var(--mieweb-primary-950)_100%)]',
     'grid-cols-[1fr_280px]',
+    // MedicationEditor compound ingredient rows (drug/form/strength/qty/unit/remove).
+    'grid-cols-[2fr_1fr_1fr_0.8fr_1fr_2rem]',
     'w-[min(600px,calc(100vw-2rem))]',
     'w-[min(880px,calc(100vw-2rem))]',
     'transition-[opacity,transform]',
