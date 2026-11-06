@@ -1,5 +1,6 @@
 /** @module onnx */
 import { sleep } from "./helpers.js";
+import { onnxRuntimeBase } from "../../../modelCache";
 
 let initialized = false, initError = null, Tensor, InferenceSession;
 
@@ -11,16 +12,15 @@ if (typeof ort !== "undefined") {
     // onnxruntime-web is a real dependency here, so let the bundler resolve it.
     // (The original also had a local-file fallback "./onnxruntime-web/ort.mjs" that Vite can't
     // resolve at build time — removed; not needed when the package is installed.)
-    import("onnxruntime-web").then((module) => {
+    // The `/wasm` entry (CPU-only; sessions here are wasm-only anyway) keeps the bundler from emitting the
+    // ~27 MiB JSEP/WebGPU binary, which exceeds Cloudflare Pages' 25 MiB per-file limit.
+    import("onnxruntime-web/wasm").then((module) => {
         try {
-            // The engine's .wasm files aren't served by the bundler, so fetch them from the CDN
-            // matching the installed version — but ONLY if a host hasn't already configured wasmPaths
-            // (so a strict-CSP / self-hosting host can point it at its own copy). Force single-threaded —
-            // localhost has no COOP/COEP headers, so the threaded build (SharedArrayBuffer) can't load.
-            if (!module.env.wasm.wasmPaths) {
-                const v = (module.env && module.env.versions && module.env.versions.web) || "";
-                module.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web" + (v ? "@" + v : "") + "/dist/";
-            }
+            // The engine's .wasm files aren't served by the bundler, so fetch them from `__ozwellAssets.ort`
+            // (self-hosted copy) or the pinned jsDelivr build — but ONLY if a host hasn't already configured
+            // wasmPaths. Force single-threaded — localhost has no COOP/COEP headers, so the threaded build
+            // (SharedArrayBuffer) can't load.
+            if (!module.env.wasm.wasmPaths) module.env.wasm.wasmPaths = onnxRuntimeBase();
             module.env.wasm.numThreads = 1;
         } catch (e) { /* fall back to engine defaults */ }
         initialized = true;

@@ -13,13 +13,20 @@ import {
   transcribeSegmentsFromSamples,
   transcribeWordsFromSamples,
 } from '../whisperTranscribe';
-import { laneNames, transcriptFromFrames } from './nemotron/attribution';
 import {
-  MODEL_REVISION,
-  type ExecutionProvider,
-  type ModelVariant,
-} from './nemotron/modelConfig';
-import { enrollNemotron, runNemotron } from './nemotron/runNemotron';
+  laneNames,
+  transcriptFromFrames,
+  type LaneFrames,
+} from './nemotron/attribution';
+import { MODEL_REVISION } from './nemotron/modelConfig';
+import {
+  defaultNemotronModel,
+  enrollNemotron,
+  listenNemotron,
+  runNemotron,
+  type NemotronListener,
+  type NemotronModel,
+} from './nemotron/runNemotron';
 import {
   isUsableWith,
   loadNemotronVoiceprints,
@@ -35,10 +42,8 @@ export const MIN_ENROLL_SECONDS = 5;
 const MAX_VOICES = 7;
 
 export interface UseNemotronDiarizationOptions {
-  /** Model weights. Default `model_quantized` (int8, ~121 MB). */
-  variant?: ModelVariant;
-  /** Default `wasm`. On `webgpu` only `model` (fp32) gives correct output. */
-  executionProvider?: ExecutionProvider;
+  /** Variant and backend. Default `defaultNemotronModel()`: fp32 on WebGPU on desktops with a GPU, else int8 on WASM. */
+  model?: NemotronModel;
   /** Isolates enrolled voices per user, as in `useDiarization`. Omit for the unscoped store. */
   voiceprintNamespace?: string;
 }
@@ -56,7 +61,23 @@ export interface NemotronDiarization {
   peaks: WaveformPeaks;
 }
 
+/** Speaker labels being worked out while a clip records; see `listen`. */
+export interface LiveDiarization {
+  /** Stops listening without using the result, e.g. when the recording is abandoned. */
+  cancel: () => void;
+}
+
+interface LiveSession extends LiveDiarization {
+  listener: NemotronListener;
+  names: string[];
+  namespace: string | undefined;
+  /** The stored voices had loaded when listening began, so `names` is the full enrolled list. */
+  hydrated: boolean;
+}
+
 export interface UseNemotronDiarizationResult {
+  /** The model in use; null for a moment while the device default is picked. */
+  model: NemotronModel | null;
   voices: NemotronVoice[];
   busy: boolean;
   /** Current step while busy, e.g. "Downloading model". */
@@ -66,7 +87,10 @@ export interface UseNemotronDiarizationResult {
   /** Enroll (or replace) a voice from a one-speaker sample of at least `MIN_ENROLL_SECONDS`. */
   enroll: (name: string, blob: Blob) => Promise<void>;
   removeVoice: (name: string) => Promise<void>;
-  diarize: (blob: Blob) => Promise<NemotronDiarization>;
+  /** Starts labelling speakers while `stream` records; pass the result to `diarize` with the clip. */
+  listen: (stream: MediaStream) => LiveDiarization;
+  /** Labels `blob`. With `live` from `listen` on the same recording, its finished labels are used. */
+  diarize: (blob: Blob, live?: LiveDiarization) => Promise<NemotronDiarization>;
 }
 
 const messageOf = (e: unknown) => (e instanceof Error ? e.message : String(e));
@@ -80,11 +104,30 @@ async function transcribe(samples: Float32Array): Promise<TranscriptSegment[]> {
   }
 }
 
+/** `model` when given, else this device's default once it has been picked (null until then). */
+export function useNemotronModel(model?: NemotronModel): NemotronModel | null {
+  const [device, setDevice] = React.useState<NemotronModel | null>(null);
+  const explicit = model !== undefined;
+  React.useEffect(() => {
+    if (explicit) return;
+    let cancelled = false;
+    void defaultNemotronModel().then((picked) => {
+      if (!cancelled) setDevice(picked);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [explicit]);
+  return model ?? device;
+}
+
 export function useNemotronDiarization({
-  variant = 'model_quantized',
-  executionProvider = 'wasm',
+  model: modelOption,
   voiceprintNamespace,
 }: UseNemotronDiarizationOptions = {}): UseNemotronDiarizationResult {
+  const model = useNemotronModel(modelOption);
+  const variant = model?.variant;
+  const executionProvider = model?.executionProvider;
   const [prints, setPrints] = React.useState<NemotronVoiceprint[]>([]);
   const [busy, setBusy] = React.useState(false);
   const [stage, setStage] = React.useState('');
@@ -97,16 +140,19 @@ export function useNemotronDiarization({
   nsRef.current = voiceprintNamespace;
   /** The current namespace's stored voices; every task waits for it before reading `printsRef`. */
   const loadRef = React.useRef<Promise<void> | null>(null);
+  const hydratedRef = React.useRef(false);
 
   // Another user's voices and transcript must not linger after a namespace switch.
   React.useEffect(() => {
     let cancelled = false;
     printsRef.current = [];
+    hydratedRef.current = false;
     setPrints([]);
     setResult(null);
     const load = loadNemotronVoiceprints(voiceprintNamespace).then((loaded) => {
       if (cancelled) return;
       printsRef.current = loaded;
+      hydratedRef.current = true;
       setPrints(loaded);
     });
     loadRef.current = load;
@@ -119,7 +165,9 @@ export function useNemotronDiarization({
   }, [voiceprintNamespace]);
 
   const track = React.useCallback(
-    async <T>(task: (assertNamespace: () => void) => Promise<T>) => {
+    async <T>(
+      task: (assertNamespace: () => void) => Promise<T>
+    ): Promise<T> => {
       const passNamespace = nsRef.current;
       const assertNamespace = () => {
         if (nsRef.current !== passNamespace)
@@ -143,13 +191,30 @@ export function useNemotronDiarization({
     []
   );
 
+  /** Settings for a pass with the enrolled voices this model can use. */
+  const nemotronOptions = React.useCallback(() => {
+    if (!variant || !executionProvider)
+      throw new Error('The speaker model is still being chosen; try again');
+    const enrolled = printsRef.current.filter((p) => isUsableWith(p, variant));
+    return {
+      variant,
+      names: enrolled.map((p) => p.name),
+      options: {
+        variant,
+        executionProvider,
+        streamingMode: 'offline' as const,
+        voiceprints: enrolled.map((p) => p.embeds),
+      },
+    };
+  }, [variant, executionProvider]);
+
   const enroll = React.useCallback(
     (name: string, blob: Blob) =>
       track(async (assertNamespace) => {
         const label = name.trim();
         if (!label) throw new Error('Enter a name for the voice');
-        const others = printsRef.current.filter((p) => p.name !== label);
-        if (others.filter((p) => isUsableWith(p, variant)).length >= MAX_VOICES)
+        const { variant, names, options } = nemotronOptions();
+        if (names.filter((n) => n !== label).length >= MAX_VOICES)
           throw new Error(`At most ${MAX_VOICES} voices can be enrolled`);
 
         setStage('Decoding audio');
@@ -160,7 +225,11 @@ export function useNemotronDiarization({
           );
         const embeds = await enrollNemotron(
           samples,
-          { variant, executionProvider, streamingMode: 'offline' },
+          {
+            variant,
+            executionProvider: options.executionProvider,
+            streamingMode: options.streamingMode,
+          },
           setStage
         );
         if (!embeds)
@@ -170,7 +239,7 @@ export function useNemotronDiarization({
 
         assertNamespace();
         const next = [
-          ...others,
+          ...printsRef.current.filter((p) => p.name !== label),
           {
             name: label,
             modelRevision: MODEL_REVISION,
@@ -183,7 +252,7 @@ export function useNemotronDiarization({
         assertNamespace();
         setPrints(next);
       }),
-    [track, variant, executionProvider]
+    [track, nemotronOptions]
   );
 
   const removeVoice = React.useCallback(
@@ -197,33 +266,57 @@ export function useNemotronDiarization({
     [track]
   );
 
+  const listen = React.useCallback(
+    (stream: MediaStream): LiveDiarization => {
+      const { names, options } = nemotronOptions();
+      const listener = listenNemotron(stream, options);
+      const session: LiveSession = {
+        listener,
+        names,
+        namespace: nsRef.current,
+        hydrated: hydratedRef.current,
+        cancel: listener.cancel,
+      };
+      return session;
+    },
+    [nemotronOptions]
+  );
+
+  /** The live labels when they belong to this user, used every enrolled voice and finished, else a
+   *  fresh pass over `samples` (run after the stored voices load). */
+  const labelSpeakers = React.useCallback(
+    async (
+      samples: Float32Array,
+      live: LiveDiarization | undefined
+    ): Promise<{ frames: LaneFrames; names: string[] }> => {
+      const session = live as LiveSession | undefined;
+      if (session && session.hydrated && session.namespace === nsRef.current) {
+        const frames = await session.listener.stop().catch(() => null);
+        if (frames) return { frames, names: session.names };
+      } else {
+        session?.cancel();
+      }
+      const { names, options } = nemotronOptions();
+      return {
+        frames: await runNemotron(samples, options, setStage),
+        names,
+      };
+    },
+    [nemotronOptions]
+  );
+
   const diarize = React.useCallback(
-    (blob: Blob) =>
+    (blob: Blob, live?: LiveDiarization) =>
       track(async (assertNamespace) => {
         setStage('Decoding audio');
         const samples = await decodeTo16kMono(blob);
-        const enrolled = printsRef.current.filter((p) =>
-          isUsableWith(p, variant)
-        );
-        const [words, frames] = await Promise.all([
+        const [words, { frames, names: enrolled }] = await Promise.all([
           transcribe(samples),
-          runNemotron(
-            samples,
-            {
-              variant,
-              executionProvider,
-              streamingMode: 'offline',
-              voiceprints: enrolled.map((p) => p.embeds),
-            },
-            setStage
-          ),
+          labelSpeakers(samples, live),
         ]);
         assertNamespace();
 
-        const names = laneNames(
-          frames,
-          enrolled.map((p) => p.name)
-        );
+        const names = laneNames(frames, enrolled);
         const out: NemotronDiarization = {
           transcript: transcriptFromFrames(
             words,
@@ -236,14 +329,28 @@ export function useNemotronDiarization({
         setResult(out);
         return out;
       }),
-    [track, variant, executionProvider]
+    [track, labelSpeakers]
   );
 
   const voices = React.useMemo(
     () =>
-      prints.map((p) => ({ name: p.name, usable: isUsableWith(p, variant) })),
+      prints.map((p) => ({
+        name: p.name,
+        usable: !variant || isUsableWith(p, variant),
+      })),
     [prints, variant]
   );
 
-  return { voices, busy, stage, error, result, enroll, removeVoice, diarize };
+  return {
+    model,
+    voices,
+    busy,
+    stage,
+    error,
+    result,
+    enroll,
+    removeVoice,
+    listen,
+    diarize,
+  };
 }

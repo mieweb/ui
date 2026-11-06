@@ -695,12 +695,18 @@ export function MCPToolCallDisplay({
     return `${(ms / 1000).toFixed(1)}s`;
   };
 
-  const friendlyName = getToolFriendlyName(toolCall.toolName, toolCall.status);
-  const durationLabel = formatDuration(toolCall.duration);
-  const paramSummary = getParameterSummary(
-    toolCall.toolName,
-    toolCall.parameters
+  // Host text may be in another script than the page; isolate it so neutral
+  // characters such as a trailing "/" keep their place.
+  const friendlyName: React.ReactNode = toolCall.displayName ? (
+    <bdi>{toolCall.displayName}</bdi>
+  ) : (
+    getToolFriendlyName(toolCall.toolName, toolCall.status)
   );
+  const durationLabel = formatDuration(toolCall.duration);
+  // A host-supplied display name already names what the call acted on.
+  const paramSummary = toolCall.displayName
+    ? null
+    : getParameterSummary(toolCall.toolName, toolCall.parameters);
 
   // While running, show the input summary in the pill (e.g. "Creating patient
   // · John Smith"). On success the name already appears as the result link, so
@@ -709,7 +715,13 @@ export function MCPToolCallDisplay({
     toolCall.status === 'success'
       ? durationLabel
       : (paramSummary ?? durationLabel);
-  const pillLabel = detailBit ? `${friendlyName} · ${detailBit}` : friendlyName;
+  const pillLabel = detailBit ? (
+    <>
+      {friendlyName} · {detailBit}
+    </>
+  ) : (
+    friendlyName
+  );
 
   const hasParams = showParameters && toolCall.parameters.length > 0;
   const hasBoxContent = Boolean(toolCall.result || toolCall.error || hasParams);
