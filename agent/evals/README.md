@@ -20,6 +20,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | [a11y.md](./a11y.md)           | Accessibility                        | MIE UI A11y Agent      |
 | [i18n.md](./i18n.md)           | Internationalization / RTL           | MIE UI i18n Agent      |
 | [migration.md](./migration.md) | Migration / compliance (incl. icons) | MIE UI Migration Agent |
+| [richtext.md](./richtext.md)   | Rich text / Kerebron editors         | MIE UI Rich Text Agent |
 
 ## Entry format
 
