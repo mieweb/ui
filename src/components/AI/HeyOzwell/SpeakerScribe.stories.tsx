@@ -39,6 +39,7 @@ Built on \`useNemotronDiarization\` (\`enroll\`, \`removeVoice\`, \`diarize\`, \
 - You need a supported, exported scribe today: use \`VisitScribe\`.
 - You already have a diarized \`Transcript\` and only need to review it: use \`TranscriptPlayer\`.
 - You only need the audio file: use \`AudioRecorder\`.
+- Your app records and transcribes the audio itself (for example on a server): use the hook with your own words; see **Hosts with their own transcription** below.
 
 ### Example
 
@@ -46,11 +47,48 @@ Built on \`useNemotronDiarization\` (\`enroll\`, \`removeVoice\`, \`diarize\`, \
 2. Record or upload a clip of the conversation. Lines from enrolled people come back named; anyone else is "Speaker N". Click a lane segment or line to hear it.
 3. Enroll someone you missed and **Re-analyze** to name them.
 
+### Hosts with their own transcription
+
+Choose this over \`diarize(blob)\` when your app owns the recorder and already has word timestamps, so the browser should not download Whisper or transcribe again. \`listen\` labels speakers while you record, \`finish\` returns only who spoke when (a \`SpeakerTimeline\`), and \`transcriptFromActivity\` combines it with your words into a \`Transcript\` for \`TranscriptPlayer\`.
+
+\`\`\`tsx
+import {
+  TranscriptPlayer,
+  transcriptFromActivity,
+  useNemotronDiarization,
+  type LiveDiarization,
+  type Transcript,
+} from '@mieweb/ui';
+
+const nemotron = useNemotronDiarization({ voiceprintNamespace: userId });
+const live = useRef<LiveDiarization | null>(null);
+
+// Your recorder's events. listen() throws until nemotron.model is set, so start after it is.
+const onStart = (stream: MediaStream) => (live.current = nemotron.listen(stream));
+const onPause = () => live.current?.pause(); // paused audio is left out, so times match the file
+const onResume = () => live.current?.resume();
+const onDiscard = () => { live.current?.cancel(); live.current = null; };
+
+async function onStop(recordingId: string) {
+  const session = live.current;
+  live.current = null;
+  if (!session) return;
+  const timeline = await nemotron.finish(session); // rejects if the user changed meanwhile
+  // [{ text, start, end }] in seconds from the start of the recording.
+  const words = await fetchWords(recordingId);
+  setTranscript(transcriptFromActivity(words, timeline));
+}
+\`\`\`
+
+- **Seconds, not milliseconds**, for word \`start\` / \`end\`; the timeline and the resulting \`Transcript\` use milliseconds.
+- A word goes to the speaker active for most of it, else the nearest one; overlap is listed. Where two speakers overlap, this can pick a different speaker than \`diarize(blob)\`, which compares the model's probabilities.
+- **Names:** a session started before the stored voices finish loading (a moment after mount or a \`voiceprintNamespace\` change) names fewer people, and \`finish\` cannot re-run without the clip.
+- Pause and resume are accurate to about 0.1 s.
+
 ### Limitations
 
-- **Experimental and unexported.** The API and stored voiceprint format may change.
-- **Labels after Stop.** The clip is analysed once recording ends; there are no live speaker labels yet.
-- **No save callback.** The recording, result and speaker edits stay inside \`SpeakerScribe\`, so a host cannot save a reviewed transcript. To persist one, call \`useNemotronDiarization\` directly, own the review and correction UI (the exported \`TranscriptPlayer\` for review), and save its \`Transcript\` yourself. \`SpeakerScribe\` and \`useNemotronDiarization\` are experimental and not package exports, so this only works inside this repository for now.
+- **Experimental.** \`SpeakerScribe\` is not exported; \`useNemotronDiarization\`, \`transcriptFromActivity\` and their types are. The API and stored voiceprint format may change.
+- **No save callback.** The recording, result and speaker edits stay inside \`SpeakerScribe\`, so a host cannot save a reviewed transcript. To persist one, call \`useNemotronDiarization\` directly, own the review and correction UI (\`TranscriptPlayer\` for review), and save its \`Transcript\` yourself.
 - **Voiceprints** are tied to the model and pinned revision; voices from another model show "re-enroll". At most 7 voices; one lane stays free for unenrolled people. Stored in IndexedDB per \`voiceprintNamespace\`, separately from TitaNet voiceprints.
 - **Identity has no confidence threshold.** A similar-sounding stranger can be named as an enrolled person.
 - **Words no lane claims** go to the most active lane; there is no separate "uncertain" marker.

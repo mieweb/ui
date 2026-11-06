@@ -262,15 +262,24 @@ export function transcriptFromFrames(
 /**
  * Builds a `Transcript` from a host's own word timestamps (seconds from the start of the recording,
  * e.g. from a server transcription) and a `SpeakerTimeline`. Every word goes to the speaker active for
- * most of it, else the nearest one in time; other speakers active together with it are its overlap.
- * Pure (no browser APIs).
+ * most of it (ties to the lower lane), else the nearest one in time; other speakers active together
+ * with it are its overlap. Pure (no browser APIs).
+ *
+ * Segments are grouped and named exactly as in `transcriptFromFrames`, but a word's speaker can
+ * differ: the timeline keeps only when each lane is above the 0.5 threshold, not its probabilities,
+ * so where lanes overlap or are close this picks the longest-active lane while `transcriptFromFrames`
+ * picks the highest mean probability. The other lane is still listed as the word's overlap.
  */
 export function transcriptFromActivity(
   words: readonly TranscriptSegment[],
   timeline: SpeakerTimeline
 ): Transcript {
   const spans = timeline.speakerActivity;
-  const fallback = timeline.speakers[0]?.id ?? 'lane-0';
+  // With nobody heard, words still need a named speaker the player and speaker edits can show.
+  const speakers = timeline.speakers.length
+    ? timeline.speakers
+    : [{ id: 'lane-0', name: 'Speaker 1' }];
+  const fallback = speakers[0].id;
 
   return buildTranscript(
     words,
@@ -299,7 +308,7 @@ export function transcriptFromActivity(
       }
       // Ties go to the speaker listed first (lower lanes, which hold the enrolled voices).
       const rank = (id: string) => {
-        const i = timeline.speakers.findIndex((s) => s.id === id);
+        const i = speakers.findIndex((s) => s.id === id);
         return i < 0 ? Infinity : i;
       };
       let speakerId = heard[0].speakerId;
@@ -325,6 +334,6 @@ export function transcriptFromActivity(
       ];
       return { speakerId, others };
     },
-    timeline
+    { ...timeline, speakers }
   );
 }

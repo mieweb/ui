@@ -65,4 +65,74 @@ test.describe('TranscriptPlayer', () => {
       });
     });
   }
+
+  // Compact (collapsibleLanes, no speaker panel, not sticky), as hosts embed it in a narrow panel.
+  for (const [name, globals, viewport] of [
+    ['', undefined, { width: 1280, height: 900 }],
+    ['-rtl', 'direction:rtl', { width: 1280, height: 900 }],
+    ['-mobile', undefined, { width: 390, height: 844 }],
+  ] as const) {
+    test(`Compact${name}`, async ({ page }) => {
+      const rtl = name === '-rtl';
+      const narrow = name === '-mobile';
+      await page.setViewportSize(viewport);
+      await gotoStory(
+        page,
+        'voice-transcript-player--compact',
+        globals ? { globals } : {}
+      );
+      await expectDocumentDirection(page, rtl ? 'rtl' : 'ltr');
+      const recording = page.getByRole('region', { name: 'Recording' });
+      const toggle = page.getByRole('button', { name: 'Show speakers' });
+      await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+      await expect(
+        page.getByRole('list', { name: 'Transcript' })
+      ).toBeVisible();
+      await expect(page.getByRole('region', { name: 'Speakers' })).toHaveCount(
+        0
+      );
+
+      // The label column follows the player's width: 6.5rem wide, 4.5rem narrow (container query).
+      expect(
+        await recording.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--tp-label').trim()
+        )
+      ).toBe(narrow ? '4.5rem' : '6.5rem');
+      // Controls sit at the inline end of the play button in both directions.
+      const play = await box(page, page.getByRole('button', { name: 'Play' }));
+      const toggleBox = await box(page, toggle);
+      if (rtl) expect(toggleBox.x).toBeLessThan(play.x);
+      else expect(toggleBox.x).toBeGreaterThan(play.x);
+
+      const noOverflow = async () =>
+        expect(
+          await page.evaluate(
+            () =>
+              document.documentElement.scrollWidth -
+              document.documentElement.clientWidth
+          )
+        ).toBeLessThanOrEqual(0);
+      await noOverflow();
+      await expect(page).toHaveScreenshot(
+        `transcript-player-compact${name}.png`,
+        { animations: 'disabled', fullPage: true }
+      );
+
+      await toggle.click();
+      await expect(
+        page.getByRole('button', { name: 'Hide speakers' })
+      ).toHaveAttribute('aria-expanded', 'true');
+      // The timeline stays an LTR island in every locale.
+      const lane = page.getByRole('group', { name: /speaking turns$/ }).first();
+      await expect(lane).toBeVisible();
+      expect(await lane.evaluate((el) => getComputedStyle(el).direction)).toBe(
+        'ltr'
+      );
+      await noOverflow();
+      await expect(page).toHaveScreenshot(
+        `transcript-player-compact-open${name}.png`,
+        { animations: 'disabled', fullPage: true }
+      );
+    });
+  }
 });

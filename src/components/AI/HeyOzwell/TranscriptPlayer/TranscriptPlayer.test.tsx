@@ -371,6 +371,29 @@ describe('TranscriptPlayer', () => {
     expect(screen.getByRole('button', { name: 'Full screen' })).toHaveFocus();
   });
 
+  it('leaves fullscreen on Escape while the open Show speakers disclosure has focus', async () => {
+    render(
+      <>
+        <button type="button">Host control</button>
+        <TranscriptPlayer
+          src="visit.wav"
+          transcript={transcript}
+          peaks={peaks}
+          collapsibleLanes
+        />
+      </>
+    );
+    const host = screen.getByRole('button', { name: 'Host control' });
+    await userEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Show speakers' })
+    );
+    expect(screen.getByRole('button', { name: 'Hide speakers' })).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    expect(host).not.toHaveAttribute('inert');
+  });
+
   it('stops interval playback on timeupdate when animation frames are paused', async () => {
     vi.stubGlobal('requestAnimationFrame', () => 0);
     renderPlayer();

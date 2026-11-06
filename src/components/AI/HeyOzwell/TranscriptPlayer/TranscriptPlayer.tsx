@@ -229,8 +229,13 @@ export function TranscriptPlayer({
       // The Fullscreen API handles Escape itself; this covers browsers without it.
       if (event.key !== 'Escape' || document.fullscreenElement) return;
       const target = event.target as HTMLInputElement | null;
-      // Escape first closes an open menu, or clears a search box.
-      if (target?.closest?.('[aria-expanded="true"]')) return;
+      // Escape first closes an open menu (not a disclosure such as Show speakers), or clears a search box.
+      if (
+        target?.closest?.(
+          '[aria-expanded="true"][aria-haspopup]:not([aria-haspopup="false"])'
+        )
+      )
+        return;
       if (target?.type === 'search' && target.value) return;
       setFullscreen(false);
     };
@@ -358,7 +363,7 @@ export function TranscriptPlayer({
       ref={rootRef}
       className={cn(
         // Sized by its container, not the viewport, so it also fits narrow hosts such as a chat bubble.
-        'text-foreground @container flex flex-col gap-4 [--tp-label:4.5rem] @md:[--tp-label:6.5rem]',
+        'text-foreground @container flex flex-col gap-4',
         fullscreen && 'bg-background fixed inset-0 z-50 overflow-y-auto p-6',
         className
       )}
@@ -375,7 +380,8 @@ export function TranscriptPlayer({
       <section
         aria-label={labels.recording}
         className={cn(
-          'border-border bg-card text-card-foreground rounded-xl border p-3 @md:p-4',
+          // The label width is set here, not on the root: a container query only sees an ancestor.
+          'border-border bg-card text-card-foreground rounded-xl border p-3 [--tp-label:4.5rem] @md:p-4 @md:[--tp-label:6.5rem]',
           sticky && 'sticky top-0 z-10'
         )}
       >

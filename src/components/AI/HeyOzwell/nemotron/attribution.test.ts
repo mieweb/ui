@@ -183,11 +183,35 @@ describe('transcriptFromActivity', () => {
     });
   });
 
-  it('matches the frame-based result for the same speech', () => {
+  it('matches the frame-based result while one lane clearly leads, including words across frame edges', () => {
     const timeline = timelineFromFrames(conversation, names, 3);
     expect(transcriptFromActivity(words, timeline)).toEqual(
       transcriptFromFrames(words, conversation, names, 3)
     );
+    const crossing = [word('so', 0.85, 1.05), word('well', 0.95, 1.15)];
+    expect(transcriptFromActivity(crossing, timeline)).toEqual(
+      transcriptFromFrames(crossing, conversation, names, 3)
+    );
+    expect(
+      transcriptFromActivity(crossing, timeline).segments?.map(
+        (s) => s.speakerId
+      )
+    ).toEqual(['lane-0', 'lane-1']);
+  });
+
+  it('gives an overlapped word to the lower lane where frames would compare probabilities', () => {
+    const close = {
+      probabilities: new Float32Array([0.6, 0.9, 0]),
+      numSpeakers: 3,
+      frameDurationSeconds: 0.1,
+    };
+    const hm = [word('hm', 0.02, 0.08)];
+    expect(
+      transcriptFromActivity(hm, timelineFromFrames(close, names, 0.1)).segments
+    ).toMatchObject([{ speakerId: 'lane-0', overlapSpeakerIds: ['lane-1'] }]);
+    expect(transcriptFromFrames(hm, close, names, 0.1).segments).toMatchObject([
+      { speakerId: 'lane-1', overlapSpeakerIds: ['lane-0'] },
+    ]);
   });
 
   it('gives a word in silence to the nearest speaker and survives an empty timeline', () => {
@@ -205,12 +229,19 @@ describe('transcriptFromActivity', () => {
     expect(
       transcriptFromActivity([word('hm', 3.5, 3.7)], timeline).segments
     ).toMatchObject([{ text: 'hm', speakerId: 'lane-1' }]);
+    const empty = transcriptFromActivity([word('hm', 0, 0.3)], {
+      durationMs: 0,
+      speakers: [],
+      speakerActivity: [],
+    });
+    expect(empty.segments).toMatchObject([{ speakerId: 'lane-0' }]);
+    expect(empty.speakers).toEqual([{ id: 'lane-0', name: 'Speaker 1' }]);
     expect(
-      transcriptFromActivity([word('hm', 0, 0.3)], {
+      transcriptFromActivity([], {
         durationMs: 0,
         speakers: [],
         speakerActivity: [],
-      }).segments
-    ).toMatchObject([{ speakerId: 'lane-0' }]);
+      }).speakers
+    ).toEqual([]);
   });
 });

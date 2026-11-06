@@ -345,21 +345,26 @@ export function useNemotronDiarization({
   );
 
   const finish = React.useCallback(
-    (live: LiveDiarization) =>
-      track(async (assertNamespace) => {
-        const session = live as LiveSession;
-        if (session.namespace !== nsRef.current) {
-          session.cancel();
+    (live: LiveDiarization) => {
+      const session = live as LiveSession;
+      // Stop now, not after `track` waits for the stored voices: the host's recorder has already
+      // stopped, and a failed voice load must not leave the listener running.
+      const stopping =
+        session.namespace === nsRef.current ? session.listener.stop() : null;
+      if (stopping) stopping.catch(() => {});
+      else session.cancel();
+      return track(async (assertNamespace) => {
+        if (!stopping)
           throw new Error('Voiceprint namespace changed during processing');
-        }
-        const frames = await session.listener.stop();
+        const frames = await stopping;
         assertNamespace();
         return timelineFromFrames(
           frames,
           laneNames(frames, session.names),
           frames.numFrames * frames.frameDurationSeconds
         );
-      }),
+      });
+    },
     [track]
   );
 
