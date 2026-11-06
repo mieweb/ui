@@ -76,8 +76,8 @@ export interface FileDocumentProps extends Omit<
   /**
    * Save the draft. While the promise is pending the Save button is busy and
    * the editor is read-only; on success the document returns to View, and on
-   * rejection it stays in Edit and shows `labels.saveFailed`. The host should
-   * update `content` before resolving.
+   * rejection it switches to Edit and shows `labels.saveFailed`. The host
+   * should update `content` before resolving.
    */
   onSave: (draft: string) => void | Promise<void>;
   /**
@@ -168,6 +168,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
         setMode('view');
       } catch {
         setSaveFailed(true);
+        setMode('edit');
       } finally {
         setSaving(false);
       }

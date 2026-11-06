@@ -82,6 +82,20 @@ describe('FileDocument', () => {
     expect(editor()).toHaveValue('# Draft');
   });
 
+  it('returns to Edit when saving from the View preview fails', async () => {
+    renderDocument({
+      defaultMode: 'edit',
+      onSave: () => Promise.reject(new Error('offline')),
+    });
+    fireEvent.change(editor(), { target: { value: '# Draft' } });
+    fireEvent.click(modeButton('View'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(await screen.findByRole('alert')).toBeVisible();
+    expect(modeButton('Edit')).toHaveAttribute('aria-pressed', 'true');
+    expect(editor()).toHaveValue('# Draft');
+  });
+
   it('asks before Cancel discards an edited draft', async () => {
     const confirmDiscard = vi
       .fn()

@@ -14,7 +14,7 @@ const meta: Meta<typeof FileDocument> = {
       description: {
         component: `### What it's for
 
-**Reading a text file by default, with editing one click away and no edits lost by accident.** \`FileDocument\` shows the \`path\`, a View/Edit toggle, and either a \`FileViewer\` (View) or a plain-text editor (Edit). Switching to View before saving previews the **draft**, an "Unsaved changes" status appears while the draft differs from \`content\`, and Save/Cancel return to View. Save calls \`onSave(draft)\`: the button is busy while its promise is pending, and a rejection keeps the user in Edit with an error. Cancel asks \`confirmDiscard()\` first when the draft has edits.
+**Reading a text file by default, with editing one click away and no edits lost by accident.** \`FileDocument\` shows the \`path\`, a View/Edit toggle, and either a \`FileViewer\` (View) or a plain-text editor (Edit). Switching to View before saving previews the **draft**, an "Unsaved changes" status appears while the draft differs from \`content\`, and Save/Cancel return to View. Save calls \`onSave(draft)\`: the button is busy while its promise is pending, and a rejection returns the user to Edit with an error. Cancel asks \`confirmDiscard()\` first when the draft has edits.
 
 ### Use it when
 
@@ -97,7 +97,7 @@ Draft and mode can each be controlled (\`draft\` + \`onDraftChange\`, \`mode\` +
     },
     onSave: {
       description:
-        '`(draft) => void | Promise<void>`. Busy while pending; returns to View on success, shows `labels.saveFailed` on rejection.',
+        '`(draft) => void | Promise<void>`. Busy while pending; returns to View on success, switches to Edit and shows `labels.saveFailed` on rejection.',
     },
     confirmDiscard: {
       description:
