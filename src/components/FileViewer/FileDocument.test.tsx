@@ -116,6 +116,34 @@ describe('FileDocument', () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
+  it('restores the latest content when Cancel is confirmed after a reload', async () => {
+    let confirm = (_ok: boolean) => {};
+    const confirmDiscard = () =>
+      new Promise<boolean>((resolve) => {
+        confirm = resolve;
+      });
+    const props = {
+      path: 'notes/plan.md',
+      onSave: () => {},
+      renderMarkdown: plainRenderer,
+      defaultMode: 'edit' as const,
+      confirmDiscard,
+    };
+    const { rerender } = renderWithTheme(
+      <FileDocument {...props} content="# Plan" />
+    );
+    fireEvent.change(editor(), { target: { value: '# Draft' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    rerender(<FileDocument {...props} content="# From server" />);
+    confirm(true);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('rendered')).toHaveTextContent('# From server')
+    );
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('cancels a clean draft without asking', async () => {
     const confirmDiscard = vi.fn();
     renderDocument({ defaultMode: 'edit', confirmDiscard });

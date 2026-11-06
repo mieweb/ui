@@ -153,6 +153,9 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
 
     const onDirtyChangeRef = React.useRef(onDirtyChange);
     onDirtyChangeRef.current = onDirtyChange;
+    // Cancel may await a confirmation, during which `content` can reload.
+    const contentRef = React.useRef(content);
+    contentRef.current = content;
     const reportedDirty = React.useRef(false);
     React.useEffect(() => {
       if (dirty === reportedDirty.current) return;
@@ -176,7 +179,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
 
     const cancel = async () => {
       if (dirty && confirmDiscard && !(await confirmDiscard())) return;
-      setDraft(content);
+      setDraft(contentRef.current);
       setSaveFailed(false);
       setMode('view');
       onCancel?.();
