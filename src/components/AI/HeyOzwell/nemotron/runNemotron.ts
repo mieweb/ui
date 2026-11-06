@@ -193,6 +193,9 @@ export interface NemotronListener {
   stop: () => Promise<NemotronResult>;
   /** Stops listening and discards the result. */
   cancel: () => void;
+  /** Drops audio until `resume`, so the frames line up with a recording that was paused. */
+  pause: () => void;
+  resume: () => void;
 }
 
 /**
@@ -209,6 +212,7 @@ export function listenNemotron(
   let cursor = 0;
   let pushed: Promise<void> = Promise.resolve();
   let open = true;
+  let paused = false;
 
   const close = () => {
     if (!open) return;
@@ -221,7 +225,7 @@ export function listenNemotron(
     const fresh = recorder.snapshotFrom(cursor);
     cursor += fresh.length;
     recorder.discardBefore(cursor);
-    if (fresh.length > 0) {
+    if (fresh.length > 0 && !paused) {
       const samples = resampleTo16kMono(fresh, recorder.sampleRate);
       pushed = pushed.then(() => nemotron.push(samples));
       // Surfaced by `stop`; this only keeps an early failure from being reported as unhandled.
@@ -247,6 +251,14 @@ export function listenNemotron(
         .catch(() => {})
         .then(() => nemotron.finish())
         .catch(() => {});
+    },
+    pause: () => {
+      drain();
+      paused = true;
+    },
+    resume: () => {
+      drain();
+      paused = false;
     },
   };
 }

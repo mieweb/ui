@@ -73,7 +73,8 @@ const Row = React.memo(function Row({
       aria-posinset={posInSet}
       onClick={() => onPlay(utterance)}
       className={cn(
-        'flex cursor-pointer items-start gap-3 rounded-lg px-2 py-2 text-sm',
+        // Narrow hosts put the text on its own line under the time and speaker.
+        'flex cursor-pointer flex-wrap items-start gap-x-3 gap-y-1 rounded-lg px-2 py-2 text-sm @md:flex-nowrap',
         active ? 'bg-primary-50 dark:bg-primary-950/40' : 'hover:bg-muted/60'
       )}
     >
@@ -112,7 +113,7 @@ const Row = React.memo(function Row({
         />
         <span className="truncate">{name}</span>
       </span>
-      <span className="min-w-0 flex-1">
+      <span className="min-w-0 grow basis-full ps-9 @md:basis-0 @md:ps-0">
         {utterance.text ? (
           highlight(utterance.text, query)
         ) : (
@@ -141,8 +142,8 @@ export interface TranscriptListProps {
 }
 
 /**
- * Fixed-height transcript that follows playback until the reader scrolls it themselves; then a
- * "Back to current" button re-attaches it.
+ * Transcript that grows with its lines up to a fixed height, then scrolls and follows playback until
+ * the reader scrolls it themselves; then a "Back to current" button re-attaches it.
  */
 export function TranscriptList({
   utterances,
@@ -237,7 +238,7 @@ export function TranscriptList({
     return (
       <p
         role="status"
-        className="text-muted-foreground flex h-80 items-center justify-center p-6 text-center text-sm"
+        className="text-muted-foreground flex items-center justify-center p-6 text-center text-sm"
       >
         {emptyMessage}
       </p>
@@ -259,7 +260,7 @@ export function TranscriptList({
           if (e.target === e.currentTarget && USER_SCROLL_KEYS.has(e.key))
             setDetached(true);
         }}
-        className="focus-visible:ring-ring h-80 overflow-y-auto rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+        className="focus-visible:ring-ring max-h-80 overflow-y-auto rounded-lg focus-visible:ring-2 focus-visible:outline-none"
       >
         {virtualize ? (
           <div
