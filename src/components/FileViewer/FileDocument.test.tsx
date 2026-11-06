@@ -116,6 +116,29 @@ describe('FileDocument', () => {
     expect(editor()).toHaveValue('# Mine');
   });
 
+  it('does not submit an enclosing form from Save or Cancel', async () => {
+    const onSubmit = vi.fn((event: React.FormEvent) => event.preventDefault());
+    const onSave = vi.fn();
+    renderWithTheme(
+      <form onSubmit={onSubmit}>
+        <FileDocument
+          path="notes/plan.md"
+          content="# Plan"
+          onSave={onSave}
+          renderMarkdown={plainRenderer}
+          defaultMode="edit"
+        />
+      </form>
+    );
+    fireEvent.change(editor(), { target: { value: '# Draft' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    fireEvent.click(modeButton('Edit'));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('supports a controlled draft and reports dirty changes', () => {
     const onDirtyChange = vi.fn();
     function Host() {

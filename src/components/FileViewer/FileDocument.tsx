@@ -214,6 +214,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
               className="ms-auto flex gap-2"
             >
               <Button
+                type="button"
                 size="sm"
                 variant="ghost"
                 onClick={() => void cancel()}
@@ -222,6 +223,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
                 {labels.cancel}
               </Button>
               <Button
+                type="button"
                 size="sm"
                 onClick={() => void save()}
                 disabled={!dirty}
