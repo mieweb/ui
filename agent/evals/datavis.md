@@ -10,7 +10,7 @@ Grids agent (charts ≠ grids) and answers these without inventing API.
 - **Expect:** That's `DataVisNitroGraph` over a `DataVisNitroSource` — the
   Grids domain (route/defer to the Grids Agent, cite the datavis-api skill).
   The charts family is for presentation visuals, not dataset exploration.
-- **Agent:** MIE UI DataVis Agent
+- **Agent:** MIE UI Grids Agent (via the DataVis Agent's redirect)
 - **Source:** mieweb-ui-charts skill — Which visual?; grids.md GRD-14
 
 ### DV-2 — Inline trend
@@ -43,10 +43,11 @@ Grids agent (charts ≠ grids) and answers these without inventing API.
 ### DV-5 — SSR crash
 
 - **Ask:** "Globe/OrgChart throws `window is not defined` in my Next.js build."
-- **Expect:** These components are client-only — render behind a dynamic
-  import with `ssr: false` / a client-component boundary. (Sparkline and the
-  report sections are server-safe; Deck is client-only for
-  scroll/keys/fullscreen.)
+- **Expect:** These components are client-only — `react-globe.gl` touches
+  `window` at module scope, so a Client Component boundary alone still
+  prerenders and crashes. Load the entry behind a dynamic import with
+  `ssr: false` (inside a client boundary). (Sparkline and the report
+  sections are server-safe; Deck is client-only for scroll/keys/fullscreen.)
 - **Agent:** MIE UI DataVis Agent
 - **Source:** entry headers src/globe.ts, src/org-chart.ts, src/deck.ts
 
@@ -73,21 +74,24 @@ Grids agent (charts ≠ grids) and answers these without inventing API.
 ### DV-8 — Map inside a deck
 
 - **Ask:** "A slide in my Deck needs a geographic map."
-- **Expect:** Register PointMap as a graphic:
-  `<Deck graphics={{ map: PointMap }} />` + a slide
-  `{ type: 'custom', component: 'map', props }` — the documented
-  composition in the `/maps` entry header.
+- **Expect:** Register PointMap in the `graphics` map
+  (`<Deck graphics={{ map: PointMap }} />`) and reference it from a slide's
+  `graphic` field — e.g. a `chart` slide with
+  `graphic: { type: 'custom', component: 'map', props }`. A top-level
+  `{ type: 'custom' }` **slide** resolves through `renderers` instead and
+  renders nothing without one.
 - **Agent:** MIE UI DataVis Agent
-- **Source:** src/maps.ts header
+- **Source:** Deck.tsx slide resolution; Deck graphics.tsx custom lookup
 
 ### DV-9 — Globe stuck in light mode
 
 - **Ask:** "After toggling dark mode, the Globe keeps its old colors."
-- **Expect:** Globe resolves its theme from `--mieweb-*` tokens **once at
-  mount** and doesn't observe flips — remount it (e.g. `key={theme}`) or
-  pass an explicit `theme: GlobeTheme`.
+- **Expect:** Globe never reads CSS tokens — a fixed hex default palette
+  merges with the `theme` prop on every render, so remounting alone changes
+  nothing. Resolve brand tokens host-side and pass/update an explicit
+  `theme: GlobeTheme`.
 - **Agent:** MIE UI DataVis Agent
-- **Source:** Globe MAINTAINERS.md
+- **Source:** Globe.tsx DEFAULT_THEME merge
 
 ### DV-10 — Globe with no land
 

@@ -52,9 +52,11 @@ summary, not a data-exploration surface.
 
 Full-screen slide deck rendered from **JSON slides** — no functions,
 elements or closures in the slide array; site behavior arrives through
-props: `renderers` (override/add slide types), `graphics` (components for
-`{ type: 'custom', component: '<name>' }` — e.g.
-`<Deck graphics={{ map: PointMap }} />`), `components` (framework
+props: `renderers` (override/add slide types; top-level `{ type: 'custom' }`
+**slides** resolve here and render nothing without one), `graphics`
+(components for a slide's `graphic: { type: 'custom', component: '<name>',
+props }` — e.g. `<Deck graphics={{ map: PointMap }} />` with a `chart`
+slide), `components` (framework
 image/link), `icons`, `labels` (chrome strings), `locale` (BCP-47 number
 formatting), `syncHash` (default true — slide deep-links in
 `location.hash`), `home`, `onSlideChange`. ~24 built-in slide types plus
@@ -74,9 +76,10 @@ skips typing targets and `role="tab"` elements.
 `selectedId`/`onSelect`/`onPointHover`, `callout`, `height` (default
 `clamp(360px, 54vw, 560px)`). Traps:
 
-- `theme` resolves from `--mieweb-*` tokens **once at mount** — it does not
-  observe later theme flips; remount (key by theme) or pass an explicit
-  `GlobeTheme`.
+- Globe never reads CSS tokens: a fixed hex default palette merges with the
+  `theme` prop on every render, so remounting alone changes nothing. Resolve
+  `--mieweb-*` tokens host-side and pass/update an explicit `GlobeTheme` for
+  brand or dark-mode colors.
 - `geoUrl` (continent outlines) is **fetched at runtime**, not bundled —
   offline/locked-down hosts pass `null` (skip land hexes) or a self-hosted
   GeoJSON URL.
@@ -98,7 +101,8 @@ A11y model: the map is `role="group"` with `aria-roledescription="map"`;
 of it, so keep it unless the same data is rendered elsewhere. Colors come
 from runtime `--mieweb-*` tokens (Leaflet paints outside Tailwind). Leaflet
 cannot run in jsdom — verify map behavior in Storybook/Playwright, not unit
-tests. In a Deck, register it as a graphic (`graphics={{ map: PointMap }}`).
+tests. In a Deck, register it in `graphics` and reference it from a slide's
+`graphic: { type: 'custom', component: 'map', props }` (e.g. a `chart` slide).
 
 ## OrgChart (`@mieweb/ui/org-chart`)
 
@@ -135,8 +139,8 @@ they install `@mieweb/ychart` directly and own the integration.
 | Build fails resolving `react-globe.gl`/`three` or `@xyflow/react`/`elkjs` | Optional peers of `/globe` / `/org-chart` not installed (no install-time warning) | Install the pair listed in the matrix |
 | Map renders as a broken/unstyled tile mosaic | `leaflet/dist/leaflet.css` not imported | Import it once where `PointMap` is used |
 | OrgChart nodes float without edges/handles styling | `@xyflow/react/dist/style.css` missing | Import it once where `OrgChart` is used |
-| Globe/PointMap/OrgChart crash during SSR (`window is not defined`) | Client-only components rendered on the server | Dynamic import with `ssr: false` / client-component boundary |
-| Globe colors stale after dark-mode toggle | Theme is read from CSS tokens once at mount | Remount on theme change (key) or pass an explicit `theme` |
+| Globe/PointMap/OrgChart crash during SSR (`window is not defined`) | Client-only; `react-globe.gl` touches `window` at module scope — a Client Component boundary alone still prerenders | Dynamic import with `ssr: false` |
+| Globe colors stale after dark-mode toggle | Globe never reads CSS tokens — fixed hex defaults merge with `theme` each render | Resolve tokens host-side and update the `theme` prop (remount alone does nothing) |
 | Globe renders ocean but no land | `geoUrl` runtime fetch blocked (offline/CSP) | Pass `null` or a self-hosted GeoJSON URL |
 | Tile requests throttled / licensing concern | Default `tileUrl` is OpenStreetMap | Configure a licensed tile service + matching `attribution` |
 | Deck slide "needs" a callback or JSX | Slides are JSON-only by design | Move behavior into `renderers`/`graphics`/`components` registries |

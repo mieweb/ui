@@ -64,8 +64,8 @@ handoff instead).
 - Install plumbing beyond the chart peers (Tailwind setup, `styles.css`,
   main-entry peer errors) → **MIE UI Install Agent**.
 - Token/Tailwind/brand theming of surrounding UI → **MIE UI Styling Agent**
-  (you keep the canvas-specific cases: Globe mount-time theme, `--xy-*`
-  mapping, `--mieweb-chart-*` palette).
+  (you keep the canvas-specific cases: Globe's host-resolved `theme` prop,
+  `--xy-*` mapping, `--mieweb-chart-*` palette).
 - Accessibility audits → **MIE UI A11y Agent** — with the canvas caveat
   carried by you.
 - Deck slide *content* authoring beyond the schema (copy, markdown) → the
