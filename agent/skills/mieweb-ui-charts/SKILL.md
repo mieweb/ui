@@ -29,8 +29,8 @@ catalog pages (Presentations, Reports, Dashboards, Records, Data Display).
 | `DataVisNitroGraph` | `/datavis` | none (engine bundled) | base styles.css | yes |
 | `Deck` | `/deck` | none beyond main | built into `@mieweb/ui/styles.css` | yes (scroll/keys/fullscreen) |
 | `Globe` | `/globe` | `react-globe.gl>=2.30.0`, `three>=0.160.0` (~700KB) | none (WebGL canvas) | yes — `ssr: false` boundary |
-| `PointMap` | `/maps` | `leaflet>=1.9.0` | **`leaflet/dist/leaflet.css`** | yes (Leaflet dynamic-imported on mount) |
-| `OrgChart` | `/org-chart` | `@xyflow/react>=12.0.0`, `elkjs>=0.9.0` | **`@xyflow/react/dist/style.css`** | yes |
+| `PointMap` | `/maps` | `leaflet>=1.9.0` | **`leaflet/dist/leaflet.css`** | client boundary; prerenders safely (Leaflet dynamic-imported in an effect) |
+| `OrgChart` | `/org-chart` | `@xyflow/react>=12.0.0`, `elkjs>=0.9.0` | **`@xyflow/react/dist/style.css`** | client boundary |
 | Report sections (`TileCartogramSection`, `BenchmarkTableSection`, `RankedListSection`, `MetricListSection`, `ReportMethodology`, `ReportByline`, `ReportLegend`, `MetricStatusBadge`, `LinkGroupsSection`, `PdfEmbedSection`) | `/templates` | none | base styles.css | server-safe |
 | `WebChartReportViewer`, `ReportDashboard` | main | none | base styles.css | SSR-safe |
 
@@ -139,7 +139,7 @@ they install `@mieweb/ychart` directly and own the integration.
 | Build fails resolving `react-globe.gl`/`three` or `@xyflow/react`/`elkjs` | Optional peers of `/globe` / `/org-chart` not installed (no install-time warning) | Install the pair listed in the matrix |
 | Map renders as a broken/unstyled tile mosaic | `leaflet/dist/leaflet.css` not imported | Import it once where `PointMap` is used |
 | OrgChart nodes float without edges/handles styling | `@xyflow/react/dist/style.css` missing | Import it once where `OrgChart` is used |
-| Globe/PointMap/OrgChart crash during SSR (`window is not defined`) | Client-only; `react-globe.gl` touches `window` at module scope — a Client Component boundary alone still prerenders | Dynamic import with `ssr: false` |
+| Globe crashes during SSR (`window is not defined`) | `react-globe.gl` touches `window` at module scope — a Client Component boundary alone still prerenders | Dynamic import with `ssr: false` (Globe only — PointMap/OrgChart/Deck need just a client boundary; PointMap prerenders its accessible point list) |
 | Globe colors stale after dark-mode toggle | Globe never reads CSS tokens — fixed hex defaults merge with `theme` each render | Resolve tokens host-side and update the `theme` prop (remount alone does nothing) |
 | Globe renders ocean but no land | `geoUrl` runtime fetch blocked (offline/CSP) | Pass `null` or a self-hosted GeoJSON URL |
 | Tile requests throttled / licensing concern | Default `tileUrl` is OpenStreetMap | Configure a licensed tile service + matching `attribution` |

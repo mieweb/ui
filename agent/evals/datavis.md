@@ -43,13 +43,15 @@ Grids agent (charts ≠ grids) and answers these without inventing API.
 ### DV-5 — SSR crash
 
 - **Ask:** "Globe/OrgChart throws `window is not defined` in my Next.js build."
-- **Expect:** These components are client-only — `react-globe.gl` touches
-  `window` at module scope, so a Client Component boundary alone still
-  prerenders and crashes. Load the entry behind a dynamic import with
-  `ssr: false` (inside a client boundary). (Sparkline and the report
-  sections are server-safe; Deck is client-only for scroll/keys/fullscreen.)
+- **Expect:** Only **Globe** needs a dynamic import with `ssr: false` —
+  `react-globe.gl` touches `window` at module scope, so a Client Component
+  boundary alone still prerenders and crashes. OrgChart/Deck just need a
+  client boundary, and PointMap prerenders safely (Leaflet is
+  dynamic-imported in an effect — keep its accessible point list in the
+  initial HTML). Sparkline and the report sections are server-safe.
 - **Agent:** MIE UI DataVis Agent
-- **Source:** entry headers src/globe.ts, src/org-chart.ts, src/deck.ts
+- **Source:** Globe MAINTAINERS.md; PointMap MAINTAINERS.md; entry headers
+  src/org-chart.ts, src/deck.ts
 
 ### DV-6 — OrgChart missing styles
 
