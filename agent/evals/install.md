@@ -160,14 +160,14 @@ format and scoring.
 
 ### INS-17 — Wiring headless modules
 
-- **Ask:** "How do I connect `ViewSet` (or SuperChat-style modules) to my app
+- **Ask:** "How do I connect SuperChat-style headless modules to my app
   data?"
 - **Expect:** Write an adapter in the app — the module never fetches,
-  subscribes, or navigates. Two distinct contracts: **ViewSet** (collection
-  views) takes `items`/`loading`/`error`, accessor props, promise-returning
-  `on*` callbacks (built-in optimistic UI + revert), and `onOpen` + `getHref`;
-  **SuperChatInbox** has its own props (`conversations`, `onMessageSent`,
-  `onConversationOpened`) — never hand it collection-view props.
+  subscribes, or navigates. `SuperChatInbox` has its own props
+  (`conversations`, `onMessageSent`, `onConversationOpened`) — never hand it
+  collection-view props. `ViewSet` wiring (items, accessors,
+  promise-returning `on*` callbacks) is the Views Agent's domain — redirect
+  it there.
 - **Agent:** MIE UI Install Agent
 - **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Wiring headless modules; lessons/wiring-headless-modules.md
 
