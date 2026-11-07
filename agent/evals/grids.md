@@ -152,10 +152,11 @@ debugging of a chosen grid.
 ### GRD-15 — i18n of the grid
 
 - **Ask:** "How do I localize the grid's labels and number/date formats?"
-- **Expect:** `locale` (BCP-47) drives number/date formatting; `trans`
-  (TranslateFn) threads through the engine's labels;
-  `DataVisNitroLanguageSelector` is the ready-made switcher. Deeper string
-  audits → i18n agent.
+- **Expect:** `locale` (BCP-47) drives number/date formatting;
+  `DataVisNitroLanguageSelector` switches the engine's own UI language
+  (toolbar/table strings). `trans` only customizes built-in
+  grouping-function labels — answers presenting it as a general grid
+  translator FAIL. Deeper string audits → i18n agent.
 - **Agent:** MIE UI Grids Agent
 - **Source:** DataVisNitro.tsx — trans/locale; stories LocalizedGrid
 
@@ -190,11 +191,13 @@ debugging of a chosen grid.
 
 - **Ask:** "How do Builder and Renderer hand data to each other, and where's the submit button?"
 - **Expect:** Builder `onChange` emits a `FormDefinition`; Renderer takes it
-  as `formDataInput` and returns validated answers as a `FormResponse` via
-  its ref's `getValidResponse()`. There is **no** submit button and no
-  persistence — the host stores definition and response. Entry
-  `@mieweb/ui/esheet` with optional peers `@esheet/builder` +
-  `@esheet/renderer`.
+  as `formDataInput`. Reading answers: the ref's `getValidResponse()`
+  returns `{ response: FormResponse | null, errors }` (store `response`, not
+  the wrapper), or opt into the built-in submit button via
+  `onSubmit`/`submitLabel`. Persistence is host-owned either way. Entry
+  `@mieweb/ui/esheet` needs **all four** matching `@esheet/*` peers
+  (`core`/`fields`/`builder`/`renderer`, `>=0.0.6-17`) even for
+  renderer-only use.
 - **Agent:** MIE UI Grids Agent
 - **Source:** CompositeForms.mdx — the eSheet pair; src/esheet.ts
 

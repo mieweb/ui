@@ -91,9 +91,11 @@ an upstream `DataGrid` prop exists here without checking the types):
   `{ label, icon?, category?, callback(ctx) }` surfaces in the operations
   palette; `ctx.rows` is the current selection. Pair with
   `features.rowSelection: 'checkbox'` for bulk edit/delete/export flows.
-- **i18n/formatting:** `locale` (BCP-47, drives number/date formatting),
-  `trans` (a `TranslateFn` threaded through the engine's labels),
-  `DataVisNitroLanguageSelector` for a ready-made switcher.
+- **i18n/formatting:** `locale` (BCP-47) drives number/date formatting.
+  `DataVisNitroLanguageSelector` is the UI-language mechanism — it switches
+  the engine's own i18next language (toolbar/table strings). `trans` is
+  narrower than it looks: it only customizes the built-in grouping-function
+  labels; it does **not** translate the general grid UI.
 - **Hover row actions:** `RowActionToolbar` with `group="grid"` (main
   barrel) composes with NITRO cells, same as with `Table` rows.
 
@@ -122,16 +124,24 @@ to the A11y agent.
 
 ## eSheet (Builder/Renderer)
 
-- Entry: **`@mieweb/ui/esheet`**; optional peers `@esheet/builder` +
-  `@esheet/renderer`. Styles: Builder and Renderer import their
+- Entry: **`@mieweb/ui/esheet`**; optional peers are **all four** `@esheet/*`
+  packages — `@esheet/core`, `@esheet/fields`, `@esheet/builder`,
+  `@esheet/renderer` — at matching versions (`>=0.0.6-17`), even for
+  renderer-only use: the shared entry exports the builder too, so all four
+  must resolve. Styles: Builder and Renderer import their
   `@esheet/styles` dependency automatically (explicit entry
   `@esheet/styles/styles.css`); keep loading `@mieweb/ui/styles.css` for
   composed UI components.
 - **The pair:** `EsheetBuilder` (`definition`/`onChange`) emits a
-  `FormDefinition`; `EsheetRenderer` takes that object as `formDataInput` and
-  hands validated answers back as a `FormResponse` via its ref's
-  `getValidResponse()`. **Neither persists anything** — no submit button, no
-  `name`, no server calls; the host stores definition and response.
+  `FormDefinition`; `EsheetRenderer` takes that object as `formDataInput`.
+  Answers come back two ways: imperatively via the ref's
+  `getValidResponse()`, which returns `{ response: FormResponse | null,
+  errors: ValidationError[] }` (`response` is `null` while invalid — store
+  `response`, not the wrapper), or via the opt-in built-in submit button —
+  pass `onSubmit` (+ `submitLabel`) and the Renderer renders it and calls
+  back with the validated `FormResponse`; don't build a duplicate submit
+  flow next to it. **Persistence is host-owned either way** — no autosave,
+  no `name`, no server calls; the host stores definition and response.
 - **Clinical fields:** `registerMieEsheetFields()` plugs the Healthcare list
   fields (`medicationList`, `allergyList`, …) into both Builder and
   Renderer — call it once before rendering definitions that use them.
@@ -139,8 +149,11 @@ to the A11y agent.
   RichEdit mode rides the Kerebron editor — the `@kerebron/*` peers, WASM
   assets and `kerebron.css` from the **mieweb-ui-kerebron** skill apply.
 - Known gaps: upstream axe failures (contrast, unlabeled landmarks, role-less
-  drag handles) tracked in the mieweb/eSheet repo; eSheet UI has no i18n
-  hooks and is LTR-only; it themes via its own `--msprimary` tokens + `dark`
+  drag handles) tracked in the mieweb/eSheet repo; no locale/translation
+  hooks — built-in strings are English — but layout **does** mirror under an
+  inherited `dir="rtl"` (panels swap, toolbar flips), with a handful of
+  physical-direction styling gaps tracked as an upstream eSheet RTL
+  enhancement; it themes via its own `--msprimary` tokens + `dark`
   class, independent of `ThemeProvider`.
 
 ## Troubleshooting

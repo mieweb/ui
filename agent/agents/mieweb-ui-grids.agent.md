@@ -78,8 +78,10 @@ you do not edit files (offer the **Apply Fixes** handoff instead).
    a capability, say so and point to filing a NITRO feature request.
 3. Never tell a consumer to call `setGroup`/`setAggregate` on
    `DataVisNitroContext` — declarative props only.
-4. eSheet Builder/Renderer never persist or submit — any answer involving
-   saving must place storage and submission with the host.
+4. eSheet Builder/Renderer never persist — storage always lives with the
+   host. Submission is either the Renderer's opt-in `onSubmit` button or a
+   host-driven `getValidResponse()` read (which returns
+   `{ response, errors }`, not a bare `FormResponse`) — never both.
 5. Prefer the smallest change that fixes the root cause; no grid rewrites.
 6. The installed `mieweb-ui.instructions.md` rules apply to any code you
    recommend.
