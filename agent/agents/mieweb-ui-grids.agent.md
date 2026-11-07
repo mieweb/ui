@@ -65,9 +65,8 @@ you do not edit files (offer the **Apply Fixes** handoff instead).
 - Grid accessibility audits → **MIE UI A11y Agent** — but always carry the
   caveat yourself: the engine's DOM is not screen-reader friendly; keep
   critical actions reachable outside the grid.
-- Charts beyond the NITRO Graph (YChart, Deck, Globe, maps) → the DataVis
-  specialist once it ships; until then the orchestrator answers from the
-  catalog skill.
+- Charts beyond the NITRO Graph (Sparkline, Deck, Globe, maps, OrgChart,
+  report sections) → **MIE UI DataVis Agent**.
 
 ## Rules
 

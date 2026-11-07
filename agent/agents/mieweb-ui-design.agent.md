@@ -31,6 +31,10 @@ handoffs:
     agent: MIE UI Grids Agent
     prompt: Handle the grid/eSheet question above (DataVis NITRO sources, columns, features, operations, eSheet Builder/Renderer) and report the minimal fix.
     send: false
+  - label: Charts & maps
+    agent: MIE UI DataVis Agent
+    prompt: Handle the visualization question above (Sparkline, Deck, Globe, PointMap, OrgChart, report sections — peers, CSS, SSR boundaries, data shapes) and report the minimal fix.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -70,8 +74,9 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
 | rich text editors (RichEditor, TextAreaRich, EmailEditor), Kerebron peers/WASM/patches, collab, Markdown rendering | MIE UI Rich Text Agent |
 | DataVis NITRO config (sources, columns, features, operations), eSheet Builder/Renderer, grid debugging | MIE UI Grids Agent |
+| charts, maps, globes, decks, org charts (Sparkline, Deck, Globe, PointMap, OrgChart, report sections) | MIE UI DataVis Agent |
 
-More specialists (DataVis, Views,
+More specialists (Views,
 SuperChat) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
