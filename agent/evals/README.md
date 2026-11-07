@@ -23,6 +23,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | [richtext.md](./richtext.md)   | Rich text / Kerebron editors         | MIE UI Rich Text Agent |
 | [grids.md](./grids.md)         | DataVis NITRO + eSheet grids         | MIE UI Grids Agent     |
 | [datavis.md](./datavis.md)     | Charts / maps / decks / org charts   | MIE UI DataVis Agent   |
+| [views.md](./views.md)         | Views / dashboards / panels / shell  | MIE UI Views Agent     |
 
 ## Entry format
 
