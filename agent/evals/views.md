@@ -35,11 +35,11 @@ views-over-shared-data model and answers these without inventing API.
 
 ### VW-4 — Dates shift a day
 
-- **Ask:** "Items due 2026-03-01 show on Feb 28 for our Sydney users."
+- **Ask:** "Items due 2026-03-01 show on Feb 28 for our Los Angeles users."
 - **Expect:** A `new Date('YYYY-MM-DD')` somewhere in the adapter — that
-  parses as UTC midnight. Keep date-only strings raw in accessors (views
-  convert via `toDateTime` as wall dates) and set one shared `timeZone` on
-  `ViewSet`.
+  parses as UTC midnight, which is still Feb 28 in zones behind UTC. Keep
+  date-only strings raw in accessors (views convert via `toDateTime` as
+  wall dates) and set one shared `timeZone` on `ViewSet`.
 - **Agent:** MIE UI Views Agent
 - **Source:** src/views/types.ts toDateTime; src/views/MAINTAINERS.md
 
@@ -101,11 +101,12 @@ views-over-shared-data model and answers these without inventing API.
 
 ### VW-11 — Drag handle
 
-- **Ask:** "My custom widget can't be dragged in CustomizableDashboard."
-- **Expect:** Drag handles are discovered via `dragHandleSelector`
-  (default `[data-slot="dashboard-widget-header"]`) — custom widget chrome
-  must carry the slot attribute or the dashboard needs a matching
-  selector.
+- **Ask:** "Where did this floating grip button in the corner of my custom dashboard widget come from?"
+- **Expect:** Nothing matched `dragHandleSelector` (default
+  `[data-slot="dashboard-widget-header"]`), so the dashboard injected a
+  floating handle — dragging always works; the selector only controls
+  handle *placement*. Add the slot attribute (or a matching selector) to
+  portal the handle into the widget's own chrome.
 - **Agent:** MIE UI Views Agent
 - **Source:** CustomizableDashboard MAINTAINERS.md — drag handles
 
@@ -143,8 +144,8 @@ views-over-shared-data model and answers these without inventing API.
 - **Ask:** "AppHeader, PageHeader, SiteHeader — which goes where?"
 - **Expect:** `AppHeader` = sticky top bar of the signed-in app (beside
   `Sidebar`, slot children); `PageHeader` = the `<h1>` block inside a page
-  (not a `<header>` landmark); `SiteHeader` = marketing chrome from
-  `/templates` (different domain).
+  (not a `<header>` landmark); `SiteHeader` = marketing chrome (main-entry
+  export; the `/templates` marketing pages are its home turf).
 - **Agent:** MIE UI Views Agent
 - **Source:** Layout.mdx — "Three headers, three jobs"
 
@@ -205,8 +206,10 @@ views-over-shared-data model and answers these without inventing API.
 
 - **Ask:** "Does the views family need peer installs, CSS imports, or ssr:false like the charts?"
 - **Expect:** No — everything exports from the main entry; `@dnd-kit/*`
-  and `luxon` are bundled regular deps; all `'use client'` but nothing
-  touches `window` at module scope, so a client boundary suffices and
-  prerender is safe; `localStorage` access is try/catch-guarded.
+  and `luxon` are bundled regular deps; all `'use client'`, so a client
+  boundary suffices and prerender is safe; `localStorage` access is
+  try/catch-guarded. One caveat: `AppHeaderSearch`'s ⌘/Ctrl shortcut hint
+  is computed from `navigator` at module scope — server renders Ctrl, Mac
+  clients ⌘ (hydration mismatch on that hint only).
 - **Agent:** MIE UI Views Agent
 - **Source:** src/index.ts; package.json; ViewSet.tsx readStored

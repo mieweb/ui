@@ -39,8 +39,11 @@ component source/MAINTAINERS, and `src/catalog/Views.mdx` / `Dashboards.mdx`
 
 Everything in this family exports from the **main** entry — no subpath, no
 optional peers, no extra CSS (`@dnd-kit/*` and `luxon` are bundled regular
-dependencies). All are `'use client'` components but nothing touches
-`window` at module scope: a client boundary is enough, prerender is safe.
+dependencies). All are `'use client'` components; a client boundary is
+enough and prerender is safe. One caveat: `AppHeaderSearch` computes a
+guarded `isMac` from `window.navigator` at module scope, so the server
+renders the Ctrl shortcut hint and Mac clients render ⌘ — expect that
+hydration mismatch if you prerender it.
 `localStorage` access (ViewSet, CustomizableDashboard) is try/catch-guarded
 — Safari private browsing throws on *access*, optional chaining alone is
 insufficient.
@@ -112,9 +115,12 @@ dependency links. Range auto-computes from item min/max when
 - **`CustomizableDashboard`** adds user drag/hide/show. Persistence:
   `storageKey` writes **three** keys — `{key}-portlet-order`,
   `{key}-dashboard-layout`, `{key}-dashboard-hidden` — restored in a mount
-  effect so SSR hydration matches; or go fully controlled with
-  `order`/`layout`/`hiddenIds`. Drag handles are discovered by
-  `dragHandleSelector` (default `[data-slot="dashboard-widget-header"]`).
+  effect so SSR hydration matches; each of `order`/`layout`/`hiddenIds` is
+  independently controlled or persisted — mixing is supported. The drag
+  handle portals into the first element matching `dragHandleSelector`
+  (default `[data-slot="dashboard-widget-header"]`); when nothing matches,
+  a floating handle is injected in the portlet's corner — the selector
+  controls *placement*, not drag ability.
   Known trap: below `lg` in 3-column mode the columns flatten with
   `display: contents`, so dropping into an *empty* column has no drop box.
 
@@ -127,7 +133,8 @@ dependency links. Range auto-computes from item min/max when
   remeasure. Portals into `container` (default `document.body`).
 - **`FloatingWindow`** — fully controlled (`open`/`minimized` are the
   host's); hand-rolled pointer drag/resize clamped to 600×400 minimum;
-  stacks via `--mieweb-dockable-panel-z` (default 45); forwards a dialog
+  fixed `z-index: 50` (inline) — `--mieweb-dockable-panel-z` is
+  DockablePanel-only. Forwards a dialog
   role — pass `aria-label` when the title isn't plain text.
   `MinimizedWindow` is a separate export; wiring the pair is the host's job.
 
@@ -138,8 +145,9 @@ dependency links. Range auto-computes from item min/max when
   no nav opinions of its own.
 - **`PageHeader`** — the `<h1>` block inside a page (title, subtitle, icon,
   actions, Breadcrumb/Tabs children). Not a `<header>` landmark.
-- **`SiteHeader`/`SiteFooter`** are *marketing* chrome (`/templates`) — a
-  different domain.
+- **`SiteHeader`/`SiteFooter`** are *marketing* chrome — main-entry exports,
+  but their domain is the marketing pages (`/templates` holds the full page
+  templates that use them).
 - **`Sidebar`** — mobile drawer uses `100dvh`; collapsed nav groups
   **unmount** rather than CSS-hide (keyboard users must not tab into
   invisible items). Record-banner headers (`PatientHeader` etc.) are

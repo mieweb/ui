@@ -41,11 +41,12 @@ handoff instead).
    a view; a roadmap is `GanttView` at month/quarter cadence, not a
    component; timed day/week slots are `ScheduleCalendar`; two unrelated
    pages are `Tabs`, not a `ViewSwitcher`.
-3. **Controlled or persisted — never both.** `ViewSet.storageKey` only
-   works uncontrolled; URL-driven pages own the view in the router.
-   `CustomizableDashboard` persists under three derived keys or goes fully
-   controlled. `FloatingWindow` and `DockablePanel` never persist — the
-   host does.
+3. **Know who owns each piece of state.** `ViewSet.storageKey` only works
+   uncontrolled — never both; URL-driven pages own the view in the router.
+   `CustomizableDashboard` decides *per concern*: each of
+   `order`/`layout`/`hiddenIds` is independently controlled or restored
+   from `storageKey`, so mixing is supported. `FloatingWindow` and
+   `DockablePanel` never persist — the host does.
 4. **Dates are wall dates.** Items keep raw date strings; views convert via
    `toDateTime` with a single shared `timeZone`. Any `new Date()` on a
    date-only string in the adapter is a bug.
@@ -65,7 +66,8 @@ handoff instead).
 - Charts/maps inside dashboard widgets or overview slots →
   **MIE UI DataVis Agent**; you own the slot, they own the visual.
 - Marketing-site chrome (`SiteHeader`, `SiteFooter`, Hero/CTA sections) →
-  the orchestrator/catalog (`/templates` domain).
+  the orchestrator/catalog (marketing domain; full page templates live in
+  `/templates`).
 - Token/Tailwind/brand theming → **MIE UI Styling Agent** (you keep the
   accent-token contract: wash + marker, never text color).
 - Accessibility and i18n/RTL audits → **MIE UI A11y Agent** / **MIE UI i18n
