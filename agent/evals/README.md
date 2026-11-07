@@ -22,6 +22,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | [migration.md](./migration.md) | Migration / compliance (incl. icons) | MIE UI Migration Agent |
 | [richtext.md](./richtext.md)   | Rich text / Kerebron editors         | MIE UI Rich Text Agent |
 | [grids.md](./grids.md)         | DataVis NITRO + eSheet grids         | MIE UI Grids Agent     |
+| [datavis.md](./datavis.md)     | Charts / maps / decks / org charts   | MIE UI DataVis Agent   |
 
 ## Entry format
 
