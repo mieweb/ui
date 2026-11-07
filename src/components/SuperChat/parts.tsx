@@ -270,30 +270,43 @@ export function acceptTokensFor(
 }
 
 /**
- * Read the `File` objects emitted by the shared `ChatComposer` into the
- * base64 `data:` URL {@link ComposerAttachment}s SuperChat hosts expect.
+ * Turn the `File` objects emitted by the shared `ChatComposer` into the
+ * {@link ComposerAttachment}s SuperChat hosts expect: each keeps its `file`,
+ * and its base64 `data:` URL unless `dataUrls` is `false`, which skips the
+ * read (a large video's base64 is more than a browser string can hold).
  */
 export function filesToComposerAttachments(
-  files: File[]
+  files: File[],
+  { dataUrls = true }: { dataUrls?: boolean } = {}
 ): Promise<ComposerAttachment[]> {
+  const toAttachment = (
+    file: File,
+    i: number,
+    dataUrl: string
+  ): ComposerAttachment => ({
+    id: `att-${Date.now()}-${i}`,
+    name: file.name || `attachment-${i}`,
+    type: file.type || 'application/octet-stream',
+    dataUrl,
+    file,
+  });
   return Promise.all(
-    files.map(
-      (file, i) =>
-        new Promise<ComposerAttachment>((resolve, reject) => {
-          const reader = new window.FileReader();
-          reader.onload = () => {
-            const dataUrl =
-              typeof reader.result === 'string' ? reader.result : '';
-            resolve({
-              id: `att-${Date.now()}-${i}`,
-              name: file.name || `attachment-${i}`,
-              type: file.type || 'application/octet-stream',
-              dataUrl,
-            });
-          };
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
-        })
+    files.map((file, i) =>
+      dataUrls
+        ? new Promise<ComposerAttachment>((resolve, reject) => {
+            const reader = new window.FileReader();
+            reader.onload = () =>
+              resolve(
+                toAttachment(
+                  file,
+                  i,
+                  typeof reader.result === 'string' ? reader.result : ''
+                )
+              );
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+          })
+        : Promise.resolve(toAttachment(file, i, ''))
     )
   );
 }

@@ -336,6 +336,8 @@ uncontrolled).
 | `renderTextContent`           | `AIRenderTextContent`                         | Markdown core      | Replace the entire text renderer (advanced).                                                        |
 | `trustedContent`              | `boolean`                                     | `false`            | Skip sanitization — **only** for host-authored content.                                             |
 | `readOnly`                    | `boolean`                                     | `false`            | Disable the composer.                                                                               |
+| `attachmentDataUrls`          | `boolean`                                     | `true`             | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.               |
+| `maxFileSize`                 | `number \| (file) => number \| undefined`     | 25 MB              | Largest file the composer takes; a function sets it per file.                                       |
 | `order`                       | `'asc' \| 'desc'`                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).      |
 | `virtualized`                 | `boolean`                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.           |
 | `showSidebar`                 | `boolean`                                     | `true`             | Show the conversation list.                                                                         |
@@ -360,6 +362,8 @@ Renders exactly one conversation.
 | `renderTextContent`    | `AIRenderTextContent`                         | Markdown core       | Replace the entire text renderer (advanced).                                                                                           |
 | `trustedContent`       | `boolean`                                     | `false`             | Skip sanitization — **only** for host-authored content.                                                                                |
 | `readOnly`             | `boolean`                                     | `false`             | Disable the composer.                                                                                                                  |
+| `attachmentDataUrls`   | `boolean`                                     | `true`              | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                  |
+| `maxFileSize`          | `number \| (file) => number \| undefined`     | 25 MB               | Largest file the composer takes; a function sets it per file.                                                                          |
 | `order`                | `'asc' \| 'desc'`                             | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                         |
 | `virtualized`          | `boolean`                                     | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                              |
 | `linkBuilder`          | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                    |
@@ -508,7 +512,7 @@ upload, or persist them however it likes:
 
 ```tsx
 onMessageSent={(text, { conversation, mentions, attachments }) => {
-  // attachments: { id, name, type, dataUrl }[]
+  // attachments: { id, name, type, dataUrl, file }[]
   const images = attachments
     .filter((a) => a.type.startsWith('image/'))
     .map((a) => `![${a.name}](${a.dataUrl})`)
@@ -527,6 +531,13 @@ Each `ComposerAttachment` carries a base64 `dataUrl`. To render inline `data:` (
 `rehype-sanitize` allow-list to permit those protocols on `<img src>` (safe, since
 scripts inside an SVG loaded via `src` do not execute). For production you'll
 typically upload the file and swap in the hosted URL instead of the `data:` URL.
+
+To upload, send each attachment's `file` — the `File` as picked — rather than
+decoding `dataUrl`. A host that only uploads can set `attachmentDataUrls={false}`
+to skip the base64 read altogether (`dataUrl` is then empty): base64 makes a file a
+third larger again in memory, and past a few hundred MB it is more than a browser
+string can hold, so large videos need it off. Raise the cap with `maxFileSize`, which also takes a function, e.g.
+`(file) => (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024`.
 
 ### Rendering video / audio / PDF inline
 
