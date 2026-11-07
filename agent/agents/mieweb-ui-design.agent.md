@@ -27,6 +27,10 @@ handoffs:
     agent: MIE UI Rich Text Agent
     prompt: Handle the rich-text question above (Kerebron editors, install legs, WASM/patches, collaboration, markdown round-trip, EmailEditor) and report the minimal fix.
     send: false
+  - label: Grids & eSheet
+    agent: MIE UI Grids Agent
+    prompt: Handle the grid/eSheet question above (DataVis NITRO sources, columns, features, operations, eSheet Builder/Renderer) and report the minimal fix.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -65,8 +69,9 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
 | migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
 | rich text editors (RichEditor, TextAreaRich, EmailEditor), Kerebron peers/WASM/patches, collab, Markdown rendering | MIE UI Rich Text Agent |
+| DataVis NITRO config (sources, columns, features, operations), eSheet Builder/Renderer, grid debugging | MIE UI Grids Agent |
 
-More specialists (Grids, DataVis, Views,
+More specialists (DataVis, Views,
 SuperChat) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
