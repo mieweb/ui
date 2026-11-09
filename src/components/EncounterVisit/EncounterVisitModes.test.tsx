@@ -87,7 +87,7 @@ const definition: EncounterVisitDefinition = {
 };
 
 const modeSwitch = () => screen.getByRole('combobox', { name: 'Visit mode' });
-const selectMode = (label: 'eSheet' | 'RichEdit' | 'View') => {
+const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
   fireEvent.click(modeSwitch());
   fireEvent.click(screen.getByRole('option', { name: label }));
 };
@@ -271,6 +271,26 @@ describe('EncounterVisit mode synchronization', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
     await waitFor(() => expect(onSubmit).toHaveBeenCalledOnce());
     expect(onSubmit.mock.calls[0][0].mdy).toContain('Last keystroke.');
+  });
+
+  it('shows the raw portable document with a download button in Export', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    render(<EncounterVisit ref={ref} definition={definition} />);
+    const hpi = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(hpi, { target: { innerHTML: 'Back pain' } });
+    selectMode('Export');
+    const exportRegion = await screen.findByRole('region', {
+      name: 'Visit export',
+    });
+    await waitFor(() => expect(exportRegion).toHaveTextContent('Back pain'));
+    expect(exportRegion.querySelector('pre')?.textContent).toBe(
+      ref.current!.getSnapshot().mdy
+    );
+    expect(
+      screen.getByRole('button', { name: 'Download visit' })
+    ).toBeEnabled();
+    selectMode('eSheet');
+    expect(await screen.findByRole('textbox', { name: 'HPI' })).toBeVisible();
   });
 
   it('opens related inputs in the same renderer and refreshes authored linked data after MCP changes', async () => {

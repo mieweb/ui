@@ -14,6 +14,7 @@ import { ButtonGroup } from '../ButtonGroup';
 import { Select } from '../Select';
 import { useEscapeKey } from '../../hooks/useEscapeKey';
 import type { RichEditorHandle } from '../RichEditor';
+import { EncounterExportView } from './EncounterExportView';
 import { EncounterMdyView } from './EncounterMdyView';
 import {
   ENCOUNTER_DOCUMENT_FIELD_ID,
@@ -80,7 +81,7 @@ export interface EncounterVisitProps extends Omit<
   initialResponses?: EncounterResponses;
   /** Portable MDY draft, loaded once per visit id. Takes precedence over initialResponses. */
   initialMdy?: string;
-  /** Initial surface; all three modes share the same draft. */
+  /** Initial surface; all modes share the same draft. */
   defaultMode?: EncounterVisitMode;
   /** Anonymous context, for example “45 yo male with pre-diabetes, back pain and hypertension”. */
   patientContext?: string;
@@ -351,7 +352,7 @@ const EncounterVisitSession = React.forwardRef<
 
   const setMode = React.useCallback(
     async (next: EncounterVisitMode, sectionId?: string) => {
-      if (!['esheet', 'rich', 'view'].includes(next)) return;
+      if (!['esheet', 'rich', 'view', 'export'].includes(next)) return;
       setModePending(true);
       try {
         if (richEditor.current && latest.current.mode === 'rich')
@@ -757,6 +758,7 @@ const EncounterVisitSession = React.forwardRef<
                 { value: 'esheet', label: m('eSheet') },
                 { value: 'rich', label: m('RichEdit') },
                 { value: 'view', label: m('View') },
+                { value: 'export', label: m('Export') },
               ]}
               onValueChange={(value) =>
                 void setMode(value as EncounterVisitMode)
@@ -910,6 +912,12 @@ const EncounterVisitSession = React.forwardRef<
             </EncounterSectionContext.Provider>
           </div>
           {mode === 'view' && <EncounterMdyView source={snapshot.mdy} />}
+          {mode === 'export' && (
+            <EncounterExportView
+              source={snapshot.mdy}
+              fileName={`${stableDefinition.id}.md`}
+            />
+          )}
         </div>
       </div>
       <footer

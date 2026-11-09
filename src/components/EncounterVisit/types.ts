@@ -166,4 +166,4 @@ export interface EncounterVisitSnapshot {
   errors: EncounterValidationIssue[];
 }
 
-export type EncounterVisitMode = 'esheet' | 'rich' | 'view';
+export type EncounterVisitMode = 'esheet' | 'rich' | 'view' | 'export';
