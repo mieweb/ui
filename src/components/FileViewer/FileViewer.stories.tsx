@@ -27,7 +27,7 @@ const meta: Meta<typeof FileViewer> = {
 
 ### Don't use it when
 
-- The user should also be able to change the file — use \`FileDocument\`, which wraps this viewer with an Edit toggle and Save/Cancel.
+- The user should also be able to change the file — use [FileDocument](?path=/docs/files-filedocument--docs), which wraps this viewer with an Edit toggle and Save/Cancel.
 - You are rendering a chat message or Markdown you authored — use the SuperChat renderer (\`createMarkdownRenderer\`) or \`MarkdownRenderer\` directly; there is no file name to decide by.
 - The file is binary (images, PDFs) — show a preview or a download link instead.
 
