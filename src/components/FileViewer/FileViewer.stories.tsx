@@ -28,7 +28,7 @@ const meta: Meta<typeof FileViewer> = {
 ### Don't use it when
 
 - The user should also be able to change the file — use [FileDocument](?path=/docs/files-filedocument--docs), which wraps this viewer with an Edit toggle and Save/Cancel.
-- You are rendering a chat message or Markdown you authored — use the SuperChat renderer (\`createMarkdownRenderer\`) or \`MarkdownRenderer\` directly; there is no file name to decide by.
+- You are rendering a chat message or Markdown you authored — use the SuperChat renderer (\`createMarkdownRenderer\`) or [MarkdownRenderer](?path=/docs/editors-markdown--docs) directly; there is no file name to decide by.
 - The file is binary (images, PDFs) — show a preview or a download link instead.
 
 ### Example
@@ -75,6 +75,11 @@ Pass \`renderMarkdown\` to reuse your app's own Markdown renderer (for example o
           type: 'uses',
           target: 'superchat-superchat-panel',
           why: 'Markdown and code render through SuperChat’s createMarkdownRenderer with the code plugin, so files look like chat replies.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-markdown',
+          why: 'FileViewer picks Markdown, highlighted code or plain text from a file name; MarkdownRenderer renders a Markdown string you already know is Markdown, with Mermaid, CSV and survey fences.',
         },
       ],
     },
