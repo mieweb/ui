@@ -86,6 +86,17 @@ describe('regional calendar dates', () => {
     expect(formatRegionalDateInput('20', locale)).toBe('20');
   });
 
+  it('accepts regional literal whitespace variants from Intl formatting', () => {
+    const entered = formatRegionalDateInput('09112026', 'bg-BG');
+    expect(parseRegionalDate(entered, 'bg-BG')).toBe('11/09/2026');
+    expect(parseRegionalDate(entered.replace(/\s/g, ' '), 'bg-BG')).toBe(
+      '11/09/2026'
+    );
+    expect(
+      parseRegionalDate(formatRegionalDate('11/09/2026', 'bg-BG'), 'bg-BG')
+    ).toBe('11/09/2026');
+  });
+
   it('preserves empty and unparseable display values', () => {
     expect(formatRegionalDate(undefined)).toBe('');
     expect(formatRegionalDate('')).toBe('');

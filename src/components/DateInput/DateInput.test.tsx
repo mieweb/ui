@@ -53,6 +53,85 @@ describe('DateInput', () => {
     expect(onChange).toHaveBeenLastCalledWith('11/10/2026');
   });
 
+  it.each([undefined, 'en-GB'])(
+    'preserves controlled calendar validation errors with locale=%s',
+    (locale) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 10, 9, 12));
+      function ControlledDate() {
+        const [value, setValue] = useState('11/09/2026');
+        return (
+          <>
+            <DateInput
+              label="Past date"
+              value={value}
+              onChange={setValue}
+              locale={locale}
+              mode="past"
+              validateOnBlur
+              showCalendar
+            />
+            <button onClick={() => setValue('11/08/2026')}>Replace date</button>
+          </>
+        );
+      }
+
+      renderWithTheme(<ControlledDate />);
+      fireEvent.click(screen.getByRole('button', { name: 'Open calendar' }));
+      fireEvent.click(screen.getByRole('button', { name: '10' }));
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Date must be in the past'
+      );
+      expect(screen.getByLabelText('Past date')).toHaveValue(
+        locale ? '10/11/2026' : '11/10/2026'
+      );
+      fireEvent.click(screen.getByRole('button', { name: 'Replace date' }));
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Past date')).toHaveValue(
+        locale ? '08/11/2026' : '11/08/2026'
+      );
+    }
+  );
+
+  it.each([
+    ['ko-KR', '2026. 11. 09.'],
+    ['bg-BG', '09.11.2026 г.'],
+  ])(
+    'allows Backspace through generated suffixes for %s',
+    async (locale, text) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      const onValidityChange = vi.fn();
+      renderWithTheme(
+        <DateInput
+          label="Regional date"
+          locale={locale}
+          value="11/09/2026"
+          onChange={onChange}
+          onValidityChange={onValidityChange}
+        />
+      );
+      const input = screen.getByLabelText('Regional date');
+      expect(input).toHaveValue(text);
+      await user.click(input);
+      await user.keyboard('{End}{Backspace}');
+      expect(input).toHaveValue(
+        locale === 'ko-KR' ? '2026. 11. 0' : '09.11.202'
+      );
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+      expect(onChange).not.toHaveBeenCalled();
+      await user.keyboard('{Backspace>7/}');
+      expect(input).toHaveValue('');
+      expect(onChange).toHaveBeenLastCalledWith('');
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+      await user.type(input, locale === 'ko-KR' ? '20261109' : '09112026');
+      expect(input).toHaveValue(
+        locale === 'ko-KR' ? text : '09.11.2026\u202fг.'
+      );
+      expect(onChange).toHaveBeenLastCalledWith('11/09/2026');
+    }
+  );
+
   it('adopts external value and regional setting changes', () => {
     const { rerender } = renderWithTheme(
       <DateInput label="Regional date" locale="en-GB" value="11/09/2026" />

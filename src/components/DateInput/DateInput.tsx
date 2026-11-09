@@ -328,6 +328,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     const [regionalText, setRegionalText] = React.useState(() =>
       formatRegionalDate(value, locale)
     );
+    const pendingCalendarSelectionRef = React.useRef<
+      { value: string; locale: string | undefined } | undefined
+    >(undefined);
     const validityCallbackRef = React.useRef(onValidityChange);
     React.useEffect(() => {
       validityCallbackRef.current = onValidityChange;
@@ -337,19 +340,42 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     React.useEffect(() => {
       setDisplayValue(isFormattedDate ? formatDateValue(value) : value);
       setRegionalText(formatRegionalDate(value, locale));
-      setLocalError(undefined);
+      const selection = pendingCalendarSelectionRef.current;
+      if (
+        !isFormattedDate ||
+        selection?.value !== value ||
+        selection.locale !== locale
+      ) {
+        setLocalError(undefined);
+      }
+      pendingCalendarSelectionRef.current = undefined;
       if (locale && isFormattedDate) {
         validityCallbackRef.current?.(value === '' || isValidDate(value));
       }
     }, [isFormattedDate, value, locale]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      pendingCalendarSelectionRef.current = undefined;
       if (locale && isFormattedDate) {
         const entered = e.target.value;
         const complete = parseRegionalDate(entered, locale);
-        const text = complete
+        let text = complete
           ? formatRegionalDate(complete, locale)
           : formatRegionalDateInput(entered, locale);
+        if (
+          'inputType' in e.nativeEvent &&
+          e.nativeEvent.inputType === 'deleteContentBackward' &&
+          entered.length < regionalText.length &&
+          text === formatRegionalDateInput(regionalText, locale)
+        ) {
+          const caret = e.target.selectionStart ?? entered.length;
+          const shortened =
+            entered
+              .slice(0, caret)
+              .replace(/\p{Decimal_Number}\P{Decimal_Number}*$/u, '') +
+            entered.slice(caret);
+          text = formatRegionalDateInput(shortened, locale);
+        }
         setRegionalText(text);
         setLocalError(undefined);
         const parsed = text === '' ? '' : parseRegionalDate(text, locale);
@@ -607,6 +633,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           : `${month}/${dayStr}/${year}`;
       setDisplayValue(formatted);
       setRegionalText(formatRegionalDate(formatted, locale));
+      pendingCalendarSelectionRef.current =
+        inputType === 'date' && onChange
+          ? { value: formatted, locale }
+          : undefined;
       onValidityChange?.(true);
       onChange?.(formatted);
       if (inputType === 'date') {
