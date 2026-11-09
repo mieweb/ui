@@ -4,6 +4,134 @@
 
 import { DateTime } from 'luxon';
 
+export type DateLocale = string | string[];
+
+/** Browser regional preferences, independently of the application's UI language. */
+export function regionalDateLocale(): string | undefined {
+  return typeof navigator === 'undefined'
+    ? undefined
+    : new Intl.DateTimeFormat([...navigator.languages]).resolvedOptions()
+        .locale;
+}
+
+function regionalDateFormatter(
+  locales: DateLocale | undefined = regionalDateLocale()
+) {
+  return new Intl.DateTimeFormat(locales, {
+    calendar: 'gregory',
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+}
+
+function calendarDate(
+  year: number,
+  month: number,
+  day: number
+): Date | undefined {
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, day);
+  return date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+    ? date
+    : undefined;
+}
+
+/** Format calendar digits, not an instant: a date never shifts with the timezone. */
+export function formatRegionalDate(
+  value?: string,
+  locales: DateLocale | undefined = regionalDateLocale()
+): string {
+  if (!value) return '';
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:$|T|\s)/.exec(value);
+  const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value);
+  const date = iso
+    ? calendarDate(+iso[1], +iso[2], +iso[3])
+    : us
+      ? calendarDate(+us[3], +us[1], +us[2])
+      : undefined;
+  return date ? regionalDateFormatter(locales).format(date) : value;
+}
+
+export function regionalDatePlaceholder(
+  locales: DateLocale | undefined = regionalDateLocale()
+): string {
+  const labels: Record<string, string> = {
+    year: 'YYYY',
+    month: 'MM',
+    day: 'DD',
+  };
+  return regionalDateFormatter(locales)
+    .formatToParts(new Date(Date.UTC(2006, 10, 22)))
+    .map((part) => labels[part.type] ?? part.value)
+    .join('');
+}
+
+function regionalDigits(value: string, locales?: DateLocale): string {
+  const number = new Intl.NumberFormat(locales, { useGrouping: false });
+  let normalized = value;
+  for (let digit = 0; digit < 10; digit++) {
+    normalized = normalized.replaceAll(number.format(digit), String(digit));
+  }
+  return normalized;
+}
+
+/** Insert the region's separators as digits are typed, including on numeric keyboards. */
+export function formatRegionalDateInput(
+  value: string,
+  locales: DateLocale | undefined = regionalDateLocale()
+): string {
+  const digits = regionalDigits(value, locales).replace(/\D/g, '').slice(0, 8);
+  let offset = 0;
+  let text = '';
+  for (const part of regionalDateFormatter(locales).formatToParts(
+    new Date(Date.UTC(2006, 10, 22))
+  )) {
+    if (offset >= digits.length) break;
+    if (part.type === 'literal') {
+      text += part.value;
+    } else {
+      const length = part.type === 'year' ? 4 : 2;
+      text += digits.slice(offset, offset + length);
+      offset += length;
+    }
+  }
+  return text;
+}
+
+/** Complete regional text to the DateInput's existing MM/DD/YYYY value contract. */
+export function parseRegionalDate(
+  value: string,
+  locales: DateLocale | undefined = regionalDateLocale()
+): string | undefined {
+  const normalized = regionalDigits(value, locales);
+  const strip = (text: string) =>
+    text.replace(/[\u200e\u200f\u061c]/g, '').trim();
+  const parts = regionalDateFormatter(locales).formatToParts(
+    new Date(Date.UTC(2006, 10, 22))
+  );
+  const fields: string[] = [];
+  const pattern = parts
+    .map((part) => {
+      if (['year', 'month', 'day'].includes(part.type)) {
+        fields.push(part.type);
+        return part.type === 'year' ? '(\\d{4})' : '(\\d{1,2})';
+      }
+      return strip(part.value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    })
+    .join('');
+  const match = new RegExp(`^${pattern}$`).exec(strip(normalized));
+  if (!match) return undefined;
+  const values = Object.fromEntries(
+    fields.map((field, index) => [field, +match[index + 1]])
+  );
+  if (!calendarDate(values.year, values.month, values.day)) return undefined;
+  return `${String(values.month).padStart(2, '0')}/${String(values.day).padStart(2, '0')}/${String(values.year).padStart(4, '0')}`;
+}
+
 /**
  * Parses a date string to a Luxon DateTime object
  * @param value - Date string in MM/DD/YYYY format (with or without separators)

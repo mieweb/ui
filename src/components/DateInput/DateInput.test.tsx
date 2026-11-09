@@ -5,6 +5,102 @@ import { renderWithTheme } from '../../test/test-utils';
 import { DateInput } from './DateInput';
 
 describe('DateInput', () => {
+  it.each([false, true])(
+    'supports regional text entry with showCalendar=%s',
+    (showCalendar) => {
+      const onChange = vi.fn();
+      renderWithTheme(
+        <DateInput
+          label="Regional date"
+          locale="en-GB"
+          value="11/09/2026"
+          onChange={onChange}
+          showCalendar={showCalendar}
+          validateOnBlur
+        />
+      );
+      const input = screen.getByLabelText('Regional date');
+      expect(input).toHaveValue('09/11/2026');
+      expect(input).toHaveAttribute('placeholder', 'DD/MM/YYYY');
+      fireEvent.change(input, { target: { value: '10/11/2026' } });
+      expect(onChange).toHaveBeenLastCalledWith('11/10/2026');
+      fireEvent.change(input, { target: { value: '31/02/2026' } });
+      fireEvent.blur(input);
+      expect(screen.getByRole('alert')).toHaveTextContent('DD/MM/YYYY');
+      expect(onChange).toHaveBeenCalledTimes(1);
+      fireEvent.change(input, { target: { value: '' } });
+      expect(onChange).toHaveBeenLastCalledWith('');
+    }
+  );
+
+  it('keeps styled calendar selection in regional order and emits the existing value format', async () => {
+    const onChange = vi.fn();
+    renderWithTheme(
+      <DateInput
+        label="Regional date"
+        locale="de-DE"
+        value="11/09/2026"
+        onChange={onChange}
+        showCalendar
+      />
+    );
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Open calendar' })
+    );
+    await userEvent.click(screen.getByRole('button', { name: '10' }));
+    expect(screen.getByLabelText('Regional date')).toHaveValue('10.11.2026');
+    expect(onChange).toHaveBeenLastCalledWith('11/10/2026');
+  });
+
+  it('adopts external value and regional setting changes', () => {
+    const { rerender } = renderWithTheme(
+      <DateInput label="Regional date" locale="en-GB" value="11/09/2026" />
+    );
+    rerender(
+      <DateInput label="Regional date" locale="sv-SE" value="12/10/2026" />
+    );
+    expect(screen.getByLabelText('Regional date')).toHaveValue('2026-12-10');
+  });
+
+  it('formats date bounds in regional validation messages', () => {
+    renderWithTheme(
+      <DateInput
+        label="Regional date"
+        locale="en-GB"
+        value="11/09/2026"
+        minDate="11/10/2026"
+        validateOnBlur
+      />
+    );
+    fireEvent.blur(screen.getByLabelText('Regional date'));
+    expect(screen.getByRole('alert')).toHaveTextContent('10/11/2026');
+  });
+
+  it('accepts digits-only regional typing on numeric keyboards', async () => {
+    const onChange = vi.fn();
+    renderWithTheme(
+      <DateInput label="Regional date" locale="en-GB" onChange={onChange} />
+    );
+    await userEvent.type(screen.getByLabelText('Regional date'), '09112026');
+    expect(screen.getByLabelText('Regional date')).toHaveValue('09/11/2026');
+    expect(onChange).toHaveBeenLastCalledWith('11/09/2026');
+  });
+
+  it('localizes a datetime display without changing its wall-clock value', () => {
+    renderWithTheme(
+      <DateInput
+        label="Regional datetime"
+        locale="en-GB"
+        inputType="datetime-local"
+        value="2026-11-09T14:30"
+        showCalendar
+      />
+    );
+    expect(screen.getByLabelText('Regional datetime')).toHaveValue(
+      '09/11/2026 14:30'
+    );
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });

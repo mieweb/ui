@@ -8,6 +8,11 @@ import {
   isDateInPast,
   isDateInFuture,
   calculateAge,
+  formatRegionalDate,
+  formatRegionalDateInput,
+  parseRegionalDate,
+  regionalDatePlaceholder,
+  type DateLocale,
 } from '../../utils/date';
 import {
   Input,
@@ -153,8 +158,12 @@ export interface DateInputProps extends Omit<
 > {
   /** The value for the selected input type. Dates use MM/DD/YYYY format. */
   value?: string;
+  /** Regional display/entry only; value, onChange and bounds retain their existing formats. */
+  locale?: DateLocale;
   /** Callback fired when the value changes */
   onChange?: (value: string) => void;
+  /** Reports incomplete/invalid regional entry without publishing it as a date. */
+  onValidityChange?: (valid: boolean) => void;
   /** Date value format and picker control. */
   inputType?: DateInputType;
   /** Minute increment for the time picker (e.g. 15 shows :00, :15, :30, :45). */
@@ -185,21 +194,30 @@ function getValidationError(
   minAge?: number,
   maxAge?: number,
   minDate?: string,
-  maxDate?: string
+  maxDate?: string,
+  locale?: DateLocale
 ): string | undefined {
   if (!value || value.replace(/\D/g, '').length === 0) {
     return undefined;
   }
 
   if (!isValidDate(value)) {
-    return 'Please enter a valid date (MM/DD/YYYY)';
+    return `Please enter a valid date (${locale ? regionalDatePlaceholder(locale) : 'MM/DD/YYYY'})`;
   }
 
   const selectedDate = parseDateValue(value);
   const minimumDate = minDate ? parseDateValue(minDate) : null;
   const maximumDate = maxDate ? parseDateValue(maxDate) : null;
-  const minimumDateLabel = minDate ? formatDateValue(minDate) : '';
-  const maximumDateLabel = maxDate ? formatDateValue(maxDate) : '';
+  const minimumDateLabel = minDate
+    ? locale
+      ? formatRegionalDate(minDate, locale)
+      : formatDateValue(minDate)
+    : '';
+  const maximumDateLabel = maxDate
+    ? locale
+      ? formatRegionalDate(maxDate, locale)
+      : formatDateValue(maxDate)
+    : '';
 
   if (selectedDate && minimumDate && selectedDate < minimumDate) {
     return `Date must be on or after ${minimumDateLabel}`;
@@ -276,7 +294,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   (
     {
       value = '',
+      locale,
       onChange,
+      onValidityChange,
       inputType = 'date',
       minuteStep = 1,
       timeFormat = '24-hour',
@@ -302,13 +322,35 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       isFormattedDate ? formatDateValue(value) : value
     );
     const [localError, setLocalError] = React.useState<string | undefined>();
+    const [regionalText, setRegionalText] = React.useState(() =>
+      formatRegionalDate(value, locale)
+    );
 
     // Sync external value changes
     React.useEffect(() => {
       setDisplayValue(isFormattedDate ? formatDateValue(value) : value);
-    }, [isFormattedDate, value]);
+      setRegionalText(formatRegionalDate(value, locale));
+    }, [isFormattedDate, value, locale]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (locale && isFormattedDate) {
+        const entered = e.target.value;
+        const complete = parseRegionalDate(entered, locale);
+        const text = complete
+          ? formatRegionalDate(complete, locale)
+          : formatRegionalDateInput(entered, locale);
+        setRegionalText(text);
+        setLocalError(undefined);
+        const parsed = text === '' ? '' : parseRegionalDate(text, locale);
+        onValidityChange?.(
+          parsed !== undefined && (parsed === '' || isValidDate(parsed))
+        );
+        if (parsed !== undefined) {
+          setDisplayValue(parsed);
+          onChange?.(parsed);
+        }
+        return;
+      }
       const formatted = formatDateValue(e.target.value);
       setDisplayValue(formatted);
       onChange?.(formatted);
@@ -323,19 +365,30 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
       onBlur?.(e);
 
       if (validateOnBlur) {
+        if (
+          locale &&
+          regionalText &&
+          !parseRegionalDate(regionalText, locale)
+        ) {
+          setLocalError(
+            `Please enter a valid date (${regionalDatePlaceholder(locale)})`
+          );
+          return;
+        }
         const validationError = getValidationError(
           displayValue,
           mode,
           minAge,
           maxAge,
           minDate,
-          maxDate
+          maxDate,
+          locale
         );
         setLocalError(validationError);
       }
     };
 
-    const placeholder = mode === 'expiration' ? 'MM/DD/YYYY' : 'MM/DD/YYYY';
+    const placeholder = locale ? regionalDatePlaceholder(locale) : 'MM/DD/YYYY';
     const autoComplete =
       mode === 'dob' ? 'bday' : mode === 'expiration' ? 'cc-exp' : undefined;
 
@@ -542,6 +595,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           ? `${year}-${month}-${dayStr}T${selectedTime}`
           : `${month}/${dayStr}/${year}`;
       setDisplayValue(formatted);
+      setRegionalText(formatRegionalDate(formatted, locale));
+      onValidityChange?.(true);
       onChange?.(formatted);
       if (inputType === 'date') {
         setIsCalendarOpen(false);
@@ -555,7 +610,8 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           minAge,
           maxAge,
           minDate,
-          maxDate
+          maxDate,
+          locale
         );
         setLocalError(validationError);
       }
@@ -1009,7 +1065,13 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
                           ? 'Select date and time'
                           : placeholder))
               }
-              value={formatPickerValue(displayValue, inputType, timeFormat)}
+              value={
+                locale && isFormattedDate
+                  ? regionalText
+                  : locale && inputType === 'datetime-local'
+                    ? `${formatRegionalDate(displayValue.slice(0, 10), locale)}${displayValue ? ` ${formatTimeDisplay(displayValue.slice(-5), timeFormat)}` : ''}`
+                    : formatPickerValue(displayValue, inputType, timeFormat)
+              }
               onChange={handleChange}
               onBlur={inputType === 'date' ? handleBlur : onBlur}
               onClick={(event) => {
@@ -1106,7 +1168,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         dir="ltr"
         autoComplete={autoComplete}
         placeholder={placeholder}
-        value={displayValue}
+        value={locale ? regionalText : displayValue}
         onChange={handleChange}
         onBlur={handleBlur}
         hasError={hasError || !!localError}
