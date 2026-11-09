@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { useState } from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
@@ -57,7 +58,7 @@ describe('DateInput', () => {
       <DateInput label="Regional date" locale="en-GB" value="11/09/2026" />
     );
     rerender(
-      <DateInput label="Regional date" locale="sv-SE" value="12/10/2026" />
+      <DateInput label="Regional date" locale={['sv-SE']} value="12/10/2026" />
     );
     expect(screen.getByLabelText('Regional date')).toHaveValue('2026-12-10');
   });
@@ -122,6 +123,39 @@ describe('DateInput', () => {
     expect(input).toHaveValue('09/11');
     fireEvent.change(input, { target: { value: '09/11/2026' } });
     expect(onValidityChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it('preserves regional drafts with inline locale arrays across parent renders', () => {
+    function RegionalForm() {
+      const [valid, setValid] = useState(true);
+      const [updates, setUpdates] = useState(0);
+      return (
+        <>
+          <DateInput
+            label="Regional date"
+            locale={['en-GB']}
+            value="11/09/2026"
+            onValidityChange={setValid}
+          />
+          <button onClick={() => setUpdates(updates + 1)}>
+            Update {updates}
+          </button>
+          <button disabled={!valid}>Save</button>
+        </>
+      );
+    }
+
+    renderWithTheme(<RegionalForm />);
+    const input = screen.getByLabelText('Regional date');
+    fireEvent.change(input, { target: { value: '0' } });
+    expect(input).toHaveValue('0');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Update 0' }));
+    expect(input).toHaveValue('0');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.change(input, { target: { value: '09112026' } });
+    expect(input).toHaveValue('09/11/2026');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 
   it.each(['01/01/1800', '01/01/2101'])(

@@ -158,7 +158,7 @@ export interface DateInputProps extends Omit<
 > {
   /** The value for the selected input type. Dates use MM/DD/YYYY format. */
   value?: string;
-  /** Regional display/entry only; value, onChange and bounds retain their existing formats. */
+  /** Regional display/entry only; preferences resolve by locale, not array identity. Value, onChange and bounds retain their existing formats. */
   locale?: DateLocale;
   /** Callback fired when the value changes */
   onChange?: (value: string) => void;
@@ -294,7 +294,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   (
     {
       value = '',
-      locale,
+      locale: locales,
       onChange,
       onValidityChange,
       inputType = 'date',
@@ -317,6 +317,9 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     },
     ref
   ) => {
+    const locale = locales
+      ? new Intl.DateTimeFormat(locales).resolvedOptions().locale
+      : undefined;
     const isFormattedDate = inputType === 'date';
     const [displayValue, setDisplayValue] = React.useState(() =>
       isFormattedDate ? formatDateValue(value) : value
