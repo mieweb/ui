@@ -105,6 +105,7 @@ export const miewebUISafelist = [
   'gap-x-3',
   'gap-y-3',
   'max-h-48',
+  'mb-3',
   'mb-4',
   'mt-6',
   'overflow-visible',
