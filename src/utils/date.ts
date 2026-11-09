@@ -123,7 +123,9 @@ export function parseRegionalDate(
         fields.push(part.type);
         return part.type === 'year' ? '(\\d{4})' : '(\\d{1,2})';
       }
-      return strip(part.value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return strip(part.value)
+        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        .replace(/\s+/g, '\\s*');
     })
     .join('');
   const match = new RegExp(`^${pattern}$`).exec(strip(normalized).trim());
