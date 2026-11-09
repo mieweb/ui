@@ -162,7 +162,7 @@ export interface DateInputProps extends Omit<
   locale?: DateLocale;
   /** Callback fired when the value changes */
   onChange?: (value: string) => void;
-  /** Reports incomplete/invalid regional entry without publishing it as a date. */
+  /** Reports regional validity on entry and external value/locale synchronization. */
   onValidityChange?: (valid: boolean) => void;
   /** Date value format and picker control. */
   inputType?: DateInputType;
@@ -325,11 +325,19 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     const [regionalText, setRegionalText] = React.useState(() =>
       formatRegionalDate(value, locale)
     );
+    const validityCallbackRef = React.useRef(onValidityChange);
+    React.useEffect(() => {
+      validityCallbackRef.current = onValidityChange;
+    }, [onValidityChange]);
 
     // Sync external value changes
     React.useEffect(() => {
       setDisplayValue(isFormattedDate ? formatDateValue(value) : value);
       setRegionalText(formatRegionalDate(value, locale));
+      setLocalError(undefined);
+      if (locale && isFormattedDate) {
+        validityCallbackRef.current?.(value === '' || isValidDate(value));
+      }
     }, [isFormattedDate, value, locale]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,10 +350,10 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         setRegionalText(text);
         setLocalError(undefined);
         const parsed = text === '' ? '' : parseRegionalDate(text, locale);
-        onValidityChange?.(
-          parsed !== undefined && (parsed === '' || isValidDate(parsed))
-        );
-        if (parsed !== undefined) {
+        const valid =
+          parsed !== undefined && (parsed === '' || isValidDate(parsed));
+        onValidityChange?.(valid);
+        if (parsed !== undefined && valid) {
           setDisplayValue(parsed);
           onChange?.(parsed);
         }
@@ -368,7 +376,7 @@ const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         if (
           locale &&
           regionalText &&
-          !parseRegionalDate(regionalText, locale)
+          !isValidDate(parseRegionalDate(regionalText, locale) ?? '')
         ) {
           setLocalError(
             `Please enter a valid date (${regionalDatePlaceholder(locale)})`

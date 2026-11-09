@@ -888,6 +888,7 @@ export function ConditionEditor({
                 </span>
                 <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[minmax(10rem,0.8fr)_auto_minmax(14rem,1.2fr)]">
                   <DateInput
+                    key={onsetFuzzy}
                     locale={regionalDateLocale()}
                     aria-label={m('Onset date (exact)')}
                     value={onsetDate}
@@ -900,7 +901,7 @@ export function ConditionEditor({
                     validateOnBlur
                     error={
                       hasInvalidOnsetDate
-                        ? m('Please enter a valid date (MM/DD/YYYY)')
+                        ? m('Please enter a valid date')
                         : undefined
                     }
                     width="full"

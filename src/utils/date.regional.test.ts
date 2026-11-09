@@ -12,6 +12,8 @@ describe('regional calendar dates', () => {
     ['en-GB', '09/11/2026', 'DD/MM/YYYY'],
     ['de-DE', '09.11.2026', 'DD.MM.YYYY'],
     ['sv-SE', '2026-11-09', 'YYYY-MM-DD'],
+    ['cs-CZ', '09. 11. 2026', 'DD. MM. YYYY'],
+    ['ko-KR', '2026. 11. 09.', 'YYYY. MM. DD.'],
   ])(
     'round-trips %s without changing the stored date',
     (locale, text, placeholder) => {
@@ -46,6 +48,8 @@ describe('regional calendar dates', () => {
     ['en-GB', '09112026', '09/11/2026'],
     ['de-DE', '09112026', '09.11.2026'],
     ['sv-SE', '20261109', '2026-11-09'],
+    ['cs-CZ', '09112026', '09. 11. 2026'],
+    ['ko-KR', '20261109', '2026. 11. 09.'],
   ])(
     'auto-formats numeric keyboard entry for %s',
     (locale, digits, expected) => {
@@ -55,6 +59,12 @@ describe('regional calendar dates', () => {
       ).toBe('11/09/2026');
     }
   );
+
+  it('does not append trailing literals to incomplete numeric entry', () => {
+    expect(formatRegionalDateInput('', 'ko-KR')).toBe('');
+    expect(formatRegionalDateInput('2026110', 'ko-KR')).toBe('2026. 11. 0');
+    expect(parseRegionalDate(' 09. 11. 2026 ', 'cs-CZ')).toBe('11/09/2026');
+  });
 
   it('preserves empty and unparseable display values', () => {
     expect(formatRegionalDate(undefined)).toBe('');

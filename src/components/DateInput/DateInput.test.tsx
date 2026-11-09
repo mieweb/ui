@@ -62,6 +62,96 @@ describe('DateInput', () => {
     expect(screen.getByLabelText('Regional date')).toHaveValue('2026-12-10');
   });
 
+  it.each([
+    ['en-GB', '12/10/2026', '10/12/2026', true],
+    ['en-GB', '', '', true],
+    ['sv-SE', '11/09/2026', '2026-11-09', true],
+    ['en-GB', '01/01/1800', '01/01/1800', false],
+  ])(
+    'reports replacement validity for %s value %s',
+    (locale, value, displayed, valid) => {
+      const onValidityChange = vi.fn();
+      const { rerender } = renderWithTheme(
+        <DateInput
+          label="Regional date"
+          locale="en-GB"
+          value="11/09/2026"
+          onValidityChange={onValidityChange}
+          validateOnBlur
+        />
+      );
+      const input = screen.getByLabelText('Regional date');
+      fireEvent.change(input, { target: { value: '09/11' } });
+      fireEvent.blur(input);
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+      rerender(
+        <DateInput
+          label="Regional date"
+          locale={locale}
+          value={value}
+          onValidityChange={onValidityChange}
+          validateOnBlur
+        />
+      );
+      expect(input).toHaveValue(displayed);
+      expect(onValidityChange).toHaveBeenLastCalledWith(valid);
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    }
+  );
+
+  it('keeps an incomplete draft when only the validity callback changes', () => {
+    const { rerender } = renderWithTheme(
+      <DateInput
+        label="Regional date"
+        locale="en-GB"
+        value="11/09/2026"
+        onValidityChange={vi.fn()}
+      />
+    );
+    const input = screen.getByLabelText('Regional date');
+    fireEvent.change(input, { target: { value: '09/11' } });
+    const onValidityChange = vi.fn();
+    rerender(
+      <DateInput
+        label="Regional date"
+        locale="en-GB"
+        value="11/09/2026"
+        onValidityChange={onValidityChange}
+      />
+    );
+    expect(input).toHaveValue('09/11');
+    fireEvent.change(input, { target: { value: '09/11/2026' } });
+    expect(onValidityChange).toHaveBeenLastCalledWith(true);
+  });
+
+  it.each(['01/01/1800', '01/01/2101'])(
+    'retains but does not publish an unsupported regional date: %s',
+    (value) => {
+      const onChange = vi.fn();
+      const onValidityChange = vi.fn();
+      renderWithTheme(
+        <DateInput
+          label="Regional date"
+          locale="en-GB"
+          value="11/09/2026"
+          onChange={onChange}
+          onValidityChange={onValidityChange}
+          validateOnBlur
+        />
+      );
+      const input = screen.getByLabelText('Regional date');
+      fireEvent.change(input, { target: { value } });
+      expect(input).toHaveValue(value);
+      expect(onValidityChange).toHaveBeenLastCalledWith(false);
+      expect(onChange).not.toHaveBeenCalled();
+      fireEvent.blur(input);
+      expect(screen.getByRole('alert')).toHaveTextContent('DD/MM/YYYY');
+      fireEvent.change(input, { target: { value: '09/11/2026' } });
+      expect(onChange).toHaveBeenLastCalledWith('11/09/2026');
+      expect(onValidityChange).toHaveBeenLastCalledWith(true);
+    }
+  );
+
   it('formats date bounds in regional validation messages', () => {
     renderWithTheme(
       <DateInput

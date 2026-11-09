@@ -90,7 +90,11 @@ export function formatRegionalDateInput(
   for (const part of regionalDateFormatter(locales).formatToParts(
     new Date(Date.UTC(2006, 10, 22))
   )) {
-    if (offset >= digits.length) break;
+    if (
+      offset >= digits.length &&
+      !(part.type === 'literal' && digits.length === 8)
+    )
+      break;
     if (part.type === 'literal') {
       text += part.value;
     } else {
@@ -108,8 +112,7 @@ export function parseRegionalDate(
   locales: DateLocale | undefined = regionalDateLocale()
 ): string | undefined {
   const normalized = regionalDigits(value, locales);
-  const strip = (text: string) =>
-    text.replace(/[\u200e\u200f\u061c]/g, '').trim();
+  const strip = (text: string) => text.replace(/[\u200e\u200f\u061c]/g, '');
   const parts = regionalDateFormatter(locales).formatToParts(
     new Date(Date.UTC(2006, 10, 22))
   );
@@ -123,7 +126,7 @@ export function parseRegionalDate(
       return strip(part.value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     })
     .join('');
-  const match = new RegExp(`^${pattern}$`).exec(strip(normalized));
+  const match = new RegExp(`^${pattern}$`).exec(strip(normalized).trim());
   if (!match) return undefined;
   const values = Object.fromEntries(
     fields.map((field, index) => [field, +match[index + 1]])

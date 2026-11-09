@@ -1,6 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderWithDarkTheme, renderWithTheme } from '../../test/test-utils';
 import { ConditionEditor } from './ConditionEditor';
 import { MessagesProvider } from '../../utils/messages';
@@ -52,6 +52,10 @@ function editor(
 }
 
 describe('ConditionEditor', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('uses the standard wide modal and aligned coding rows', () => {
     const { container } = editor();
 
@@ -155,9 +159,11 @@ describe('ConditionEditor', () => {
 
     fireEvent.change(exact, { target: { value: '09/01/2020' } });
     fireEvent.change(fuzzy, { target: { value: 'since childhood' } });
-    expect(exact).toHaveValue('');
+    expect(screen.getByLabelText('Onset date (exact)')).toHaveValue('');
 
-    fireEvent.change(exact, { target: { value: '09/01/2020' } });
+    fireEvent.change(screen.getByLabelText('Onset date (exact)'), {
+      target: { value: '09/01/2020' },
+    });
     expect(fuzzy).toHaveValue('');
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
@@ -194,14 +200,43 @@ describe('ConditionEditor', () => {
       fireEvent.blur(exact);
 
       const saveButton = screen.getByRole('button', { name: 'Save' });
-      expect(
-        screen.getByText('Please enter a valid date (MM/DD/YYYY)')
-      ).toBeVisible();
+      expect(screen.getByText('Please enter a valid date')).toBeVisible();
       expect(saveButton).toBeDisabled();
       fireEvent.click(saveButton);
       expect(onSave).not.toHaveBeenCalled();
     }
   );
+
+  it('does not show a US-specific error for British regional onset entry', () => {
+    vi.spyOn(navigator, 'languages', 'get').mockReturnValue(['en-GB']);
+    editor();
+    const exact = screen.getByLabelText('Onset date (exact)');
+    expect(exact).toHaveAttribute('placeholder', 'DD/MM/YYYY');
+    fireEvent.change(exact, { target: { value: '09/11' } });
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Please enter a valid date'
+    );
+    expect(screen.getByRole('alert')).not.toHaveTextContent('MM/DD/YYYY');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+  });
+
+  it('clears an unpublished exact draft when entering a fuzzy onset', () => {
+    const { onSave } = editor();
+    fireEvent.change(screen.getByLabelText('Onset date (exact)'), {
+      target: { value: '09/01' },
+    });
+    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText('Onset (fuzzy)'), {
+      target: { value: 'since childhood' },
+    });
+    expect(screen.getByLabelText('Onset date (exact)')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onSave.mock.calls[0][0].onset).toEqual({
+      date: undefined,
+      fuzzy: 'since childhood',
+    });
+  });
 
   it('disables coding inputs when coding is explicitly unknown', () => {
     editor();
