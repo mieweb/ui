@@ -77,6 +77,7 @@ module.exports = {
     'gap-x-3',
     'gap-y-3',
     'max-h-48',
+    'mb-3',
     'mb-4',
     'min-h-11',
     'mt-6',
