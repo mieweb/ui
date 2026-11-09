@@ -50,7 +50,8 @@ const [visit, setVisit] = useState('');      // 'YYYY-MM-DDTHH:mm'
 ### Limitations
 
 - Accessibility: the field is an \`<input type="text" inputMode="numeric">\` (never a native date input) with \`<label htmlFor>\`, \`aria-invalid\`, \`aria-describedby\` → error/helper, and \`role="alert"\` on the error. The picker trigger is a \`<button aria-haspopup="dialog" aria-expanded aria-label="Open calendar" | "Open time picker">\`; the panel is \`role="dialog"\` with an English \`aria-label\` (\`"Choose date"\`, \`"Choose month"\`, \`"Choose time"\`, \`"Choose date and time"\`). Month/year/hour/minute are native \`<select>\`s with \`aria-label\`s. **Day cells are plain \`<button>\`s with no \`aria-label\`, \`aria-pressed\` or grid semantics and no arrow-key navigation** — Tab moves through every day. Escape closes and returns focus to the trigger; click-outside closes without restoring focus. No focus trap.
-- Value formats are fixed: \`MM/DD/YYYY\` for dates (US order only, no locale formats), \`minDate\` / \`maxDate\` likewise. Nothing is ISO-8601 except \`datetime-local\` / \`month\`; convert before sending to an API. Non-\`date\` types are \`readOnly\` — the value can only be set through the picker.
+- Value formats remain \`MM/DD/YYYY\` for dates and bounds. Set \`locale="en-GB"\` (or \`locale={regionalDateLocale()}\`) for regional text entry, placeholders and date display; the callback still emits US-order dates so storage adapters do not change. Regional entry emits only complete calendar dates within 1900–2100 or a cleared value; \`onValidityChange\` reports entry and external value/locale synchronization so a parent can block saving an invalid draft. Changing only that callback does not reset a draft. Spaces in regional separators accept ordinary or non-breaking whitespace; numeric entry inserts the full regional format, including trailing literals such as Korean's final period and Bulgarian's year suffix. Without \`locale\`, existing US auto-formatting is unchanged. Nothing is ISO-8601 except \`datetime-local\` / \`month\`; convert before sending to an API. Non-\`date\` types are \`readOnly\` — the value can only be set through the picker.
+- Backspace on a generated regional literal also removes the preceding digit, so suffixes do not trap deletion.
 - Time zones: parsing goes through Luxon \`DateTime.fromFormat(..., { zone: 'local' })\`; \`datetime-local\` and \`time\` are naive wall-clock strings with no offset. Years outside 1900–2100 are rejected as invalid.
 - i18n: every string is hard-coded English — validation messages ("Please enter a valid date (MM/DD/YYYY)", "Must be at least N years old", …), month names, \`Su Mo Tu We Th Fr Sa\` headers, "Today", "Done", placeholders ("Select month", "Select time", …). Week starts on Sunday. \`error\` lets you supply your own message but the built-in checks still emit English.
 - Validation runs only on blur (\`validateOnBlur\`) or on calendar selection for \`inputType="date"\`; it does not block typing or submission. \`mode="dob"\` sets \`autoComplete="bday"\`, \`"expiration"\` sets \`cc-exp\`.
@@ -138,6 +139,16 @@ export const WithCalendar: Story = {
     label: 'Select Date',
     showCalendar: true,
     width: 'fixed',
+  },
+};
+
+export const RegionalDate: Story = {
+  args: {
+    label: 'Appointment date',
+    locale: 'en-GB',
+    value: '11/09/2026',
+    showCalendar: true,
+    validateOnBlur: true,
   },
 };
 
