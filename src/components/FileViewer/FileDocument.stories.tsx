@@ -74,6 +74,11 @@ Draft and mode can each be controlled (\`draft\` + \`onDraftChange\`, \`mode\` +
           target: 'files-filemanager',
           why: "FileManager lists a record's files and hands Preview to onPreview; FileDocument opens the text file for reading and editing.",
         },
+        {
+          type: 'alternative to',
+          target: 'editors-richeditor',
+          why: 'FileDocument opens a file read-first with a plain-text Edit mode and no extra peers; RichEditor when the writer needs Markdown formatting, a toolbar or live collaboration.',
+        },
       ],
     },
   },
