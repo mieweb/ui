@@ -164,6 +164,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
     }, [dirty]);
 
     const save = async () => {
+      if (cancelling.current) return;
       setSaving(true);
       setSaveFailed(false);
       try {
@@ -177,12 +178,15 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
       }
     };
 
-    // Only one Cancel may wait on confirmDiscard; a late duplicate could
-    // otherwise erase edits made after the first one finished.
+    // Only one Cancel may wait on confirmDiscard, and Save waits for it too: a
+    // late duplicate could erase newer edits, and a confirmed discard must not
+    // close the document while a save is still writing.
     const cancelling = React.useRef(false);
+    const [confirmingCancel, setConfirmingCancel] = React.useState(false);
     const cancel = async () => {
       if (cancelling.current) return;
       cancelling.current = true;
+      setConfirmingCancel(true);
       try {
         if (dirty && confirmDiscard && !(await confirmDiscard())) return;
         setDraft(contentRef.current);
@@ -191,6 +195,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
         onCancel?.();
       } finally {
         cancelling.current = false;
+        setConfirmingCancel(false);
       }
     };
 
@@ -239,7 +244,7 @@ export const FileDocument = React.forwardRef<HTMLDivElement, FileDocumentProps>(
                 type="button"
                 size="sm"
                 onClick={() => void save()}
-                disabled={!dirty}
+                disabled={!dirty || confirmingCancel}
                 isLoading={saving}
               >
                 {labels.save}

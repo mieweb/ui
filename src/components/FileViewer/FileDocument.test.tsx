@@ -164,6 +164,28 @@ describe('FileDocument', () => {
     await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
   });
 
+  it('blocks Save while a discard confirmation is open', async () => {
+    let confirm = (_ok: boolean) => {};
+    const confirmDiscard = () =>
+      new Promise<boolean>((resolve) => {
+        confirm = resolve;
+      });
+    const onSave = vi.fn();
+    const onCancel = vi.fn();
+    renderDocument({ defaultMode: 'edit', confirmDiscard, onSave, onCancel });
+    fireEvent.change(editor(), { target: { value: '# Draft' } });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    expect(saveButton).toBeDisabled();
+    fireEvent.click(saveButton);
+    expect(onSave).not.toHaveBeenCalled();
+
+    confirm(true);
+    await waitFor(() => expect(onCancel).toHaveBeenCalledTimes(1));
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
   it('cancels a clean draft without asking', async () => {
     const confirmDiscard = vi.fn();
     renderDocument({ defaultMode: 'edit', confirmDiscard });
