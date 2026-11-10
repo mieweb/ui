@@ -295,6 +295,60 @@ const MATRIX: {
       '[data-slot="avatar-group"] [data-slot="avatar"]'
     ),
   },
+  {
+    // The search button joins the select at its inline-end; the shared
+    // edge must be square on both controls in either direction.
+    name: 'pharmacy-input',
+    story: 'encounter-orders-pharmacyinput--two-preferred',
+    assert: async (page, direction) => {
+      await sitsInline(
+        'end',
+        '[data-slot="pharmacy-input-search"]',
+        '[data-slot="pharmacy-input-group"]'
+      )(page, direction);
+      const joined = direction === 'ltr' ? 'Right' : 'Left';
+      const opposite = direction === 'ltr' ? 'Left' : 'Right';
+      const radius = (selector: string, side: string) =>
+        page
+          .locator(selector)
+          .evaluate(
+            (el, s) =>
+              getComputedStyle(el).getPropertyValue(`border-top-${s}-radius`),
+            side.toLowerCase()
+          );
+      expect(await radius('[data-slot="pharmacy-input-select"]', joined)).toBe(
+        '0px'
+      );
+      expect(
+        await radius('[data-slot="pharmacy-input-search"]', opposite)
+      ).toBe('0px');
+    },
+  },
+  {
+    // Labels lead the details grid; phone and fax stay LTR islands.
+    name: 'pharmacy-info',
+    story: 'encounter-orders-pharmacysearch--details-panel',
+    assert: async (page, direction) => {
+      await sitsInline(
+        'start',
+        '[data-slot="pharmacy-info-fields"] dt',
+        '[data-slot="pharmacy-info-fields"]'
+      )(page, direction);
+      const island = page
+        .locator('[data-slot="pharmacy-info-fields"] span[dir="ltr"]')
+        .first();
+      await expect(island).toHaveText('(260) 555-0103');
+      expect(
+        await island.evaluate((el) => getComputedStyle(el).direction)
+      ).toBe('ltr');
+      // Street numbers must not be reordered by the RTL paragraph.
+      const street = page
+        .locator('[data-slot="pharmacy-info-fields"] address bdi')
+        .first();
+      await expect(street).toHaveText('220 Oak Ave');
+      expect(await street.evaluate((el) => el.matches(':dir(ltr)'))).toBe(true);
+    },
+  },
 ];
 
 test.describe('RTL visual matrix', () => {

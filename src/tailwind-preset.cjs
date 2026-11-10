@@ -438,6 +438,11 @@ module.exports = {
     'ps-1',
     'ps-6',
     'rounded-s-none',
+    // Pharmacy: input group end corner and info panel label column.
+    'rounded-e-none',
+    'sm:grid-cols-[8rem_1fr]',
+    '[&_[data-slot=radio-group-items]]:flex-wrap',
+    '[&_[data-slot=radio-group-items]]:gap-y-2',
     'start-1',
     'first:border-s-0',
     'rtl:origin-right',

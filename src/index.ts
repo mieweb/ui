@@ -146,6 +146,7 @@ export * from './components/PaymentHistoryTable';
 export * from './components/PaymentMethod';
 export * from './components/PendingClaimsTable';
 export * from './components/PermissionsEditor';
+export * from './components/Pharmacy';
 export * from './components/PhiMask';
 export * from './components/PhoneInput';
 export * from './components/PresentingProblems';
