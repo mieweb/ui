@@ -449,11 +449,14 @@ interface Span<T> {
   hit: T | null;
 }
 
+// Bounded quantifier keeps matching linear-time on adversarial inputs — an
+// unanchored `[...]+ $` retries at every position in the string, so an
+// unbounded run (e.g. a long string of "!") backtracks polynomially.
 const clean = (phrase: string) =>
   phrase
     .toLowerCase()
     .replace(/^\(/, '')
-    .replace(/[.,;:!?)]+$/, '');
+    .replace(/[.,;:!?)]{1,10}$/, '');
 
 function scan<T>(
   tokens: string[],

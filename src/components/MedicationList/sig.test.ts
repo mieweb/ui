@@ -197,3 +197,18 @@ describe('shared dictionary', () => {
     expect(parseSig('apply __ in __ eye bid').route).toBe('ophthalmic');
   });
 });
+
+describe('ReDoS hardening', () => {
+  it('strips trailing punctuation in linear time on adversarial input', () => {
+    // Regression test for a high-severity CodeQL finding: the trailing-
+    // punctuation strip in `clean()` used an unanchored `[...]+$`, which
+    // retries at every position in the string and backtracks polynomially
+    // on a long run of a single allowed character (here "!"). A fixed
+    // bound keeps each retry O(1), so this completes in milliseconds
+    // instead of seconds even on a 50k-character adversarial token.
+    const adversarial = '!'.repeat(50_000);
+    const start = Date.now();
+    expect(() => expandSig(`1 tab po qd ${adversarial}`)).not.toThrow();
+    expect(Date.now() - start).toBeLessThan(1000);
+  });
+});
