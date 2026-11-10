@@ -192,11 +192,12 @@ function Modal({
   // by `Animated`, which is element-agnostic.
   const focusTrapRef = useFocusTrap<HTMLElement>(isGuarded);
 
-  // Handle escape key
+  // Handle escape key. A nested open Modal (rendered inside this one's
+  // content, e.g. a picker opened from a form dialog) gets Escape first.
   useEscapeKey(() => {
-    if (closeOnEscape && open) {
-      onOpenChange(false);
-    }
+    if (!closeOnEscape || !open) return;
+    if (focusTrapRef.current?.querySelector('[data-slot="modal"]')) return;
+    onOpenChange(false);
   }, open);
 
   // Handle overlay click
