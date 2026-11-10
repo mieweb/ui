@@ -1407,6 +1407,19 @@ export const miewebUISafelist = [
   // tap-to-focus card cursor (text-base is safelisted above)
   'sm:text-sm',
   'cursor-text',
+  // RichMediaCaptureEditor capture ribbon (mieweb/ui#733) — docked toolbar
+  // frame, compact buttons, and the red recording state
+  'mx-4',
+  '-mb-px',
+  'rounded-t-xl',
+  'bg-neutral-50',
+  'min-w-7',
+  'bg-red-100',
+  'text-red-800',
+  'dark:bg-red-900/40',
+  'dark:text-red-300',
+  'text-neutral-700',
+  'hover:bg-neutral-200',
   'md:col-span-1',
   'md:col-start-2',
   'md:row-start-1',

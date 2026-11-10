@@ -25,3 +25,14 @@ export * from './components/RichEditor';
 export { TextAreaRichKerebron as TextAreaRich } from './components/TextAreaRich/TextAreaRichKerebron';
 export type { TextAreaRichKerebronProps } from './components/TextAreaRich/TextAreaRichKerebron';
 export type { TextAreaRichProps } from './components/TextAreaRich';
+
+// RichEditor with a docked capture ribbon (screenshots, camera, files, native
+// document scans inserted as image/video nodes). Working name pending
+// stakeholder sign-off — mieweb/ui#728.
+export {
+  RichMediaCaptureEditor,
+  type RichMediaCaptureEditorProps,
+  type CaptureAction,
+  type CaptureGroup,
+  type ScanDocument,
+} from './components/RichMediaCaptureEditor';

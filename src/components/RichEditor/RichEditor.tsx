@@ -15,6 +15,7 @@ import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
 import { MDY_PROJECTION_META } from './mdyTransaction';
+import { insertMediaFiles, type InsertFilesResult } from './insertMediaFiles';
 import {
   createEditorKits,
   type CollabConfig,
@@ -28,6 +29,7 @@ export type {
   MenuElement,
   ModifyMenu,
 } from './editorKits';
+export type { InsertFilesResult } from './insertMediaFiles';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
@@ -153,6 +155,17 @@ export interface RichEditorHandle {
   getContent: () => Promise<string>;
   /** Focus the editor, restoring the caret where the writer left it. */
   focus: () => void;
+  /**
+   * Insert image/video files at the current selection through the same
+   * validation and upload pipeline as paste/drop — honoring the mount-time
+   * {@link RichEditorProps.mediaUpload} options, so with an `uploadHandler`
+   * the document carries URLs and without one images embed as base64.
+   * Files the schema or limits reject come back in `skipped`; nothing throws.
+   *
+   * Optional so existing implementers of this handle (wrappers exposing
+   * `getContent`/`focus` only) keep compiling — call as `insertFiles?.()`.
+   */
+  insertFiles?: (files: File[]) => Promise<InsertFilesResult>;
 }
 
 /**
@@ -208,6 +221,9 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const loadedDocRef = useRef<unknown>(null);
     const disabledRef = useRef(disabled);
     const readOnlyRef = useRef(readOnly);
+    // `mediaUpload` is read once, on mount (see the prop docs); the handle's
+    // `insertFiles` must honor those same options, so hold the mount value.
+    const mediaUploadRef = useRef(mediaUpload);
 
     const [md, setMd] = useState<string>('');
     // A strict surface reconciles in an after-render effect, but publishing
@@ -603,6 +619,19 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           // Callers focus on mount; the editor may still be loading its kits.
           if (editorInstance.current) apply();
           else void readyRef.current?.then(apply, () => undefined);
+        },
+        insertFiles: async (files: File[]): Promise<InsertFilesResult> => {
+          // Setup failures surface through `onError`; here they just mean
+          // there is no document to insert into, so everything is skipped.
+          await readyRef.current?.catch(() => undefined);
+          const editor = editorInstance.current;
+          if (!editor || !files.length)
+            return { inserted: [], skipped: [...files] };
+          return insertMediaFiles(
+            editor.view,
+            files,
+            mediaUploadRef.current ?? {}
+          );
         },
       }),
       []
