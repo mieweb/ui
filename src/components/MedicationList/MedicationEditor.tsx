@@ -43,6 +43,8 @@ import {
  * | Indication     | Diagnosis/Primary                      |
  * | Prescriber     | Prescriber                             |
  * | Pharmacy notes | Note                                   |
+ * | Pharmacy       | Pharmacy (with `pharmacy` prop)        |
+ * | Transmission   | — (host acts on the saved choice)      |
  */
 
 import * as React from 'react';
@@ -85,6 +87,10 @@ import { Calculator } from 'lucide-react';
 import { Autocomplete } from '../Autocomplete';
 import { cn } from '../../utils/cn';
 import { useCodeLookupConfig } from '../CodeLookup/context';
+import {
+  MedicationPharmacyFields,
+  type MedicationPharmacyConfig,
+} from './MedicationPharmacyFields';
 
 // =============================================================================
 // Types
@@ -170,6 +176,12 @@ export interface MedicationEditorProps {
    * (`uncodedType === 'CP'`).
    */
   collectCompoundIngredients?: boolean;
+  /**
+   * Adds Pharmacy (`PharmacyField`) and Transmission (Transmit / Print / None)
+   * rows above the pharmacy notes, saved as `pharmacyId` and `transmission`.
+   * Omit to leave the editor as is.
+   */
+  pharmacy?: MedicationPharmacyConfig;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
@@ -767,6 +779,7 @@ export function MedicationEditor({
   prescribers,
   sigTerms,
   collectCompoundIngredients,
+  pharmacy,
   onClose,
   onSave,
 }: MedicationEditorProps): React.JSX.Element | null {
@@ -1435,6 +1448,14 @@ export function MedicationEditor({
                 />
               </div>
             </div>
+            {pharmacy && (
+              <MedicationPharmacyFields
+                config={pharmacy}
+                pharmacyId={draft.pharmacyId}
+                transmission={draft.transmission}
+                onChange={patch}
+              />
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="med-pharmacy-notes">{m('Pharmacy notes')}</Label>
               <Textarea
@@ -1467,6 +1488,8 @@ export function MedicationEditor({
                 uncodedType === 'CP'
                   ? draft.compoundIngredients?.filter((i) => i.name.trim())
                   : undefined,
+              // the editor shows "None" until another choice is made
+              ...(pharmacy && { transmission: draft.transmission ?? 'none' }),
             });
             onClose();
           }}

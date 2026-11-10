@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { gotoStory } from './helpers';
+import { gotoStory, expectDocumentDirection } from './helpers';
 
 /**
  * Pharmacy search modal and field (src/components/Pharmacy). RTL coverage
@@ -73,4 +73,44 @@ test.describe('Pharmacy', () => {
       animations: 'disabled',
     });
   });
+});
+
+test.describe('MedicationEditor pharmacy & transmission', () => {
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`Pharmacy rows - ${direction}`, async ({ page }) => {
+      await gotoStory(
+        page,
+        'clinical-lists-medicationlist--prescribe-with-pharmacy',
+        { globals: `direction:${direction}` }
+      );
+      await expectDocumentDirection(page, direction);
+      const transmission = page.getByRole('radiogroup', {
+        name: 'Transmission',
+      });
+      const transmit = transmission.getByRole('radio', {
+        name: 'Transmit (e-prescribe)',
+      });
+      await expect(transmit).toBeEnabled();
+      await expect(
+        transmission.getByRole('radio', { name: 'None' })
+      ).toBeChecked();
+      await page.evaluate(() => document.fonts.ready);
+
+      // Transmit leads the row: inline-start in either direction.
+      const t = await transmit.boundingBox();
+      const n = await transmission
+        .getByRole('radio', { name: 'None' })
+        .boundingBox();
+      expect(t && n).toBeTruthy();
+      if (direction === 'ltr') expect(t!.x).toBeLessThan(n!.x);
+      else expect(t!.x).toBeGreaterThan(n!.x);
+
+      await transmission.scrollIntoViewIfNeeded();
+      await expect(
+        page.locator('[data-slot="modal-body"]').locator('section').last()
+      ).toHaveScreenshot(`medication-editor-pharmacy-${direction}.png`, {
+        animations: 'disabled',
+      });
+    });
+  }
 });

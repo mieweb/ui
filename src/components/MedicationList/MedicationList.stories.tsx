@@ -8,8 +8,18 @@ import {
   type MedicationStatus,
 } from './MedicationList';
 import { MedicationReconciliation } from './MedicationReconciliation';
-import type { MedicationEditorOptions } from './MedicationEditor';
+import {
+  MedicationEditor,
+  type MedicationEditorOptions,
+} from './MedicationEditor';
 import { CodeLookup } from '../CodeLookup';
+import { Button } from '../Button';
+import {
+  createFakePharmacySource,
+  storyPharmacies,
+  storyStateOptions,
+  type StoryPatientId,
+} from '../Pharmacy/storyData';
 
 const meta: Meta<typeof MedicationList> = {
   id: 'clinical-lists-medicationlist',
@@ -29,7 +39,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 | \`MedicationList\` | You need full control of the data flow and will supply your own dialogs / editor. Presentational and controlled: \`medications\` in, \`onStatusChange\` / \`onAction\` / \`onReorder\` / \`onQuickAdd\` / \`onAddOther\` out | **Headless**, **Default** and the variant stories |
 | \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs) |
 
-**Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, prescriber, pharmacy notes) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit), \`expandSig\` (practitioner shorthand "1 tab po bid" → patient sig) and \`parseSig\` (route / frequency / PRN from the sig text). Directions presets, days-supply presets and the prescriber list go through \`editorOptions\`. Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
+**Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, prescriber, pharmacy notes; with its \`pharmacy\` prop, a Pharmacy field and a Transmit / Print / None choice) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit), \`expandSig\` (practitioner shorthand "1 tab po bid" → patient sig) and \`parseSig\` (route / frequency / PRN from the sig text). Directions presets, days-supply presets and the prescriber list go through \`editorOptions\`. Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
 
 ### Use it when
 
@@ -97,7 +107,7 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
         {
           type: 'composes with',
           target: 'encounter-orders-pharmacyfield',
-          why: 'A prescription form pairs MedicationEditor (what is prescribed) with PharmacyField (where it is sent); the PharmacyField page shows the host wiring.',
+          why: "MedicationEditor's pharmacy prop embeds PharmacyField and a Transmit / Print / None choice that is enabled only when the chosen pharmacy can e-prescribe or fax.",
         },
         {
           type: 'composes with',
@@ -573,4 +583,92 @@ toggle.
       },
     },
   },
+};
+
+/** Story host: MedicationEditor with a fake pharmacy source and the saved record. */
+function PrescribeHost({
+  medication,
+  patId = 'preferred-and-recent',
+}: {
+  medication: Medication;
+  patId?: StoryPatientId;
+}) {
+  const [source] = useState(() => createFakePharmacySource());
+  const [open, setOpen] = useState(true);
+  const [saved, setSaved] = useState<Medication | null>(null);
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <Button onClick={() => setOpen(true)}>Prescribe</Button>
+      {saved && (
+        <pre className="bg-muted rounded-md p-3 text-xs">
+          {JSON.stringify(
+            {
+              name: saved.name,
+              pharmacyId: saved.pharmacyId,
+              transmission: saved.transmission,
+            },
+            null,
+            2
+          )}
+        </pre>
+      )}
+      <MedicationEditor
+        key={saved?.id ?? medication.id}
+        open={open}
+        medication={saved ?? medication}
+        codeLookup={false}
+        prescribers={sampleEditorOptions.prescribers}
+        pharmacy={{ source, patId, stateOptions: storyStateOptions }}
+        onSave={setSaved}
+        onClose={() => setOpen(false)}
+      />
+    </div>
+  );
+}
+
+const prescription: Medication = {
+  id: 'rx-1',
+  name: 'lisinopril 10 mg tablet',
+  status: 'unreconciled',
+  sig: '1 tab po daily',
+  patientSig: 'Take 1 tablet by mouth once a day.',
+  quantity: '30',
+  quantityUnit: 'tablet',
+  daysSupply: '30',
+  refills: '3',
+};
+
+export const PrescribeWithPharmacy: StoryObj<typeof MedicationEditor> = {
+  render: () => <PrescribeHost medication={prescription} />,
+  parameters: {
+    docs: {
+      story: { inline: false, iframeHeight: 900 },
+      description: {
+        story: `
+**Pharmacy and transmission.** \`MedicationEditor\`'s \`pharmacy\` prop adds
+a Pharmacy row ([PharmacyField](?path=/docs/encounter-orders-pharmacyfield--docs))
+and a **Transmission** choice above the pharmacy notes. The patient's
+preferred pharmacy is selected; **Transmit (e-prescribe)** is available but
+**None** is the default. Pick Riverside Apothecary for **Transmit (fax)**, or
+search for Hilltop Health Shop (print only) to see Transmit disabled with its
+reason. Save shows the stored \`pharmacyId\` and \`transmission\`; the host
+performs the choice.
+        `,
+      },
+    },
+  },
+};
+
+/** A saved Transmit to a print-only pharmacy falls back to None and says why. */
+export const PrescribeTransmitUnavailable: StoryObj<typeof MedicationEditor> = {
+  render: () => (
+    <PrescribeHost
+      medication={{
+        ...prescription,
+        pharmacyId: storyPharmacies.hilltop.pharmId,
+        transmission: 'transmit',
+      }}
+    />
+  ),
+  parameters: { docs: { story: { inline: false, iframeHeight: 900 } } },
 };

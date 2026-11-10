@@ -163,7 +163,26 @@ export interface Medication {
   prescriber?: string;
   /** Note to pharmacy (Note) */
   pharmacyNotes?: string;
+
+  // —— Pharmacy & transmission ——
+  /**
+   * Destination pharmacy (`pharmId`: NCPDP ID, or `"N" + npi` for an
+   * NPI-only pharmacy). A string so NPI ids and leading zeros survive; the
+   * host maps it to its own storage. Matches `PrescriptionDetails.pharmacyId`.
+   */
+  pharmacyId?: string;
+  /**
+   * How the prescriber chose to send it. Saved with the prescription; the
+   * host performs it — the library never sends or prints.
+   */
+  transmission?: MedicationTransmission;
 }
+
+/**
+ * `transmit` e-prescribes or faxes (see `transmitRoute`), `print` prints for
+ * the patient, `none` records the prescription only.
+ */
+export type MedicationTransmission = 'transmit' | 'print' | 'none';
 
 /** Non-status row actions revealed on hover. */
 export type MedicationAction =
