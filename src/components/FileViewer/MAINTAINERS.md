@@ -75,9 +75,11 @@ The plain over-limit `<pre>` doesn't get it because there is no prose around it.
   **before** resolving, or the document returns to View still dirty.
 - **Cancel.** Only one Cancel may wait on `confirmDiscard` at a time
   (`cancelling` ref). A late duplicate would otherwise discard edits made
-  after the first confirmation resolved. After the await, Cancel restores
-  `contentRef.current`, not the `content` captured when it was clicked, so a
-  reload during the dialog is not reverted.
+  after the first confirmation resolved. Save is disabled while the
+  confirmation is open (`confirmingCancel` state, plus a `cancelling` check in
+  `save`), so a confirmed discard can't call `onCancel` mid-save. After the
+  await, Cancel restores `contentRef.current`, not the `content` captured when
+  it was clicked, so a reload during the dialog is not reverted.
 - Both buttons are `type="button"` so a FileDocument inside a `<form>` never
   submits it.
 
