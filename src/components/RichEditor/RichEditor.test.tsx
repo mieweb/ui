@@ -15,6 +15,16 @@ const setProps = vi.fn();
 // to tell an edit from a selection change, so tests swap the object to mean
 // "the document changed" and leave it alone to mean "only the caret moved".
 const docMock = { current: { id: 'doc-0' } as object };
+// insertFiles support: node factories and the dispatch sink it writes to.
+const imageNodeCreate = vi.fn((attrs: Record<string, unknown>) => ({
+  nodeSize: 1,
+  attrs,
+}));
+const videoNodeCreate = vi.fn((attrs: Record<string, unknown>) => ({
+  nodeSize: 1,
+  attrs,
+}));
+const dispatch = vi.fn();
 const editorMock = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
@@ -28,9 +38,22 @@ const editorMock = {
     setProps,
     hasFocus: () => false,
     focus: vi.fn(),
+    dispatch,
     dom: document.createElement('div'),
     get state() {
-      return { doc: docMock.current };
+      return {
+        doc: docMock.current,
+        selection: { from: 1 },
+        schema: {
+          nodes: {
+            image: { create: imageNodeCreate },
+            video: { create: videoNodeCreate },
+          },
+        },
+        tr: {
+          insert: (pos: number, node: unknown) => ({ pos, node }),
+        },
+      };
     },
   },
 };
@@ -228,6 +251,78 @@ describe('RichEditor', () => {
     renderWithTheme(<RichEditor ref={ref} value="# hello" />);
     await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
     await expect(ref.current?.getContent()).resolves.toBe('# hello');
+  });
+
+  // insertFiles mirrors the paste/drop pipeline (ExtensionMediaUpload): same
+  // validation, upload-or-embed, and node insertion at the selection — so the
+  // capture ribbon and pasting produce identical documents (mieweb/ui#733).
+  describe('insertFiles', () => {
+    const png = (name = 'shot.png', content = 'x') =>
+      new File([content], name, { type: 'image/png' });
+
+    it('uploads through mediaUpload.uploadHandler and inserts an image node at the selection', async () => {
+      const uploadHandler = vi
+        .fn()
+        .mockResolvedValue('https://cdn.test/shot.png');
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} mediaUpload={{ uploadHandler }} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const file = png();
+      const result = await ref.current!.insertFiles!([file]);
+
+      expect(uploadHandler).toHaveBeenCalledWith(file);
+      expect(imageNodeCreate).toHaveBeenCalledWith({
+        src: 'https://cdn.test/shot.png',
+        alt: 'shot.png',
+      });
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ inserted: [file], skipped: [] });
+    });
+
+    it('embeds images as base64 data URLs without an uploadHandler, like paste does', async () => {
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const result = await ref.current!.insertFiles!([png()]);
+
+      expect(imageNodeCreate).toHaveBeenCalledWith({
+        src: expect.stringMatching(/^data:image\/png;base64,/) as string,
+        alt: 'shot.png',
+      });
+      expect(result.inserted).toHaveLength(1);
+    });
+
+    it('skips files the schema or limits reject, without throwing', async () => {
+      const uploadHandler = vi.fn();
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(
+        <RichEditor ref={ref} mediaUpload={{ uploadHandler, maxFileSize: 1 }} />
+      );
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const pdf = new File(['x'], 'doc.pdf', { type: 'application/pdf' });
+      const oversize = png('big.png', 'xx'); // 2 bytes > maxFileSize: 1
+      const result = await ref.current!.insertFiles!([pdf, oversize]);
+
+      expect(result).toEqual({ inserted: [], skipped: [pdf, oversize] });
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(uploadHandler).not.toHaveBeenCalled();
+    });
+
+    it('reports an upload failure as skipped, not thrown', async () => {
+      const uploadHandler = vi.fn().mockRejectedValue(new Error('offline'));
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} mediaUpload={{ uploadHandler }} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const file = png();
+      const result = await ref.current!.insertFiles!([file]);
+
+      expect(result).toEqual({ inserted: [], skipped: [file] });
+      expect(dispatch).not.toHaveBeenCalled();
+    });
   });
 
   it('retains the exact loaded Markdown and emits no change on opening or selection', async () => {
