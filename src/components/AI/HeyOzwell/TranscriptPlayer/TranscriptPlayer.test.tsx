@@ -371,6 +371,29 @@ describe('TranscriptPlayer', () => {
     expect(screen.getByRole('button', { name: 'Full screen' })).toHaveFocus();
   });
 
+  it('leaves fullscreen on Escape while the open Show speakers disclosure has focus', async () => {
+    render(
+      <>
+        <button type="button">Host control</button>
+        <TranscriptPlayer
+          src="visit.wav"
+          transcript={transcript}
+          peaks={peaks}
+          collapsibleLanes
+        />
+      </>
+    );
+    const host = screen.getByRole('button', { name: 'Host control' });
+    await userEvent.click(screen.getByRole('button', { name: 'Full screen' }));
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Show speakers' })
+    );
+    expect(screen.getByRole('button', { name: 'Hide speakers' })).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    expect(host).not.toHaveAttribute('inert');
+  });
+
   it('stops interval playback on timeupdate when animation frames are paused', async () => {
     vi.stubGlobal('requestAnimationFrame', () => 0);
     renderPlayer();
@@ -563,5 +586,54 @@ describe('TranscriptPlayer', () => {
       screen.getByText('No transcript for this recording.')
     ).toBeInTheDocument();
     expect(screen.getByText('No speaker activity.')).toBeInTheDocument();
+  });
+
+  it('keeps the lanes and overview behind Show speakers with collapsibleLanes', async () => {
+    renderPlayer({ collapsibleLanes: true });
+    const toggle = screen.getByRole('button', { name: 'Show speakers' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.queryByRole('group', { name: 'Patient speaking turns' })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('slider', { name: 'Visible part of the recording' })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('slider', { name: 'Seek' })).toBeInTheDocument();
+    expect(screen.getByText('Better but sore.')).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+    expect(
+      screen.getByRole('button', { name: 'Hide speakers' })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(lane('Patient')).toBeInTheDocument();
+  });
+
+  it('has no Show speakers button by default', () => {
+    renderPlayer();
+    expect(
+      screen.queryByRole('button', { name: 'Show speakers' })
+    ).not.toBeInTheDocument();
+    expect(lane('Patient')).toBeInTheDocument();
+  });
+
+  it('pins the player while scrolling unless sticky is false', () => {
+    const { unmount } = renderPlayer();
+    expect(screen.getByRole('region', { name: 'Recording' })).toHaveClass(
+      'sticky'
+    );
+    unmount();
+    renderPlayer({ sticky: false });
+    expect(screen.getByRole('region', { name: 'Recording' })).not.toHaveClass(
+      'sticky'
+    );
+  });
+
+  it('drops the speakers panel and hint when showSpeakerPanel is false', () => {
+    renderPlayer({ showSpeakerPanel: false });
+    expect(
+      screen.queryByRole('heading', { name: 'Speakers' })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Hover a coloured segment/)).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Transcript' })).toBeVisible();
   });
 });

@@ -20,7 +20,9 @@ const meta: Meta<typeof TranscriptPlayer> = {
 
 **Reviewing a diarized recording: who spoke when, and what they said.** \`TranscriptPlayer\` takes an audio \`src\` and a \`Transcript\` and shows one playhead across a waveform, one lane per speaker, an overview of the whole recording with a draggable window, and a searchable transcript. Hover a lane segment for its speaker and times; click it, or a transcript line, to play just that interval. The speaker panel shows each person's talk time and share and hides or shows them. Long recordings open on a 5-minute window you can zoom and pan; long transcripts are virtualized.
 
-Lanes come from \`transcript.speakerActivity\` when present (raw diarizer output, so overlap and "mm-hm" with no words stay visible), else from \`segments\`. A segment's \`overlapSpeakerIds\` shows as "Overlaps …" on its line. \`useNemotronDiarization\` produces this shape, and \`SpeakerScribe\` uses the player for its result.
+Lanes come from \`transcript.speakerActivity\` when present (raw diarizer output, so overlap and "mm-hm" with no words stay visible), else from \`segments\`. A segment's \`overlapSpeakerIds\` shows as "Overlaps …" on its line. \`useNemotronDiarization\` produces this shape, and \`SpeakerScribe\` uses the player for its result. If your app transcribes the audio itself, \`transcriptFromActivity\` builds this shape from your words and Nemotron's speaker timeline: see **Modules / Voice / Speaker Scribe → Hosts with their own transcription**.
+
+For a narrow host such as a chat message, \`collapsibleLanes\` keeps the lanes behind "Show speakers", \`showSpeakerPanel={false}\` gives the transcript the full width and \`sticky={false}\` lets the player scroll with the page (see **Compact**).
 
 ### Use it when
 
@@ -98,7 +100,13 @@ export default meta;
 type Story = StoryObj<typeof TranscriptPlayer>;
 
 /** Builds a demo recording once per mount and frees its audio URL on unmount. */
-function Demo({ make }: { make: () => DemoRecording }) {
+function Demo({
+  make,
+  ...props
+}: { make: () => DemoRecording } & Pick<
+  React.ComponentProps<typeof TranscriptPlayer>,
+  'collapsibleLanes' | 'showSpeakerPanel' | 'sticky'
+>) {
   const recording = React.useMemo(make, [make]);
   React.useEffect(() => () => URL.revokeObjectURL(recording.src), [recording]);
   return (
@@ -107,6 +115,7 @@ function Demo({ make }: { make: () => DemoRecording }) {
         src={recording.src}
         transcript={recording.transcript}
         peaks={recording.peaks}
+        {...props}
       />
     </div>
   );
@@ -143,6 +152,22 @@ export const ShortVisit: Story = {
 /** Five minutes, three speakers; the timeline opens on the whole recording. */
 export const FiveMinutes: Story = {
   render: () => <Demo make={medium} />,
+};
+
+/**
+ * Compact, for a chat message: `collapsibleLanes` keeps the lanes and overview behind "Show
+ * speakers", `showSpeakerPanel={false}` leaves the transcript full width and `sticky={false}` lets
+ * the player scroll with the feed. Narrow the canvas to see the small-container layout.
+ */
+export const Compact: Story = {
+  render: () => (
+    <Demo
+      make={medium}
+      collapsibleLanes
+      showSpeakerPanel={false}
+      sticky={false}
+    />
+  ),
 };
 
 /** 45 minutes: the lanes show a 5-minute window; drag the overview box or zoom to move. */

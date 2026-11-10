@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { dominantLane, laneNames, transcriptFromFrames } from './attribution';
+import {
+  dominantLane,
+  laneNames,
+  timelineFromFrames,
+  transcriptFromActivity,
+  transcriptFromFrames,
+} from './attribution';
 
 /** Builds `numFrames x 3` frames of 0.1 s where `active(frame)` lists the lit lanes. */
 function frames(numFrames: number, active: (frame: number) => number[]) {
@@ -145,5 +151,97 @@ describe('transcriptFromFrames', () => {
       ['f', undefined],
       ['g', undefined],
     ]);
+  });
+});
+
+describe('transcriptFromActivity', () => {
+  const names = ['Dr. Smith', 'Mom', 'Speaker 1'];
+  const word = (text: string, start: number, end: number) => ({
+    text,
+    start,
+    end,
+  });
+  const words = [
+    word('how', 0.1, 0.4),
+    word('are', 0.5, 0.8),
+    word('fine', 1.2, 1.5),
+    word('both', 2.2, 2.6),
+  ];
+
+  it('keeps only heard speakers in the timeline', () => {
+    expect(timelineFromFrames(conversation, names, 3)).toEqual({
+      durationMs: 3000,
+      speakers: [
+        { id: 'lane-0', name: 'Dr. Smith' },
+        { id: 'lane-1', name: 'Mom' },
+      ],
+      speakerActivity: [
+        { speakerId: 'lane-0', startMs: 0, endMs: 1000 },
+        { speakerId: 'lane-1', startMs: 1000, endMs: 3000 },
+        { speakerId: 'lane-0', startMs: 2000, endMs: 3000 },
+      ],
+    });
+  });
+
+  it('matches the frame-based result while one lane clearly leads, including words across frame edges', () => {
+    const timeline = timelineFromFrames(conversation, names, 3);
+    expect(transcriptFromActivity(words, timeline)).toEqual(
+      transcriptFromFrames(words, conversation, names, 3)
+    );
+    const crossing = [word('so', 0.85, 1.05), word('well', 0.95, 1.15)];
+    expect(transcriptFromActivity(crossing, timeline)).toEqual(
+      transcriptFromFrames(crossing, conversation, names, 3)
+    );
+    expect(
+      transcriptFromActivity(crossing, timeline).segments?.map(
+        (s) => s.speakerId
+      )
+    ).toEqual(['lane-0', 'lane-1']);
+  });
+
+  it('gives an overlapped word to the lower lane where frames would compare probabilities', () => {
+    const close = {
+      probabilities: new Float32Array([0.6, 0.9, 0]),
+      numSpeakers: 3,
+      frameDurationSeconds: 0.1,
+    };
+    const hm = [word('hm', 0.02, 0.08)];
+    expect(
+      transcriptFromActivity(hm, timelineFromFrames(close, names, 0.1)).segments
+    ).toMatchObject([{ speakerId: 'lane-0', overlapSpeakerIds: ['lane-1'] }]);
+    expect(transcriptFromFrames(hm, close, names, 0.1).segments).toMatchObject([
+      { speakerId: 'lane-1', overlapSpeakerIds: ['lane-0'] },
+    ]);
+  });
+
+  it('gives a word in silence to the nearest speaker and survives an empty timeline', () => {
+    const timeline = {
+      durationMs: 5000,
+      speakers: [
+        { id: 'lane-0', name: 'Dr. Smith' },
+        { id: 'lane-1', name: 'Mom' },
+      ],
+      speakerActivity: [
+        { speakerId: 'lane-0', startMs: 0, endMs: 1000 },
+        { speakerId: 'lane-1', startMs: 4000, endMs: 5000 },
+      ],
+    };
+    expect(
+      transcriptFromActivity([word('hm', 3.5, 3.7)], timeline).segments
+    ).toMatchObject([{ text: 'hm', speakerId: 'lane-1' }]);
+    const empty = transcriptFromActivity([word('hm', 0, 0.3)], {
+      durationMs: 0,
+      speakers: [],
+      speakerActivity: [],
+    });
+    expect(empty.segments).toMatchObject([{ speakerId: 'lane-0' }]);
+    expect(empty.speakers).toEqual([{ id: 'lane-0', name: 'Speaker 1' }]);
+    expect(
+      transcriptFromActivity([], {
+        durationMs: 0,
+        speakers: [],
+        speakerActivity: [],
+      }).speakers
+    ).toEqual([]);
   });
 });

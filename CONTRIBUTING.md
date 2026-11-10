@@ -288,6 +288,13 @@ ingests, so **the story is the record of truth and the manifest is derived from 
 page (deprecated, experimental, product-specific, demo-only), so a component never
 needs a hand-written status notice.
 
+`maturity:deprecated` and `maturity:retired` additionally **hide the entry from
+the sidebar and search** (the `tags` option in [.storybook/main.ts](.storybook/main.ts),
+[mieweb/ui#731](https://github.com/mieweb/ui/issues/731)); the docs page stays
+built and reachable by direct URL. When deprecating a component, in the same PR:
+move its `title` under the flat `Deprecated/` tier and add its row (status,
+replacement, why) to the directory at [src/catalog/Deprecated.mdx](src/catalog/Deprecated.mdx).
+
 ### Description template
 
 Write `description.component` under these headings, in this order. Keep each

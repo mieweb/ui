@@ -23,6 +23,22 @@ handoffs:
     agent: MIE UI Migration Agent
     prompt: Audit the code discussed above for @mieweb/ui compliance (raw HTML elements, custom modal/card/badge patterns, hand-rolled icons, CSS foundation) and report findings with a prioritized replacement plan.
     send: false
+  - label: Rich text editors
+    agent: MIE UI Rich Text Agent
+    prompt: Handle the rich-text question above (Kerebron editors, install legs, WASM/patches, collaboration, markdown round-trip, EmailEditor) and report the minimal fix.
+    send: false
+  - label: Grids & eSheet
+    agent: MIE UI Grids Agent
+    prompt: Handle the grid/eSheet question above (DataVis NITRO sources, columns, features, operations, eSheet Builder/Renderer) and report the minimal fix.
+    send: false
+  - label: Charts & maps
+    agent: MIE UI DataVis Agent
+    prompt: Handle the visualization question above (Sparkline, Deck, Globe, PointMap, OrgChart, report sections — peers, CSS, SSR boundaries, data shapes) and report the minimal fix.
+    send: false
+  - label: Views & layout
+    agent: MIE UI Views Agent
+    prompt: Handle the views/layout question above (ViewSet, ListView/BoardView/CalendarView/GanttView, dashboards, DockablePanel/FloatingWindow, app shell — accessors, stages, persistence, dates) and report the minimal fix.
+    send: false
 ---
 
 # MIE UI Design Agent (orchestrator)
@@ -55,14 +71,17 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | Question is about…                                   | Delegate to            |
 | ---------------------------------------------------- | ---------------------- |
 | install / peer deps / preset / safelist / `@source`  | MIE UI Install Agent   |
-| wiring headless modules (ViewSet, SuperChat) to data | MIE UI Install Agent   |
+| wiring headless modules (SuperChat) to data          | MIE UI Install Agent   |
 | tokens, CSS vars, Tailwind classes, brands, dark     | MIE UI Styling Agent   |
 | ARIA, keyboard nav, screen readers, contrast         | MIE UI A11y Agent      |
 | translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
 | migrating code to @mieweb/ui, raw-HTML compliance    | MIE UI Migration Agent |
+| rich text editors (RichEditor, TextAreaRich, EmailEditor), Kerebron peers/WASM/patches, collab, Markdown rendering | MIE UI Rich Text Agent |
+| DataVis NITRO config (sources, columns, features, operations), eSheet Builder/Renderer, grid debugging | MIE UI Grids Agent |
+| charts, maps, globes, decks, org charts (Sparkline, Deck, Globe, PointMap, OrgChart, report sections) | MIE UI DataVis Agent |
+| views & layout (ViewSet, ListView/BoardView/CalendarView/GanttView, ViewSwitcher), dashboards, DockablePanel/FloatingWindow, app shell (Sidebar, AppHeader, PageHeader) | MIE UI Views Agent |
 
-More specialists (Grids, DataVis, Views,
-SuperChat, Rich Text) land in later phases; until one ships, answer its domain
+More specialists (SuperChat) land in later phases; until one ships, answer its domain
 from the skills and the component docs, or defer (below).
 
 **Tie-breakers:**

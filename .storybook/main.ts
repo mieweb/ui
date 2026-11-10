@@ -205,6 +205,15 @@ const ychartDependencyNames = readDependencyNames('ychart');
 
 const config: StorybookConfig = {
   stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  // Deprecated/retired entries are hidden from both the sidebar tree and
+  // search (one filtered dataset drives both — there is no search-only mode).
+  // Their docs pages stay built and reachable by direct URL; the Deprecated
+  // catalog page (src/catalog/Deprecated.mdx, the one entry left under the
+  // Deprecated root) is the findable directory of what's hidden (mieweb/ui#731).
+  tags: {
+    'maturity:deprecated': { excludeFromSidebar: true },
+    'maturity:retired': { excludeFromSidebar: true },
+  },
   addons: [
     '@storybook/addon-a11y',
     {
