@@ -71,7 +71,7 @@ Images and videos can be pasted or dropped straight onto the surface. **Set \`me
 />
 \`\`\`
 
-The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters. The handle's \`insertFiles(files)\` runs the same pipeline programmatically — host UI (a capture ribbon, a picker) inserts image/video nodes at the cursor and gets \`{ inserted, skipped }\` back; [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) is the packaged version of exactly that.
 
 \`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 

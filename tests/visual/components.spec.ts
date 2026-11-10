@@ -227,10 +227,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(ribbon).toHaveCount(0);
 
     await page.locator("[data-slot='chat-composer-add-button']").click();
-    const dockToggle = page.getByRole('menuitemcheckbox', {
+    const dockToggle = page.getByRole('menuitem', {
       name: 'Dock capture ribbon',
     });
-    await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
     await dockToggle.click();
     await expect(ribbon).toBeVisible();
 
@@ -250,6 +249,38 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(
       page.locator("[data-slot='chat-composer-attachments']")
     ).toBeVisible();
+  });
+
+  // Real-editor round-trip (mieweb/ui#733): capture → uploadHandler → image
+  // node in the live Kerebron document → serialized markdown. Complements the
+  // unit tests, which mock the editor because tree-sitter WASM can't run in
+  // jsdom.
+  test('RichMediaCaptureEditor - Attach file round-trips into markdown via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-richmediacaptureeditor--with-upload-handler');
+    // Insertion happens at the caret, exactly like paste — put it in the
+    // paragraph (markdown headings cannot carry images through serialization).
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    // The unrestricted hidden input backs "Attach file" (the other is
+    // accept="image/*" for Capture image).
+    await page
+      .locator('input[type="file"]:not([accept])')
+      .setInputFiles({
+        name: 'note-photo.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from('fake-png-bytes'),
+      });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the serialized document; the image node must carry the
+    // uploaded URL, not a base64 embed.
+    await expect(page.getByTestId('markdown-output')).toContainText(
+      '![note-photo.png](https://media.example.test/note-photo.png)'
+    );
   });
 
   test('DictationButton - Mock provider', async ({ page }) => {
