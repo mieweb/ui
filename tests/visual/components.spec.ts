@@ -227,10 +227,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(ribbon).toHaveCount(0);
 
     await page.locator("[data-slot='chat-composer-add-button']").click();
-    const dockToggle = page.getByRole('menuitemcheckbox', {
+    const dockToggle = page.getByRole('menuitem', {
       name: 'Dock capture ribbon',
     });
-    await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
     await dockToggle.click();
     await expect(ribbon).toBeVisible();
 

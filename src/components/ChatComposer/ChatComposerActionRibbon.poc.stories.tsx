@@ -29,6 +29,7 @@ import {
   Mic,
   MonitorPlay,
   Pin,
+  PinOff,
   Square,
   SquareDashed,
 } from 'lucide-react';
@@ -188,7 +189,7 @@ function ComposerWithCaptureRibbon({
 
   const recordIconClass = cn(iconClass, 'text-red-600');
 
-  const captures: CaptureAction[] = [
+  const allCaptures: CaptureAction[] = [
     {
       id: 'record-audio',
       group: 'record',
@@ -221,7 +222,8 @@ function ComposerWithCaptureRibbon({
     },
     ...fileCaptures,
     ...extraCaptures,
-  ].filter((c) => c.available !== false);
+  ];
+  const captures = allCaptures.filter((c) => c.available !== false);
 
   const menuItems: ChatComposerMenuItem[] = [
     ...captures.map((c) => ({
@@ -232,9 +234,12 @@ function ComposerWithCaptureRibbon({
     })),
     {
       id: 'dock',
-      label: 'Dock capture ribbon',
-      icon: <Pin className={iconClass} aria-hidden="true" />,
-      checked: docked,
+      label: docked ? 'Undock capture ribbon' : 'Dock capture ribbon',
+      icon: docked ? (
+        <PinOff className={iconClass} aria-hidden="true" />
+      ) : (
+        <Pin className={iconClass} aria-hidden="true" />
+      ),
       onSelect: () => setDocked((d) => !d),
     },
   ];
