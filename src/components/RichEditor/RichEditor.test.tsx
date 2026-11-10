@@ -41,8 +41,12 @@ const editorMock = {
     dispatch,
     dom: document.createElement('div'),
     get state() {
+      // insertFiles clamps against doc.content.size; give every stand-in doc
+      // one without disturbing its identity (tests compare references).
+      const doc = docMock.current as { content?: { size: number } };
+      doc.content ??= { size: 1000 };
       return {
-        doc: docMock.current,
+        doc,
         selection: { from: 1 },
         schema: {
           nodes: {

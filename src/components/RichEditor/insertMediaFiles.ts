@@ -91,8 +91,15 @@ export async function insertMediaFiles(
       const node = isVideo
         ? nodeType.create({ src, title: file.name, controls: true })
         : nodeType.create({ src, alt: file.name });
-      view.dispatch(view.state.tr.insert(pos, node));
-      pos += node.nodeSize;
+      // The document may have changed during the await (typing, collab).
+      // Clamp so an edit can never turn a finished upload into a silent
+      // failure; exact-position fidelity under concurrent edits would need
+      // placeholder nodes mapped through transactions, which this
+      // deliberately leaves to a future iteration (same trade-off as the
+      // extension's own async paste path).
+      const insertAt = Math.min(pos, view.state.doc.content.size);
+      view.dispatch(view.state.tr.insert(insertAt, node));
+      pos = insertAt + node.nodeSize;
       inserted.push(file);
     } catch {
       skipped.push(file);

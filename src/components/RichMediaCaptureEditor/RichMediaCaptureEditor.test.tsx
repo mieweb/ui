@@ -52,6 +52,17 @@ describe('RichMediaCaptureEditor', () => {
     expect(screen.queryByRole('button', { name: 'Scan document' })).toBeNull();
   });
 
+  it.each([{ disabled: true }, { readOnly: true }])(
+    'hides the capture ribbon when the editor is locked (%o)',
+    (lockProps) => {
+      renderWithTheme(<RichMediaCaptureEditor {...lockProps} />);
+      expect(
+        screen.queryByRole('button', { name: 'Capture image' })
+      ).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Attach file' })).toBeNull();
+    }
+  );
+
   it('inserts picked files through the editor handle and announces it', async () => {
     const { container } = renderWithTheme(<RichMediaCaptureEditor />);
     const fileInput =
@@ -77,7 +88,7 @@ describe('RichMediaCaptureEditor', () => {
 
     await waitFor(() =>
       expect(screen.getByRole('status')).toHaveTextContent(
-        '1 file(s) skipped — not an image or video'
+        '1 file(s) could not be attached'
       )
     );
   });

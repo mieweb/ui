@@ -48,10 +48,22 @@ export function useFileCaptures({
   const m = useMessages();
   const imageInputRef = React.useRef<HTMLInputElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [support] = React.useState(detectSupport);
-  const [documentScanner] = React.useState<ScanDocument | null>(() =>
-    scanDocument === undefined ? detectNativeDocumentScanner() : scanDocument
-  );
+  // Capabilities are detected after hydration: reading `navigator` in the
+  // initial render would make server and client markup disagree (the server
+  // sees no getDisplayMedia, a desktop browser does).
+  const [support, setSupport] = React.useState<
+    ReturnType<typeof detectSupport>
+  >({ audio: false, screenRecording: false, screenshot: false });
+  const [documentScanner, setDocumentScanner] =
+    React.useState<ScanDocument | null>(null);
+  React.useEffect(() => {
+    setSupport(detectSupport());
+  }, []);
+  React.useEffect(() => {
+    setDocumentScanner(() =>
+      scanDocument === undefined ? detectNativeDocumentScanner() : scanDocument
+    );
+  }, [scanDocument]);
 
   const runSafely = (task: () => Promise<void>, failure: string) => () => {
     task().catch(() => onStatus(failure));

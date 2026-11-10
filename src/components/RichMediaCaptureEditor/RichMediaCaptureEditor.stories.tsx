@@ -94,6 +94,7 @@ Files that cannot land as an image/video node (a PDF through Attach file, an ove
 
 - **Native document-scanner adapters are unverified on devices**; Storybook exercises Scan document through a mock.
 - The markdown schema has image and video nodes only — no audio.
+- Captures insert **at the caret**, like paste. A caret inside a heading drops the image on markdown serialization (headings cannot carry images); concurrent edits during a slow upload can shift the insertion point.
 - Strings externalize through the shared \`MessagesProvider\` contract (English defaults).`,
       },
     },
@@ -142,7 +143,12 @@ export const WithUploadHandler: Story = {
           mediaUpload={{ uploadHandler: mockUploadHandler }}
           onChange={setMarkdown}
         />
-        <pre className="max-h-40 overflow-auto text-xs">{markdown}</pre>
+        <pre
+          data-testid="markdown-output"
+          className="max-h-40 overflow-auto text-xs"
+        >
+          {markdown}
+        </pre>
       </div>
     );
   },

@@ -46,6 +46,13 @@ export const RichMediaCaptureEditor = React.forwardRef<
   const m = useMessages();
   const editorRef = React.useRef<RichEditorHandle>(null);
   const [status, setStatus] = React.useState('');
+  // A locked editor must not accept captures: insertFiles dispatches straight
+  // into the document, bypassing ProseMirror's `editable` flag. Hiding the
+  // ribbon prevents starting one; the guard in `insert` drops any capture
+  // that finishes after the editor locks mid-flight.
+  const locked = Boolean(editorProps.disabled || editorProps.readOnly);
+  const lockedRef = React.useRef(locked);
+  lockedRef.current = locked;
 
   React.useImperativeHandle(
     ref,
@@ -58,12 +65,12 @@ export const RichMediaCaptureEditor = React.forwardRef<
   );
 
   const insert = async (files: File[], message: string) => {
-    if (!files.length) return;
+    if (!files.length || lockedRef.current) return;
     const result = await editorRef.current?.insertFiles?.(files);
     if (!result) return;
     setStatus(
       result.skipped.length
-        ? m('{count} file(s) skipped — not an image or video', {
+        ? m('{count} file(s) could not be attached', {
             count: result.skipped.length,
           })
         : message
@@ -86,7 +93,7 @@ export const RichMediaCaptureEditor = React.forwardRef<
 
   return (
     <div>
-      <CaptureRibbon captures={visible} />
+      {!locked && <CaptureRibbon captures={visible} />}
       <RichEditor ref={editorRef} {...editorProps} />
       {inputs}
       <p
