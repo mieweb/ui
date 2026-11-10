@@ -82,6 +82,16 @@ The component is stateless about files: every change goes through the host and b
           target: 'grids-table',
           why: 'The file list is a Table with fixed Filename, Extension and Size columns.',
         },
+        {
+          type: 'composes with',
+          target: 'files-fileviewer',
+          why: 'onPreview leaves showing the file to the host; FileViewer renders a text file it opens.',
+        },
+        {
+          type: 'composes with',
+          target: 'files-filedocument',
+          why: 'onPreview leaves showing the file to the host; FileDocument opens a text file for reading and editing.',
+        },
       ],
     },
   },

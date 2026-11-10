@@ -959,6 +959,8 @@ export const miewebUISafelist = [
   // injected <svg> so the diagram sizes naturally instead of collapsing.
   '[&_svg]:h-auto',
   '[&_svg]:max-w-none',
+  // FileViewer — fenced code stays LTR inside dir="auto" Markdown.
+  '[&_pre]:[direction:ltr]',
   // AI pills — CollapsiblePill / MCPToolCall arbitrary utilities
   'rounded-[8px]',
   'rounded-[10px]',

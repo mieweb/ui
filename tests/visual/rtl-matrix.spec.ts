@@ -289,6 +289,16 @@ const MATRIX: {
     ),
   },
   {
+    // Opens in Edit, so Cancel/Save show at the toolbar's inline-end.
+    name: 'file-document',
+    story: 'files-filedocument--confirm-before-discard',
+    assert: sitsInline(
+      'end',
+      '[data-slot="file-document-actions"]',
+      '[data-slot="file-document-toolbar"]'
+    ),
+  },
+  {
     name: 'avatar-group',
     story: 'record-details-avatargroup--default',
     assert: avatarsStackTowardInlineEnd(
