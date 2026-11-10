@@ -241,6 +241,8 @@ function Autocomplete<T>({
         commitRow(rows[activeIndex]);
       }
     } else if (e.key === 'Escape') {
+      // Closing the list consumes Escape so an enclosing Modal stays open.
+      if (isOpen) e.stopPropagation();
       setOpen(false);
       setActiveIndex(-1);
     }
