@@ -391,6 +391,20 @@
   display: none;
 }
 
+/* Kerebron styles the menu bar for document-length editors: sticky, with a
+ * -8px top overhang (margin: calc(-1 * --kb-space-sm)). Inside the bordered
+ * one-comment field the overhang pokes above the field, painting over its
+ * top border, rounded corners, and anything docked above (the mediaCapture
+ * ribbon, mieweb/ui#734). Keep it in normal flow inside the border and round
+ * its top corners to the field's inner radius. The editable's offset
+ * (editorTop) is measured from live rects, so it follows automatically. */
+[data-slot='textarea-rich'] .kb-custom-menu {
+  position: static;
+  margin-top: 0;
+  border-start-start-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
+  border-start-end-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
+}
+
 /* Disabled/readOnly: the toolbar is made `inert` (see TextAreaRichKerebron);
  * dim it so it also reads as unavailable. */
 [data-slot='textarea-rich'][data-inert] .kb-custom-menu {

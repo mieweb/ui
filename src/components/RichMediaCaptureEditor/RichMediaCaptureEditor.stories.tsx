@@ -26,10 +26,14 @@ const mockScanDocument: ScanDocument = async () => {
     : [];
 };
 
-/** Pretends to upload and returns a stable URL, like a real media store would. */
+/**
+ * Pretends to upload: returns an object URL so the demo image actually
+ * renders. A real media store returns a persistent https URL instead — an
+ * unreachable src leaves a broken-image glyph in the document.
+ */
 const mockUploadHandler = async (file: File) => {
   await new Promise((r) => setTimeout(r, 300));
-  return `https://media.example.test/${encodeURIComponent(file.name)}`;
+  return URL.createObjectURL(file);
 };
 
 const meta: Meta<typeof RichMediaCaptureEditor> = {
@@ -57,6 +61,7 @@ Ships from the **\`@mieweb/ui/kerebron\`** entry with the same peer/WASM setup a
 ### Don't use it when
 
 - You are attaching files to a **chat message**, not inserting them into a document — [ChatComposer](?path=/docs/chat-chatcomposer--docs) (its \`+\` menu and \`addFiles\` already do this).
+- The field is a **comment-sized HTML surface**, not a Markdown document — [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) docks this same ribbon via its \`mediaCapture\` opt-in.
 - You need the plain editor — [RichEditor](?path=/docs/editors-richeditor--docs), or call its \`insertFiles\` handle method from your own UI.
 - You need **recordings or dictation**: the markdown schema has no audio node and live voice-to-text is a different model — both tracked under mieweb/ui#728, out of scope here.
 - You need **one document turned into fields** (ID, insurance card) with preview and extraction — [DocumentScanner](?path=/docs/files-documentscanner--docs).
@@ -109,6 +114,11 @@ Files that cannot land as an image/video node (a PDF through Attach file, an ove
           type: 'uses',
           target: 'overlays-tooltip',
           why: 'Ribbon buttons are icon-only; Tooltip shows each capture’s name on hover and focus.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-textarearich-kerebron',
+          why: 'TextAreaRich (Kerebron)’s mediaCapture opt-in docks this component’s capture ribbon above the comment field, through the shared CaptureDock and the same insertFiles pipeline.',
         },
       ],
     },

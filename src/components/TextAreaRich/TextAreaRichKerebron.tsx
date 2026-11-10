@@ -36,6 +36,10 @@ import {
 } from '../RichTextEditor';
 import type { TextAreaRichProps } from './TextAreaRich';
 import { getSpeechRecognition, type SpeechRecognitionLike } from './speech';
+import {
+  CaptureDock,
+  type MediaCaptureOptions,
+} from '../RichMediaCaptureEditor';
 
 /**
  * Kerebron-backed TextAreaRich surface: ProseMirror underneath, the stock
@@ -203,6 +207,16 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * {@link RichEditorProps.omitExtensions}.
    */
   omitExtensions?: readonly string[];
+  /**
+   * Docks the capture ribbon (Capture image, Capture screen, Attach file,
+   * Scan document) above the field; captures land in the document through
+   * the editor's media pipeline, so set `mediaUpload.uploadHandler` or every
+   * image embeds as a base64 `data:` URL. Pass `true` for the defaults or a
+   * {@link MediaCaptureOptions} object. Default **off**: when absent the
+   * field renders exactly as before. Kerebron surface only — same contract
+   * as `RichMediaCaptureEditor` (mieweb/ui#734).
+   */
+  mediaCapture?: boolean | MediaCaptureOptions;
 }
 
 const TextAreaRichKerebron = React.forwardRef<
@@ -236,6 +250,7 @@ const TextAreaRichKerebron = React.forwardRef<
       editorStyle,
       mediaUpload,
       omitExtensions,
+      mediaCapture,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
@@ -1203,7 +1218,10 @@ const TextAreaRichKerebron = React.forwardRef<
       return () => observer.disconnect();
     }, [ready, toolbarVisible]);
 
-    return (
+    // The field itself — built unconditionally so a `mediaCapture`-less
+    // render returns this exact tree, byte-for-byte what it was before the
+    // opt-in existed (mieweb/ui#734).
+    const field = (
       <div
         ref={wrapperRef}
         data-slot="textarea-rich"
@@ -1522,6 +1540,19 @@ const TextAreaRichKerebron = React.forwardRef<
           )}
         </div>
       </div>
+    );
+
+    if (!mediaCapture) return field;
+    const captureOptions = mediaCapture === true ? {} : mediaCapture;
+    return (
+      <CaptureDock
+        locked={inert}
+        insertFiles={(files) => editorHandleRef.current?.insertFiles?.(files)}
+        scanDocument={captureOptions.scanDocument}
+        extraCaptures={captureOptions.extraCaptures}
+      >
+        {field}
+      </CaptureDock>
     );
   }
 );
