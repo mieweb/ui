@@ -9,7 +9,11 @@ import {
   type FieldResponse,
 } from '@esheet/core';
 import { renderWithTheme } from '../test/test-utils';
-import { EsheetNarrativeField } from './EsheetNarrativeField';
+import {
+  EsheetNarrativeField,
+  narrativeText,
+  sanitizeNarrativeHtml,
+} from './EsheetNarrativeField';
 import { getNarrativeFindings } from './narrativeFindings';
 
 // ProseMirror resists jsdom simulation; field logic runs on the legacy
@@ -95,5 +99,125 @@ describe('EsheetNarrativeField', () => {
       JSON.stringify([finding])
     );
     expect(getNarrativeFindings(latest)).toEqual([finding]);
+  });
+});
+
+describe('sanitizeNarrativeHtml media opt-in (mieweb/ui#736)', () => {
+  const img = (src: string) => `<p>Note</p><img src="${src}" alt="scan">`;
+
+  it('keeps stripping images without the opt-in (regression)', () => {
+    expect(sanitizeNarrativeHtml(img('https://cdn.example/scan.png'))).toBe(
+      '<p>Note</p>'
+    );
+    expect(sanitizeNarrativeHtml(img('https://cdn.example/scan.png'), {})).toBe(
+      '<p>Note</p>'
+    );
+  });
+
+  it('keeps https and same-origin images, with src and alt only', () => {
+    expect(
+      sanitizeNarrativeHtml(
+        '<p>Note</p><img src="https://cdn.example/scan.png" alt="scan" width="8" onerror="x()">',
+        { media: true }
+      )
+    ).toBe('<p>Note</p><img src="https://cdn.example/scan.png" alt="scan">');
+    expect(
+      sanitizeNarrativeHtml(img('/uploads/scan.png'), { media: true })
+    ).toBe('<p>Note</p><img src="/uploads/scan.png" alt="scan">');
+    // Object URLs carry their creator's origin: same-origin blobs pass the
+    // check (session-scoped; durable storage is the uploadHandler's job).
+    const blob = `blob:${window.location.origin}/0f1e2d3c`;
+    expect(sanitizeNarrativeHtml(img(blob), { media: true })).toBe(
+      `<p>Note</p><img src="${blob}" alt="scan">`
+    );
+  });
+
+  it.each([
+    ['data URI', 'data:image/png;base64,iVBORw0KGgo='],
+    ['cross-origin blob URL', 'blob:https://evil.example/1-2-3'],
+    ['cross-origin http', 'http://evil.example/x.png'],
+    ['javascript URL', 'javascript:alert(1)'],
+  ])('strips %s images', (_name, src) => {
+    expect(sanitizeNarrativeHtml(img(src), { media: true })).toBe(
+      '<p>Note</p>'
+    );
+  });
+
+  it('images never contribute narrative text, so the forgery gate holds', () => {
+    const html = sanitizeNarrativeHtml(img('https://cdn.example/scan.png'), {
+      media: true,
+    });
+    expect(narrativeText(html)).toBe('Note');
+  });
+});
+
+describe('EsheetNarrativeField media capture opt-in (mieweb/ui#736)', () => {
+  const uploadHandler = async () => 'https://cdn.example/uploaded.png';
+  const imgEdit = {
+    target: {
+      innerHTML:
+        '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+    },
+  };
+
+  it('publishes image URLs when opted in with an uploadHandler', () => {
+    const onResponse = vi.fn();
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props({ onResponse })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    expect(screen.getByTestId('capture-ribbon-stub')).toBeInTheDocument();
+    fireEvent.input(screen.getByRole('textbox', { name: 'Summary' }), imgEdit);
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: 'Wound photo:',
+        attributes: expect.objectContaining({
+          narrativeHtml:
+            '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+        }),
+      })
+    );
+  });
+
+  it('ignores the opt-in without an uploadHandler (base64 is impossible)', () => {
+    const onResponse = vi.fn();
+    renderWithTheme(
+      <EsheetNarrativeField {...props({ onResponse })} mediaCapture />
+    );
+    expect(screen.queryByTestId('capture-ribbon-stub')).toBeNull();
+    fireEvent.input(screen.getByRole('textbox', { name: 'Summary' }), imgEdit);
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: 'Wound photo:',
+        attributes: expect.objectContaining({
+          narrativeHtml: '<p>Wound photo:</p>',
+        }),
+      })
+    );
+  });
+
+  it('restores stored image markup when the forgery gate passes', () => {
+    const { container } = renderWithTheme(
+      <EsheetNarrativeField
+        {...props({
+          response: {
+            answer: 'Wound photo:',
+            attributes: {
+              narrativeText: 'Wound photo:',
+              narrativeHtml:
+                '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+            },
+          } as unknown as FieldResponse,
+        })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    expect(
+      container.querySelector('img[src="https://cdn.example/scan.png"]')
+    ).toBeInTheDocument();
   });
 });

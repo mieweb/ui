@@ -29,6 +29,12 @@ export interface MediaCaptureOptions {
   scanDocument?: ScanDocument | null;
   /** Additional host captures appended after the built-ins. */
   extraCaptures?: CaptureAction[];
+  /**
+   * Called before a screen capture starts; resolve `false` to cancel. Lets
+   * clinical hosts interpose a PHI notice — a shared screen can show other
+   * patients' data — before the browser's picker opens (mieweb/ui#736).
+   */
+  confirmScreenCapture?: () => boolean | Promise<boolean>;
 }
 
 export interface CaptureDockProps extends MediaCaptureOptions {
@@ -75,6 +81,7 @@ export function CaptureDock({
   annotateAnchorRef,
   scanDocument,
   extraCaptures = [],
+  confirmScreenCapture,
   children,
 }: CaptureDockProps) {
   const m = useMessages();
@@ -155,6 +162,7 @@ export function CaptureDock({
     },
     onStatus: setStatus,
     scanDocument,
+    confirmScreenCapture,
   });
 
   const visible = [...captures, ...extraCaptures].filter(

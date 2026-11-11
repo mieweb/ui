@@ -1577,6 +1577,7 @@ const TextAreaRichKerebron = React.forwardRef<
         annotateAnchorRef={gutterWrapperRef}
         scanDocument={captureOptions.scanDocument}
         extraCaptures={captureOptions.extraCaptures}
+        confirmScreenCapture={captureOptions.confirmScreenCapture}
       >
         {field}
       </CaptureDock>
