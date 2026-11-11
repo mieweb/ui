@@ -797,6 +797,7 @@ export function SuperChat({
   // SuperChat's host callback (mentions + base64 `data:` URL attachments).
   const handleComposerSend = React.useCallback(
     async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
+      if (readOnly) return;
       const epoch = draftEpochRef.current;
       try {
         const text = message.content;
@@ -838,7 +839,7 @@ export function SuperChat({
         }
       }
     },
-    [conversation, onMessageSent, composerProps?.mentionOptions]
+    [conversation, onMessageSent, composerProps?.mentionOptions, readOnly]
   );
 
   return (
@@ -1057,7 +1058,6 @@ export function SuperChat({
       )}
 
       <ChatComposer
-        disabled={readOnly}
         placeholder={
           readOnly
             ? 'Read-only conversation'
@@ -1095,6 +1095,8 @@ export function SuperChat({
           ) : undefined
         }
         {...composerProps}
+        // A host may disable a writable composer, never enable a read-only one.
+        disabled={readOnly || composerProps?.disabled}
         // Matches the thread's p-4 gutter so the composer card lines up with
         // the messages instead of running flush against the panel edges.
         className={cn('px-4 pb-4', composerProps?.className)}

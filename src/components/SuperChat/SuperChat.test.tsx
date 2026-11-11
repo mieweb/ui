@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -918,6 +919,53 @@ describe('SuperChat', () => {
         'cc @reviewer and @Everyone, not @Triage',
         expect.objectContaining({ mentions: ['u2', 'team'] })
       );
+    });
+
+    it('matches whole mention tokens only, longest first, in any script', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const send = async (text: string) => {
+        onMessageSent.mockClear();
+        await user.clear(screen.getByLabelText('Message'));
+        await user.type(screen.getByLabelText('Message'), text);
+        await user.click(screen.getByLabelText('Send message'));
+        return onMessageSent.mock.calls[0][1].mentions;
+      };
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            mentionOptions: [
+              { id: 'john', label: 'John', value: 'john' },
+              { id: 'johndoe', label: 'John Doe', value: 'john.doe' },
+              { id: 'li', label: '李', value: '李' },
+              { id: 'liming', label: '李明', value: '李明' },
+            ],
+          }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      expect(await send('ask @john.doe')).toEqual(['johndoe']);
+      expect(await send('thanks @john.')).toEqual(['john']);
+      expect(await send('@john, @john.doe!')).toEqual(['john', 'johndoe']);
+      expect(await send('问 @李明')).toEqual(['liming']);
+      expect(await send('问 @李，好')).toEqual(['li']);
+      expect(await send('mail me@john.doe')).toEqual([]);
+    });
+
+    it('keeps a read-only conversation disabled whatever composerProps says', () => {
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          readOnly
+          composerProps={{ disabled: false }}
+        />
+      );
+      expect(screen.getByLabelText('Message')).toBeDisabled();
     });
 
     it('sends no mentions with an empty mentionOptions', async () => {
@@ -2159,6 +2207,59 @@ describe('SuperChatInbox', () => {
           sidebarWidth: 480,
         });
         const handle = screen.getByRole('separator');
+        expect(sidebarWidth(container)).toBe('360px');
+        expect(handle).toHaveAttribute('aria-valuenow', '360');
+        expect(handle).toHaveAttribute('aria-valuemax', '360');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('lowers the sidebar minimum when the inbox is too narrow for both panes', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 400 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({ resizableSidebar: true });
+        const handle = screen.getByRole('separator');
+        // 400 - 240 for the panel leaves 160 for the list, below its 200 minimum.
+        expect(sidebarWidth(container)).toBe('160px');
+        expect(handle).toHaveAttribute('aria-valuemin', '160');
+        expect(handle).toHaveAttribute('aria-valuemax', '160');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('re-clamps a drag in progress when the inbox shrinks', () => {
+      let resize: (width: number) => void = () => {};
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe(target: Element) {
+            // Other parts observe too; drive only the inbox's own observer.
+            if (target.getAttribute('data-slot') !== 'superchat-inbox') return;
+            resize = (width) => this.cb([{ contentRect: { width } }]);
+            this.cb([{ contentRect: { width: 1000 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({ resizableSidebar: true });
+        const handle = screen.getByRole('separator');
+        pointer(handle, 'pointerdown', 256);
+        pointer(handle, 'pointermove', 480);
+        expect(sidebarWidth(container)).toBe('480px');
+        act(() => resize(600));
         expect(sidebarWidth(container)).toBe('360px');
         expect(handle).toHaveAttribute('aria-valuenow', '360');
         expect(handle).toHaveAttribute('aria-valuemax', '360');

@@ -862,6 +862,10 @@ module.exports = {
     'start-[3px]',
     'group-hover:bg-primary-500',
     'group-focus-visible:bg-primary-600',
+    // AIMessage pending (scheduled) bubble
+    'border-neutral-400',
+    'dark:border-neutral-500',
+    'dark:bg-transparent',
     'col-span-3',
     'col-start-1',
     'col-start-3',

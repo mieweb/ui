@@ -84,27 +84,44 @@ export function detectMentions(
   );
 }
 
+/** Letters, digits and combining marks in any script, plus `_`. */
+const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
+
 /**
- * Ids whose `@token` appears in `text`. Used for a host's own
- * `mentionOptions`, whose inserted token is `value`, or the first word of
+ * Ids whose `@token` appears in `text`, in `entries` order. Used for a host's
+ * own `mentionOptions`, whose inserted token is `value`, or the first word of
  * `label` (the same default the composer inserts).
+ *
+ * Only whole tokens count: the `@` must not follow a letter, digit or another
+ * `@`, and the token must not run on into a letter or digit, in any script
+ * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
+ * the longest one at that spot wins, so `@john.doe` is not also `@john`.
  */
 export function matchMentionTokens(
   text: string,
   entries: { id: string; token: string }[]
 ): string[] {
-  const ids: string[] = [];
-  for (const { id, token } of entries) {
-    // Match a whole mention token only: the `@` must not be preceded by a word
-    // character or another `@`, and the token must not be followed by a word
-    // character (so `@Triage` does not match `@TriageAgent`).
+  const found = new Set<string>();
+  const taken: [number, number][] = [];
+  const longestFirst = [...entries].sort(
+    (a, b) => b.token.length - a.token.length
+  );
+  for (const { id, token } of longestFirst) {
     const pattern = new RegExp(
-      `(?<![\\w@])${escapeRegExp('@' + token)}(?![\\w])`,
-      'i'
+      `(?<![${MENTION_WORD}@])${escapeRegExp('@' + token)}(?![${MENTION_WORD}])`,
+      'giu'
     );
-    if (pattern.test(text) && !ids.includes(id)) ids.push(id);
+    for (const match of text.matchAll(pattern)) {
+      const start = match.index;
+      const end = start + match[0].length;
+      if (taken.some(([s, e]) => start < e && s < end)) continue;
+      taken.push([start, end]);
+      found.add(id);
+    }
   }
-  return ids;
+  return entries
+    .map((e) => e.id)
+    .filter((id, i, all) => found.has(id) && all.indexOf(id) === i);
 }
 
 export function lastMessageByTime(

@@ -99,7 +99,10 @@ export interface SuperChatInboxProps {
    * double-click on the divider restores. Defaults to `256`.
    */
   defaultSidebarWidth?: number;
-  /** Narrowest the divider can make the sidebar, in px. Defaults to `200`. */
+  /**
+   * Narrowest the divider can make the sidebar, in px. Defaults to `200`. An
+   * inbox too narrow for this plus the panel's 240px lowers it to what's left.
+   */
   minSidebarWidth?: number;
   /**
    * Widest the divider can make the sidebar, in px. Defaults to `480`. A narrow
@@ -222,14 +225,17 @@ export function SuperChatInbox({
     availableWidth === undefined
       ? maxSidebarWidth
       : Math.max(
-          minSidebarWidth,
+          0,
           Math.min(maxSidebarWidth, availableWidth - MIN_PANEL_WIDTH)
         );
+  // An inbox narrower than both minimums together gives the panel its 240px
+  // first: the list's minimum (and its announced bound) drops to what's left.
+  const narrowestSidebar = Math.min(minSidebarWidth, widestSidebar);
 
   const clampStoredWidth = (w: number) =>
     Math.round(Math.min(maxSidebarWidth, Math.max(minSidebarWidth, w)));
   const clampWidth = (w: number) =>
-    Math.round(Math.min(widestSidebar, Math.max(minSidebarWidth, w)));
+    Math.round(Math.min(widestSidebar, Math.max(narrowestSidebar, w)));
   const [internalWidth, setInternalWidth] = React.useState(defaultSidebarWidth);
   // Width while a drag is in progress; kept here so the host re-renders once
   // per drag, not once per pointermove.
@@ -239,7 +245,9 @@ export function SuperChatInbox({
   // reset compares against it, so a key press that leaves the divider where it
   // is never overwrites the stored width.
   const savedWidth = clampStoredWidth(sidebarWidth ?? internalWidth);
-  const width = dragWidth ?? settledWidth;
+  // Re-clamped every render, so an inbox that shrinks mid-drag never leaves
+  // the panel under its minimum or announces a width past the maximum.
+  const width = dragWidth === null ? settledWidth : clampWidth(dragWidth);
   const resizeSidebar = (next: number, final: boolean, reset = false) => {
     const clamped = clampWidth(next);
     if (!final) {
@@ -291,7 +299,7 @@ export function SuperChatInbox({
       {showSidebar && resizableSidebar && (
         <SidebarResizeHandle
           width={width}
-          minWidth={minSidebarWidth}
+          minWidth={narrowestSidebar}
           maxWidth={widestSidebar}
           onResize={resizeSidebar}
           onReset={() => resizeSidebar(defaultSidebarWidth, true, true)}
