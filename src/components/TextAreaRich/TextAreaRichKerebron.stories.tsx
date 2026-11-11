@@ -41,7 +41,7 @@ Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text
 
 ### Media capture opt-in
 
-Set \`mediaCapture\` to dock the capture ribbon from [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) above the field — same actions, same \`RichEditorHandle.insertFiles\` pipeline, same conditional availability. Default **off**: without the prop nothing about the field changes. Pass \`true\` for the defaults or a \`MediaCaptureOptions\` object (\`scanDocument\`, \`extraCaptures\`); set \`mediaUpload.uploadHandler\` or captures embed as base64 \`data:\` URLs.`,
+Set \`mediaCapture\` to dock the capture ribbon from [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) above the field — same actions, same \`RichEditorHandle.insertFiles\` pipeline, same conditional availability. Default **off**: without the prop nothing about the field changes. Pass \`true\` for the defaults or a \`MediaCaptureOptions\` object (\`scanDocument\`, \`extraCaptures\`); set \`mediaUpload.uploadHandler\` or captures embed as base64 \`data:\` URLs. Treat the prop as mount-time static — toggling it on a live field remounts the editor and resets undo history (the default-off DOM is kept byte-identical for existing consumers, so the dock wrapper cannot stay mounted).`,
       },
     },
     catalog: {

@@ -213,8 +213,10 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * the editor's media pipeline, so set `mediaUpload.uploadHandler` or every
    * image embeds as a base64 `data:` URL. Pass `true` for the defaults or a
    * {@link MediaCaptureOptions} object. Default **off**: when absent the
-   * field renders exactly as before. Kerebron surface only — same contract
-   * as `RichMediaCaptureEditor` (mieweb/ui#734).
+   * field renders exactly as before. Treat as mount-time static: toggling
+   * between off and on swaps the field's root element, remounting the
+   * editor (selection and undo history reset). Kerebron surface only — same
+   * contract as `RichMediaCaptureEditor` (mieweb/ui#734).
    */
   mediaCapture?: boolean | MediaCaptureOptions;
 }
