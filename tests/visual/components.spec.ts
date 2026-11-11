@@ -277,10 +277,33 @@ test.describe('Visual Regression Tests - Core Components', () => {
       timeout: 15000,
     });
     // The story echoes the serialized document; the image node must carry the
-    // uploaded URL, not a base64 embed.
+    // uploaded URL (the mock returns an object URL), not a base64 embed.
     await expect(page.getByTestId('markdown-output')).toContainText(
-      '![note-photo.png](https://media.example.test/note-photo.png)'
+      '![note-photo.png](blob:'
     );
+  });
+
+  // TextAreaRich (Kerebron) mediaCapture opt-in (mieweb/ui#734): the same
+  // ribbon docked above the comment field, round-tripping through the real
+  // editor into the HTML the field emits.
+  test('TextAreaRich Kerebron - mediaCapture attach round-trips into HTML via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the field's HTML: the image carries the uploaded URL
+    // (the mock returns an object URL), not a base64 embed.
+    await expect(page.getByTestId('html-output')).toContainText('src="blob:');
   });
 
   test('DictationButton - Mock provider', async ({ page }) => {

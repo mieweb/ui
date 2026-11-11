@@ -32,6 +32,7 @@ export type { TextAreaRichProps } from './components/TextAreaRich';
 export {
   RichMediaCaptureEditor,
   type RichMediaCaptureEditorProps,
+  type MediaCaptureOptions,
   type CaptureAction,
   type CaptureGroup,
   type ScanDocument,

@@ -37,7 +37,11 @@ Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text
 - **Strictly controlled**, like a native input: an edit that \`onChange\` does not echo back into \`value\` reverts. (The legacy engine only applied \`value\` when the prop changed.)
 - The block gutter \`+\` button rests beside the field and docks inward on hover/focus (the legacy engine reserves the start padding permanently).
 - \`sanitizeHtml\` and \`markdownShortcuts\` from \`RichTextEditorProps\` are not honored — pastes are filtered through the ProseMirror schema (instead of \`sanitizeHtml\`) and markdown block shortcuts are always on. \`variableGroups\` **is** honored: the toolbar gains a searchable **Variables** menu that inserts \`{{variable}}\` tokens at the caret through a ProseMirror transaction (native undo). The legacy \`<< >>\` → \`{{ }}\` converter button is not ported.
-- Output HTML is ProseMirror-normalized (e.g. no \`style\` attributes from \`execCommand\`).`,
+- Output HTML is ProseMirror-normalized (e.g. no \`style\` attributes from \`execCommand\`).
+
+### Media capture opt-in
+
+Set \`mediaCapture\` to dock the capture ribbon from [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) above the field — same actions, same \`RichEditorHandle.insertFiles\` pipeline, same conditional availability. Default **off**: without the prop nothing about the field changes. Pass \`true\` for the defaults or a \`MediaCaptureOptions\` object (\`scanDocument\`, \`extraCaptures\`); set \`mediaUpload.uploadHandler\` or captures embed as base64 \`data:\` URLs. The block (\`+\`) menu gains a "Hide/Show capture bar" toggle (labels via \`blockMenuLabels.hideCaptureBar\`/\`showCaptureBar\`), mirroring the toolbar toggle. Treat the prop as mount-time static — toggling it on a live field remounts the editor and resets undo history (the default-off DOM is kept byte-identical for existing consumers, so the dock wrapper cannot stay mounted).`,
       },
     },
     catalog: {
@@ -62,6 +66,11 @@ Since 0.12 this engine also powers the main barrel's [Textarea](?path=/docs/text
           type: 'composes with',
           target: 'editors-macrolibrary',
           why: 'The macros prop enables .shortcut dot-phrase expansion, an "Insert macro" gutter flyout, and a "Show macro library" item that docks the MacroLibrary panel.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-richmediacaptureeditor',
+          why: 'The mediaCapture opt-in docks that component’s capture ribbon above the field, inserting captures through the same RichEditorHandle.insertFiles / mediaUpload pipeline.',
         },
       ],
     },
@@ -215,6 +224,50 @@ export const Disabled: Story = {
       description: {
         story:
           'Disabled and `readOnly` make the ProseMirror surface non-editable, mark the stock toolbar `inert`, and dim it; `readOnly` keeps the text selectable and announces `aria-readonly`.',
+      },
+    },
+  },
+};
+
+/**
+ * Pretends to upload: returns an object URL so the demo image actually
+ * renders. A real media store returns a persistent https URL instead — an
+ * unreachable src leaves a broken-image glyph in the document.
+ */
+const mockUploadHandler = async (file: File) => {
+  await new Promise((r) => setTimeout(r, 300));
+  return URL.createObjectURL(file);
+};
+
+function WithMediaCaptureExample() {
+  const [value, setValue] = useState('<p>Attach evidence below.</p>');
+  return (
+    <div className="flex max-w-2xl flex-col gap-2">
+      <TextAreaRich
+        value={value}
+        onChange={setValue}
+        mediaCapture
+        mediaUpload={{ uploadHandler: mockUploadHandler }}
+        aria-label="Comment with media capture"
+      />
+      <pre
+        data-testid="html-output"
+        className="max-h-40 overflow-auto text-xs whitespace-pre-wrap"
+      >
+        {value}
+      </pre>
+    </div>
+  );
+}
+
+export const WithMediaCapture: Story = {
+  name: 'With media capture',
+  render: () => <WithMediaCaptureExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The `mediaCapture` opt-in docks the capture ribbon above the field; captures land at the caret as image/video nodes through the editor’s `mediaUpload` pipeline (here a mock `uploadHandler` — the `<pre>` echoes the HTML the field emits). Unavailable captures are hidden, and the ribbon disappears entirely while the field is `disabled`/`readOnly`.',
       },
     },
   },
