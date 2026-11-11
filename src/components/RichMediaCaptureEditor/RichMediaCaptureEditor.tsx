@@ -42,8 +42,8 @@ export const RichMediaCaptureEditor = React.forwardRef<
       getContent: () => editorRef.current!.getContent(),
       focus: () => editorRef.current?.focus(),
       insertFiles: (files: File[]) => editorRef.current!.insertFiles!(files),
-      replaceImage: (src: string, file: File) =>
-        editorRef.current!.replaceImage!(src, file),
+      replaceImage: (src: string, file: File, occurrence?: number) =>
+        editorRef.current!.replaceImage!(src, file, occurrence),
     }),
     []
   );
