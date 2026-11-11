@@ -174,12 +174,18 @@ export interface RichEditorHandle {
    * Replace the `src` of the image node currently showing `src` with `file`,
    * through the same mount-time {@link RichEditorProps.mediaUpload} pipeline
    * as insertion — the save path of the annotate flow (mieweb/ui#735).
+   * `occurrence` disambiguates duplicates: the index of the target among
+   * same-src images in document order (defaults to the first).
    * Resolves `false` when the file fails validation, the upload rejects, or
    * the image left the document mid-upload; nothing throws.
    *
    * Optional for the same compatibility reason as `insertFiles`.
    */
-  replaceImage?: (src: string, file: File) => Promise<boolean>;
+  replaceImage?: (
+    src: string,
+    file: File,
+    occurrence?: number
+  ) => Promise<boolean>;
 }
 
 /**
@@ -647,7 +653,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             mediaUploadRef.current ?? {}
           );
         },
-        replaceImage: async (src: string, file: File): Promise<boolean> => {
+        replaceImage: async (
+          src: string,
+          file: File,
+          occurrence?: number
+        ): Promise<boolean> => {
           await readyRef.current?.catch(() => undefined);
           const editor = editorInstance.current;
           if (!editor) return false;
@@ -655,7 +665,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             editor.view,
             src,
             file,
-            mediaUploadRef.current ?? {}
+            mediaUploadRef.current ?? {},
+            occurrence
           );
         },
       }),

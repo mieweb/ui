@@ -116,12 +116,21 @@ export async function insertMediaFiles(
  * upload resolves, so edits made while the upload was in flight cannot
  * misplace the swap; if the image was deleted meanwhile, the replace reports
  * `false` instead of inserting anything. Other attrs (alt, title) survive.
+ *
+ * A src does not uniquely identify a node — attaching the same file twice
+ * yields identical data URLs — so callers pass the `occurrence` index of the
+ * image among same-src images in document order. When duplicates were
+ * added/removed mid-edit the index is re-checked: a single survivor is
+ * unambiguous, otherwise the swap is refused rather than guessed (exact
+ * fidelity under concurrent edits needs placeholder nodes mapped through
+ * transactions — the same trade-off documented on the insert path).
  */
 export async function replaceImageSrc(
   view: MediaInsertView,
   oldSrc: string,
   file: File,
-  options: MediaUploadOptions
+  options: MediaUploadOptions,
+  occurrence = 0
 ): Promise<boolean> {
   const {
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
@@ -141,18 +150,15 @@ export async function replaceImageSrc(
     const src = uploadHandler
       ? await uploadHandler(file)
       : await fileToDataURL(file);
-    let found: number | null = null;
+    const matches: number[] = [];
     view.state.doc.descendants((node, pos) => {
-      if (
-        found === null &&
-        node.type.name === 'image' &&
-        node.attrs.src === oldSrc
-      ) {
-        found = pos;
+      if (node.type.name === 'image' && node.attrs.src === oldSrc) {
+        matches.push(pos);
       }
-      return found === null;
+      return true;
     });
-    if (found === null) return false;
+    const found = matches.length === 1 ? matches[0] : matches[occurrence];
+    if (found === undefined) return false;
     const node = view.state.doc.nodeAt(found);
     if (!node) return false;
     view.dispatch(

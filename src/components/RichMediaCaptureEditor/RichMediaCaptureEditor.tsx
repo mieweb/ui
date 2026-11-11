@@ -52,7 +52,9 @@ export const RichMediaCaptureEditor = React.forwardRef<
     <CaptureDock
       locked={locked}
       insertFiles={(files) => editorRef.current?.insertFiles?.(files)}
-      replaceImage={(src, file) => editorRef.current?.replaceImage?.(src, file)}
+      replaceImage={(src, file, occurrence) =>
+        editorRef.current?.replaceImage?.(src, file, occurrence)
+      }
       scanDocument={scanDocument}
       extraCaptures={extraCaptures}
     >

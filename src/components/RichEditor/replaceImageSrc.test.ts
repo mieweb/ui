@@ -102,4 +102,42 @@ describe('replaceImageSrc', () => {
     expect(ok).toBe(false);
     expect(dispatch).not.toHaveBeenCalled();
   });
+
+  it('tells same-src duplicates apart by occurrence index', async () => {
+    // Attaching the same file twice yields identical data URLs — the src
+    // alone cannot identify a node (mieweb/ui#747 review).
+    const { view, setNodeMarkup } = fakeView([
+      { src: 'data:dup', alt: 'first' },
+      { src: 'data:dup', alt: 'second' },
+    ]);
+
+    const ok = await replaceImageSrc(view, 'data:dup', png(), {}, 1);
+
+    expect(ok).toBe(true);
+    expect(setNodeMarkup).toHaveBeenCalledWith(2, undefined, {
+      src: expect.stringMatching(/^data:image\/png;base64,/) as string,
+      alt: 'second',
+    });
+  });
+
+  it('refuses an out-of-range occurrence when duplicates remain ambiguous', async () => {
+    const { view, dispatch } = fakeView([
+      { src: 'data:dup' },
+      { src: 'data:dup' },
+    ]);
+
+    // Index 2 no longer exists (a duplicate was deleted mid-edit): with two
+    // candidates left, guessing could annotate the wrong image.
+    expect(await replaceImageSrc(view, 'data:dup', png(), {}, 2)).toBe(false);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('accepts a stale occurrence when a single match remains unambiguous', async () => {
+    const { view, setNodeMarkup } = fakeView([{ src: 'data:dup' }]);
+
+    const ok = await replaceImageSrc(view, 'data:dup', png(), {}, 3);
+
+    expect(ok).toBe(true);
+    expect(setNodeMarkup).toHaveBeenCalledOnce();
+  });
 });

@@ -39,6 +39,78 @@ type Op =
   | { kind: 'stroke'; color: string; points: Point[] }
   | { kind: 'text'; color: string; at: Point; value: string };
 
+interface PendingText {
+  at: Point;
+  value: string;
+  /** Captured at placement so a palette change mid-typing can't recolor it. */
+  color: string;
+}
+
+interface AnnoState {
+  ops: Op[];
+  pending: PendingText | null;
+}
+
+type AnnoAction =
+  | { type: 'reset' }
+  | { type: 'add'; op: Op }
+  | { type: 'undo' }
+  | { type: 'place'; at: Point; color: string }
+  | { type: 'input'; value: string }
+  | { type: 'nudge'; dx: number; dy: number }
+  | { type: 'commit' }
+  | { type: 'discard' };
+
+/**
+ * Ops and the pending note live in one reducer so committing a note is a
+ * single pure transition — an `ops` update enqueued inside a `pending`
+ * updater would run twice under StrictMode and duplicate the note.
+ */
+function annoReducer(state: AnnoState, action: AnnoAction): AnnoState {
+  switch (action.type) {
+    case 'reset':
+      return { ops: [], pending: null };
+    case 'add':
+      return { ...state, ops: [...state.ops, action.op] };
+    case 'undo':
+      return { ...state, ops: state.ops.slice(0, -1) };
+    case 'place':
+      return {
+        ...state,
+        pending: { at: action.at, color: action.color, value: '' },
+      };
+    case 'input':
+      return state.pending
+        ? { ...state, pending: { ...state.pending, value: action.value } }
+        : state;
+    case 'nudge':
+      return state.pending
+        ? {
+            ...state,
+            pending: {
+              ...state.pending,
+              at: {
+                x: Math.min(1, Math.max(0, state.pending.at.x + action.dx)),
+                y: Math.min(1, Math.max(0, state.pending.at.y + action.dy)),
+              },
+            },
+          }
+        : state;
+    case 'commit':
+      return {
+        ops: state.pending?.value.trim()
+          ? [...state.ops, { kind: 'text', ...state.pending }]
+          : state.ops,
+        pending: null,
+      };
+    case 'discard':
+      return { ...state, pending: null };
+  }
+}
+
+/** Alt+Arrow nudge step for keyboard-placed notes (fraction of the image). */
+const NUDGE = 0.02;
+
 /** Annotation palette: high-contrast marker colors, not theme tokens — they
  * are burned into user content and must survive light/dark mode changes. */
 const COLORS = ['#dc2626', '#2563eb', '#16a34a', '#111111'] as const;
@@ -109,11 +181,10 @@ export function AnnotateImageDialog({
   const [img, setImg] = React.useState<HTMLImageElement | null>(null);
   const [tool, setTool] = React.useState<Tool>('pen');
   const [color, setColor] = React.useState<string>(COLORS[0]);
-  const [ops, setOps] = React.useState<Op[]>([]);
-  const [pendingText, setPendingText] = React.useState<{
-    at: Point;
-    value: string;
-  } | null>(null);
+  const [{ ops, pending }, dispatch] = React.useReducer(annoReducer, {
+    ops: [],
+    pending: null,
+  });
   const [error, setError] = React.useState<string | null>(null);
   const [saving, setSaving] = React.useState(false);
   // The in-flight stroke mutates a ref (one state commit per frame would
@@ -123,8 +194,7 @@ export function AnnotateImageDialog({
   // Reset per image.
   React.useEffect(() => {
     setImg(null);
-    setOps([]);
-    setPendingText(null);
+    dispatch({ type: 'reset' });
     setError(null);
     setTool('pen');
     if (!src) return;
@@ -172,30 +242,18 @@ export function AnnotateImageDialog({
     };
   };
 
-  const commitPendingText = () => {
-    setPendingText((pending) => {
-      if (pending && pending.value.trim()) {
-        setOps((prev) => [
-          ...prev,
-          { kind: 'text', color, at: pending.at, value: pending.value },
-        ]);
-      }
-      return null;
-    });
-  };
-
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!img || saving) return;
     // Suppress the compatibility mouse events: mousedown's default action
     // would move focus to the modal container, instantly blurring (and so
     // discarding) the note input spawned below.
     e.preventDefault();
-    if (pendingText) {
-      commitPendingText();
+    if (pending) {
+      dispatch({ type: 'commit' });
       return;
     }
     if (tool === 'text') {
-      setPendingText({ at: toPoint(e), value: '' });
+      dispatch({ type: 'place', at: toPoint(e), color });
       return;
     }
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -212,7 +270,7 @@ export function AnnotateImageDialog({
   const handlePointerUp = () => {
     const stroke = liveStroke.current;
     liveStroke.current = null;
-    if (stroke) setOps((prev) => [...prev, stroke]);
+    if (stroke) dispatch({ type: 'add', op: stroke });
   };
 
   const repaintLive = () => {
@@ -223,24 +281,19 @@ export function AnnotateImageDialog({
 
   const handleSave = async () => {
     if (!img || saving) return;
-    commitPendingText();
+    dispatch({ type: 'commit' });
     setSaving(true);
     try {
       // Export at natural resolution from a fresh canvas: the display canvas
-      // may hold an uncommitted pending-text frame, and React state inside
-      // `commitPendingText` hasn't flushed yet — compose from source data.
+      // may hold an uncommitted pending-text frame, and the reducer dispatch
+      // above hasn't flushed yet — compose from this render's source data.
       const out = document.createElement('canvas');
       out.width = img.naturalWidth;
       out.height = img.naturalHeight;
       const ctx = out.getContext('2d')!;
       const all = [...ops];
-      if (pendingText?.value.trim()) {
-        all.push({
-          kind: 'text',
-          color,
-          at: pendingText.at,
-          value: pendingText.value,
-        });
+      if (pending?.value.trim()) {
+        all.push({ kind: 'text', ...pending });
       }
       drawOps(ctx, img, all);
       const blob = await new Promise<Blob>((resolve, reject) =>
@@ -282,7 +335,10 @@ export function AnnotateImageDialog({
     <Modal
       open={!!src}
       onOpenChange={(open) => {
-        if (!open) onClose();
+        // Escape/backdrop/header-close during save would dismiss the dialog
+        // without cancelling the in-flight export/upload — the image would
+        // still be replaced after an apparent cancel. Hold the dialog open.
+        if (!open && !saving) onClose();
       }}
       size="3xl"
       aria-label={m('Annotate image')}
@@ -326,7 +382,7 @@ export function AnnotateImageDialog({
           />
           <button
             type="button"
-            onClick={() => setOps((prev) => prev.slice(0, -1))}
+            onClick={() => dispatch({ type: 'undo' })}
             disabled={!ops.length}
             aria-label={m('Undo')}
             className={cn(
@@ -342,9 +398,18 @@ export function AnnotateImageDialog({
           <canvas
             ref={canvasRef}
             data-slot="annotate-canvas"
-            // The canvas is pointer-driven; the toolbar is the keyboard
-            // surface and Save/Cancel live in the footer.
+            // Pen strokes are pointer-only, but text notes have a keyboard
+            // path: Tab to the canvas, Enter/Space drops a note mid-image,
+            // Alt+Arrows nudge it from inside the input below.
+            tabIndex={0}
             aria-label={m('Annotation canvas')}
+            onKeyDown={(e) => {
+              if (!img || saving || pending) return;
+              if (tool === 'text' && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                dispatch({ type: 'place', at: { x: 0.5, y: 0.5 }, color });
+              }
+            }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -356,24 +421,42 @@ export function AnnotateImageDialog({
               tool === 'text' ? 'cursor-text' : 'cursor-crosshair'
             )}
           />
-          {pendingText && canvasRef.current && (
+          {pending && canvasRef.current && (
             <input
               // Focus on mount: the input exists because the user just
               // placed a note on the canvas — this is a continuation of that
               // action, not a focus steal (hence no autoFocus prop).
               ref={(el) => el?.focus()}
-              value={pendingText.value}
+              value={pending.value}
               onChange={(e) =>
-                setPendingText((p) => p && { ...p, value: e.target.value })
+                dispatch({ type: 'input', value: e.target.value })
               }
               onKeyDown={(e) => {
-                if (e.key === 'Enter') commitPendingText();
+                if (e.key === 'Enter') dispatch({ type: 'commit' });
                 if (e.key === 'Escape') {
                   e.stopPropagation(); // keep the dialog open
-                  setPendingText(null);
+                  dispatch({ type: 'discard' });
+                }
+                if (e.altKey && e.key.startsWith('Arrow')) {
+                  e.preventDefault();
+                  dispatch({
+                    type: 'nudge',
+                    dx:
+                      e.key === 'ArrowLeft'
+                        ? -NUDGE
+                        : e.key === 'ArrowRight'
+                          ? NUDGE
+                          : 0,
+                    dy:
+                      e.key === 'ArrowUp'
+                        ? -NUDGE
+                        : e.key === 'ArrowDown'
+                          ? NUDGE
+                          : 0,
+                  });
                 }
               }}
-              onBlur={commitPendingText}
+              onBlur={() => dispatch({ type: 'commit' })}
               aria-label={m('Note text')}
               placeholder={m('Type a note')}
               className={cn(
@@ -381,9 +464,18 @@ export function AnnotateImageDialog({
                 'border-neutral-400 dark:bg-neutral-900/80'
               )}
               style={{
-                left: `${pendingText.at.x * 100}%`,
-                top: `${pendingText.at.y * 100}%`,
-                color,
+                // Offset from the *canvas*, not the full-width wrapper the
+                // canvas is centered in — percentages of the wrapper would
+                // drift sideways on narrow/portrait images. Physical px from
+                // canvas pixel math:
+                // rtl-ignore -- canvas-coordinate math is physical
+                left:
+                  canvasRef.current.offsetLeft +
+                  pending.at.x * canvasRef.current.offsetWidth,
+                top:
+                  canvasRef.current.offsetTop +
+                  pending.at.y * canvasRef.current.offsetHeight,
+                color: pending.color,
               }}
             />
           )}

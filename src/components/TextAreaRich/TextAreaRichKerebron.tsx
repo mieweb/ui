@@ -1569,8 +1569,8 @@ const TextAreaRichKerebron = React.forwardRef<
       <CaptureDock
         locked={inert || !captureBarVisible}
         insertFiles={(files) => editorHandleRef.current?.insertFiles?.(files)}
-        replaceImage={(src, file) =>
-          editorHandleRef.current?.replaceImage?.(src, file)
+        replaceImage={(src, file, occurrence) =>
+          editorHandleRef.current?.replaceImage?.(src, file, occurrence)
         }
         // Inside the sliding-gutter hover scope: a sibling button would
         // collapse the gutter (and shift the layout) when hovered.

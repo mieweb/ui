@@ -99,6 +99,8 @@ Files that cannot land as an image/video node (a PDF through Attach file, an ove
 
 Hover any image in the document (or arrow the caret next to it and Tab) and a pencil button opens the **annotate dialog**: draw with the pen, drop text notes, undo, then **Save** flattens the annotations into a new PNG that replaces the image through the same \`mediaUpload\` pipeline — \`RichEditorHandle.replaceImage\` (mieweb/ui#735). Cancel/Escape discards. Annotations are burned in: there is no re-editable annotation layer, and no new document node types. Works for every image regardless of how it arrived — captured, attached, or pasted.
 
+Text notes have a full keyboard path: Tab to the canvas, press Enter with the text tool active to drop a note mid-image, nudge it with Alt+Arrows while typing, Enter to commit. Pen strokes remain pointer-only.
+
 ### Limitations
 
 - **Native document-scanner adapters are unverified on devices**; Storybook exercises Scan document through a mock.

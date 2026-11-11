@@ -50,7 +50,11 @@ export interface CaptureDockProps extends MediaCaptureOptions {
    * {@link AnnotateImageDialog} and swaps in the flattened PNG
    * (mieweb/ui#735). Omit to keep the dock insert-only.
    */
-  replaceImage?: (src: string, file: File) => Promise<boolean> | undefined;
+  replaceImage?: (
+    src: string,
+    file: File,
+    occurrence?: number
+  ) => Promise<boolean> | undefined;
   /**
    * A *positioned* element inside the editor's own hover scope to mount the
    * annotate button into. Hosts whose layout reacts to :hover (e.g.
@@ -81,7 +85,10 @@ export function CaptureDock({
   const surfaceRef = React.useRef<HTMLDivElement>(null);
   const annotateEnabled = Boolean(replaceImage) && !locked;
   const target = useAnnotateTarget(surfaceRef, annotateEnabled);
-  const [annotateSrc, setAnnotateSrc] = React.useState<string | null>(null);
+  const [annotate, setAnnotate] = React.useState<{
+    src: string;
+    occurrence: number;
+  } | null>(null);
   const [overlay, setOverlay] = React.useState<{
     mount: HTMLElement;
     top: number;
@@ -168,6 +175,7 @@ export function CaptureDock({
             // absolute coordinates.
             <span
               className="absolute z-10"
+              // rtl-ignore -- physical px computed from getBoundingClientRect
               style={{ top: overlay.top, left: overlay.left }}
             >
               <Tooltip content={m('Annotate image')} placement="top">
@@ -175,7 +183,22 @@ export function CaptureDock({
                   type="button"
                   data-slot="annotate-image-button"
                   aria-label={m('Annotate image')}
-                  onClick={() => setAnnotateSrc(target.src)}
+                  onClick={() => {
+                    // The *raw* attribute, not `target.src`: the DOM property
+                    // resolves relative upload URLs to absolute ones, which
+                    // would never match the document node's stored attrs.src.
+                    const src = target.getAttribute('src');
+                    if (!src) return;
+                    // Same-src duplicates (the same file attached twice gets
+                    // identical data URLs) are told apart by document order.
+                    const twins = Array.from(
+                      surfaceRef.current?.querySelectorAll('img') ?? []
+                    ).filter((i) => i.getAttribute('src') === src);
+                    setAnnotate({
+                      src,
+                      occurrence: Math.max(0, twins.indexOf(target)),
+                    });
+                  }}
                   className={cn(
                     'flex h-7 w-7 items-center justify-center rounded-lg border shadow-sm',
                     'border-neutral-200 bg-white/90 text-neutral-700 hover:bg-white',
@@ -193,16 +216,21 @@ export function CaptureDock({
       {inputs}
       {replaceImage && (
         <AnnotateImageDialog
-          src={annotateSrc}
+          src={annotate?.src ?? null}
           onSave={async (file) => {
-            const src = annotateSrc!;
-            const ok = await replaceImage(src, file);
+            // The host may have locked while the dialog was open; a locked
+            // editor must not accept the swap. (A lock landing *during* the
+            // replace upload is the same mid-flight race as captures —
+            // tracked with mieweb/ui#743.)
+            if (lockedRef.current) throw new Error('locked');
+            const { src, occurrence } = annotate!;
+            const ok = await replaceImage(src, file, occurrence);
             // `false` means validation/upload failed or the image left the
             // document mid-edit — keep the dialog open with its error.
             if (!ok) throw new Error('replace failed');
             setStatus(m('Image annotated'));
           }}
-          onClose={() => setAnnotateSrc(null)}
+          onClose={() => setAnnotate(null)}
         />
       )}
       <p
