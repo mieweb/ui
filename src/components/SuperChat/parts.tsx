@@ -95,7 +95,8 @@ const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
  * Only whole tokens count: the `@` must not follow a letter, digit or another
  * `@`, and the token must not run on into a letter or digit, in any script
  * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
- * the longest one at that spot wins, so `@john.doe` is not also `@john`.
+ * the longest one at that spot wins, so `@john.doe` is not also `@john`;
+ * entries with the same token all match it (two people named Alex).
  */
 export function matchMentionTokens(
   text: string,
@@ -114,8 +115,11 @@ export function matchMentionTokens(
     for (const match of text.matchAll(pattern)) {
       const start = match.index;
       const end = start + match[0].length;
-      if (taken.some(([s, e]) => start < e && s < end)) continue;
-      taken.push([start, end]);
+      // A shorter token inside a longer one's match is rejected, but the same
+      // span counts for every entry that inserts that token (two "Alex"es).
+      const sameSpan = taken.some(([s, e]) => s === start && e === end);
+      if (!sameSpan && taken.some(([s, e]) => start < e && s < end)) continue;
+      if (!sameSpan) taken.push([start, end]);
       found.add(id);
     }
   }

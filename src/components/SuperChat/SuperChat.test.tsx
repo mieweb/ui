@@ -956,6 +956,33 @@ describe('SuperChat', () => {
       expect(await send('mail me@john.doe')).toEqual([]);
     });
 
+    it('reports everyone who shares a mention token', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={{
+            ...conversation,
+            participants: [
+              ...conversation.participants,
+              { id: 'alex1', kind: 'human', name: 'Alex Smith' },
+              { id: 'alex2', kind: 'human', name: 'Alex Jones' },
+            ],
+          }}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hi @Alex');
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'hi @Alex',
+        expect.objectContaining({ mentions: ['alex1', 'alex2'] })
+      );
+    });
+
     it('keeps a read-only conversation disabled whatever composerProps says', () => {
       render(
         <SuperChat
