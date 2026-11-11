@@ -24,6 +24,7 @@ const meta: Meta<typeof MarkdownRenderer> = {
 ### Don't use it when
 
 - The user **edits** the text — \`RichEditor\`.
+- You are showing a **file** whose type comes from its name (\`.md\`, \`.ts\`, \`.json\`, …) — [FileViewer](?path=/docs/files-fileviewer--docs) picks Markdown, highlighted code or plain text from the path.
 - The source is HTML, not Markdown — sanitise and render it yourself; this component parses Markdown syntax.
 - You cannot accept the optional peers for the fences you use: \`mermaid\` (diagrams), \`papaparse\` (CSV), \`js-yaml\` (survey). Plain Markdown and code blocks need none of them.
 
@@ -69,6 +70,11 @@ Keep \`cacheKey\` stable per message; the renderer appends the text length while
           type: 'composes with',
           target: 'chat-aimessage',
           why: 'Pass MarkdownRenderer through renderTextContent to render assistant text as sanitised Markdown.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-fileviewer',
+          why: 'MarkdownRenderer renders a Markdown string with rich fences; FileViewer when you have a file and its name should decide between Markdown, highlighted code or plain text.',
         },
       ],
     },

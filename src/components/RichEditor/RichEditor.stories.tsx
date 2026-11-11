@@ -28,6 +28,7 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 - The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
+- Users mostly **read** a file and only occasionally fix it in place — [FileDocument](?path=/docs/files-filedocument--docs) shows it rendered, with a plain-text Edit mode and Save/Cancel, without the Kerebron peers or WASM.
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
 
 ### Example
@@ -121,6 +122,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           type: 'alternative to',
           target: 'editors-emaileditor',
           why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-filedocument',
+          why: 'RichEditor for formatted or collaborative Markdown editing; FileDocument when a file is mostly read and only occasionally edited as plain text.',
         },
       ],
     },

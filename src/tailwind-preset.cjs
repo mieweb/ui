@@ -690,6 +690,8 @@ module.exports = {
     'dark:text-neutral-300',
     'dark:hover:bg-neutral-700',
     'dark:hover:text-neutral-100',
+    // FileViewer — fenced code stays LTR inside dir="auto" Markdown.
+    '[&_pre]:[direction:ltr]',
     'text-[11px]',
     'text-[13px]',
     'px-3.5',
