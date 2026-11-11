@@ -511,12 +511,12 @@ function Select(props: SelectProps) {
     ]
   );
 
-  // Focus search input when dropdown opens
+  // Browsers cannot focus the search until the positioned popup is visible.
   React.useEffect(() => {
-    if (isOpen && searchable && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (isOpen && searchable && dropdownStyle.visibility !== 'hidden') {
+      searchInputRef.current?.focus({ preventScroll: true });
     }
-  }, [isOpen, searchable]);
+  }, [isOpen, searchable, dropdownStyle.visibility]);
 
   // Reset highlighted index when search changes
   React.useEffect(() => {
