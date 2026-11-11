@@ -122,4 +122,32 @@ describe('TextAreaRichKerebron mediaCapture', () => {
       expect(screen.queryByRole('button', { name: 'Attach file' })).toBeNull();
     }
   );
+
+  it('toggles the capture bar from the block menu', async () => {
+    const { container } = renderWithTheme(
+      <TextAreaRichKerebron value="" onChange={noop} mediaCapture />
+    );
+    const ribbon = () =>
+      container.querySelector('[data-slot="capture-ribbon"]');
+    expect(ribbon()).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+    fireEvent.click(
+      await screen.findByRole('menuitem', { name: 'Hide capture bar' })
+    );
+    expect(ribbon()).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+    fireEvent.click(
+      await screen.findByRole('menuitem', { name: 'Show capture bar' })
+    );
+    expect(ribbon()).toBeInTheDocument();
+  });
+
+  it('offers no capture-bar toggle when mediaCapture is off', async () => {
+    renderWithTheme(<TextAreaRichKerebron value="" onChange={noop} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Block menu' }));
+    await screen.findByRole('menuitem', { name: 'Show toolbar' });
+    expect(screen.queryByRole('menuitem', { name: /capture bar/i })).toBeNull();
+  });
 });

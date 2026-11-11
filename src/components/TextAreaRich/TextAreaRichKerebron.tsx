@@ -213,10 +213,11 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * the editor's media pipeline, so set `mediaUpload.uploadHandler` or every
    * image embeds as a base64 `data:` URL. Pass `true` for the defaults or a
    * {@link MediaCaptureOptions} object. Default **off**: when absent the
-   * field renders exactly as before. Treat as mount-time static: toggling
-   * between off and on swaps the field's root element, remounting the
-   * editor (selection and undo history reset). Kerebron surface only — same
-   * contract as `RichMediaCaptureEditor` (mieweb/ui#734).
+   * field renders exactly as before. The block (`+`) menu gains a "Hide/Show
+   * capture bar" toggle so users can reclaim the space. Treat as mount-time
+   * static: toggling between off and on swaps the field's root element,
+   * remounting the editor (selection and undo history reset). Kerebron
+   * surface only — same contract as `RichMediaCaptureEditor` (mieweb/ui#734).
    */
   mediaCapture?: boolean | MediaCaptureOptions;
 }
@@ -286,6 +287,9 @@ const TextAreaRichKerebron = React.forwardRef<
     const [uncontrolledToolbar, setUncontrolledToolbar] =
       React.useState(defaultToolbar);
     const toolbarVisible = (toolbar ?? uncontrolledToolbar) === 'visible';
+    // The mediaCapture ribbon defaults visible (the host opted in); the block
+    // menu lets users reclaim the space, mirroring the toolbar toggle.
+    const [captureBarVisible, setCaptureBarVisible] = React.useState(true);
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
     const [isEmpty, setIsEmpty] = React.useState(true);
@@ -1394,6 +1398,21 @@ const TextAreaRichKerebron = React.forwardRef<
                       ? (blockMenuLabels?.hideToolbar ?? 'Hide toolbar')
                       : (blockMenuLabels?.showToolbar ?? 'Show toolbar')}
                   </DropdownItem>
+                  {!!mediaCapture && (
+                    <DropdownItem
+                      onClick={() => {
+                        setBlockMenuOpen(false);
+                        setCaptureBarVisible((visible) => !visible);
+                        focusEditor();
+                      }}
+                    >
+                      {captureBarVisible
+                        ? (blockMenuLabels?.hideCaptureBar ??
+                          'Hide capture bar')
+                        : (blockMenuLabels?.showCaptureBar ??
+                          'Show capture bar')}
+                    </DropdownItem>
+                  )}
                 </Dropdown>
               </div>
             )}
@@ -1548,7 +1567,7 @@ const TextAreaRichKerebron = React.forwardRef<
     const captureOptions = mediaCapture === true ? {} : mediaCapture;
     return (
       <CaptureDock
-        locked={inert}
+        locked={inert || !captureBarVisible}
         insertFiles={(files) => editorHandleRef.current?.insertFiles?.(files)}
         scanDocument={captureOptions.scanDocument}
         extraCaptures={captureOptions.extraCaptures}
