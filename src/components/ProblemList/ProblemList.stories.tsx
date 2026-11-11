@@ -22,17 +22,18 @@ const meta: Meta<typeof ProblemList> = {
       description: {
         component: `### What it's for
 
-The **chart-scope problem list**: one row per \`ConditionConcern\` — the durable identity (\`concernId\`) that encounters and orders reference — whose coded characterization evolves through an **assertion history** (\`assertions[]\`, oldest → newest; \`currentAssertion()\` returns the last non-refuted one). Rows group into **Unconfirmed / Active / Inactive / Resolved** (\`concernGroupKey()\`), show ICD-10 / ICD-11 codes inline with SNOMED and crosswalk provenance in a tooltip (\`CodingChips\`), verification and \`uncertainty\` badges, concern \`relationships\`, and expand into the assertion timeline (refuted assertions struck through) plus \`observations\`. Fully **controlled**: \`concerns\` in; \`onAction(concern, action)\`, \`onAddProblem(text)\` and \`onReorder(concernIds)\` out. \`actions\` trims the row toolbar (\`open · observe · refine · revise · resolve · relate · move-up · move-down\`); \`readOnly\` removes it. Also exported: \`currentAssertion\`, \`concernGroupKey\`, \`CodingChips\`, \`UncertaintyBadge\`, \`concernHistoryContent\`, \`CONCERN_STATUS_LABELS\`, \`CHANGE_TYPE_LABELS\` and the model types (\`ConditionConcern\`, \`ConditionAssertion\`, \`ConditionCoding\`, \`ConcernStatus\`, \`VerificationStatus\`, \`Uncertainty\`).
+The **chart-scope problem list**: one row per \`ConditionConcern\` — the durable identity (\`concernId\`) that encounters and orders reference — whose coded characterization evolves through an **assertion history** (\`assertions[]\`, oldest → newest; \`currentAssertion()\` returns the last non-refuted one). Rows group into **Unconfirmed / Active / Inactive / Resolved** (\`concernGroupKey()\`), show ICD-10 / ICD-11 codes inline with SNOMED and crosswalk provenance in a tooltip (\`CodingChips\`), verification and \`uncertainty\` badges, concern \`relationships\`, and expand into the assertion timeline (refuted assertions struck through) plus \`observations\`. Fully **controlled**: \`concerns\` in; \`onAction(concern, action)\`, \`onAddProblem(text)\`, \`onAdd()\` and \`onReorder(concernIds)\` out; \`addSearch\` slots an inline coded search (e.g. a CodeLookup) into the add section. \`actions\` trims the row toolbar (\`open · observe · refine · revise · resolve · relate · move-up · move-down\`); \`readOnly\` removes it. Also exported: \`currentAssertion\`, \`concernGroupKey\`, \`CodingChips\`, \`UncertaintyBadge\`, \`concernHistoryContent\`, \`CONCERN_STATUS_LABELS\`, \`CHANGE_TYPE_LABELS\` and the model types (\`ConditionConcern\`, \`ConditionAssertion\`, \`ConditionCoding\`, \`ConcernStatus\`, \`VerificationStatus\`, \`Uncertainty\`).
 
 ### Use it when
 
 - You are rendering the **patient's longitudinal problem list** — every concern the chart knows about, not what one visit addressed.
 - The host owns the concerns as data and can persist appended assertions, status changes, relationships and ordering; the list never mutates.
-- You want capture-first entry: \`onAddProblem\` hands you a bare name to store as an \`unconfirmed\` assertion, enriched later through \`ConditionEditor\`.
+- You want capture-first entry: \`addSearch\` slots a coded lookup, \`onAddProblem\` hands you a bare name to store as an \`unconfirmed\` assertion, and the \`onAdd\` pill opens your detailed editor (e.g. \`ConditionEditor\`).
 
 ### Don't use it when
 
 - You need the **encounter view** — which of these concerns is relevant *this visit* and how (Addressed / Relevant Hx / Noted) — [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs). Relevance lives on the encounter reference, never on the concern.
+- The problem list belongs to a whole visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs)'s Conditions section renders this list from its shared eSheet response store; use ProblemList directly for a host-controlled longitudinal chart list.
 - You need today's **assessment and plan**, with orders nested under problems — [Assessment](?path=/docs/encounter-orders-assessment--docs).
 - You need to **edit** an assertion (codes, severity, onset, uncertainty) — pair with [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs); ProblemList only emits \`refine\` / \`revise\` / \`relate\` / \`observe\` intents.
 - Your data is a flat list of diagnosis strings with no history or coding — a \`Table\` or plain list is simpler; the concern/assertion model is the whole point here.
@@ -88,6 +89,11 @@ The host appends the new assertion (and, for a \`revision\`, marks the supersede
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-encountervisit',
+          why: "EncounterVisit's Conditions section renders this list over its eSheet-native concerns; use ProblemList directly for a host-controlled longitudinal chart list.",
+        },
         {
           type: 'composes with',
           target: 'clinical-lists-presentingproblems',

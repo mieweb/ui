@@ -486,6 +486,23 @@ describe('MediaEditor does not scroll the page on small screens', () => {
     focus.mockRestore();
   });
 
+  it('inverts ArrowLeft/ArrowRight word-caret movement under RTL', () => {
+    render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
+    const listbox = screen.getByRole('listbox', { name: 'Transcript words' });
+    // jsdom does not cascade dir → direction; set both (see useDirection.test).
+    listbox.setAttribute('dir', 'rtl');
+    listbox.style.direction = 'rtl';
+
+    const option = (text: string) =>
+      screen.getByText(text).closest('[role="option"]');
+
+    // Caret keys are visual: ArrowLeft advances in RTL text.
+    fireEvent.keyDown(listbox, { key: 'ArrowLeft' });
+    expect(option('brave')).toHaveAttribute('aria-selected', 'true');
+    fireEvent.keyDown(listbox, { key: 'ArrowRight' });
+    expect(option('Hello')).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('never reaches for scrollIntoView when moving the cursor', () => {
     render(<MediaEditor src="clip.mp3" kind="audio" transcript={transcript} />);
     const listbox = screen.getByRole('listbox', { name: 'Transcript words' });

@@ -111,6 +111,8 @@ const WebsiteInput = React.forwardRef<HTMLInputElement, WebsiteInputProps>(
         inputMode="url"
         autoComplete="url"
         placeholder="https://example.com"
+        // LTR island: URLs are left-to-right even in RTL
+        dir="ltr"
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}

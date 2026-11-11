@@ -1,28 +1,43 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextEditor, type RichTextVariableGroup } from './RichTextEditor';
+import { createDeprecationBanner } from '../TextAreaRich/DeprecationBanner';
+
+const DEPRECATION_NOTICE =
+  '> ⚠️ **Deprecated** — `RichTextEditor` is deprecated (mieweb/ui#692). Use [RichEditor](?path=/docs/editors-richeditor--docs) from `@mieweb/ui/kerebron` — the supported ProseMirror/Kerebron engine: install the `@kerebron/*` peers and import `@mieweb/ui/kerebron.css`. Mind the format difference — RichEditor stores **Markdown** (`getContent()`); hosts that persist **HTML** can use [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs), which keeps the HTML `value`/`onChange` contract **including `variableGroups`** (its toolbar carries the same searchable Variables menu) and dictation. This legacy `document.execCommand` editor will be removed in a future major release.';
 
 const meta: Meta<typeof RichTextEditor> = {
-  id: 'editors-richtexteditor',
-  title: 'Modules/Editors/RichTextEditor',
+  id: 'deprecated-richtexteditor',
+  title: 'Deprecated/RichTextEditor (Legacy)',
   component: RichTextEditor,
+  decorators: [
+    createDeprecationBanner(
+      <>
+        RichTextEditor is deprecated. Use RichEditor from{' '}
+        <code>@mieweb/ui/kerebron</code> instead.
+      </>
+    ),
+  ],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: `### What it's for
+        component: `${DEPRECATION_NOTICE}
 
-**A lightweight HTML editor for templated notes and letters, with variable insertion and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
+### What it's for
+
+**A lightweight HTML editor for templated notes and letters, with variable insertion, macros and dictation.** \`RichTextEditor\` is a \`contentEditable\` \`div\` (\`role="textbox" aria-multiline\`) that mirrors its \`innerHTML\` to \`value\` / \`onChange\` — the stored format is **HTML**. The toolbar uses \`document.execCommand\` for bold, italic, underline, bullet/numbered lists and left/center/right alignment. Pass \`variableGroups\` (\`{ label, variables: [{ label, value, insertValue? }] }\`) to get a searchable **Variables** \`Dropdown\` that inserts \`{{tokens}}\` at the caret, plus a **\`<< >>\` to \`{{ }}\`** converter (\`convertAngleBracketsToMustache\`). Pass \`macros\` (\`MacroGroup[]\`) to add a **Macros** toolbar toggle that docks a \`MacroLibrary\` panel inside the editor frame — searchable, grouped snippets inserted at the remembered caret through the native undo stack (\`defaultMacrosOpen\`, \`onCreateMacro\`); omit it and the editor is unchanged. \`enableDictation\` (default \`true\`) adds a **Dictate** button on the Web Speech API (\`SpeechRecognition\` / \`webkitSpeechRecognition\`) that runs spoken punctuation through \`processDictation\` ("period" → ".", "new paragraph", …). \`toolbar="hidden"\` removes the toolbar for chromeless surfaces (uncontrolled visibility starts from \`defaultToolbar\` and is reported through \`onToolbarChange\`), and \`markdownShortcuts\` expands block tokens typed at the start of a line (\`#\`/\`##\`/\`###\` + space → heading, \`-\`/\`*\` → bullet list, \`1.\` → numbered list, \`>\` → block quote) — pair them so formatting stays reachable without chrome. \`blockMenu\` adds a Notion-style \`+\` button in the start gutter of the hovered text row (keyboard: Ctrl/Cmd+/ on the caret's block) whose menu applies block formats, opens the macro panel and shows/hides the toolbar; its labels are overridable via \`blockMenuLabels\`. \`placeholder\`, \`disabled\`, \`aria-label\`, \`onDictationError\` complete the surface; the ref is the editable \`div\`. Everything ships on the main \`@mieweb/ui\` entry with no extra peers.
 
 ### Use it when
 
 - The output is stored or mailed as **HTML** — employer letters, case notes, message templates — and the writer needs basic formatting plus merge fields.
 - Users fill in **template variables** from a known catalogue, or convert legacy \`<<field>>\` markers.
+- The note is assembled from reusable boilerplate — exam normals, standard instructions — supplied as \`macros\` and inserted from the docked \`MacroLibrary\` panel or by typing a shortcut (\`.b\` + space) directly in the note.
 - Clinicians dictate into the note and the browser (Chrome/Edge/Safari) exposes \`SpeechRecognition\`.
 
 ### Don't use it when
 
-- The stored format is **Markdown**, you need headings/tables/code blocks, real undo history or **multi-user collaboration** — \`RichEditor\` (\`@mieweb/ui/kerebron\`).
+- The stored format is **Markdown**, you need links/images/tables/code blocks, real undo history or **multi-user collaboration** — \`RichEditor\` (\`@mieweb/ui/kerebron\`). Headings H1–H3 alone no longer force the switch — the opt-in \`markdownShortcuts\` covers them here.
 - Plain text is enough — \`Textarea\`; a single line — \`Input\`.
 - The HTML will be rendered to other users without sanitising: the editor emits raw \`innerHTML\` and does not sanitise pasted content.
 - You need offline/on-device speech recognition — the Web Speech API streams to the vendor's service; see \`RecordButton\` + your own transcription for a blob-based flow.
@@ -54,10 +69,11 @@ The host owns the HTML string and is responsible for sanitising it before storag
 ### Limitations
 
 - Accessibility: the editable region is labelled by \`aria-label\` **or falls back to the placeholder text**; toolbar icon buttons have \`aria-label\` + \`title\` (Bold, Italic, Underline, Bullet list, Numbered list, Align left/center/right), while Variables, Convert and Dictate rely on visible text. No \`aria-pressed\` reflects the current formatting, no \`aria-live\` announces dictation start/stop or errors (they go to \`onDictationError\`, else \`console.warn\`). The placeholder is \`aria-hidden\`.
-- Formatting is \`document.execCommand\` — deprecated, browser-dependent markup (\`<b>\` vs \`<strong>\`, inline styles for alignment), and there are no headings, links, images, tables or code. Undo/redo is the browser's native contentEditable history. Setting \`value\` externally rewrites \`innerHTML\` and **drops the caret**.
+- Formatting is \`document.execCommand\` — deprecated, browser-dependent markup (\`<b>\` vs \`<strong>\`, inline styles for alignment), and there are no links, images, tables or code; headings are limited to H1–H3 via the opt-in \`markdownShortcuts\` block rules (no toolbar heading control). Undo/redo is the browser's native contentEditable history. Setting \`value\` externally rewrites \`innerHTML\` and **drops the caret**.
 - Dictation: requests \`getUserMedia\` first to force the permission prompt, then runs \`SpeechRecognition\` with \`lang\` hard-coded to \`en-US\`, \`continuous\`, auto-restarting on end; only final results are inserted. Unsupported browsers (Firefox) get a disabled button with an English \`title\`. \`processDictation\`'s punctuation heuristics are English-only.
 - The \`<< >>\` converter and \`{{ }}\` tokens are plain text — nothing validates that a variable exists. \`insertValue\` with newlines becomes \`<br>\`s.
-- The surface uses \`prose prose-sm\` classes that **have no effect** unless the host installs \`@tailwindcss/typography\`; \`min-h-[250px]\` is fixed. RTL: alignment commands are physical (\`justifyLeft\`/\`justifyRight\`), the placeholder is anchored \`left-0\`, and the toolbar is a symmetric flex row.
+- \`markdownShortcuts\` covers **block rules only** (headings, lists, block quote) at the start of a line; inline markdown (\`**bold**\`, \`[links]\`) is not interpreted, and the stored format remains HTML. With \`toolbar="hidden"\` and no \`blockMenu\`, typed shortcuts and the browser's native ⌘/Ctrl+B/I/U are the only input paths. The block gutter targets **top-level blocks** of the editable region; its \`+\` button is hover/focus-revealed (always visible on touch) and the menu is also reachable with Ctrl/Cmd+/.
+- The surface ships baseline block styles for H1–H3, lists and block quotes (Tailwind preflight would otherwise strip them); the \`prose prose-sm\` classes are an optional enhancement that **has no effect** unless the host installs \`@tailwindcss/typography\`. \`min-h-[250px]\` is fixed. RTL: alignment commands are physical (\`justifyLeft\`/\`justifyRight\`), the placeholder is anchored \`left-0\`, and the toolbar is a symmetric flex row.
 - Theming: \`border-border\`, \`bg-background\`, \`bg-muted\`, \`text-muted-foreground\`; disabled text hard-codes \`neutral-700/300\`. Depends on \`Button\`, \`Separator\`, \`Dropdown\`, \`lucide-react\`. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -65,29 +81,29 @@ The host owns the HTML string and is responsible for sanitising it before storag
       entry: '@mieweb/ui',
       relationships: [
         {
-          type: 'alternative to',
+          type: 'superseded by',
           target: 'editors-richeditor',
-          why: 'RichEditor stores Markdown on ProseMirror via the @mieweb/ui/kerebron entry with Yjs collab; RichTextEditor stores HTML from a contentEditable div on the main barrel with variables and dictation.',
+          why: 'RichEditor is the supported rich-text surface — Markdown on the ProseMirror/Kerebron engine from @mieweb/ui/kerebron with real undo history and Yjs collab; RichTextEditor\u2019s HTML/execCommand engine is deprecated (mieweb/ui#692).',
         },
         {
           type: 'alternative to',
-          target: 'text-inputs-textarea',
-          why: 'RichTextEditor when the note needs bold/lists/alignment, merge variables or dictation; Textarea for plain multi-line text.',
+          target: 'deprecated-textarearich',
+          why: 'TextAreaRich packages this editor chromeless — hidden toolbar, markdown shortcuts, block gutter menu — in Textarea-matched chrome for comment-sized fields; RichTextEditor for full documents with the toolbar on.',
         },
         {
-          type: 'alternative to',
-          target: 'editors-emaileditor',
-          why: 'RichTextEditor for a single formatted HTML body; EmailEditor when the message needs layout blocks and is sent as an email.',
+          type: 'composes with',
+          target: 'editors-macrolibrary',
+          why: 'The macros prop docks a MacroLibrary panel inside the editor frame; the editor restores the saved caret and inserts the chosen macro through the native undo stack.',
         },
         {
           type: 'uses',
           target: 'choice-inputs-dropdown',
-          why: 'The searchable Variables menu is a Dropdown with DropdownLabel groups and DropdownItem entries.',
+          why: 'The searchable Variables menu is a Dropdown with DropdownLabel groups and DropdownItem entries; the block gutter menu reuses the same primitives.',
         },
       ],
     },
   },
-  tags: ['autodocs', 'scope:general-purpose', 'maturity:stable'],
+  tags: ['autodocs', 'scope:general-purpose', 'maturity:deprecated'],
 };
 
 export default meta;
@@ -168,4 +184,113 @@ export const Disabled: Story = {
       />
     </div>
   ),
+};
+
+function MarkdownShortcutsExample() {
+  const [value, setValue] = useState('');
+  return (
+    <div className="max-w-2xl">
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        markdownShortcuts
+        placeholder="Type ## then space for a heading, - for a bullet list, 1. for a numbered list, > for a quote…"
+        aria-label="Note body"
+      />
+    </div>
+  );
+}
+
+export const MarkdownShortcuts: Story = {
+  name: 'Markdown shortcuts',
+  render: () => <MarkdownShortcutsExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `markdownShortcuts`, block tokens typed at the start of a line expand on space: `#`/`##`/`###` → headings, `-`/`*` → bullet list, `1.` → numbered list, `>` → block quote. Inline markdown is not interpreted.',
+      },
+    },
+  },
+};
+
+function HiddenToolbarExample() {
+  const [value, setValue] = useState('');
+  return (
+    <div className="max-w-2xl">
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        toolbar="hidden"
+        markdownShortcuts
+        placeholder="A chromeless surface — use markdown shortcuts or ⌘/Ctrl+B/I/U…"
+        aria-label="Note body"
+      />
+    </div>
+  );
+}
+
+export const HiddenToolbar: Story = {
+  name: 'Hidden toolbar',
+  render: () => <HiddenToolbarExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`toolbar="hidden"` removes the toolbar entirely for chromeless, document-like surfaces. Pair it with `markdownShortcuts` so formatting stays reachable.',
+      },
+    },
+  },
+};
+
+function BlockMenuExample() {
+  const [value, setValue] = useState(
+    '<h2>Visit summary</h2><p>Hover a row to reveal the + button in the gutter, or press Ctrl/Cmd+/ on the current line.</p><p>The menu changes the block format, inserts a macro, or shows the toolbar.</p>'
+  );
+  return (
+    <div className="max-w-2xl">
+      <RichTextEditor
+        value={value}
+        onChange={setValue}
+        defaultToolbar="hidden"
+        blockMenu
+        markdownShortcuts
+        macros={[
+          {
+            id: 'library',
+            label: 'Exam normals',
+            macros: [
+              {
+                id: 'cardio',
+                label: 'Cardio — WNL',
+                content: 'Regular rate and rhythm, no murmurs.',
+                shortcut: '.c',
+              },
+              {
+                id: 'resp',
+                label: 'Respiratory — WNL',
+                content: 'Lungs clear to auscultation bilaterally.',
+                shortcut: '.r',
+              },
+            ],
+          },
+        ]}
+        placeholder="Start writing…"
+        aria-label="Note body"
+      />
+    </div>
+  );
+}
+
+export const BlockMenu: Story = {
+  name: 'Block menu',
+  render: () => <BlockMenuExample />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`blockMenu` reveals a `+` button in the start gutter of the hovered text row (Ctrl/Cmd+/ from the keyboard). Its menu applies block formats to that row, opens the macro panel, and shows or hides the toolbar — here the toolbar starts hidden via `defaultToolbar` and can be brought back from the menu.',
+      },
+    },
+  },
 };

@@ -91,8 +91,8 @@ const toMs = (seconds: number): number =>
  * returned {@link UseMediaTransportReturn.setMediaElement} callback to an
  * `<audio>`/`<video>` `ref` and the hook wires the native listeners.
  *
- * Shared by `MediaPlayer` (ms API) and, at the boundary, `AudioPlayer`
- * (seconds API — convert with `ms / 1000`). The WaveSurfer waveform variant is
+ * Shared by `MediaPlayer` (ms API) and TranscriptPlayer's `usePlayback` (seconds,
+ * converted at the boundary). The WaveSurfer waveform variant is
  * out of scope; this hook targets native media transport only.
  *
  * @example
@@ -168,7 +168,14 @@ export function useMediaTransport(
 
   // Attach native transport listeners whenever an element mounts.
   useEffect(() => {
-    if (!element) return;
+    if (!element) {
+      // A detached element (e.g. the source was removed) leaves nothing playing or loaded;
+      // an error stays visible to hosts that swap the element for an error panel.
+      if (stateRef.current !== 'error') setState('idle');
+      setDurationMs(0);
+      setCurrentTimeMs(0);
+      return;
+    }
 
     const emitTime = () => {
       const ms = toMs(element.currentTime);
@@ -178,12 +185,20 @@ export function useMediaTransport(
     };
 
     const onLoadStart = () => setState('loading');
-    const onCanPlay = () => setState('idle');
+    // canplay can also follow a seek mid-playback; only leave the loading state here.
+    const onCanPlay = () => {
+      if (stateRef.current === 'loading')
+        setState(element.paused ? 'idle' : 'playing');
+    };
     const onLoadedMetadata = () => {
       setDurationMs(toMs(element.duration));
       emitTime();
     };
+    // MediaRecorder webm often reports Infinity until the end is known.
+    const onDurationChange = () => setDurationMs(toMs(element.duration));
     const onTimeUpdateEvt = () => emitTime();
+    // The speed can change outside these controls (iOS's own full screen player).
+    const onRateChange = () => setPlaybackRateState(element.playbackRate);
     const onPlay = () => setState('playing');
     const onPlaying = () => setState('playing');
     const onPause = () => setState('paused');
@@ -205,23 +220,28 @@ export function useMediaTransport(
     element.addEventListener('loadstart', onLoadStart);
     element.addEventListener('canplay', onCanPlay);
     element.addEventListener('loadedmetadata', onLoadedMetadata);
+    element.addEventListener('durationchange', onDurationChange);
     element.addEventListener('timeupdate', onTimeUpdateEvt);
+    element.addEventListener('ratechange', onRateChange);
     element.addEventListener('play', onPlay);
     element.addEventListener('playing', onPlaying);
     element.addEventListener('pause', onPause);
     element.addEventListener('ended', onEndedEvt);
     element.addEventListener('error', onErrorEvt);
 
-    // Sync duration if metadata is already available on attach.
-    if (Number.isFinite(element.duration)) {
-      setDurationMs(toMs(element.duration));
-    }
+    // Sync on attach; a new element must not inherit the previous one's duration or play state.
+    setDurationMs(toMs(element.duration));
+    if (element.paused && stateRef.current === 'playing') setState('paused');
+    // e.g. a 404 that failed before hydration attached these listeners.
+    if (element.error) onErrorEvt();
 
     return () => {
       element.removeEventListener('loadstart', onLoadStart);
       element.removeEventListener('canplay', onCanPlay);
       element.removeEventListener('loadedmetadata', onLoadedMetadata);
+      element.removeEventListener('durationchange', onDurationChange);
       element.removeEventListener('timeupdate', onTimeUpdateEvt);
+      element.removeEventListener('ratechange', onRateChange);
       element.removeEventListener('play', onPlay);
       element.removeEventListener('playing', onPlaying);
       element.removeEventListener('pause', onPause);
@@ -246,7 +266,8 @@ export function useMediaTransport(
   const togglePlay = useCallback(() => {
     const el = elementRef.current;
     if (!el) return;
-    if (el.paused) void el.play();
+    // A refused start (autoplay policy) leaves it paused; nothing to report.
+    if (el.paused) void el.play()?.catch(() => {});
     else el.pause();
   }, []);
 

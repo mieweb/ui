@@ -1,3 +1,4 @@
+import { useMessages } from '../../utils/messages';
 import * as React from 'react';
 import {
   Bold,
@@ -12,15 +13,27 @@ import {
   Replace,
   Mic,
   MicOff,
+  BookOpen,
+  Plus,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Button } from '../Button';
 import { Separator } from '../Separator';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import {
+  MacroLibrary,
+  type Macro,
+  type MacroGroup,
+  type MacroLibraryProps,
+} from '../MacroLibrary';
+import { Animated, AnimatedPresence } from '../../motion';
 import {
   Dropdown,
   DropdownItem,
   DropdownLabel,
   DropdownSeparator,
+  DropdownSubmenu,
 } from '../Dropdown';
 import {
   processDictation,
@@ -42,6 +55,43 @@ export interface RichTextVariableGroup {
   label: string;
   /** Variables belonging to the group. */
   variables: RichTextVariable[];
+}
+
+export interface RichTextEditorBlockMenuLabels {
+  /** Accessible label for the gutter `+` button. Defaults to "Block menu". */
+  blockMenu?: string;
+  /** "Text" (normal paragraph) menu item. */
+  text?: string;
+  /** "Heading 1" menu item. */
+  heading1?: string;
+  /** "Heading 2" menu item. */
+  heading2?: string;
+  /** "Heading 3" menu item. */
+  heading3?: string;
+  /** "Bullet list" menu item. */
+  bulletList?: string;
+  /** "Numbered list" menu item. */
+  numberedList?: string;
+  /** "Quote" menu item. */
+  quote?: string;
+  /** "Insert macro" submenu parent (shown when `macros` is provided). */
+  insertMacro?: string;
+  /** "Show macro library" menu item (shown when `macros` is provided). */
+  showMacroLibrary?: string;
+  /** Toolbar toggle item while the toolbar is hidden. */
+  showToolbar?: string;
+  /** Toolbar toggle item while the toolbar is visible. */
+  hideToolbar?: string;
+  /**
+   * Capture-bar toggle item while the bar is hidden (Kerebron surface,
+   * shown when `mediaCapture` is enabled).
+   */
+  showCaptureBar?: string;
+  /**
+   * Capture-bar toggle item while the bar is visible (Kerebron surface,
+   * shown when `mediaCapture` is enabled).
+   */
+  hideCaptureBar?: string;
 }
 
 export interface RichTextEditorProps {
@@ -69,8 +119,119 @@ export interface RichTextEditorProps {
    * DOM. Without it, pasted markup is inserted as the browser provides it.
    */
   sanitizeHtml?: (html: string) => string;
+  /**
+   * Grouped macros for the optional macro addon. When omitted the editor is
+   * unchanged. When provided, a "Macros" toolbar toggle docks a searchable
+   * macro panel inside the editor; selecting a macro inserts its content at
+   * the retained caret position. Typing a macro shortcut (e.g. `.b`)
+   * followed by a space expands it in place, panel open or not.
+   */
+  macros?: MacroGroup[];
+  /** Open the macro panel initially. Defaults to false. */
+  defaultMacrosOpen?: boolean;
+  /**
+   * Focus-driven macro panel: the field rests as a plain input, the panel
+   * animates in while focus is anywhere inside the editor frame (editable,
+   * toolbar, gutter or the panel itself) and animates away when focus
+   * leaves. Overrides `defaultMacrosOpen`; Escape-to-close is disabled since
+   * visibility follows focus. Pairs well with `compactMacros`. Defaults to
+   * false.
+   */
+  macrosOnFocus?: boolean;
+  /**
+   * Dock the macro panel in `MacroLibrary`'s compact mode (no header,
+   * search, or library group headings) and shrink the macros-open working
+   * space to match — for short lists in dense forms. Defaults to false.
+   */
+  compactMacros?: boolean;
+  /**
+   * Called on any explicit macro invocation: a pick from the macro panel or
+   * the block gutter flyout, or a typed `.shortcut` expansion. Return `true`
+   * to take over the insertion: the editor skips its caret insertion and the
+   * host applies the content through its own value update (e.g. appending a
+   * coded finding as its own line). For typed shortcuts the editor removes
+   * the typed token (and publishes that edit) before consulting the
+   * callback, so a host that takes over computes from a token-free value.
+   */
+  onMacroInsert?: (macro: Macro) => boolean | void;
+  /**
+   * Overridable labels for the macro addon (i18n). Panel labels are
+   * forwarded to the docked `MacroLibrary`; `macros` doubles as the toolbar
+   * toggle text, and `showMacros`/`hideMacros` set the toggle's title.
+   */
+  macroLabels?: MacroLibraryProps['labels'] & {
+    /** Toggle title while the panel is closed. Defaults to "Show macros". */
+    showMacros?: string;
+    /** Toggle title while the panel is open. Defaults to "Hide macros". */
+    hideMacros?: string;
+  };
+  /** Forwarded to the macro panel's "Save as macro" action. */
+  onCreateMacro?: () => void;
+  /**
+   * Controlled toolbar visibility. `'hidden'` removes the toolbar entirely
+   * for chromeless surfaces (typed shortcuts keep working; pair with
+   * `markdownShortcuts` or `blockMenu` so formatting stays reachable). When
+   * omitted the editor manages visibility itself, starting from
+   * `defaultToolbar` — existing consumers are unchanged.
+   */
+  toolbar?: 'visible' | 'hidden';
+  /**
+   * Initial toolbar visibility when `toolbar` is uncontrolled. Defaults to
+   * `'visible'`.
+   */
+  defaultToolbar?: 'visible' | 'hidden';
+  /**
+   * Called when the block gutter menu toggles the toolbar ("Show toolbar" /
+   * "Hide toolbar"), so hosts can persist the preference or drive the
+   * controlled `toolbar` prop.
+   */
+  onToolbarChange?: (toolbar: 'visible' | 'hidden') => void;
+  /**
+   * Notion-style block gutter menu. Hovering a text row reveals a `+`
+   * button in the start gutter whose menu applies block formats to that
+   * row, opens the macro panel (when `macros` is provided) and toggles the
+   * toolbar. Also reachable from the keyboard with Ctrl/Cmd+/ on the
+   * caret's block. Defaults to false.
+   */
+  blockMenu?: boolean;
+  /** Overridable labels for the block gutter menu (i18n). */
+  blockMenuLabels?: RichTextEditorBlockMenuLabels;
+  /**
+   * Expand markdown-style block shortcuts typed at the start of a line and
+   * followed by a space: `#`/`##`/`###` → headings, `-`/`*` → bullet list,
+   * `1.` → numbered list, `>` → block quote. Inline rules (`**bold**`) are
+   * not interpreted. Defaults to false.
+   */
+  markdownShortcuts?: boolean;
+  /**
+   * Textarea-like surface: removes the wrapper border/radius and starts the
+   * editable at a single Input-row height that auto-grows with content
+   * (matching `Textarea`'s `md` metrics). The host supplies the chrome —
+   * `TextAreaRich` is the packaged pairing. Defaults to false.
+   */
+  chromeless?: boolean;
+  /** Id applied to the editable region (deep links, `aria-labelledby`). */
+  id?: string;
+  /**
+   * Prevent editing and formatting while keeping the region focusable and
+   * its text selectable — the contenteditable analogue of a native
+   * textarea's `readOnly`. The block gutter menu is hidden.
+   */
+  readOnly?: boolean;
+  /** Extra class for the editable region itself (fonts, whitespace). */
+  editorClassName?: string;
+  /** Inline style for the editable region (e.g. a row-derived min-height). */
+  editorStyle?: React.CSSProperties;
   /** Accessible label for the editable region. */
   'aria-label'?: string;
+  /** Id(s) of element(s) labelling the editable region. */
+  'aria-labelledby'?: string;
+  /** Ids of elements describing the editable region (errors, helper text). */
+  'aria-describedby'?: string;
+  /** Marks the editable region invalid for assistive technology. */
+  'aria-invalid'?: React.AriaAttributes['aria-invalid'];
+  /** Marks the editable region required for assistive technology. */
+  'aria-required'?: React.AriaAttributes['aria-required'];
 }
 
 // --- Minimal Web Speech API typings (absent from the standard DOM lib) ---
@@ -115,13 +276,103 @@ function getSpeechRecognition(): SpeechRecognitionCtor | undefined {
   return w.SpeechRecognition || w.webkitSpeechRecognition;
 }
 
+/** Elements that end a visible word, equivalent to whitespace. */
+const BLOCK_BOUNDARY =
+  /^(BR|DIV|P|LI|UL|OL|TABLE|TR|TD|TH|H[1-6]|BLOCKQUOTE|PRE|HR)$/;
+
 /**
- * A presentational rich-text editor with formatting, template-variable
- * insertion and optional speech-to-text dictation. Content is supplied and
- * surfaced via `value`/`onChange` so it can be wired to any store. The variable
- * menu is data-agnostic — pass `variableGroups` to populate it.
+ * Markdown-style block tokens expanded on space at the start of a line.
+ * Values feed `document.execCommand`; block rules only — inline markdown
+ * (e.g. `**bold**`) is intentionally not interpreted.
  */
-const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
+const MARKDOWN_BLOCK_RULES: Record<
+  string,
+  { command: string; value?: string }
+> = {
+  '#': { command: 'formatBlock', value: 'h1' },
+  '##': { command: 'formatBlock', value: 'h2' },
+  '###': { command: 'formatBlock', value: 'h3' },
+  '-': { command: 'insertUnorderedList' },
+  '*': { command: 'insertUnorderedList' },
+  '1.': { command: 'insertOrderedList' },
+  '>': { command: 'formatBlock', value: 'blockquote' },
+};
+
+/**
+ * Bounding rect of a top-level editor node. Text nodes (a bare first line
+ * has no element wrapper) are measured through a Range.
+ */
+function nodeRect(node: Node) {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    return (node as HTMLElement).getBoundingClientRect();
+  }
+  if (node.nodeType === Node.TEXT_NODE && (node.textContent ?? '').length > 0) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    return range.getBoundingClientRect();
+  }
+  return null;
+}
+
+/**
+ * Last non-empty text node rendered inside `node`, or 'boundary' when it
+ * ends with a line break or block element.
+ */
+function lastTextWithin(node: Node): Text | 'boundary' | null {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return (node.textContent ?? '').length > 0 ? (node as Text) : null;
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return null;
+  if (BLOCK_BOUNDARY.test((node as HTMLElement).tagName)) return 'boundary';
+  for (let child = node.lastChild; child; child = child.previousSibling) {
+    const found = lastTextWithin(child);
+    if (found) return found;
+  }
+  return null;
+}
+
+/**
+ * Previous visible text node before `node`, looking across adjacent inline
+ * elements (e.g. the "." in `.<b>c</b>` precedes the "c"). Returns null at
+ * a block/line-break boundary or the editor root, where a word cannot
+ * continue.
+ */
+function previousVisibleText(node: Node, root: HTMLElement): Text | null {
+  let current: Node = node;
+  while (current !== root) {
+    let sibling: Node | null = current.previousSibling;
+    while (sibling) {
+      const found = lastTextWithin(sibling);
+      if (found === 'boundary') return null;
+      if (found) return found;
+      sibling = sibling.previousSibling;
+    }
+    const parent: Node | null = current.parentNode;
+    if (!parent) return null;
+    if (
+      parent !== root &&
+      parent.nodeType === Node.ELEMENT_NODE &&
+      BLOCK_BOUNDARY.test((parent as HTMLElement).tagName)
+    ) {
+      return null;
+    }
+    current = parent;
+  }
+  return null;
+}
+
+/**
+ * The rich-text editor implementation. Exported for the library's own
+ * composite (`TextAreaRichLegacy`) so its consumers do not trigger the
+ * public `RichTextEditor` deprecation warning — do not use in new code.
+ * Content is supplied and surfaced via `value`/`onChange` so it can be
+ * wired to any store. The variable menu is data-agnostic — pass
+ * `variableGroups` to populate it.
+ */
+const RichTextEditorBase = React.forwardRef<
+  HTMLDivElement,
+  RichTextEditorProps
+>(
   (
     {
       value,
@@ -133,19 +384,127 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       onDictationError,
       disabled = false,
       sanitizeHtml,
+      macros,
+      defaultMacrosOpen = false,
+      macrosOnFocus = false,
+      compactMacros = false,
+      onMacroInsert,
+      macroLabels,
+      onCreateMacro,
+      toolbar,
+      defaultToolbar = 'visible',
+      onToolbarChange,
+      blockMenu = false,
+      blockMenuLabels,
+      markdownShortcuts = false,
+      chromeless = false,
+      id,
+      readOnly = false,
+      editorClassName,
+      editorStyle,
       'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+      'aria-required': ariaRequired,
     },
     ref
   ) => {
+    const m = useMessages();
+    // Shared guard: read-only blocks edits exactly like disabled does, but
+    // keeps the region focusable and selectable.
+    const inert = disabled || readOnly;
     const editorRef = React.useRef<HTMLDivElement>(null);
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
     const recognitionRef = React.useRef<SpeechRecognitionLike | null>(null);
     const isListeningRef = React.useRef(false);
     const shouldRestartRef = React.useRef(false);
+    const [macrosOpen, setMacrosOpen] = React.useState(
+      defaultMacrosOpen && !macrosOnFocus
+    );
+    // Last caret/selection inside the editable region, retained while the
+    // macro panel has focus so insertion lands where the clinician left off.
+    const savedRangeRef = React.useRef<Range | null>(null);
+    const macroPanelId = React.useId();
+    // The macro panel is an absolute side panel from `md:` up but sits
+    // in-flow below the editor on small screens, where it must animate its
+    // height so the surrounding layout follows instead of holding full size
+    // until the exit finishes and then snapping shut.
+    const macroSidePanel = useMediaQuery('(min-width: 768px)');
+    const prefersReducedMotion = usePrefersReducedMotion();
 
     const hasVariables = Boolean(variableGroups && variableGroups.length > 0);
+    const hasMacros = Boolean(macros);
+    // Focus mode at rest: the field is a bare one-line input — no block-menu
+    // indent, no gutter `+` on hover — until focus grows it.
+    const macrosResting = hasMacros && macrosOnFocus && !macrosOpen;
+    const hasMacroEntries = Boolean(
+      macros?.some((group) => group.macros.length > 0)
+    );
     const isEmpty = isHtmlEmpty(value);
+    const [uncontrolledToolbar, setUncontrolledToolbar] =
+      React.useState(defaultToolbar);
+    const toolbarVisible = (toolbar ?? uncontrolledToolbar) !== 'hidden';
+    const setToolbarVisibility = (next: 'visible' | 'hidden') => {
+      if (toolbar === undefined) setUncontrolledToolbar(next);
+      onToolbarChange?.(next);
+    };
+    // Mirrored into a ref so async dictation code can read the live value
+    // after awaiting microphone permission.
+    const toolbarVisibleRef = React.useRef(toolbarVisible);
+    // Same for disabled/readOnly: recognition callbacks outlive renders.
+    const inertRef = React.useRef(inert);
+
+    // --- Block gutter menu state ---
+    const [blockMenuOpen, setBlockMenuOpen] = React.useState(false);
+    // Offset of the gutter button within the editor body; aligns with the
+    // editable region's top padding (p-4 / chromeless py-[7px]) before any
+    // row is hovered.
+    const [gutterTop, setGutterTop] = React.useState(chromeless ? 7 : 16);
+    const gutterWrapperRef = React.useRef<HTMLDivElement>(null);
+    // Density styles (condensed-view.css) shrink that padding under the
+    // defaults above, which would leave the at-rest trigger hanging below a
+    // one-line condensed field — measure it from the live editable.
+    const measureRestGutterTop = React.useCallback(() => {
+      const fallback = chromeless ? 7 : 16;
+      if (!editorRef.current) return fallback;
+      const padding = parseFloat(
+        getComputedStyle(editorRef.current).paddingTop
+      );
+      return Number.isNaN(padding) ? fallback : Math.round(padding);
+    }, [chromeless]);
+    React.useLayoutEffect(() => {
+      if (!blockMenu || !editorRef.current) return;
+      setGutterTop((current) => {
+        const next = measureRestGutterTop();
+        return current === next ? current : next;
+      });
+    }, [blockMenu, measureRestGutterTop]);
+    const hoverBlockNodeRef = React.useRef<Node | null>(null);
+    /** Park the trigger back at its rest offset and forget the hovered row. */
+    const resetGutter = React.useCallback(() => {
+      hoverBlockNodeRef.current = null;
+      const next = measureRestGutterTop();
+      setGutterTop((current) => (current === next ? current : next));
+    }, [measureRestGutterTop]);
+    /** Content edits can delete the hovered row (or every row) while the
+     *  trigger still floats at the old offset — below a field that shrank,
+     *  now that chromeless mode no longer clips the wrapper. */
+    const reconcileGutterWithContent = React.useCallback(() => {
+      if (!blockMenu || !editorRef.current) return;
+      const hovered = hoverBlockNodeRef.current;
+      if (
+        (hovered && !editorRef.current.contains(hovered)) ||
+        !editorRef.current.hasChildNodes()
+      ) {
+        resetGutter();
+      }
+    }, [blockMenu, resetGutter]);
+    // Where the chosen menu action is applied: the hovered block's start
+    // (mouse) or the caret position (Ctrl/Cmd+/), captured at open time.
+    const blockTargetRangeRef = React.useRef<Range | null>(null);
+    const firstBlockItemRef = React.useRef<HTMLButtonElement>(null);
 
     React.useImperativeHandle(ref, () => editorRef.current as HTMLDivElement);
 
@@ -163,14 +522,59 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       };
     }, []);
 
+    // Hiding the toolbar removes the Stop control and listening indicator,
+    // so a running dictation must not keep inserting text (and restarting
+    // through onend) with no way to stop it.
+    React.useEffect(() => {
+      toolbarVisibleRef.current = toolbarVisible;
+      if (toolbarVisible) return;
+      if (recognitionRef.current && isListeningRef.current) {
+        shouldRestartRef.current = false;
+        isListeningRef.current = false;
+        recognitionRef.current.stop();
+        setIsListening(false);
+      }
+    }, [toolbarVisible]);
+
+    // Turning disabled/readOnly mid-dictation must stop recognition: the
+    // Stop button is disabled while inert, and onresult would otherwise keep
+    // editing a field the user can no longer change.
+    React.useEffect(() => {
+      inertRef.current = inert;
+      if (!inert) return;
+      if (recognitionRef.current && isListeningRef.current) {
+        shouldRestartRef.current = false;
+        isListeningRef.current = false;
+        recognitionRef.current.stop();
+        setIsListening(false);
+      }
+    }, [inert]);
+
     React.useEffect(() => {
       if (editorRef.current && editorRef.current.innerHTML !== value) {
+        const hadFocus = document.activeElement === editorRef.current;
         editorRef.current.innerHTML = value;
+        if (hadFocus) {
+          // The replacement destroyed the nodes holding the caret, which
+          // collapses the selection to the top of the document. Park it
+          // after the last block instead so typing continues on the next
+          // line below the newly applied content (e.g. a host-appended
+          // macro line).
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          const selection = window.getSelection();
+          selection?.removeAllRanges();
+          selection?.addRange(range);
+          savedRangeRef.current = range.cloneRange();
+        }
+        reconcileGutterWithContent();
       }
-    }, [value]);
+    }, [value, reconcileGutterWithContent]);
 
     const updateContent = () => {
       if (editorRef.current) onChange(editorRef.current.innerHTML);
+      reconcileGutterWithContent();
     };
 
     // Pasted/dropped HTML otherwise lands in the live DOM unfiltered, where
@@ -210,14 +614,14 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const execCommand = (command: string) => {
-      if (disabled) return;
+      if (inert) return;
       document.execCommand(command, false);
       editorRef.current?.focus();
       updateContent();
     };
 
     const handleConvertToMustache = () => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       editorRef.current.innerHTML = convertAngleBracketsToMustache(
         editorRef.current.innerHTML
       );
@@ -225,7 +629,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
     };
 
     const insertVariable = (variable: RichTextVariable) => {
-      if (disabled || !editorRef.current) return;
+      if (inert || !editorRef.current) return;
       editorRef.current.focus();
       const textToInsert = variable.insertValue ?? variable.value;
 
@@ -263,6 +667,380 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       else if (typeof console !== 'undefined') console.warn(message);
     };
 
+    /** Bookmark the selection whenever it lives inside the editable region. */
+    const saveSelection = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !editorRef.current)
+        return;
+      const range = selection.getRangeAt(0);
+      if (editorRef.current.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange();
+      }
+    };
+
+    /** Focus the editor and restore the bookmarked selection if still valid. */
+    const focusRestoringSelection = () => {
+      if (!editorRef.current) return;
+      editorRef.current.focus();
+      const saved = savedRangeRef.current;
+      const selection = window.getSelection();
+      if (
+        saved &&
+        selection &&
+        editorRef.current.contains(saved.commonAncestorContainer)
+      ) {
+        selection.removeAllRanges();
+        selection.addRange(saved);
+      }
+    };
+
+    const insertMacro = (macro: Macro) => {
+      if (inert || !editorRef.current) return;
+      if (onMacroInsert?.(macro) === true) return;
+      focusRestoringSelection();
+      insertTextAtSelection(macro.content);
+    };
+
+    /**
+     * Replace the current selection with plain text. execCommand participates
+     * in the browser's native undo stack, so an insertion can be reverted
+     * with a single undo.
+     */
+    const insertTextAtSelection = (content: string) => {
+      let inserted = false;
+      try {
+        inserted = document.execCommand('insertText', false, content);
+      } catch {
+        inserted = false;
+      }
+      if (!inserted) {
+        // Fallback (and jsdom path): manual range insertion. Content is
+        // always inserted as text nodes, never parsed as HTML.
+        const fragment = document.createDocumentFragment();
+        const lines = content.split('\n');
+        lines.forEach((line, index) => {
+          fragment.appendChild(document.createTextNode(line));
+          if (index < lines.length - 1) {
+            fragment.appendChild(document.createElement('br'));
+          }
+        });
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+          const range = sel.getRangeAt(0);
+          range.deleteContents();
+          range.insertNode(fragment);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (editorRef.current) {
+          editorRef.current.appendChild(fragment);
+        }
+      }
+      saveSelection();
+      updateContent();
+    };
+
+    /**
+     * The visible word immediately before the collapsed caret, spanning
+     * adjacent inline nodes (`.<b>c</b>` is ".c"). Returns the token, the
+     * range coordinates to replace it, and whether it sits at the start of
+     * its line (nothing but a block boundary before it).
+     */
+    const collectTokenBeforeCaret = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !selection.isCollapsed)
+        return null;
+      const caret = selection.getRangeAt(0);
+      const node = caret.startContainer;
+      if (
+        node.nodeType !== Node.TEXT_NODE ||
+        !editorRef.current?.contains(node)
+      )
+        return null;
+      const typed = /(\S+)$/.exec(
+        (node.textContent ?? '').slice(0, caret.startOffset)
+      );
+      if (!typed) return null;
+      let token = typed[1];
+      let startNode: Node = node;
+      let startOffset = caret.startOffset - typed[1].length;
+      while (startOffset === 0) {
+        const prev = previousVisibleText(startNode, editorRef.current);
+        if (!prev) break;
+        const text = prev.textContent ?? '';
+        const continued = /(\S+)$/.exec(text);
+        if (!continued) break;
+        token = continued[1] + token;
+        startNode = prev;
+        startOffset = text.length - continued[1].length;
+      }
+      const atLineStart =
+        startOffset === 0 && !previousVisibleText(startNode, editorRef.current);
+      return {
+        token,
+        startNode,
+        startOffset,
+        caretNode: node,
+        caretOffset: caret.startOffset,
+        atLineStart,
+        selection,
+      };
+    };
+
+    /** Select `collected`'s token so the next editing command replaces it. */
+    const selectCollectedToken = (
+      collected: NonNullable<ReturnType<typeof collectTokenBeforeCaret>>
+    ) => {
+      const replaceRange = document.createRange();
+      replaceRange.setStart(collected.startNode, collected.startOffset);
+      replaceRange.setEnd(collected.caretNode, collected.caretOffset);
+      collected.selection.removeAllRanges();
+      collected.selection.addRange(replaceRange);
+      return replaceRange;
+    };
+
+    /**
+     * Delete the selected range through execCommand so the removal joins
+     * the native undo stack, with a manual fallback for jsdom. Leaves a
+     * collapsed caret where the selection started.
+     */
+    const deleteSelectedRange = (replaceRange: Range) => {
+      let deleted = false;
+      try {
+        deleted = document.execCommand('delete', false);
+      } catch {
+        deleted = false;
+      }
+      if (!deleted) {
+        replaceRange.deleteContents();
+        replaceRange.collapse(true);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(replaceRange);
+      }
+    };
+
+    /**
+     * Expand a typed macro shortcut (dot phrase). When the word immediately
+     * before the caret matches a macro shortcut and the user presses space,
+     * the shortcut is replaced with the macro content in a single undoable
+     * edit; the triggering space is consumed.
+     */
+    const expandTypedShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (!macros) return;
+      const collected = collectTokenBeforeCaret();
+      if (!collected) return;
+      const lowered = collected.token.toLowerCase();
+      const macro = macros
+        .flatMap((group) => group.macros)
+        .find((candidate) => candidate.shortcut?.toLowerCase() === lowered);
+      if (!macro) return;
+
+      event.preventDefault();
+      if (onMacroInsert) {
+        // Remove the typed token and publish that edit first, so a host
+        // that takes over the insertion computes from a token-free value.
+        deleteSelectedRange(selectCollectedToken(collected));
+        saveSelection();
+        updateContent();
+        if (onMacroInsert(macro) === true) return;
+        insertTextAtSelection(macro.content);
+        return;
+      }
+      selectCollectedToken(collected);
+      insertTextAtSelection(macro.content);
+    };
+
+    /**
+     * Apply a markdown block rule when the token before the caret starts its
+     * line and matches `MARKDOWN_BLOCK_RULES` (`##` + space → heading). The
+     * token removal and the block command both run through execCommand so
+     * the expansion stays natively undoable. Returns true when handled.
+     */
+    const applyMarkdownShortcut = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      const collected = collectTokenBeforeCaret();
+      if (!collected || !collected.atLineStart) return false;
+      // Own-property check: tokens like "constructor" or "toString" resolve
+      // inherited object members and must not be treated as rules.
+      if (!Object.hasOwn(MARKDOWN_BLOCK_RULES, collected.token)) return false;
+      const rule = MARKDOWN_BLOCK_RULES[collected.token];
+
+      event.preventDefault();
+      deleteSelectedRange(selectCollectedToken(collected));
+      try {
+        document.execCommand(rule.command, false, rule.value);
+      } catch {
+        // jsdom: no execCommand — the token is still consumed.
+      }
+      editorRef.current?.focus();
+      saveSelection();
+      updateContent();
+      return true;
+    };
+
+    /** Space-keydown pipeline: markdown block rules, then macro shortcuts. */
+    const handleEditorKeyDown = (
+      event: React.KeyboardEvent<HTMLDivElement>
+    ) => {
+      if (inert) return;
+      if (
+        blockMenu &&
+        event.key === '/' &&
+        (event.ctrlKey || event.metaKey) &&
+        !event.altKey
+      ) {
+        event.preventDefault();
+        openBlockMenuAtCaret();
+        return;
+      }
+      if (
+        event.key !== ' ' ||
+        // Space during IME composition selects/converts a candidate; never
+        // hijack it for shortcut expansion.
+        event.nativeEvent.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey
+      )
+        return;
+      if (markdownShortcuts && applyMarkdownShortcut(event)) return;
+      expandTypedShortcut(event);
+    };
+
+    // --- Block gutter menu ---
+
+    /** Track the hovered block and keep the gutter button beside it. */
+    const handleGutterMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+      // While the menu is open its target must not follow the pointer.
+      if (blockMenuOpen || !editorRef.current || !gutterWrapperRef.current)
+        return;
+      let target: Node | null = null;
+      let top: number | null = null;
+      // Last top-level node starting above the pointer; first node otherwise.
+      for (const child of Array.from(editorRef.current.childNodes)) {
+        const rect = nodeRect(child);
+        if (!rect) continue;
+        // Collapsed whitespace between blocks (formatted HTML) measures 0×0
+        // at the origin; its top of 0 always passes the comparison below and
+        // would steal the target from the visible row. Zero-width nodes that
+        // still have a height (an empty rendered line) remain eligible.
+        if (rect.width === 0 && rect.height === 0) continue;
+        if (target === null || rect.top <= event.clientY) {
+          target = child;
+          top = rect.top;
+        }
+      }
+      if (!target || top === null) {
+        // Every row is gone (e.g. the controlled value was cleared) — don't
+        // leave the trigger floating at the deleted row's offset.
+        resetGutter();
+        return;
+      }
+      hoverBlockNodeRef.current = target;
+      const wrapperTop = gutterWrapperRef.current.getBoundingClientRect().top;
+      const next = Math.max(Math.round(top - wrapperTop), 4);
+      setGutterTop((current) => (current === next ? current : next));
+    };
+
+    /** Collapsed range at the very start of `node`. */
+    const rangeAtStartOf = (node: Node) => {
+      const range = document.createRange();
+      range.setStart(node, 0);
+      range.collapse(true);
+      return range;
+    };
+
+    /** Dropdown open/close driven by the gutter trigger (mouse path). */
+    const handleBlockMenuOpenChange = (open: boolean) => {
+      if (open) {
+        const block =
+          hoverBlockNodeRef.current ?? editorRef.current?.firstChild ?? null;
+        blockTargetRangeRef.current = block ? rangeAtStartOf(block) : null;
+      } else if (
+        editorRef.current &&
+        document.activeElement?.closest('[role="menu"]')
+      ) {
+        // Escape: focus sits on a menu item about to unmount — without a
+        // hand-off it falls to <body> and typing stops editing. Outside
+        // clicks have already moved focus, so they skip this branch.
+        const editor = editorRef.current;
+        editor.focus();
+        const target = blockTargetRangeRef.current;
+        const selection = window.getSelection();
+        if (target && selection && editor.contains(target.startContainer)) {
+          selection.removeAllRanges();
+          selection.addRange(target);
+          saveSelection();
+        }
+      }
+      setBlockMenuOpen(open);
+    };
+
+    /** Ctrl/Cmd+/ — open the menu targeting the caret's block. */
+    const openBlockMenuAtCaret = () => {
+      const selection = window.getSelection();
+      if (
+        selection &&
+        selection.rangeCount > 0 &&
+        editorRef.current?.contains(selection.getRangeAt(0).startContainer)
+      ) {
+        const caret = selection.getRangeAt(0);
+        blockTargetRangeRef.current = caret.cloneRange();
+        // Move the gutter button beside the caret's top-level block so the
+        // menu opens where the action will land.
+        let node: Node = caret.startContainer;
+        while (node.parentNode && node.parentNode !== editorRef.current) {
+          node = node.parentNode;
+        }
+        const rect = nodeRect(node);
+        const wrapperRect = gutterWrapperRef.current?.getBoundingClientRect();
+        if (rect && wrapperRect) {
+          setGutterTop(Math.max(Math.round(rect.top - wrapperRect.top), 4));
+        }
+      } else {
+        blockTargetRangeRef.current = null;
+      }
+      setBlockMenuOpen(true);
+    };
+
+    /** Apply a block command from the menu to the captured target range. */
+    const applyBlockFormat = (command: string, value?: string) => {
+      if (inert || !editorRef.current) return;
+      setBlockMenuOpen(false);
+      editorRef.current.focus();
+      const target = blockTargetRangeRef.current;
+      const selection = window.getSelection();
+      if (
+        target &&
+        selection &&
+        editorRef.current.contains(target.startContainer)
+      ) {
+        selection.removeAllRanges();
+        selection.addRange(target);
+      }
+      try {
+        document.execCommand(command, false, value);
+      } catch {
+        // jsdom: no execCommand — nothing to apply.
+      }
+      saveSelection();
+      updateContent();
+    };
+
+    // Menus move focus to their first item on open (WAI-ARIA menu pattern);
+    // required for the Ctrl/Cmd+/ path, where focus is still in the editor.
+    React.useEffect(() => {
+      if (!blockMenuOpen) return;
+      const frame = requestAnimationFrame(() =>
+        firstBlockItemRef.current?.focus()
+      );
+      return () => cancelAnimationFrame(frame);
+    }, [blockMenuOpen]);
+
     const toggleDictation = async () => {
       const SpeechRecognition = getSpeechRecognition();
       if (!SpeechRecognition) return;
@@ -287,6 +1065,11 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
         return;
       }
 
+      // The toolbar (and its Stop control) may have been hidden — or the
+      // editor made disabled/readOnly — while awaiting microphone
+      // permission; do not start an unstoppable or read-only session.
+      if (!toolbarVisibleRef.current || inertRef.current) return;
+
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
@@ -300,6 +1083,7 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       };
 
       recognition.onresult = (event) => {
+        if (inertRef.current) return;
         let finalTranscript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
@@ -344,9 +1128,17 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
       };
 
       recognition.onend = () => {
-        if (shouldRestartRef.current && isListeningRef.current) {
+        if (
+          shouldRestartRef.current &&
+          isListeningRef.current &&
+          !inertRef.current
+        ) {
           setTimeout(() => {
-            if (shouldRestartRef.current && isListeningRef.current) {
+            if (
+              shouldRestartRef.current &&
+              isListeningRef.current &&
+              !inertRef.current
+            ) {
               try {
                 recognition.start();
               } catch {
@@ -371,241 +1163,679 @@ const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
 
     const iconButtonClass = 'h-8 w-8 p-0';
 
+    const blockFormatItems: Array<{
+      key: keyof RichTextEditorBlockMenuLabels;
+      label: string;
+      command: string;
+      value?: string;
+    }> = [
+      { key: 'text', label: 'Text', command: 'formatBlock', value: 'p' },
+      {
+        key: 'heading1',
+        label: 'Heading 1',
+        command: 'formatBlock',
+        value: 'h1',
+      },
+      {
+        key: 'heading2',
+        label: 'Heading 2',
+        command: 'formatBlock',
+        value: 'h2',
+      },
+      {
+        key: 'heading3',
+        label: 'Heading 3',
+        command: 'formatBlock',
+        value: 'h3',
+      },
+      {
+        key: 'bulletList',
+        label: 'Bullet list',
+        command: 'insertUnorderedList',
+      },
+      {
+        key: 'numberedList',
+        label: 'Numbered list',
+        command: 'insertOrderedList',
+      },
+      {
+        key: 'quote',
+        label: 'Quote',
+        command: 'formatBlock',
+        value: 'blockquote',
+      },
+    ];
+
     return (
       <div
         data-slot="rich-text-editor"
+        data-chromeless={chromeless || undefined}
+        // Focus-driven macros: open while focus is anywhere inside the frame
+        // (focus events bubble in React), close only when it truly leaves —
+        // a macro pick or a toolbar click moves focus within and stays open.
+        onFocus={
+          hasMacros && macrosOnFocus ? () => setMacrosOpen(true) : undefined
+        }
+        onBlur={
+          hasMacros && macrosOnFocus
+            ? (event) => {
+                const related = event.relatedTarget as HTMLElement | null;
+                if (related && event.currentTarget.contains(related)) return;
+                // The block gutter's dropdown — and its "Insert macro"
+                // submenu — mount in portals under document.body (outside
+                // this frame); focus moving into our own menu tree is an
+                // internal move, not leaving the field. Walk each menu back
+                // to its trigger (a submenu's trigger sits in the parent
+                // menu's portal) until one lands inside this frame.
+                let menu = related?.closest<HTMLElement>('[role="menu"]');
+                while (menu && menu.id) {
+                  const trigger = document.querySelector(
+                    `[aria-controls="${globalThis.CSS.escape(menu.id)}"]`
+                  );
+                  if (!trigger) break;
+                  if (event.currentTarget.contains(trigger)) return;
+                  menu = trigger.closest<HTMLElement>('[role="menu"]');
+                }
+                setMacrosOpen(false);
+              }
+            : undefined
+        }
         className={cn(
-          'border-border bg-background flex flex-col overflow-hidden rounded-lg border',
+          'bg-background flex flex-col',
+          !chromeless && 'border-border overflow-hidden rounded-lg border',
           className
         )}
       >
-        <div
-          data-slot="rich-text-editor-toolbar"
-          className="border-border bg-muted/30 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2"
-        >
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('bold')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Bold"
-            title="Bold"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('italic')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Italic"
-            title="Italic"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('underline')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Underline"
-            title="Underline"
-          >
-            <Underline className="h-4 w-4" />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-1 h-6" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertUnorderedList')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Bullet list"
-            title="Bullet list"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('insertOrderedList')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Numbered list"
-            title="Numbered list"
-          >
-            <ListOrdered className="h-4 w-4" />
-          </Button>
-
-          <Separator orientation="vertical" className="mx-1 h-6" />
-
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyLeft')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align left"
-            title="Align left"
-          >
-            <AlignLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyCenter')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align center"
-            title="Align center"
-          >
-            <AlignCenter className="h-4 w-4" />
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => execCommand('justifyRight')}
-            disabled={disabled}
-            className={iconButtonClass}
-            aria-label="Align right"
-            title="Align right"
-          >
-            <AlignRight className="h-4 w-4" />
-          </Button>
-
-          {hasVariables && (
-            <>
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Dropdown
-                placement="bottom-start"
-                width={240}
-                searchable
-                searchPlaceholder="Search variables…"
-                searchAriaLabel="Search template variables"
-                disabled={disabled}
-                trigger={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 gap-1 px-2"
-                    disabled={disabled}
-                    title="Insert variable"
-                  >
-                    <Braces className="h-4 w-4" />
-                    <span className="text-xs">Variables</span>
-                  </Button>
-                }
-              >
-                {variableGroups!.map((group, groupIndex) => (
-                  <React.Fragment key={group.label}>
-                    {groupIndex > 0 && <DropdownSeparator />}
-                    <DropdownLabel>{group.label}</DropdownLabel>
-                    {group.variables.map((variable) => (
-                      <DropdownItem
-                        key={variable.value}
-                        onClick={() => insertVariable(variable)}
-                      >
-                        {variable.label}
-                      </DropdownItem>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </Dropdown>
-
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleConvertToMustache}
-                disabled={disabled}
-                className="h-8 gap-1 px-2"
-                title="Convert <<field>> to {{field}}"
-              >
-                <Replace className="h-4 w-4" />
-                <span className="text-xs">{'<< >> to {{ }}'}</span>
-              </Button>
-            </>
-          )}
-
-          {enableDictation && (
-            <>
-              <Separator orientation="vertical" className="mx-1 h-6" />
-              <Button
-                type="button"
-                variant={isListening ? 'danger' : 'ghost'}
-                size="sm"
-                onClick={toggleDictation}
-                disabled={disabled || !speechSupported}
-                className={cn('h-8 gap-1 px-2', isListening && 'animate-pulse')}
-                title={
-                  !speechSupported
-                    ? 'Speech recognition not supported in this browser'
-                    : isListening
-                      ? 'Stop dictation'
-                      : 'Start dictation'
-                }
-              >
-                {isListening ? (
-                  <MicOff className="h-4 w-4" />
-                ) : (
-                  <Mic className="h-4 w-4" />
-                )}
-                <span className="text-xs">
-                  {isListening ? 'Stop' : 'Dictate'}
-                </span>
-              </Button>
-            </>
-          )}
-        </div>
-
-        <div className="relative flex-1">
-          {isEmpty && placeholder && (
-            <div
-              aria-hidden="true"
-              className="text-muted-foreground pointer-events-none absolute start-0 top-0 p-4"
-            >
-              {placeholder}
-            </div>
-          )}
+        {toolbarVisible && (
           <div
-            ref={editorRef}
-            role="textbox"
-            aria-multiline="true"
-            aria-label={ariaLabel ?? placeholder}
-            contentEditable={!disabled}
-            tabIndex={disabled ? -1 : 0}
-            onInput={updateContent}
-            onPaste={handlePaste}
-            onDrop={handleDrop}
-            className={cn(
-              'min-h-[250px] overflow-y-auto p-4 focus:outline-none',
-              'prose prose-sm max-w-none',
-              disabled &&
-                'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300'
+            data-slot="rich-text-editor-toolbar"
+            className="border-border bg-muted/30 sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b p-2"
+          >
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('bold')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Bold')}
+              title={m('Bold')}
+            >
+              <Bold className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('italic')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Italic')}
+              title={m('Italic')}
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('underline')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Underline')}
+              title={m('Underline')}
+            >
+              <Underline className="h-4 w-4" />
+            </Button>
+
+            <Separator orientation="vertical" className="mx-1 h-6" />
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('insertUnorderedList')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Bullet list')}
+              title={m('Bullet list')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('insertOrderedList')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Numbered list')}
+              title={m('Numbered list')}
+            >
+              <ListOrdered className="h-4 w-4" />
+            </Button>
+
+            <Separator orientation="vertical" className="mx-1 h-6" />
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyLeft')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Align left')}
+              title={m('Align left')}
+            >
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyCenter')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Align center')}
+              title={m('Align center')}
+            >
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => execCommand('justifyRight')}
+              disabled={disabled}
+              className={iconButtonClass}
+              aria-label={m('Align right')}
+              title={m('Align right')}
+            >
+              <AlignRight className="h-4 w-4" />
+            </Button>
+
+            {hasVariables && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Dropdown
+                  placement="bottom-start"
+                  width={240}
+                  searchable
+                  searchPlaceholder="Search variables…"
+                  searchAriaLabel="Search template variables"
+                  disabled={disabled}
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 gap-1 px-2"
+                      disabled={disabled}
+                      title={m('Insert variable')}
+                    >
+                      <Braces className="h-4 w-4" />
+                      <span className="ms-1 text-xs">{m('Variables')}</span>
+                    </Button>
+                  }
+                >
+                  {variableGroups!.map((group, groupIndex) => (
+                    <React.Fragment key={group.label}>
+                      {groupIndex > 0 && <DropdownSeparator />}
+                      <DropdownLabel>{group.label}</DropdownLabel>
+                      {group.variables.map((variable) => (
+                        <DropdownItem
+                          key={variable.value}
+                          onClick={() => insertVariable(variable)}
+                        >
+                          {variable.label}
+                        </DropdownItem>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </Dropdown>
+
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleConvertToMustache}
+                  disabled={disabled}
+                  className="h-8 gap-1 px-2"
+                  title={m('Convert <<field>> to {{field}}')}
+                >
+                  <Replace className="h-4 w-4" />
+                  <span className="ms-1 text-xs">{m('<< >> to {{ }}')}</span>
+                </Button>
+              </>
             )}
-            suppressContentEditableWarning
-          />
+
+            {enableDictation && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant={isListening ? 'danger' : 'ghost'}
+                  size="sm"
+                  onClick={toggleDictation}
+                  disabled={inert || !speechSupported}
+                  className={cn(
+                    'h-8 gap-1 px-2',
+                    isListening && 'animate-pulse'
+                  )}
+                  title={
+                    !speechSupported
+                      ? m('Speech recognition not supported in this browser')
+                      : isListening
+                        ? m('Stop dictation')
+                        : m('Start dictation')
+                  }
+                >
+                  {isListening ? (
+                    <MicOff className="h-4 w-4" />
+                  ) : (
+                    <Mic className="h-4 w-4" />
+                  )}
+                  <span className="ms-1 text-xs">
+                    {isListening ? m('Stop') : m('Dictate')}
+                  </span>
+                </Button>
+              </>
+            )}
+
+            {hasMacros && (
+              <>
+                <Separator orientation="vertical" className="mx-1 h-6" />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setMacrosOpen((open) => !open)}
+                  disabled={disabled}
+                  className={cn('h-8 gap-1 px-2', macrosOpen && 'bg-muted')}
+                  aria-expanded={macrosOpen}
+                  aria-controls={macrosOpen ? macroPanelId : undefined}
+                  title={
+                    macrosOpen
+                      ? (macroLabels?.hideMacros ?? 'Hide macros')
+                      : (macroLabels?.showMacros ?? 'Show macros')
+                  }
+                >
+                  <BookOpen className="h-4 w-4" />
+                  <span className="ms-1 text-xs">
+                    {macroLabels?.macros ?? 'Macros'}
+                  </span>
+                </Button>
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="relative flex min-h-0 flex-1 flex-col">
+          <div
+            ref={gutterWrapperRef}
+            className={cn(
+              'relative flex-1',
+              blockMenu && 'group/rte-body',
+              hasMacros && macrosOpen && 'md:me-72'
+            )}
+            onMouseMove={
+              blockMenu && !disabled ? handleGutterMouseMove : undefined
+            }
+          >
+            {blockMenu && !inert && !macrosResting && (
+              // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mousedown here only guards editor focus (preventDefault); the real controls inside are native buttons.
+              <div
+                data-slot="rich-text-editor-block-gutter"
+                className="absolute start-1 z-10"
+                style={{ top: gutterTop }}
+                // Keep the editor focused through gutter interaction. iOS
+                // taps never focus buttons, so tapping the trigger or a menu
+                // item would first blur the editor with a null relatedTarget,
+                // collapsing focus-driven hosts and unmounting this gutter —
+                // and its menu — before the click can land. Preventing
+                // mousedown's focus default leaves the caret and virtual
+                // keyboard in place; clicks still fire. The dropdown portals
+                // under document.body, but React portal events bubble through
+                // the React tree, so this one handler covers the menu too.
+                onMouseDown={(event) => event.preventDefault()}
+              >
+                <Dropdown
+                  open={blockMenuOpen}
+                  onOpenChange={handleBlockMenuOpenChange}
+                  placement="bottom-start"
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        'h-6 w-6 p-0',
+                        // Revealed on hover/focus; always visible on touch,
+                        // which has no hover to reveal it with.
+                        'opacity-0 transition-opacity',
+                        'group-hover/rte-body:opacity-100',
+                        'focus-visible:opacity-100',
+                        '[@media(hover:none)]:opacity-100',
+                        blockMenuOpen && 'opacity-100'
+                      )}
+                      aria-label={blockMenuLabels?.blockMenu ?? 'Block menu'}
+                      title={blockMenuLabels?.blockMenu ?? 'Block menu'}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  }
+                >
+                  {blockFormatItems.map((item, index) => (
+                    <DropdownItem
+                      key={item.key}
+                      ref={index === 0 ? firstBlockItemRef : undefined}
+                      onClick={() => applyBlockFormat(item.command, item.value)}
+                    >
+                      {blockMenuLabels?.[item.key] ?? item.label}
+                    </DropdownItem>
+                  ))}
+                  <DropdownSeparator />
+                  {hasMacros && macros && (
+                    <>
+                      <DropdownSubmenu
+                        label={blockMenuLabels?.insertMacro ?? 'Insert macro'}
+                        // No macros to offer — the panel's empty state (via
+                        // "Show macro library") explains the situation.
+                        disabled={!hasMacroEntries}
+                      >
+                        {/* Children are built per render even while closed
+                            (the menu JSX lives in the editor's tree), so
+                            skip the catalog walk until the menu is open. */}
+                        {blockMenuOpen &&
+                          macros.flatMap((group) => [
+                            // Group headings only earn their row when there
+                            // is more than one group to tell apart.
+                            ...(macros.length > 1
+                              ? [
+                                  <DropdownLabel key={`h:${group.id}`}>
+                                    {group.label}
+                                  </DropdownLabel>,
+                                ]
+                              : []),
+                            ...group.macros.map((macro) => (
+                              <DropdownItem
+                                // Serialized pair: plain `${a}-${b}` joins
+                                // collide ('a-b','c' vs 'a','b-c') and can
+                                // alias a heading key.
+                                key={`m:${JSON.stringify([group.id, macro.id])}`}
+                                // The item's label slot is a flex item with
+                                // min-width:auto, so it refuses to shrink and
+                                // a long macro name overflows instead of
+                                // hitting the truncate below. Scoped here
+                                // rather than changed in DropdownItem, whose
+                                // other consumers size to content.
+                                className="[&>[data-slot=dropdown-item-label]]:min-w-0 [&>[data-slot=dropdown-item-label]]:flex-1"
+                                onClick={() => {
+                                  setBlockMenuOpen(false);
+                                  // Insertion lands at the menu's target
+                                  // block, mirroring the panel flow.
+                                  if (blockTargetRangeRef.current) {
+                                    savedRangeRef.current =
+                                      blockTargetRangeRef.current;
+                                  }
+                                  // The menu unmounts with this pick; hand
+                                  // focus back to the editor (host-handled
+                                  // picks skip insertMacro's own focus) so a
+                                  // focus-driven field can rest on the next
+                                  // click away. Panel picks keep focus on
+                                  // their row for keyboard multi-pick.
+                                  focusRestoringSelection();
+                                  insertMacro(macro);
+                                }}
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  {macro.shortcut && (
+                                    <span
+                                      // Shortcuts are typed sequences; keep
+                                      // them LTR in RTL locales.
+                                      dir="ltr"
+                                      className="border-border bg-background text-muted-foreground rounded border px-1 font-mono text-[11px]"
+                                    >
+                                      {macro.shortcut}
+                                    </span>
+                                  )}
+                                  <span className="min-w-0 flex-1 truncate">
+                                    {macro.label}
+                                  </span>
+                                </span>
+                              </DropdownItem>
+                            )),
+                          ])}
+                      </DropdownSubmenu>
+                      <DropdownItem
+                        onClick={() => {
+                          setBlockMenuOpen(false);
+                          // Macro insertion restores the bookmarked
+                          // selection; point it at the menu's target block.
+                          if (blockTargetRangeRef.current) {
+                            savedRangeRef.current = blockTargetRangeRef.current;
+                          }
+                          setMacrosOpen(true);
+                          // The activated item unmounts with the menu; move
+                          // focus back AND apply the bookmark to the live
+                          // selection — a bare focus() would leave the old
+                          // caret live, and the editor's onBlur (fired when
+                          // the panel's search field takes focus) would then
+                          // re-save it over the menu's target.
+                          focusRestoringSelection();
+                        }}
+                      >
+                        {blockMenuLabels?.showMacroLibrary ??
+                          'Show macro library'}
+                      </DropdownItem>
+                      {/* The toolbar toggle is editor chrome, not a macro
+                          action — keep it visually apart. */}
+                      <DropdownSeparator />
+                    </>
+                  )}
+                  <DropdownItem
+                    onClick={() => {
+                      setBlockMenuOpen(false);
+                      setToolbarVisibility(
+                        toolbarVisible ? 'hidden' : 'visible'
+                      );
+                      // See the macro item: the menu unmounts on close.
+                      editorRef.current?.focus();
+                    }}
+                  >
+                    {toolbarVisible
+                      ? (blockMenuLabels?.hideToolbar ?? 'Hide toolbar')
+                      : (blockMenuLabels?.showToolbar ?? 'Show toolbar')}
+                  </DropdownItem>
+                </Dropdown>
+              </div>
+            )}
+            {isEmpty && placeholder && (
+              <div
+                aria-hidden="true"
+                className={cn(
+                  'text-muted-foreground pointer-events-none absolute start-0 top-0',
+                  // Chromeless hosts drop the wrapper's clipping, so a long
+                  // placeholder must stay a single ellipsized line (as a
+                  // native textarea clips its own) instead of wrapping out
+                  // of the one-row field.
+                  chromeless ? 'end-0 truncate px-3 py-[7px] text-base' : 'p-4',
+                  blockMenu && !macrosResting && 'ps-10',
+                  // Keep the placeholder's font in step with the editable
+                  // when the host restyles it (e.g. Textarea's `size`).
+                  editorClassName
+                )}
+              >
+                {placeholder}
+              </div>
+            )}
+            <div
+              ref={editorRef}
+              id={id}
+              role="textbox"
+              aria-multiline="true"
+              aria-label={ariaLabel ?? placeholder}
+              aria-labelledby={ariaLabelledBy}
+              aria-describedby={ariaDescribedBy}
+              aria-invalid={ariaInvalid}
+              aria-required={ariaRequired}
+              aria-readonly={readOnly || undefined}
+              // A native disabled control announces its state (and axe
+              // exempts it from color-contrast); a contenteditable div
+              // must say so explicitly.
+              aria-disabled={disabled || undefined}
+              contentEditable={!inert}
+              // Styling hook: condensed-view.css must not pin the editable
+              // to its compact single-line minimum while the macro panel
+              // (absolutely stretched over this region) needs the md
+              // macros-open working space below.
+              data-macros-open={hasMacros && macrosOpen ? '' : undefined}
+              tabIndex={disabled ? -1 : 0}
+              onInput={updateContent}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onBlur={hasMacros ? saveSelection : undefined}
+              onKeyDown={
+                hasMacros || markdownShortcuts || blockMenu
+                  ? handleEditorKeyDown
+                  : undefined
+              }
+              onKeyUp={hasMacros ? saveSelection : undefined}
+              onMouseUp={hasMacros ? saveSelection : undefined}
+              className={cn(
+                'overflow-y-auto focus:outline-none',
+                // Chromeless surfaces start one Input row tall (Textarea md
+                // metrics: 24px line + 7px padding + the host's 1px borders
+                // = h-10) and auto-grow with content.
+                chromeless
+                  ? 'min-h-[38px] px-3 py-[7px] text-base'
+                  : 'min-h-[250px] p-4',
+                'prose prose-sm max-w-none',
+                // Baseline block styles: Tailwind preflight strips heading,
+                // list and quote styling, and the `prose` classes above only
+                // work when the host installs @tailwindcss/typography —
+                // without these, block formats would apply invisibly.
+                '[&_h1]:my-3 [&_h1]:text-2xl [&_h1]:font-bold',
+                '[&_h2]:my-3 [&_h2]:text-xl [&_h2]:font-bold',
+                '[&_h3]:my-2 [&_h3]:text-lg [&_h3]:font-semibold',
+                '[&_ul]:my-2 [&_ul]:list-disc [&_ul]:ps-6',
+                '[&_ol]:my-2 [&_ol]:list-decimal [&_ol]:ps-6',
+                '[&_blockquote]:border-border [&_blockquote]:text-muted-foreground [&_blockquote]:my-2 [&_blockquote]:border-s-4 [&_blockquote]:ps-3',
+                blockMenu && !macrosResting && 'ps-10',
+                // Tall enough for the docked panel's search plus a few rows
+                // without forcing the host form to scroll; the compact panel
+                // is just rows, so it needs far less.
+                hasMacros &&
+                  macrosOpen &&
+                  (compactMacros ? 'md:min-h-[140px]' : 'md:min-h-[250px]'),
+                // Focus mode grows the field from one row on focus (and, with
+                // the block gutter, indents it) — ease the jump instead of
+                // snapping.
+                hasMacros &&
+                  macrosOnFocus &&
+                  'transition-[min-height,padding] duration-200 ease-out motion-reduce:transition-none',
+                disabled &&
+                  'bg-muted/20 cursor-not-allowed text-neutral-700 dark:text-neutral-300',
+                editorClassName
+              )}
+              style={editorStyle}
+              suppressContentEditableWarning
+            />
+          </div>
+
+          {hasMacros && (
+            <AnimatedPresence>
+              {macrosOpen && (
+                <Animated
+                  key="macro-panel"
+                  // In-flow on mobile: `collapse` animates real height so the
+                  // field shrinks with the panel. `collapse` is a plain value
+                  // animation that reduced-motion config does not drop, so
+                  // honor the preference here (the side panel's `menu` nudge
+                  // is covered by the provider).
+                  preset={macroSidePanel ? 'menu' : 'collapse'}
+                  enabled={macroSidePanel || !prefersReducedMotion}
+                  mode="presence"
+                  // The side the panel occupies, resolved to a physical edge
+                  // so the closed nudge retreats toward the editor.
+                  custom={
+                    typeof document !== 'undefined' && document.dir === 'rtl'
+                      ? 'left'
+                      : 'right'
+                  }
+                  fallbackClassName="animate-fade-in"
+                  className="border-border flex max-h-72 flex-col overflow-hidden border-t md:absolute md:inset-y-0 md:end-0 md:max-h-none md:w-72 md:overflow-visible md:border-s md:border-t-0"
+                >
+                  <MacroLibrary
+                    id={macroPanelId}
+                    groups={macros!}
+                    onSelect={insertMacro}
+                    targetLabel={ariaLabel ?? placeholder}
+                    onClose={
+                      // Focus mode: visibility follows focus; a close that
+                      // refocuses the editor would just reopen the panel.
+                      macrosOnFocus
+                        ? undefined
+                        : () => {
+                            setMacrosOpen(false);
+                            // Selecting text in the panel moves the document
+                            // selection; put the caret back where the user
+                            // left it.
+                            focusRestoringSelection();
+                          }
+                    }
+                    onCreateMacro={onCreateMacro}
+                    labels={macroLabels}
+                    compact={compactMacros}
+                    className="min-h-0 flex-1"
+                  />
+                </Animated>
+              )}
+            </AnimatedPresence>
+          )}
         </div>
       </div>
     );
   }
 );
 
+RichTextEditorBase.displayName = 'RichTextEditorBase';
+
+// Warn once per session (dev builds only) that the legacy RichTextEditor is
+// deprecated. Bundlers replace `process.env.NODE_ENV` at build time, so this
+// entire branch is dead-code-eliminated from production bundles.
+let didWarnDeprecated = false;
+function warnDeprecatedOnce() {
+  if (process.env.NODE_ENV === 'production' || didWarnDeprecated) return;
+  didWarnDeprecated = true;
+  console.warn(
+    '[@mieweb/ui] RichTextEditor is deprecated. Use RichEditor from @mieweb/ui/kerebron (ProseMirror engine) instead.'
+  );
+}
+
+/**
+ * A presentational rich-text editor with formatting, template-variable
+ * insertion and optional speech-to-text dictation. Content is supplied and
+ * surfaced via `value`/`onChange` so it can be wired to any store. The variable
+ * menu is data-agnostic — pass `variableGroups` to populate it.
+ *
+ * @deprecated Use `RichEditor` from `@mieweb/ui/kerebron` instead — the
+ * supported ProseMirror/Kerebron rich-text surface: install the `@kerebron/*`
+ * peers, import `@mieweb/ui/kerebron.css`, and switch the component. Note the
+ * format difference: `RichEditor` stores Markdown (`getContent()`), while this
+ * editor carries HTML through `value`/`onChange`. For a textarea-like HTML
+ * surface use `TextAreaRich` from `@mieweb/ui/kerebron`. This legacy
+ * `document.execCommand` editor will be removed in a future major release
+ * (mieweb/ui#692).
+ */
+const RichTextEditor = React.forwardRef<HTMLDivElement, RichTextEditorProps>(
+  (props, ref) => {
+    warnDeprecatedOnce();
+    return <RichTextEditorBase ref={ref} {...props} />;
+  }
+);
+
 RichTextEditor.displayName = 'RichTextEditor';
 
-export { RichTextEditor };
+export { RichTextEditor, RichTextEditorBase };

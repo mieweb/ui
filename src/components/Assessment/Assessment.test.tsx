@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithTheme } from '../../test/test-utils';
 import { Assessment, type AssessmentProps } from './Assessment';
@@ -313,7 +313,9 @@ describe('Assessment actions', () => {
     fireEvent.change(orderInput, {
       target: { value: 'lisinopril 10 mg tablet' },
     });
-    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    // The unified add row's free-text fallback has its own 'Add' button —
+    // scope to the per-problem order form.
+    fireEvent.click(within(orderForm).getByRole('button', { name: 'Add' }));
 
     expect(onAddOrder).toHaveBeenCalledWith(items[0], {
       type: 'medication',
@@ -441,4 +443,23 @@ describe('Assessment actions', () => {
       );
     });
   });
+});
+
+describe('Assessment capture landmark', () => {
+  it.each([
+    [undefined, 'Add concern or order'],
+    ['Add clinical assessment', 'Add clinical assessment'],
+  ])(
+    'uses an explicit form label while preserving the default',
+    (addFormLabel, expected) => {
+      renderAssessment({
+        concerns: [],
+        items: [],
+        addFormLabel,
+        onAddAssessment: vi.fn(),
+        renderOrderSearch: () => <span>Coded search</span>,
+      });
+      expect(screen.getByRole('form', { name: expected })).toBeInTheDocument();
+    }
+  );
 });

@@ -2,23 +2,34 @@
 
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
+  useReducer,
   useRef,
   useState,
 } from 'react';
 
-import { CoreEditor, type AssetLoad } from '@kerebron/editor';
+import { CoreEditor, type AssetLoad, type EditorKit } from '@kerebron/editor';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
+import { MDY_PROJECTION_META } from './mdyTransaction';
+import { insertMediaFiles, type InsertFilesResult } from './insertMediaFiles';
 import {
   createEditorKits,
   type CollabConfig,
   type MediaUploadOptions,
+  type ModifyMenu,
 } from './editorKits';
 
-export type { CollabConfig, MediaUploadOptions } from './editorKits';
+export type {
+  CollabConfig,
+  MediaUploadOptions,
+  MenuElement,
+  ModifyMenu,
+} from './editorKits';
+export type { InsertFilesResult } from './insertMediaFiles';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
@@ -40,6 +51,10 @@ export interface RichEditorProps {
   value?: string;
   /** Called with the editor's markdown content whenever it changes. */
   onChange?: (value: string) => void;
+  /** Called when editor setup or a Markdown load fails. getContent also rejects. */
+  onError?: (error: unknown) => void;
+  /** Called after the initial Markdown load completes. */
+  onReady?: (editor: CoreEditor) => void;
   /** Whether to render the live markdown output preview. Defaults to `false`. */
   showPreview?: boolean;
   /**
@@ -55,6 +70,12 @@ export interface RichEditorProps {
   collab?: CollabConfig;
   /** Read-only surface: no typing, and the content dims. */
   disabled?: boolean;
+  /**
+   * Lock edits while keeping the surface focusable and selectable, without
+   * the dimmed `disabled` styling. Applied from creation, so the document
+   * cannot be edited even while the initial load is still in flight.
+   */
+  readOnly?: boolean;
   /**
    * Id for the editor host element — an `aria-labelledby`/`aria-describedby`
    * anchor. The host is a `div`, not a labelable control, so a
@@ -92,6 +113,38 @@ export interface RichEditorProps {
    * to change it.
    */
   mediaUpload?: MediaUploadOptions;
+  /** Additional editor kits, installed once when the editor mounts. */
+  editorKits?: EditorKit[];
+  /**
+   * Reshape the stock toolbar before it renders: receives the menu's item
+   * groups and returns the groups to render — append custom controls (a
+   * macros toggle, dictation) or drop stock ones. Read once, when the editor
+   * mounts — like {@link collab}, remount via `key` to change it.
+   */
+  modifyMenu?: ModifyMenu;
+  /**
+   * Schema extensions to remove by name (e.g. `['task_list', 'task_item']`).
+   * The toolbar, input rules and paste handling are all schema-driven, so
+   * dropping a node here removes the whole feature in one move. Read once,
+   * when the editor mounts — like {@link collab}, remount via `key` to
+   * change it.
+   */
+  omitExtensions?: readonly string[];
+  /**
+   * MIME type of the `value`/`onChange` contract (`'text/x-markdown'` by
+   * default; pass `'text/html'` for an HTML-valued surface). Governs both
+   * how `value` is parsed and what `onChange`/`getContent()` emit.
+   */
+  valueType?: string;
+  /**
+   * Converge the document to `value` on every render, not only when the
+   * prop changes — native controlled-input semantics: when a host's
+   * `onChange` does not echo an edit back into `value`, the edit reverts.
+   * A rejected edit leaves the prop identity unchanged while the document
+   * moved on, which a change-gated reload can never see. Off by default,
+   * which tolerates read-once hosts that call `getContent()` on submit.
+   */
+  strictValue?: boolean;
 }
 
 export interface RichEditorHandle {
@@ -102,6 +155,17 @@ export interface RichEditorHandle {
   getContent: () => Promise<string>;
   /** Focus the editor, restoring the caret where the writer left it. */
   focus: () => void;
+  /**
+   * Insert image/video files at the current selection through the same
+   * validation and upload pipeline as paste/drop — honoring the mount-time
+   * {@link RichEditorProps.mediaUpload} options, so with an `uploadHandler`
+   * the document carries URLs and without one images embed as base64.
+   * Files the schema or limits reject come back in `skipped`; nothing throws.
+   *
+   * Optional so existing implementers of this handle (wrappers exposing
+   * `getContent`/`focus` only) keep compiling — call as `insertFiles?.()`.
+   */
+  insertFiles?: (files: File[]) => Promise<InsertFilesResult>;
 }
 
 /**
@@ -117,15 +181,23 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     {
       value = '',
       onChange,
+      onError,
+      onReady,
       showPreview = false,
       collab,
       disabled = false,
+      readOnly = false,
       id,
       className,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       assetLoad,
       mediaUpload,
+      editorKits: additionalEditorKits,
+      modifyMenu,
+      omitExtensions,
+      valueType = MARKDOWN_TYPE,
+      strictValue = false,
     },
     ref
   ) {
@@ -134,47 +206,173 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     const editorInstance = useRef<CoreEditor | null>(null);
     const onChangeRef = useRef(onChange);
     onChangeRef.current = onChange;
+    const onErrorRef = useRef(onError);
+    onErrorRef.current = onError;
+    const onReadyRef = useRef(onReady);
+    onReadyRef.current = onReady;
     // Mirrors what the editor last held, so an echo of our own `onChange`
     // doesn't reload the document out from under the caret.
     const valueRef = useRef(value);
     const readyRef = useRef<Promise<void> | null>(null);
     const loadingRef = useRef(false);
+    const loadVersionRef = useRef(0);
+    // Return the exact source until a writer changes the loaded document.
+    // Running the Markdown converter alone can normalize whitespace or links.
+    const loadedDocRef = useRef<unknown>(null);
     const disabledRef = useRef(disabled);
+    const readOnlyRef = useRef(readOnly);
+    // `mediaUpload` is read once, on mount (see the prop docs); the handle's
+    // `insertFiles` must honor those same options, so hold the mount value.
+    const mediaUploadRef = useRef(mediaUpload);
 
     const [md, setMd] = useState<string>('');
+    // A strict surface reconciles in an after-render effect, but publishing
+    // an edit only mutates refs — a host whose `onChange` ignores the edit
+    // (rejection) triggers no render, so the stale document would stay
+    // visible. Each publication schedules one render; an accepted update
+    // from the host batches into the same pass, so the effect compares the
+    // freshest prop either way.
+    const [, scheduleStrictReconcile] = useReducer(
+      (tick: number) => tick + 1,
+      0
+    );
+    const strictValueRef = useRef(strictValue);
+    strictValueRef.current = strictValue;
     // Serializing the document is the expensive part of a transaction, so the
     // last doc that was serialized is kept to recognise the transactions that
     // did not change it. ProseMirror documents are immutable, so identity is an
     // exact test.
     const lastSerializedDoc = useRef<unknown>(null);
-    // Read inside the transaction handler, which is created once on mount.
+    // Read inside effects created once on mount.
     const showPreviewRef = useRef(showPreview);
     showPreviewRef.current = showPreview;
+    const valueTypeRef = useRef(valueType);
+    valueTypeRef.current = valueType;
+
+    // The contenteditable surface has no implicit ARIA role, so labeling
+    // attributes are only permitted alongside an explicit textbox role — and
+    // `aria-readonly` is only valid on such a role, not on the host div.
+    const surfaceAttributes = useCallback(
+      () =>
+        ariaLabel || ariaLabelledBy
+          ? {
+              role: 'textbox',
+              'aria-multiline': 'true',
+              ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+              ...(ariaLabelledBy ? { 'aria-labelledby': ariaLabelledBy } : {}),
+              ...(readOnlyRef.current ? { 'aria-readonly': 'true' } : {}),
+            }
+          : null,
+      [ariaLabel, ariaLabelledBy]
+    );
+
+    // Applies the read state everywhere it matters: the view's `editable`
+    // prop, the surface's ARIA attributes, and the stock toolbar — whose
+    // buttons dispatch commands regardless of `editable`, so disabled and
+    // readOnly must neutralize it with `inert` (blocks pointer and keyboard
+    // access while the document's text stays selectable).
+    // ProseMirror drops natural tabbability once `editable` is false, so a
+    // read-only (not disabled) surface restores it with a direct tabindex —
+    // tracked by ownership so a host-supplied tabindex (the TextAreaRich
+    // adapter sets its own through `setProps`) is never touched.
+    const ownsTabindexRef = useRef(false);
+    const syncReadState = useCallback(() => {
+      const editor = editorInstance.current;
+      if (editor) {
+        const attributes = surfaceAttributes();
+        editor.view.setProps({
+          editable: () => !disabledRef.current && !readOnlyRef.current,
+          ...(attributes ? { attributes } : {}),
+        });
+        const dom = editor.view.dom as HTMLElement;
+        if (readOnlyRef.current && !disabledRef.current) {
+          if (!dom.hasAttribute('tabindex')) {
+            dom.setAttribute('tabindex', '0');
+            ownsTabindexRef.current = true;
+          }
+        } else if (ownsTabindexRef.current) {
+          if (dom.getAttribute('tabindex') === '0')
+            dom.removeAttribute('tabindex');
+          ownsTabindexRef.current = false;
+        }
+      }
+      const inert = disabledRef.current || readOnlyRef.current;
+      for (const toolbar of hostRef.current?.querySelectorAll<HTMLElement>(
+        '.kb-custom-menu, .kb-custom-menu__overflow-menu'
+      ) ?? []) {
+        toolbar.inert = inert;
+      }
+    }, [surfaceAttributes]);
 
     useEffect(() => {
       disabledRef.current = disabled;
-      editorInstance.current?.view.setProps({
-        editable: () => !disabledRef.current,
-      });
-    }, [disabled]);
+      readOnlyRef.current = readOnly;
+      syncReadState();
+    }, [disabled, readOnly, syncReadState]);
 
+    // Runs after every render (no dependency array): a `strictValue` surface
+    // must converge even when the prop identity never changed — a rejected
+    // edit keeps `value` as-is while the document moved on. The
+    // `value === valueRef` guard keeps the common case free; non-strict
+    // hosts additionally require the prop itself to have changed (tracked
+    // manually below), preserving tolerance for read-once hosts.
+    const lastValuePropRef = useRef(value);
     useEffect(() => {
+      const propChanged = lastValuePropRef.current !== value;
+      lastValuePropRef.current = value;
       // In collab mode the CRDT owns the content; reloading would fight it.
       if (collab || value === valueRef.current) return;
+      if (!strictValue && !propChanged) return;
       valueRef.current = value;
       const editor = editorInstance.current;
       if (!editor) return;
 
       loadingRef.current = true;
-      void editor
-        .loadDocumentText(MARKDOWN_TYPE, value)
+      const loadVersion = ++loadVersionRef.current;
+      const previousReady = readyRef.current;
+      // Serialize reloads behind setup and one another. Saving while a reload
+      // is pending awaits that same promise rather than reading stale prose.
+      const pending = (previousReady ?? Promise.resolve())
         .catch(() => undefined)
+        .then(async () => {
+          if (editorInstance.current !== editor) return;
+          // Reloading the document must not cost the writer their caret: a
+          // host-composed update (macro pick, finding) lands mid-flow and
+          // the next keystroke should keep going into the editable.
+          const hadFocus = editor.view.hasFocus();
+          await editor.loadDocumentText(valueTypeRef.current, value);
+          if (editorInstance.current !== editor) return;
+          loadedDocRef.current = editor.view.state.doc;
+          lastSerializedDoc.current = editor.view.state.doc;
+          if (hadFocus) {
+            // The load can take long enough for the writer to move on —
+            // only reclaim the caret when no other control has taken it.
+            const active = document.activeElement;
+            if (
+              !active ||
+              active === document.body ||
+              (editor.view.dom as HTMLElement).contains(active)
+            ) {
+              editor.view.focus();
+            }
+          }
+          if (showPreviewRef.current) setMd(value);
+        })
         .finally(() => {
-          if (editorInstance.current === editor) loadingRef.current = false;
+          if (
+            editorInstance.current === editor &&
+            loadVersion === loadVersionRef.current
+          ) {
+            loadingRef.current = false;
+          }
         });
-      // `collab` is fixed for the lifetime of the instance.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [value]);
+      readyRef.current = pending;
+      void pending.catch((error) => {
+        if (editorInstance.current !== editor) return;
+        console.error('Failed to load markdown:', error);
+        onErrorRef.current?.(error);
+      });
+    });
 
     useEffect(() => {
       if (!hostRef.current) return;
@@ -189,7 +387,34 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       host.appendChild(mount);
 
       // Listen to transactions and update markdown preview
-      const onTransaction = async () => {
+      const onTransaction = async (event?: Event) => {
+        const transaction = (
+          event as
+            | globalThis.CustomEvent<{
+                transaction?: {
+                  getMeta: (key: string) => unknown;
+                  before: unknown;
+                };
+              }>
+            | undefined
+        )?.detail?.transaction;
+        if (transaction?.getMeta(MDY_PROJECTION_META) === true) {
+          const doc = editorInstance.current?.view.state.doc;
+          if (transaction.before === loadedDocRef.current) {
+            loadedDocRef.current = doc;
+            lastSerializedDoc.current = doc;
+          } else {
+            lastSerializedDoc.current = null;
+            // A host projection can overtake a pending user-edit save. That
+            // older result is discarded below, so publish the newest composed
+            // document even if the writer does not make another transaction.
+            // A microtask coalesces a burst of clinical updates into one save.
+            void Promise.resolve().then(() => {
+              if (!disposed) return onTransaction();
+            });
+          }
+          return;
+        }
         // Programmatic loads are not edits — reporting them would echo the
         // caller's own `value` back through `onChange`.
         if (loadingRef.current || !editorInstance.current) return;
@@ -201,17 +426,30 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
         const { doc } = editorInstance.current.view.state;
         if (doc === lastSerializedDoc.current) return;
         lastSerializedDoc.current = doc;
+        const loadVersion = loadVersionRef.current;
 
         try {
-          const buffer =
-            await editorInstance.current.saveDocument(MARKDOWN_TYPE);
+          const buffer = await editorInstance.current.saveDocument(
+            valueTypeRef.current
+          );
           const markdown = new globalThis.TextDecoder().decode(buffer);
-          if (disposed) return;
+          if (
+            disposed ||
+            loadingRef.current ||
+            loadVersion !== loadVersionRef.current ||
+            doc !== editorInstance.current?.view.state.doc
+          ) {
+            return;
+          }
           valueRef.current = markdown;
           // `md` only feeds the preview pane; setting it with the preview off
           // re-renders the editor on every keystroke for nothing.
           if (showPreviewRef.current) setMd(markdown);
           onChangeRef.current?.(markdown);
+          if (strictValueRef.current) scheduleStrictReconcile();
+          // This source is now published. Future clinical-only projections
+          // preserve it without starting another authored-prose write.
+          loadedDocRef.current = doc;
         } catch (err) {
           // The document was marked as serialized before the attempt, to keep
           // selection-only transactions arriving mid-save from re-entering.
@@ -225,12 +463,16 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       // collaborative mode additionally swaps `history` for the Yjs CRDT sync
       // and lazy-loads the Yjs kit (see `editorKits.ts` for why).
       const setup = async () => {
+        loadingRef.current = true;
+        const loadVersion = ++loadVersionRef.current;
         // `collaborative` is false when a room was asked for but the Yjs kit
         // could not be loaded — the editor is still created, just a local one,
         // so there is no room to join below.
         const { kits: editorKits, collaborative } = await createEditorKits(
           collab,
-          mediaUpload
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
         );
         if (disposed) return;
 
@@ -238,28 +480,12 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           element: mount,
           uri: 'file:///untitled.md',
           assetLoad: assetLoad ?? createAssetLoad('/kerebron-wasm'),
-          editorKits,
-          readOnly: disabledRef.current,
+          editorKits: [...editorKits, ...(additionalEditorKits ?? [])],
+          readOnly: disabledRef.current || readOnlyRef.current,
         });
 
         editorInstance.current = editor;
-        // The contenteditable surface has no implicit ARIA role, so labeling
-        // attributes are only permitted alongside an explicit textbox role.
-        const surfaceAttributes =
-          ariaLabel || ariaLabelledBy
-            ? {
-                role: 'textbox',
-                'aria-multiline': 'true',
-                ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
-                ...(ariaLabelledBy
-                  ? { 'aria-labelledby': ariaLabelledBy }
-                  : {}),
-              }
-            : null;
-        editor.view.setProps({
-          editable: () => !disabledRef.current,
-          ...(surfaceAttributes ? { attributes: surfaceAttributes } : {}),
-        });
+        syncReadState();
         editor.addEventListener('transaction', onTransaction);
 
         // Seed initial content, then populate the preview once on mount.
@@ -300,7 +526,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
               if (current) return; // somebody's content arrived — done
               if (attempt >= 2) {
                 await editorInstance.current.loadDocumentText(
-                  MARKDOWN_TYPE,
+                  valueTypeRef.current,
                   seed
                 );
                 return;
@@ -315,19 +541,28 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
 
         if (valueRef.current) {
           await queueInitialLoad(() =>
-            editor!.loadDocumentText(MARKDOWN_TYPE, valueRef.current)
+            editor!.loadDocumentText(valueTypeRef.current, valueRef.current)
           );
-          await onTransaction();
-          joinRoom();
-        } else {
-          void onTransaction();
-          joinRoom();
         }
+        if (disposed) return;
+        loadedDocRef.current = editor.view.state.doc;
+        lastSerializedDoc.current = editor.view.state.doc;
+        if (showPreviewRef.current) setMd(valueRef.current);
+        if (loadVersion === loadVersionRef.current) loadingRef.current = false;
+        onReadyRef.current?.(editor);
+        joinRoom();
       };
 
-      readyRef.current = setup().catch((err) =>
-        console.error('Failed to set up editor:', err)
-      );
+      const pending = setup();
+      readyRef.current = pending;
+      // Observe the rejection without replacing the readiness promise: callers
+      // must be able to detect a failed load instead of saving stale content.
+      void pending.catch((error) => {
+        if (disposed) return;
+        loadingRef.current = false;
+        console.error('Failed to set up editor:', error);
+        onErrorRef.current?.(error);
+      });
 
       // Cleanup on unmount
       return () => {
@@ -347,13 +582,26 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       ref,
       () => ({
         getContent: async (): Promise<string> => {
-          await readyRef.current;
-          const editor = editorInstance.current;
-          if (!editor) return valueRef.current;
-          const buffer = await editor.saveDocument(MARKDOWN_TYPE);
-          const markdown = new globalThis.TextDecoder().decode(buffer);
-          valueRef.current = markdown;
-          return markdown;
+          while (true) {
+            await readyRef.current;
+            const editor = editorInstance.current;
+            if (!editor) return valueRef.current;
+            const doc = editor.view.state.doc;
+            const loadVersion = loadVersionRef.current;
+            if (doc === loadedDocRef.current) return valueRef.current;
+            const buffer = await editor.saveDocument(valueTypeRef.current);
+            if (
+              editorInstance.current !== editor ||
+              loadVersion !== loadVersionRef.current ||
+              doc !== editor.view.state.doc
+            )
+              continue;
+            const markdown = new globalThis.TextDecoder().decode(buffer);
+            valueRef.current = markdown;
+            loadedDocRef.current = doc;
+            lastSerializedDoc.current = doc;
+            return markdown;
+          }
         },
         focus: (): void => {
           const apply = (): void => {
@@ -370,7 +618,20 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           };
           // Callers focus on mount; the editor may still be loading its kits.
           if (editorInstance.current) apply();
-          else void readyRef.current?.then(apply);
+          else void readyRef.current?.then(apply, () => undefined);
+        },
+        insertFiles: async (files: File[]): Promise<InsertFilesResult> => {
+          // Setup failures surface through `onError`; here they just mean
+          // there is no document to insert into, so everything is skipped.
+          await readyRef.current?.catch(() => undefined);
+          const editor = editorInstance.current;
+          if (!editor || !files.length)
+            return { inserted: [], skipped: [...files] };
+          return insertMediaFiles(
+            editor.view,
+            files,
+            mediaUploadRef.current ?? {}
+          );
         },
       }),
       []

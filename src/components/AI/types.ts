@@ -12,14 +12,21 @@ import type * as React from 'react';
 // ============================================================================
 
 /**
- * Status of an MCP tool invocation
+ * Status of an MCP tool invocation.
+ *
+ * `awaiting-approval` is a call the user has to allow before it runs;
+ * `denied` and `expired` are calls that never ran because the user refused
+ * or did not answer in time.
  */
 export type MCPToolStatus =
   | 'pending'
+  | 'awaiting-approval'
   | 'running'
   | 'success'
   | 'error'
-  | 'cancelled';
+  | 'cancelled'
+  | 'denied'
+  | 'expired';
 
 /**
  * MCP Tool parameter definition
@@ -39,6 +46,19 @@ export interface MCPToolCall {
   id: string;
   /** Name of the tool being invoked */
   toolName: string;
+  /**
+   * What the call did in the user's words, e.g. "Read notes.md". Shown in
+   * place of `toolName`, which then moves into the call's details. Omit it to
+   * show `toolName`.
+   */
+  displayName?: string;
+  /**
+   * Who provides the tool — an MCP server's display name, for example. Shown
+   * before the tool name; omit it for first-party tools.
+   */
+  serverName?: string;
+  /** Leading icon for the call. Defaults to a wrench where one is shown. */
+  icon?: React.ReactNode;
   /** Human-readable description of what the tool does */
   description?: string;
   /** Parameters passed to the tool */

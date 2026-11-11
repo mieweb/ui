@@ -25,6 +25,7 @@ import type {
 } from '../TranscriptView/transcript';
 import { PLAYBACK_SPEEDS, isSilenceType } from '../TranscriptView/transcript';
 import { useTranscriptEdits } from '../../hooks/useTranscriptEdits';
+import { isRtl } from '../../hooks/useDirection';
 import {
   MediaPlayer,
   type MediaPlayerRef,
@@ -1136,20 +1137,24 @@ export const MediaEditor = React.forwardRef<HTMLDivElement, MediaEditorProps>(
           if (canRedoWords) redo();
           else if (canRedo && onRedo) onRedo();
           handled = true;
-        } else if (e.key === 'ArrowLeft') {
-          if (cursorPosition === 'after') {
-            // Move from 'after' the last word back to 'before' it
-            setCursorPosition('before');
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          // Caret keys are visual: in RTL transcripts ArrowLeft advances to
+          // the next word and ArrowRight retreats, like native text fields.
+          const forward = (e.key === 'ArrowRight') !== isRtl(e.currentTarget);
+          if (forward) {
+            if (cursorIndex === wordCount - 1 && cursorPosition === 'before') {
+              // At the last word: move the caret after it
+              setCursorPosition('after');
+            } else if (cursorPosition !== 'after') {
+              newIndex = Math.min(wordCount - 1, cursorIndex + 1);
+            }
           } else {
-            newIndex = Math.max(0, cursorIndex - 1);
-          }
-          handled = true;
-        } else if (e.key === 'ArrowRight') {
-          if (cursorIndex === wordCount - 1 && cursorPosition === 'before') {
-            // At the last word: move the caret after it
-            setCursorPosition('after');
-          } else if (cursorPosition !== 'after') {
-            newIndex = Math.min(wordCount - 1, cursorIndex + 1);
+            if (cursorPosition === 'after') {
+              // Move from 'after' the last word back to 'before' it
+              setCursorPosition('before');
+            } else {
+              newIndex = Math.max(0, cursorIndex - 1);
+            }
           }
           handled = true;
         } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {

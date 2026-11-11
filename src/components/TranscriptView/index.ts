@@ -8,6 +8,7 @@ export type {
   TranscriptWord,
   TranscriptSegment,
   Speaker,
+  SpeakerActivity,
   Transcript,
   EditableWord,
   PlaybackSegment,

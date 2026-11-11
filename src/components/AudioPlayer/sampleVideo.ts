@@ -15,11 +15,14 @@
  * below should call `URL.revokeObjectURL` when the URL is no longer needed to
  * avoid leaking the underlying blob.
  */
-export function createSampleVideoUrl(durationSec = 3): Promise<string> {
+export function createSampleVideoUrl(
+  durationSec = 3,
+  shape: SampleVideoShape = 'landscape'
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas');
-    canvas.width = 320;
-    canvas.height = 180;
+    canvas.width = shape === 'portrait' ? 180 : 320;
+    canvas.height = shape === 'portrait' ? 320 : 180;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -98,7 +101,8 @@ export function createSampleVideoUrl(durationSec = 3): Promise<string> {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = 'white';
       ctx.font = '20px sans-serif';
-      ctx.fillText('Sample recording', 70, 95);
+      if (shape === 'portrait') ctx.fillText('Sample', 55, 150);
+      else ctx.fillText('Sample recording', 70, 95);
       if (elapsed < durationSec) {
         requestAnimationFrame(draw);
       } else {
@@ -111,13 +115,20 @@ export function createSampleVideoUrl(durationSec = 3): Promise<string> {
   });
 }
 
-// Memoized sample URL promise (generated once, reused across stories).
-let _sampleVideoPromise: Promise<string> | null = null;
+/** A wide (16:9) clip, or an upright one like a phone recording. */
+export type SampleVideoShape = 'landscape' | 'portrait';
 
-/** ~3s animated WebM clip. */
-export function getSampleVideo(): Promise<string> {
-  if (!_sampleVideoPromise) {
-    _sampleVideoPromise = createSampleVideoUrl(3);
+// Memoized sample URL promises (one per shape, reused across stories).
+const sampleVideoPromises = new Map<SampleVideoShape, Promise<string>>();
+
+/** ~3s animated WebM clip, wide unless `shape` is `'portrait'`. */
+export function getSampleVideo(
+  shape: SampleVideoShape = 'landscape'
+): Promise<string> {
+  let promise = sampleVideoPromises.get(shape);
+  if (!promise) {
+    promise = createSampleVideoUrl(3, shape);
+    sampleVideoPromises.set(shape, promise);
   }
-  return _sampleVideoPromise;
+  return promise;
 }

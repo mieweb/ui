@@ -275,3 +275,21 @@ export default function App() {
 Privacy: conversation content stays between the user and Ozwell and is never
 relayed to the host page. The host receives only the tool calls it declares,
 lifecycle/error events, and any data the user explicitly shares (opt-in).
+
+## Rule 17: Icons come from lucide-react
+
+- **Every icon comes from `lucide-react`** — either a `*Icon` convenience re-export from `@mieweb/ui` (`HomeIcon`, `SearchIcon`, `TrashIcon`, …) or a direct `lucide-react` import for the full set.
+- **Never hand-roll an `<svg>` icon and never add another icon library** (Font Awesome, Heroicons, Material Icons, …) — `@fortawesome/*` is ESLint-blocked in the library for this reason, and mixed icon sets break visual consistency.
+- Sizing: `h-4 w-4` (16px) is the default inline size; `h-5 w-5` for emphasis, `h-3.5 w-3.5` in dense UI. Lucide's `size={16}` prop is equivalent.
+- Icon-only controls need an `aria-label` (Rules 2 and 9); purely decorative icons get `aria-hidden="true"`.
+- For dynamic icon props, type them as `LucideIcon` (re-exported from `@mieweb/ui`).
+
+```tsx
+// ✅ Convenience re-exports, or the full set directly
+import { SearchIcon, TrashIcon } from '@mieweb/ui';
+import { Stethoscope } from 'lucide-react';
+
+// ❌ Hand-rolled or foreign icons
+// <svg viewBox="0 0 24 24"><path d="..." /></svg>
+// import { faTrash } from '@fortawesome/free-solid-svg-icons';
+```

@@ -51,6 +51,7 @@ export const entries = {
   'components/DateInput/index': 'src/components/DateInput/index.ts',
   'components/Dropdown/index': 'src/components/Dropdown/index.ts',
   'components/EmailEditor/index': 'src/components/EmailEditor/index.ts',
+  'components/FileViewer/index': 'src/components/FileViewer/index.ts',
   'components/FilterSummaryBar/index':
     'src/components/FilterSummaryBar/index.ts',
   'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',
@@ -79,6 +80,7 @@ export const entries = {
   'components/ReadingProgressBar/index':
     'src/components/ReadingProgressBar/index.ts',
   'components/RecordButton/index': 'src/components/RecordButton/index.ts',
+  'components/DictationButton/index': 'src/components/DictationButton/index.ts',
   'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',
   'components/SchedulePicker/index': 'src/components/SchedulePicker/index.ts',
   'components/ScrollArea/index': 'src/components/ScrollArea/index.ts',

@@ -17,4 +17,15 @@ describe('CountryCodeDropdown', () => {
       screen.getByRole('button', { name: 'Select country code' })
     ).toHaveTextContent('Code');
   });
+
+  // #319: "+1" is digits plus a direction-neutral "+" — without an explicit
+  // dir="ltr" island, RTL bidi renders it as "1+".
+  it('renders the trigger dial code as a dir="ltr" island', () => {
+    const { container } = renderWithTheme(<CountryCodeDropdown />);
+    const dialCode = container.querySelector(
+      '[data-slot="country-dropdown-dialcode"]'
+    );
+    expect(dialCode).toHaveTextContent('+1');
+    expect(dialCode).toHaveAttribute('dir', 'ltr');
+  });
 });

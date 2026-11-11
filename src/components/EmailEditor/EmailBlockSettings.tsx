@@ -3,10 +3,13 @@ import { Plus, Trash2, Upload } from 'lucide-react';
 
 import { Button as BaseButton, type ButtonProps } from '../Button';
 import { Input } from '../Input';
-import { RichTextEditor, type RichTextVariableGroup } from '../RichTextEditor';
+import type { RichTextVariableGroup } from '../RichTextEditor/RichTextEditor';
 import { Select } from '../Select';
 import { Switch } from '../Switch';
 import { Textarea } from '../Textarea';
+// Text blocks ride the Kerebron (ProseMirror) engine (mieweb/ui#695) — the
+// same surface behind the main bundle's Textarea, so this adds no new peers.
+import { TextAreaRichKerebron } from '../TextAreaRich/TextAreaRichKerebron';
 import type { EmailEditorLabels } from './labels';
 import { sanitizeEmailHtml } from './renderEmailMjml';
 import {
@@ -21,6 +24,11 @@ import {
 } from './types';
 
 type Patch<B> = (patch: Partial<B>) => void;
+
+// Task lists have no place in an email: their checkbox <input>s are forbidden
+// by the sanitiser and inert in every mail client. Module-level so the editor
+// sees one stable identity.
+const EMAIL_OMITTED_EXTENSIONS = ['task_list', 'task_item'] as const;
 
 /** Editor actions must never submit a host form. */
 export function Button(props: ButtonProps) {
@@ -208,9 +216,28 @@ export function EmailBlockSettings({
   const uploadRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = React.useState(false);
   const [uploadFailed, setUploadFailed] = React.useState(false);
-  // HTML the editor just emitted is already live in its DOM; sanitising it again
-  // would normalise it and make RichTextEditor rewrite innerHTML (losing the caret).
+  // HTML the editor just emitted is already live in its document; sanitising it
+  // again would normalise it, and the strictly controlled editor would rewrite
+  // its content to match (losing the caret).
   const emitted = React.useRef<string | null>(null);
+  // The editor captures `mediaUpload` once, when it mounts; reading the latest
+  // `onUploadImage` through a ref keeps paste uploads in sync with the host's
+  // current callback (added, swapped, or removed after mount) without
+  // rebuilding the editor and losing the user's editing state.
+  const onUploadImageRef = React.useRef(onUploadImage);
+  onUploadImageRef.current = onUploadImage;
+  const uploadPastedImage = React.useCallback(async (file: File) => {
+    const upload = onUploadImageRef.current;
+    if (!upload) {
+      // The media extension catches rejections and inserts nothing — parity
+      // with the legacy editor, where pasted image files never survived the
+      // sanitiser — but leaves a console trace for debuggability.
+      throw new Error(
+        'EmailEditor: pasted file skipped — no onUploadImage handler'
+      );
+    }
+    return upload(file);
+  }, []);
 
   switch (block.type) {
     case 'heading':
@@ -242,7 +269,7 @@ export function EmailBlockSettings({
     case 'text':
       return (
         <>
-          <RichTextEditor
+          <TextAreaRichKerebron
             aria-label={f.content}
             value={
               block.content === emitted.current
@@ -253,11 +280,27 @@ export function EmailBlockSettings({
               emitted.current = content;
               set({ content });
             }}
-            // Pasted markup must pass the same policy as stored content; the
-            // `emitted` bypass above is only safe because of this.
+            // Declares the policy pasted markup must pass. The Kerebron
+            // surface filters pastes through the ProseMirror schema (a
+            // stricter subset); stored content is still sanitised on every
+            // exit (canvas preview and MJML render).
             sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
+            // A pasted image file must not become a base64 `data:` URL — the
+            // email URL policy (`isSafeUrl`) strips those on render, leaving a
+            // broken image. The always-present stable handler routes files
+            // through the host's current uploader, or rejects (= skips the
+            // file) without one. No videos in email text blocks.
+            mediaUpload={{
+              uploadHandler: uploadPastedImage,
+              allowedVideoTypes: [],
+            }}
+            // Task lists serialize checkbox <input>s, which the sanitiser
+            // forbids and no mail client would honour — dropping the nodes
+            // removes the menu item, input rule and paste handling together.
+            omitExtensions={EMAIL_OMITTED_EXTENSIONS}
             variableGroups={variableGroups}
             enableDictation={false}
+            defaultToolbar="visible"
           />
           {alignment(block.alignment, 'left')}
           <ColorField

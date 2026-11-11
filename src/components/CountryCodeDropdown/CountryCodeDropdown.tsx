@@ -356,7 +356,10 @@ function CountryDropdownBase({
             {placeholder}
           </span>
         ) : showDialCode ? (
-          <span data-slot="country-dropdown-dialcode">{selected.dialCode}</span>
+          // LTR island: keeps the '+' before the digits under RTL bidi
+          <span data-slot="country-dropdown-dialcode" dir="ltr">
+            {selected.dialCode}
+          </span>
         ) : (
           <span data-slot="country-dropdown-name" className="min-w-0 truncate">
             {selected.name}
@@ -465,8 +468,10 @@ function CountryDropdownBase({
                       {country.name}
                     </span>
                     {showDialCode && (
+                      // LTR island: keeps the '+' before the digits under RTL bidi
                       <span
                         data-slot="country-dropdown-option-dialcode"
+                        dir="ltr"
                         className="text-muted-foreground shrink-0 text-xs"
                       >
                         {country.dialCode}

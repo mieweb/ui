@@ -1,53 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-
-// Helper to navigate to a story and wait for it to render
-async function gotoStory(
-  page: Page,
-  storyId: string,
-  { globals, args }: { globals?: string; args?: string } = {}
-) {
-  // Navigate to the story iframe
-  await page.goto(
-    `/iframe.html?id=${storyId}&viewMode=story${
-      globals ? `&globals=${globals}` : ''
-    }${args ? `&args=${args}` : ''}`
-  );
-
-  // Wait for either success or error state
-  const result = await page.waitForFunction(
-    () => {
-      const body = document.body;
-      const root = document.querySelector('#storybook-root');
-      // Success: main is showing and root has content
-      if (
-        body?.classList.contains('sb-show-main') &&
-        root &&
-        root.children.length > 0
-      ) {
-        return 'success';
-      }
-      // Error: no preview is showing
-      if (
-        body?.classList.contains('sb-show-nopreview') ||
-        body?.classList.contains('sb-show-errordisplay')
-      ) {
-        return 'error';
-      }
-      return false;
-    },
-    { timeout: 20000 }
-  );
-
-  const status = await result.jsonValue();
-  if (status === 'error') {
-    throw new Error(
-      `Story '${storyId}' failed to render - check if the story exists`
-    );
-  }
-
-  // Additional delay for any animations/renders
-  await page.waitForTimeout(500);
-}
+import { gotoStory, expectDocumentDirection } from './helpers';
 
 // Warm up the server before running tests
 test.beforeAll(async ({ browser }) => {
@@ -157,11 +109,257 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-condensed', { globals: 'density:condensed' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer - Selectors end slot${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-chatcomposer--with-selectors-end-slot', {
+        ...options,
+      });
+      // The end slot follows the model selector in reading order, so it
+      // sits physically left of it under RTL and right of it otherwise.
+      const [model, slot] = await Promise.all([
+        page
+          .locator("[data-slot='composer-model-selector-trigger']")
+          .boundingBox(),
+        page.locator("[data-slot='composer-selector-trigger']").boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(slot!.x).toBeLessThan(model!.x);
+      } else {
+        expect(slot!.x).toBeGreaterThan(model!.x);
+      }
+      await expect(page).toHaveScreenshot(
+        `chat-composer-selectors-end-slot${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-condensed', { globals: 'density:condensed' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`HeyOzwellSelector - Error menu${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'voice-hey-ozwell-selector--error-state', {
+        ...options,
+      });
+      const trigger = page.locator("[data-slot='composer-selector-trigger']");
+      // The phase icon leads the label: right of it under RTL, left otherwise.
+      const [icon, text] = await Promise.all([
+        trigger.locator('svg').first().boundingBox(),
+        trigger.locator('span').first().boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(icon!.x).toBeGreaterThan(text!.x);
+      } else {
+        expect(icon!.x).toBeLessThan(text!.x);
+      }
+      await trigger.click();
+      await expect(
+        page.getByText('Microphone permission denied')
+      ).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `hey-ozwell-selector-error-menu${name}.png`
+      );
+    });
+  }
+
   test('ChatComposer - With record button', async ({ page }) => {
     // The 40px RecordButton in micSlot must overflow-center in the h-8
     // control row without inflating the pill height.
     await gotoStory(page, 'chat-chatcomposer--with-record-button');
     await expect(page).toHaveScreenshot('chat-composer-with-record-button.png');
+  });
+
+  // Capture ribbon POC (#637): docked Record/Capture ribbon above the input.
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ChatComposer capture ribbon - Docked${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(
+        page,
+        'chat-chatcomposer-action-ribbon-poc--native-with-document',
+        { ...options }
+      );
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+      const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+      await expect(ribbon).toBeVisible();
+      // Record leads Capture in reading order: physically right of it under
+      // RTL, left of it otherwise.
+      const [record, capture] = await Promise.all([
+        ribbon.getByRole('group', { name: 'Record' }).boundingBox(),
+        ribbon.getByRole('group', { name: 'Capture' }).boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(record!.x).toBeGreaterThan(capture!.x);
+      } else {
+        expect(record!.x).toBeLessThan(capture!.x);
+      }
+      if (viewport) {
+        const box = await ribbon.boundingBox();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(ribbon).toHaveScreenshot(
+        `chat-composer-capture-ribbon${name}.png`
+      );
+    });
+  }
+
+  test('ChatComposer capture ribbon - Dock and undock from the + menu', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-chatcomposer-action-ribbon-poc--menu-only');
+    const ribbon = page.locator("[data-slot='chat-composer-capture-ribbon']");
+    await expect(ribbon).toHaveCount(0);
+
+    await page.locator("[data-slot='chat-composer-add-button']").click();
+    const dockToggle = page.getByRole('menuitem', {
+      name: 'Dock capture ribbon',
+    });
+    await dockToggle.click();
+    await expect(ribbon).toBeVisible();
+
+    await ribbon.getByRole('button', { name: 'Undock capture ribbon' }).click();
+    await expect(ribbon).toHaveCount(0);
+  });
+
+  test('ChatComposer capture ribbon - Scan document attaches a page', async ({
+    page,
+  }) => {
+    await gotoStory(
+      page,
+      'chat-chatcomposer-action-ribbon-poc--native-with-document'
+    );
+    await page.getByRole('button', { name: 'Scan document' }).click();
+    await expect(page.getByRole('status')).toHaveText('Scanned 1 page(s)');
+    await expect(
+      page.locator("[data-slot='chat-composer-attachments']")
+    ).toBeVisible();
+  });
+
+  // Real-editor round-trip (mieweb/ui#733): capture → uploadHandler → image
+  // node in the live Kerebron document → serialized markdown. Complements the
+  // unit tests, which mock the editor because tree-sitter WASM can't run in
+  // jsdom.
+  test('RichMediaCaptureEditor - Attach file round-trips into markdown via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-richmediacaptureeditor--with-upload-handler');
+    // Insertion happens at the caret, exactly like paste — put it in the
+    // paragraph (markdown headings cannot carry images through serialization).
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    // The unrestricted hidden input backs "Attach file" (the other is
+    // accept="image/*" for Capture image).
+    await page
+      .locator('input[type="file"]:not([accept])')
+      .setInputFiles({
+        name: 'note-photo.png',
+        mimeType: 'image/png',
+        buffer: Buffer.from('fake-png-bytes'),
+      });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the serialized document; the image node must carry the
+    // uploaded URL (the mock returns an object URL), not a base64 embed.
+    await expect(page.getByTestId('markdown-output')).toContainText(
+      '![note-photo.png](blob:'
+    );
+  });
+
+  // TextAreaRich (Kerebron) mediaCapture opt-in (mieweb/ui#734): the same
+  // ribbon docked above the comment field, round-tripping through the real
+  // editor into the HTML the field emits.
+  test('TextAreaRich Kerebron - mediaCapture attach round-trips into HTML via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the field's HTML: the image carries the uploaded URL
+    // (the mock returns an object URL), not a base64 embed.
+    await expect(page.getByTestId('html-output')).toContainText('src="blob:');
+  });
+
+  test('DictationButton - Mock provider', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--mock-provider');
+    await expect(page).toHaveScreenshot('dictation-button-mock-provider.png');
+  });
+
+  test('DictationButton - In chat composer', async ({ page }) => {
+    // Dictation is the composer's only mic, in micSlot.
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer');
+    await expect(page).toHaveScreenshot('dictation-button-in-composer.png');
+  });
+
+  test('DictationButton - In chat composer (dark)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'theme:dark',
+    });
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-dark.png'
+    );
+  });
+
+  test('DictationButton - In chat composer (RTL)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'direction:rtl',
+    });
+    // The mic precedes Send in reading order, so under RTL it sits to its right.
+    const [mic, send] = await Promise.all([
+      page.locator("[data-slot='dictation-button']").boundingBox(),
+      page.locator("[data-slot='chat-composer-send-button']").boundingBox(),
+    ]);
+    expect(mic!.x).toBeGreaterThan(send!.x);
+    await expect(page).toHaveScreenshot('dictation-button-in-composer-rtl.png');
+  });
+
+  test('DictationButton - In chat composer (condensed)', async ({ page }) => {
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer', {
+      globals: 'density:condensed',
+    });
+    await expect(page.locator("[data-slot='dictation-button']")).toHaveCSS(
+      'gap',
+      '4px'
+    );
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-condensed.png'
+    );
+  });
+
+  test('DictationButton - In chat composer (mobile stacked)', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await gotoStory(page, 'media-dictationbutton--in-chat-composer');
+    await expect(page).toHaveScreenshot(
+      'dictation-button-in-composer-mobile.png'
+    );
   });
 
   test('ChatComposer - With leading slot', async ({ page }) => {
@@ -631,6 +829,288 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  test('MCPToolCallGroup - Settled run collapses to one line and expands', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-mcptoolcall--group');
+    const header = page.getByRole('button', { name: 'Used 5 tools' });
+    const rows = page.locator("[data-slot='ai-tool-call-row']");
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(rows).toHaveCount(0);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-collapsed.png');
+
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(rows).toHaveCount(5);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-expanded.png');
+  });
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Pinned approval and error rows${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-needs-attention', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Collapsing by hand leaves the approval and failed calls listed.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await header.click();
+      await expect(header).toHaveAttribute('aria-expanded', 'false');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(2);
+      await expect(
+        page.getByText('ENOENT: no such file or directory, open notes.txt')
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      // The status badge sits at the row's inline end: physically right of
+      // the tool name in LTR and left of it in RTL.
+      const approvalRow = rows.filter({ hasText: 'delete_file' });
+      const [toolName, badge] = await Promise.all([
+        approvalRow.locator('code').boundingBox(),
+        approvalRow.getByText('Needs approval', { exact: true }).boundingBox(),
+      ]);
+      if (isRtl) {
+        expect(badge!.x + badge!.width).toBeLessThan(toolName!.x);
+      } else {
+        expect(badge!.x).toBeGreaterThan(toolName!.x + toolName!.width);
+      }
+
+      // The list's guide rule is on the inline-start side.
+      const rule = await page.getByRole('list').evaluate((el) => ({
+        left: getComputedStyle(el).borderLeftWidth,
+        right: getComputedStyle(el).borderRightWidth,
+      }));
+      expect(rule).toEqual(
+        isRtl ? { left: '0px', right: '1px' } : { left: '1px', right: '0px' }
+      );
+
+      // Parameter JSON is an LTR island even in an RTL document.
+      const paramsDirection = await approvalRow
+        .locator('pre')
+        .first()
+        .evaluate((el) => getComputedStyle(el).direction);
+      expect(paramsDirection).toBe('ltr');
+
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-needs-attention${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`MCPToolCallGroup - Translated labels at narrow width${name}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      await gotoStory(page, 'chat-mcptoolcall--group-labels', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      const header = page.getByRole('button', {
+        name: '5 herramientas usadas',
+      });
+      await header.click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(5);
+
+      // Longer labels must not push the badge out of its row.
+      for (const row of await rows.all()) {
+        const [trigger, badge] = await Promise.all([
+          row.getByRole('button').first().boundingBox(),
+          row.getByText('Hecho', { exact: true }).boundingBox(),
+        ]);
+        expect(badge!.x).toBeGreaterThanOrEqual(trigger!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          trigger!.x + trigger!.width + 0.5
+        );
+      }
+      const scrollWidth = await page.evaluate(
+        () => document.documentElement.scrollWidth
+      );
+      expect(scrollWidth).toBeLessThanOrEqual(320);
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-labels-narrow${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 640 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Display names with tool ids${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-display-names', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Host-supplied names are direction-isolated, so English text keeps
+      // its trailing "/" in place inside an RTL document.
+      const firstLabel = page.getByText('Looked at files in src/', {
+        exact: true,
+      });
+      expect(
+        await firstLabel.evaluate((el) => getComputedStyle(el).direction)
+      ).toBe('ltr');
+
+      // The call awaiting approval keeps the group and its own row open.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(3);
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      const longName = 'Read src/components/AI/MCPToolCallGroup.tsx';
+      const readRow = rows.filter({ hasText: longName });
+      await readRow.getByRole('button').first().click();
+
+      const rowNames = [
+        ['Looked at files in src/', 'Done'],
+        [longName, 'Done'],
+        ['Delete the build folder', 'Needs approval'],
+      ] as const;
+      for (const [index, [displayName, status]] of rowNames.entries()) {
+        const trigger = rows.nth(index).getByRole('button').first();
+        // The row shows the display name as plain text, not the tool id.
+        await expect(trigger.locator('code')).toHaveCount(0);
+        const [triggerBox, label, badge] = await Promise.all([
+          trigger.boundingBox(),
+          trigger.getByText(displayName, { exact: true }).boundingBox(),
+          trigger.getByText(status, { exact: true }).boundingBox(),
+        ]);
+        // The badge stays inside the row, at its inline end, and leaves the
+        // name room to show.
+        expect(label!.width).toBeGreaterThan(40);
+        expect(badge!.x).toBeGreaterThanOrEqual(triggerBox!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          triggerBox!.x + triggerBox!.width + 0.5
+        );
+        if (isRtl) {
+          expect(badge!.x + badge!.width).toBeLessThan(label!.x);
+        } else {
+          expect(badge!.x).toBeGreaterThan(label!.x + label!.width);
+        }
+      }
+
+      // Expanded rows show the full name and the raw tool id.
+      for (const [row, toolName] of [
+        [readRow, 'read_file'],
+        [rows.nth(2), 'delete_file'],
+      ] as const) {
+        await expect(row.locator("[data-slot='ai-tool-call-id']")).toHaveText(
+          `Tool ID ${toolName}`
+        );
+      }
+      const fullName = readRow.locator(
+        "[data-slot='ai-tool-call-display-name']"
+      );
+      await expect(fullName).toHaveText(longName);
+
+      if (viewport) {
+        // The row truncates the long name; its details wrap it instead.
+        const [rowLabel, details] = await Promise.all([
+          readRow
+            .getByRole('button')
+            .first()
+            .getByText(longName, { exact: true })
+            .evaluate((el) => ({
+              scrollWidth: el.scrollWidth,
+              clientWidth: el.clientWidth,
+            })),
+          fullName.evaluate((el) => ({
+            scrollWidth: el.scrollWidth,
+            clientWidth: el.clientWidth,
+          })),
+        ]);
+        expect(rowLabel.scrollWidth).toBeGreaterThan(rowLabel.clientWidth);
+        expect(details.scrollWidth).toBeLessThanOrEqual(details.clientWidth);
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-display-names${name}.png`
+      );
+    });
+  }
+
+  for (const [name, reducedMotion] of [
+    ['', 'no-preference'],
+    ['-reduced-motion', 'reduce'],
+  ] as const) {
+    test(`MCPToolCallGroup - Live run collapses when it settles${name}`, async ({
+      page,
+    }) => {
+      // A fake, paused clock drives both the story's 700ms call cadence and
+      // the motion runtime's rAF loop, so each frame is stepped explicitly.
+      await page.emulateMedia({ reducedMotion });
+      await page.clock.install({ time: new Date('2026-01-15T12:00:00') });
+      await page.clock.pauseAt(new Date('2026-01-15T12:00:01'));
+      await gotoStory(page, 'chat-mcptoolcall--group-motion');
+
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await page.getByRole('button', { name: 'Play run' }).click();
+      await expect(rows).toHaveCount(1);
+      for (let count = 2; count <= 5; count++) {
+        await page.clock.runFor(700);
+        await expect(rows).toHaveCount(count);
+      }
+      const header = page.getByRole('button', { name: /^Running 5 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      await page.clock.runFor(300); // let the fifth row finish entering
+      const fullHeight = (await rows.first().boundingBox())!.height;
+
+      // The fifth call settles 700ms after it arrived; the group collapses.
+      await page.clock.runFor(400);
+      const settled = page.getByRole('button', { name: 'Used 5 tools' });
+      await expect(settled).toHaveAttribute('aria-expanded', 'false');
+
+      if (reducedMotion === 'reduce') {
+        // No exit animation: rows go without the clock advancing a frame.
+        await expect(rows).toHaveCount(0);
+      } else {
+        // Midway through the 200ms collapse the rows are still shrinking.
+        await page.clock.runFor(100);
+        const midHeight = (await rows.first().boundingBox())!.height;
+        expect(midHeight).toBeGreaterThan(0);
+        expect(midHeight).toBeLessThan(fullHeight);
+        await page.clock.runFor(400);
+        await expect(rows).toHaveCount(0);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-live-settled${name}.png`
+      );
+    });
+  }
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
@@ -708,11 +1188,108 @@ test.describe('Visual Regression Tests - Core Components', () => {
       ((r) => ({ left: r.left }))(el.getBoundingClientRect())
     );
     await expect
-      .poll(() =>
-        submenu.evaluate((el) => el.getBoundingClientRect().right)
-      )
+      .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - RTL island on an LTR page keeps its direction', async ({
+    page,
+  }) => {
+    // The panel portals to <body>, so without the carried `dir` it would
+    // inherit the LTR document direction and `bottom-start` would anchor to
+    // the physical left. Inside a local dir="rtl" island both must follow
+    // the trigger: panel direction rtl, start edge = right.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands');
+    const trigger = page
+      .locator('[data-testid="rtl-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'rtl');
+    await expect(menu).toHaveCSS('direction', 'rtl');
+    // Closeness, not one-sided: `right <= trigger.right` would also pass for
+    // a left-anchored panel. Poll so the open animation settles first.
+    const triggerRight = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().right - expected),
+          triggerRight
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - LTR island on an RTL page keeps its direction', async ({
+    page,
+  }) => {
+    // The inverse island: on a dir="rtl" document the LTR island's menu must
+    // stay LTR and `bottom-start` must anchor to the physical left.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands', {
+      globals: 'direction:rtl',
+    });
+    // Guard the premise: the island sets dir="ltr" itself, so every assertion
+    // below would also pass on an LTR page if the global stopped applying.
+    await expectDocumentDirection(page, 'rtl');
+    const trigger = page
+      .locator('[data-testid="ltr-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'ltr');
+    await expect(menu).toHaveCSS('direction', 'ltr');
+    const triggerLeft = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().left
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().left - expected),
+          triggerLeft
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-ltr.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('CountBadge - Row action menu anchors inline-end (RTL)', async ({
+    page,
+  }) => {
+    // The portal row menu hugs the trigger's inline-end edge: LTR pins its
+    // right edge to the trigger's right (translateX(-100%)); under dir="rtl"
+    // it pins its left edge to the trigger's left and opens toward the
+    // inline-end instead. DashboardWidget and FileManager share the recipe.
+    await gotoStory(page, 'data-display-countbadge--hover-menu-info', {
+      globals: 'direction:rtl',
+    });
+    await page.getByRole('button', { name: 'Open Enc 5' }).click();
+    const actionBtn = page.locator('button[aria-label^="Actions for"]').first();
+    await actionBtn.click();
+    const menu = page.locator('[role="menu"]');
+    await menu.waitFor({ state: 'visible' });
+    // Geometry, not just pixels: the 5% page-diff tolerance can swallow a
+    // side swap on a small menu. Poll: positioning lands in a layout effect.
+    // Equality (±0.5px), not one-sided: `left >= trigger.left` would also
+    // pass for a menu still anchored to the trigger's right edge.
+    const btnBox = await actionBtn.boundingBox();
+    await expect
+      .poll(() => menu.evaluate((el) => el.getBoundingClientRect().left))
+      .toBeCloseTo(btnBox!.x, 0);
+    await expect(page).toHaveScreenshot('countbadge-row-menu-rtl.png', {
       animations: 'disabled',
     });
   });
@@ -721,7 +1298,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // `start`/`end` resolve against the trigger's text direction: in LTR
     // start = left of the trigger, end = right.
     await gotoStory(page, 'overlays-tooltip--logical-placements');
-    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const startTip = page
+      .getByRole('tooltip')
+      .filter({ hasText: 'Inline start' });
     const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
     const startBtn = page.getByRole('button', { name: 'Start' });
     const endBtn = page.getByRole('button', { name: 'End' });
@@ -746,7 +1325,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await gotoStory(page, 'overlays-tooltip--logical-placements', {
       globals: 'direction:rtl',
     });
-    const startTip = page.getByRole('tooltip').filter({ hasText: 'Inline start' });
+    const startTip = page
+      .getByRole('tooltip')
+      .filter({ hasText: 'Inline start' });
     const endTip = page.getByRole('tooltip').filter({ hasText: 'Inline end' });
     const startBtn = page.getByRole('button', { name: 'Start' });
     const endBtn = page.getByRole('button', { name: 'End' });
@@ -761,6 +1342,218 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('tooltip-logical-placements-rtl.png', {
       animations: 'disabled',
     });
+  });
+
+  test('LoadingPage - bar and shimmer animations mirror under RTL', async ({
+    page,
+  }) => {
+    // `animate-loading-bar` / `animate-shimmer` emitted no CSS at all before
+    // this batch (their keyframes were never defined), so assert they resolve
+    // to real animations and swap to the `-rtl` mirrors under dir="rtl".
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors');
+    const bar = page.locator('.animate-loading-bar');
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar');
+    await expect(page).toHaveScreenshot('loading-bar-colors.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--progress-bar-colors', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => bar.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('loading-bar-rtl');
+    await expect(page).toHaveScreenshot('loading-bar-colors-rtl.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons');
+    const wave = page.locator('.animate-shimmer').first();
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer');
+    await expect(page).toHaveScreenshot('loading-skeletons.png', {
+      animations: 'disabled',
+    });
+    await gotoStory(page, 'loading-loadingpage--skeletons', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() => wave.evaluate((el) => getComputedStyle(el).animationName))
+      .toBe('shimmer-rtl');
+    await expect(page).toHaveScreenshot('loading-skeletons-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Deck - bar chart marker label stays centered in RTL', async ({
+    page,
+  }) => {
+    // The label anchors at `start-1/2` (right: 50% in RTL), so the physical
+    // centering translate must mirror: `-translate-x-1/2 rtl:translate-x-1/2`.
+    // Without the mirror the label lands a full label-width off the divider.
+    await gotoStory(page, 'presentations-deck--rtl');
+    const label = page
+      .locator('[data-slot="deck-bar-chart"] span.start-1\\/2')
+      .first();
+    // Center-to-center offset within a 1px subpixel-rounding budget — an
+    // unmirrored label sits a half label-width (tens of px) off the divider.
+    await expect
+      .poll(() =>
+        label.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const center = r.left + r.width / 2;
+          const p = el.parentElement!.getBoundingClientRect();
+          return Math.abs(center - (p.left + p.width / 2));
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    const chart = page.locator('[data-slot="deck-bar-chart"]').first();
+    await chart.scrollIntoViewIfNeeded();
+    await expect(chart).toHaveScreenshot('deck-bar-chart-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('BookingDialog - Consent switch thumb mirrors (RTL)', async ({
+    page,
+  }) => {
+    const translateX = () =>
+      page
+        .locator("[data-slot='consent-switch-thumb']")
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).translate));
+    // Normal density: the component's own rtl:-translate-x-* utilities
+    // drive the travel (-0.125rem resting, -1.25rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl',
+    });
+    const toggle = page.locator("[data-slot='consent-switch-toggle']").first();
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-20);
+    // Condensed density: condensed-view.css repositions the thumb with
+    // physical `translate` + `transform: none !important`, trampling the
+    // utilities above — dedicated :dir(rtl) condensed rules mirror it
+    // (-0.125rem resting, -0.875rem checked).
+    await gotoStory(page, 'users-integrations-bookingdialog--default', {
+      globals: 'direction:rtl;density:condensed',
+    });
+    await expect.poll(translateX).toBe(-2);
+    await toggle.click();
+    await expect.poll(translateX).toBe(-14);
+    const consent = page.locator("[data-slot='booking-dialog-consent']");
+    await consent.scrollIntoViewIfNeeded();
+    await expect(consent).toHaveScreenshot(
+      'booking-consent-condensed-rtl.png',
+      { animations: 'disabled' }
+    );
+  });
+
+  // #319 LTR islands: phone numbers, dates, URLs and dial codes carry an
+  // explicit dir="ltr" so bidi can't reorder their separators under RTL.
+  const direction = (locator: ReturnType<Page['locator']>) =>
+    locator.evaluate((el) => getComputedStyle(el).direction);
+
+  test('PhoneInput - formatted value is an LTR island (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'text-inputs-phoneinput--pre-filled', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="tel"]').first();
+    await expect(input).toHaveValue('(555) 123-4567');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('phoneinput-prefilled-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('WebsiteInput - URL is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'text-inputs-websiteinput--with-value', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[type="url"]').first();
+    await expect(input).toHaveValue('https://bluehivehealth.com');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('websiteinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('DateInput - MM/DD/YYYY is an LTR island (RTL)', async ({ page }) => {
+    await gotoStory(page, 'date-time-dateinput--default', {
+      globals: 'direction:rtl',
+    });
+    const input = page.locator('input[inputmode="numeric"]').first();
+    await input.fill('12252024');
+    await expect(input).toHaveValue('12/25/2024');
+    await expect.poll(() => direction(input)).toBe('ltr');
+    await expect(page).toHaveScreenshot('dateinput-value-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('CountryCodeDropdown - dial codes are LTR islands (RTL)', async ({
+    page,
+  }) => {
+    // "+1" is digits plus a direction-neutral "+": without the island, RTL
+    // bidi renders it as "1+".
+    await gotoStory(page, 'choice-inputs-countrycodedropdown--default', {
+      globals: 'direction:rtl',
+    });
+    const triggerCode = page.locator('[data-slot="country-dropdown-dialcode"]');
+    await expect(triggerCode).toHaveText('+1');
+    await expect.poll(() => direction(triggerCode)).toBe('ltr');
+    await page.locator('[data-slot="country-dropdown-trigger"]').click();
+    const optionCode = page
+      .locator('[data-slot="country-dropdown-option-dialcode"]')
+      .first();
+    await expect.poll(() => direction(optionCode)).toBe('ltr');
+    await expect(page).toHaveScreenshot('countrycodedropdown-open-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Table - numeric cells are right-aligned LTR islands', async ({
+    page,
+  }) => {
+    const priceCell = () =>
+      page.locator('td[dir="ltr"]', { hasText: '$100.00' }).first();
+    // LTR base: numeric opts in to physical right alignment + tabular-nums.
+    await gotoStory(page, 'grids-table--with-footer');
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const s = getComputedStyle(el);
+          return [s.direction, s.textAlign, s.fontVariantNumeric].join(' ');
+        })
+      )
+      .toBe('ltr end tabular-nums');
+    // The header label is bidi-isolated so RTL-script column names keep
+    // their natural direction inside the alignment island.
+    await expect(page.locator('th[dir="ltr"] bdi').first()).toHaveText(
+      'Quantity'
+    );
+    await expect(page).toHaveScreenshot('table-footer-numeric.png');
+    // RTL: cells stay dir="ltr" islands, so the digits and the physical
+    // right alignment are identical to the LTR rendering.
+    await gotoStory(page, 'grids-table--with-footer', {
+      globals: 'direction:rtl',
+    });
+    await expect
+      .poll(() =>
+        priceCell().evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const text = range.getBoundingClientRect();
+          // Text hugs the cell's right padding edge (p-4 = 16px) in RTL too.
+          return Math.abs(r.right - 16 - text.right);
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    await expect(page).toHaveScreenshot('table-footer-numeric-rtl.png');
   });
 
   test('Table - Default', async ({ page }) => {
@@ -870,6 +1663,111 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('audioplayer-podcast-player.png');
   });
 
+  test('AudioPlayer - Compact thumb anchors inline-start (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'media-audioplayer--compact', {
+      globals: 'direction:rtl',
+    });
+    const bar = page.locator("[data-slot='audio-player-progress']");
+    const thumb = page.locator("[data-slot='audio-player-progress-thumb']");
+    // At progress 0 the thumb must sit centred on the bar's inline-start
+    // edge — the RIGHT edge in RTL. Closeness, not a one-sided bound: the
+    // old physical layout parked it on the left edge.
+    const barBox = await bar.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right }))(el.getBoundingClientRect())
+    );
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(barBox.right - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(barBox.right + 1.5);
+    await expect(page).toHaveScreenshot('audioplayer-compact-rtl.png');
+  });
+
+  test('Slider - Thumb and fill track the value (LTR)', async ({ page }) => {
+    await gotoStory(page, 'choice-inputs-slider--with-value');
+    const track = page.locator("[data-slot='slider-track']");
+    const thumb = page.locator("[data-slot='slider-thumb']");
+    const box = await track.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right, width: r.width }))(
+        el.getBoundingClientRect()
+      )
+    );
+    // value 75 of 0–100: thumb centre at 75% from the left edge (±1.5px).
+    const expected = box.left + box.width * 0.75;
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(expected - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(expected + 1.5);
+    await expect(page).toHaveScreenshot('slider-with-value.png');
+  });
+
+  test('Slider - Fill anchors inline-start and mirrors (RTL)', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-slider--with-value', {
+      globals: 'direction:rtl',
+    });
+    const track = page.locator("[data-slot='slider-track']");
+    const range = page.locator("[data-slot='slider-range']");
+    const thumb = page.locator("[data-slot='slider-thumb']");
+    const box = await track.evaluate((el) =>
+      ((r) => ({ left: r.left, right: r.right, width: r.width }))(
+        el.getBoundingClientRect()
+      )
+    );
+    // value 75 of 0–100 in RTL: thumb centre at 75% from the RIGHT edge
+    // (±1.5px) and the fill anchored to the right edge. Closeness, not a
+    // one-sided bound: the old physical layout also kept the thumb inside
+    // the track.
+    const expected = box.right - box.width * 0.75;
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeGreaterThanOrEqual(expected - 1.5);
+    await expect
+      .poll(() =>
+        thumb.evaluate((el) => {
+          const r = el.getBoundingClientRect();
+          return r.left + r.width / 2;
+        })
+      )
+      .toBeLessThanOrEqual(expected + 1.5);
+    const rangeRight = await range.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    expect(Math.abs(rangeRight - box.right)).toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('slider-with-value-rtl.png');
+  });
+
   test('CommandPalette - Default', async ({ page }) => {
     await gotoStory(page, 'navigation-commandpalette--default');
     await expect(page).toHaveScreenshot('commandpalette-default.png');
@@ -878,6 +1776,20 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('AGGrid - Default', async ({ page }) => {
     await gotoStory(page, 'deprecated-aggrid--default');
     await expect(page).toHaveScreenshot('aggrid-default.png');
+  });
+
+  test('AGGrid - mirrors via enableRtl (RTL)', async ({ page }) => {
+    await gotoStory(page, 'deprecated-aggrid--default', {
+      globals: 'direction:rtl',
+    });
+    // The wrapper resolves the inherited dir and passes AG Grid's native
+    // enableRtl — the root wrapper gains .ag-rtl and lays out right-to-left.
+    const root = page.locator('.ag-root-wrapper').first();
+    await expect(root).toHaveClass(/ag-rtl/);
+    await expect
+      .poll(() => root.evaluate((el) => getComputedStyle(el).direction))
+      .toBe('rtl');
+    await expect(page).toHaveScreenshot('aggrid-default-rtl.png');
   });
 });
 
@@ -1377,6 +2289,42 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page).toHaveScreenshot('richeditor-formatted-dark.png');
   });
 
+  test('RichEditor - mirrors under RTL with LTR code island', async ({
+    page,
+  }) => {
+    // Guards the kerebron.css RTL overrides (#319): Kerebron's content.css
+    // uses physical list/blockquote rules, and code blocks inherited the
+    // surrounding direction (bidi-reordering program code).
+    await gotoStory(page, formattedStory, { globals: 'direction:rtl' });
+    await waitForFormatted(page);
+    // Prose follows the inherited direction…
+    await expect(page.locator('.ProseMirror').first()).toHaveCSS(
+      'direction',
+      'rtl'
+    );
+    // …lists pad from the inline start (logical override)…
+    const list = page.locator('.kb-editor ul').first();
+    await expect(list).toHaveCSS('padding-right', '30px');
+    await expect(list).toHaveCSS('padding-left', '0px');
+    // …and code blocks stay LTR islands (code must not bidi-reorder).
+    await expect(page.locator('.codecrock-root').first()).toHaveCSS(
+      'direction',
+      'ltr'
+    );
+    await expect(page).toHaveScreenshot('richeditor-formatted-rtl.png', {
+      animations: 'disabled',
+    });
+
+    // Blockquote mirror: wrap the h1 and assert the quote bar sits on the
+    // inline-start (right) edge instead of staying physically left.
+    await page.locator('.kb-editor h1').click();
+    await page.getByRole('button', { name: 'Wrap in block quote' }).click();
+    const quote = page.locator('.kb-editor blockquote').first();
+    await expect(quote).not.toHaveCSS('border-right-width', '0px');
+    await expect(quote).toHaveCSS('border-left-width', '0px');
+    await expect(quote).toHaveCSS('padding-left', '0px');
+  });
+
   test('RichEditor - Heading dropdown opens with active state', async ({
     page,
   }) => {
@@ -1462,6 +2410,52 @@ test.describe('Visual Regression Tests - RichEditor (kerebron.css)', () => {
     await expect(page.locator('.kb-editor ul ul')).toHaveCount(0);
     await expect(page.locator('.kb-editor ol')).toHaveCount(1);
   });
+
+  test('RichEditor - dropdown opens below its trigger on a scrolled page', async ({
+    page,
+  }) => {
+    // Guards the renderPinnedDropdown scroll offset in the extension-menu
+    // patch (#690): the pinned dropdown is appended to document.body with
+    // position:absolute, so without adding window.scrollX/Y to the trigger's
+    // viewport rect it opened scrollY px above the trigger — off-screen on
+    // any scrolled page, making the toolbar dropdowns look dead. The other
+    // dropdown tests run at scrollY 0 and cannot catch this.
+    await gotoStory(page, formattedStory);
+    await waitForFormatted(page);
+    // Create document scroll above the story and bring the toolbar back
+    // into view, caret parked in a plain paragraph for the item dispatch.
+    await page.evaluate(() => {
+      document.body.style.paddingTop = '1200px';
+      window.scrollTo(0, 1200);
+    });
+    await page.locator('.kb-editor p', { hasText: 'inline code' }).click();
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    const trigger = page
+      .locator('.kb-dropdown__label', { hasText: 'Heading' })
+      .first();
+    await trigger.click();
+    const menu = page.locator('.kb-custom-menu__pinned-dropdown');
+    await menu.waitFor({ state: 'visible' });
+    // Geometry: the menu sits 4px below the trigger, aligned to its
+    // inline-start edge — both boxes measured in the same viewport space.
+    const triggerBox = await trigger.boundingBox();
+    const menuBox = await menu.boundingBox();
+    if (!triggerBox || !menuBox) throw new Error('menu not rendered');
+    expect(
+      Math.abs(menuBox.y - (triggerBox.y + triggerBox.height + 4))
+    ).toBeLessThanOrEqual(1.5);
+    expect(Math.abs(menuBox.x - triggerBox.x)).toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('richeditor-dropdown-scrolled.png', {
+      animations: 'disabled',
+    });
+    // End-to-end: selecting an item must still change the document.
+    await page
+      .locator('.kb-custom-menu__overflow-item', { hasText: 'Heading 2' })
+      .first()
+      .locator('.kb-custom-menu__overflow-item-label')
+      .click();
+    await expect(page.locator('.kb-editor h2')).toHaveCount(2);
+  });
 });
 
 test.describe('Visual Regression Tests - EmailEditor', () => {
@@ -1499,5 +2493,454 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoEditor(page);
     await expect(page).toHaveScreenshot('emaileditor-mobile.png');
+  });
+
+  test('EmailEditor - Text block rides Kerebron and round-trips merge tags', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    // The Kerebron editor mounts asynchronously.
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    // Merge tags render as atomic chips that keep their braces.
+    await expect(editor).toContainText('{{first_name}}');
+    await expect(page).toHaveScreenshot('emaileditor-text-block-kerebron.png');
+    // Typing round-trips through onChange onto the canvas with tags intact.
+    // Click past the end of the last line — a centred click would land on the
+    // atomic merge-tag chip and select it instead of placing the caret.
+    const lastPara = editor.locator('p').last();
+    const paraBox = (await lastPara.boundingBox())!;
+    await lastPara.click({
+      position: { x: paraBox.width - 2, y: paraBox.height / 2 },
+    });
+    await page.keyboard.press('End');
+    await page.keyboard.type(' Cheers!');
+    const canvas = page.getByRole('region', { name: 'Email canvas' });
+    await expect(canvas).toContainText('in October. Cheers!');
+    await expect(canvas).toContainText('{{company_name}}');
+    // In-editor undo reverts the typing and echoes back out.
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect(canvas).not.toContainText('Cheers!');
+  });
+
+  test('EmailEditor - Variables menu inserts a merge tag', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.click();
+    const direct = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await direct.count()) {
+      await direct.first().click();
+    } else {
+      await page
+        .locator('.kb-custom-menu button[aria-label="More tools"]')
+        .click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    await page
+      .locator('[data-slot="dropdown-menu"]')
+      .getByRole('menuitem', { name: 'Sender' })
+      .click();
+    await expect(editor).toContainText('{{sender_name}}');
+    await expect(
+      page.getByRole('region', { name: 'Email canvas' })
+    ).toContainText('{{sender_name}}');
+  });
+
+  test('EmailEditor - Pasted image files route through the host uploader', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.locator('p').first().click();
+    // Paste a real image file. The story's onUploadImage returns an object
+    // URL, so the inserted <img> must be blob: — never the stock pipeline's
+    // base64 data: URL, which the email policy would strip on render.
+    await page.evaluate(() => {
+      const bytes = Uint8Array.from(
+        atob(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ),
+        (c) => c.charCodeAt(0)
+      );
+      const data = new DataTransfer();
+      data.items.add(new File([bytes], 'pixel.png', { type: 'image/png' }));
+      // `.kb-editor` IS the ProseMirror editable (createView's attributes).
+      document.querySelector('.kb-editor')!.dispatchEvent(
+        new ClipboardEvent('paste', {
+          clipboardData: data,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    await expect(
+      editor.getByRole('img', { name: 'pixel.png' })
+    ).toHaveAttribute('src', /^blob:/);
+  });
+});
+
+test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
+  const story = 'deprecated-richtexteditor--block-menu';
+  const editorSel = '[contenteditable="true"]';
+  const gutterSel = '[data-slot="rich-text-editor-block-gutter"]';
+
+  // The gutter is hover-revealed, so it never appears in static snapshots;
+  // assert its reveal, row tracking, and inline-start anchoring with
+  // geometry in BOTH directions — the 5% screenshot tolerance can swallow
+  // a button-sized regression (CONTRIBUTING.md → "Testing in RTL").
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`RichTextEditor - Gutter tracks the hovered row (${direction.toUpperCase()})`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        story,
+        direction === 'rtl' ? { globals: 'direction:rtl' } : {}
+      );
+      await expectDocumentDirection(page, direction);
+      // Hover the SECOND block (first <p>; an <h2> precedes it) so the
+      // assertions cover row targeting, not the first-block fallback.
+      const row = page.locator(`${editorSel} > p`).first();
+      await row.hover();
+      const button = page.locator(`${gutterSel} button`);
+      await expect
+        .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+        .toBe('1');
+      const rowBox = await row.boundingBox();
+      const gutterBox = await page.locator(gutterSel).boundingBox();
+      // The button rides beside the hovered row…
+      expect(Math.abs(gutterBox!.y - rowBox!.y)).toBeLessThanOrEqual(4);
+      // …in the editor's inline-start gutter (start-1 ≈ 4px; equality, not
+      // one-sided, so an end-anchored button cannot pass).
+      const editorBox = await page.locator(editorSel).boundingBox();
+      const startGap =
+        direction === 'rtl'
+          ? editorBox!.x + editorBox!.width - (gutterBox!.x + gutterBox!.width)
+          : gutterBox!.x - editorBox!.x;
+      expect(startGap).toBeGreaterThanOrEqual(0);
+      expect(startGap).toBeLessThanOrEqual(12);
+      await expect(page).toHaveScreenshot(
+        `richtexteditor-block-gutter-${direction}.png`
+      );
+    });
+  }
+
+  test('RichTextEditor - Menu formats the hovered row with visible block styles', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    const row = page.locator(`${editorSel} > p`).first();
+    const rowText = await row.textContent();
+    await row.hover();
+    await page.locator(`${gutterSel} button`).click();
+    await page.getByRole('menuitem', { name: 'Heading 1' }).click();
+    // The hovered row — not the first block — became the heading…
+    const h1 = page.locator(`${editorSel} > h1`);
+    await expect(h1).toHaveText(rowText!);
+    // …and the baseline block styles survive Tailwind preflight (no
+    // @tailwindcss/typography in this build).
+    const h1Style = await h1.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { fontSize: parseFloat(s.fontSize), fontWeight: s.fontWeight };
+    });
+    expect(h1Style.fontSize).toBeGreaterThanOrEqual(24);
+    expect(Number(h1Style.fontWeight)).toBeGreaterThanOrEqual(700);
+    // Quote the remaining paragraph: a visible inline-start border.
+    const lastRow = page.locator(`${editorSel} > p`).last();
+    await lastRow.hover();
+    await page.locator(`${gutterSel} button`).click();
+    await page.getByRole('menuitem', { name: 'Quote' }).click();
+    const quote = page.locator(`${editorSel} > blockquote`);
+    await expect(quote).toBeVisible();
+    expect(
+      await quote.evaluate((el) =>
+        parseFloat(getComputedStyle(el).borderInlineStartWidth)
+      )
+    ).toBeGreaterThan(0);
+    await expect(page).toHaveScreenshot('richtexteditor-block-formats.png');
+  });
+});
+
+test.describe('Visual Regression Tests - TextAreaRich', () => {
+  const story = 'deprecated-textarearich--basic';
+  const wrapperSel = '[data-slot="rich-text-editor"][data-chromeless]';
+  const editorSel = '[contenteditable="true"]';
+
+  for (const direction of ['ltr', 'rtl'] as const) {
+    test(`TextAreaRich - Single-line start that auto-grows (${direction.toUpperCase()})`, async ({
+      page,
+    }) => {
+      await gotoStory(
+        page,
+        story,
+        direction === 'rtl' ? { globals: 'direction:rtl' } : {}
+      );
+      await expectDocumentDirection(page, direction);
+      // At rest the surface matches the md Textarea / Input row: 40px
+      // (38px editable + the wrapper's 1px borders).
+      const wrapper = page.locator(wrapperSel);
+      const restBox = await wrapper.boundingBox();
+      expect(Math.abs(restBox!.height - 40)).toBeLessThanOrEqual(1);
+      await expect(page).toHaveScreenshot(
+        `textarearich-single-line-${direction}.png`
+      );
+      // Typing a markdown shortcut formats without any toolbar, and the
+      // surface grows with the content instead of scrolling.
+      const editor = page.locator(editorSel);
+      await editor.click();
+      await page.keyboard.type('## ');
+      await page.keyboard.type('Visit summary');
+      await page.keyboard.press('Enter');
+      await page.keyboard.type('Grows with content.');
+      await expect(page.locator(`${editorSel} > h2`)).toHaveText(
+        'Visit summary'
+      );
+      const grownBox = await wrapper.boundingBox();
+      expect(grownBox!.height).toBeGreaterThan(restBox!.height + 20);
+    });
+  }
+
+  test('TextAreaRich - Grown content with the gutter menu available', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('## ');
+    await page.keyboard.type('Visit summary');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('A plain row under the heading.');
+    // The hover gutter stays available on the chromeless surface.
+    const row = page.locator(`${editorSel} > div`).last();
+    await row.hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await expect(page).toHaveScreenshot('textarearich-grown.png');
+  });
+
+  test('TextAreaRich - Gutter trigger follows the field when content is cleared', async ({
+    page,
+  }) => {
+    // Hovering a lower row parks the trigger beside it; clearing the content
+    // shrinks the chromeless field (which no longer clips its wrapper) back
+    // to one row, and the trigger must come back inside it.
+    await gotoStory(page, story);
+    const editor = page.locator(editorSel);
+    await editor.click();
+    await page.keyboard.type('First row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Second row');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('Third row');
+    await page.locator(`${editorSel} > div`).last().hover();
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    const grownButtonBox = (await button.boundingBox())!;
+    await page.keyboard.press('ControlOrMeta+a');
+    await page.keyboard.press('Delete');
+    const wrapper = page.locator(wrapperSel);
+    await expect
+      .poll(async () => (await wrapper.boundingBox())!.height)
+      .toBeLessThanOrEqual(41);
+    // Before any corrective hover, the trigger has already been parked back
+    // at the rest offset instead of the deleted row's.
+    const within = async () => {
+      const wrapperBox = (await wrapper.boundingBox())!;
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox.y + wrapperBox.height + 0.5
+      );
+      return box;
+    };
+    const restBox = await within();
+    expect(restBox.y).toBeLessThan(grownButtonBox.y);
+    // And the hover reveal shows it in that position.
+    await editor.hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+  });
+
+  test('TextAreaRich - Narrow empty field keeps the placeholder to one line', async ({
+    page,
+  }) => {
+    // Chromeless surfaces have no wrapper clipping; a long hint must
+    // truncate instead of wrapping below the one-row field.
+    await page.setViewportSize({ width: 320, height: 640 });
+    await gotoStory(page, story);
+    const wrapper = page.locator(wrapperSel);
+    const placeholder = wrapper.locator('div[aria-hidden="true"]');
+    const wrapperBox = await wrapper.boundingBox();
+    const hintBox = await placeholder.boundingBox();
+    expect(hintBox!.y + hintBox!.height).toBeLessThanOrEqual(
+      wrapperBox!.y + wrapperBox!.height + 0.5
+    );
+    expect(
+      await placeholder.evaluate((el) => getComputedStyle(el).textOverflow)
+    ).toBe('ellipsis');
+  });
+
+  test('TextAreaRich - Condensed gutter trigger stays inside the empty field', async ({
+    page,
+  }) => {
+    await gotoStory(page, story, { globals: 'density:condensed' });
+    const wrapper = page.locator(wrapperSel);
+    // Condensed single-line baseline: 26px editable + the wrapper's borders.
+    const wrapperBox = await wrapper.boundingBox();
+    expect(Math.abs(wrapperBox!.height - 28)).toBeLessThanOrEqual(1);
+    const button = page.locator(
+      '[data-slot="rich-text-editor-block-gutter"] button'
+    );
+    // The trigger must sit inside the one-line field both at rest and once
+    // hover repositions it beside the hovered row.
+    const within = async () => {
+      const box = (await button.boundingBox())!;
+      expect(box.y).toBeGreaterThanOrEqual(wrapperBox!.y - 0.5);
+      expect(box.y + box.height).toBeLessThanOrEqual(
+        wrapperBox!.y + wrapperBox!.height + 0.5
+      );
+    };
+    await within();
+    await page.locator(editorSel).hover();
+    await expect
+      .poll(() => button.evaluate((el) => getComputedStyle(el).opacity))
+      .toBe('1');
+    await within();
+    await expect(page).toHaveScreenshot('textarearich-condensed.png');
+  });
+
+  test('TextAreaRich - Condensed macro panel keeps its working height', async ({
+    page,
+  }) => {
+    // The compact condensed minimum must release when the macro panel —
+    // absolutely stretched over the editor body — needs md working space.
+    await gotoStory(page, 'deprecated-textarearich--with-macros', {
+      globals: 'density:condensed',
+    });
+    const editor = page.locator(editorSel);
+    await editor.hover();
+    await page
+      .locator('[data-slot="rich-text-editor-block-gutter"] button')
+      .click();
+    await page.getByRole('menuitem', { name: 'Show macro library' }).click();
+    await expect(editor).toHaveAttribute('data-macros-open', '');
+    const editorBox = await editor.boundingBox();
+    expect(editorBox!.height).toBeGreaterThanOrEqual(249);
+    await expect(
+      page.getByRole('button', { name: 'Cardio — WNL' })
+    ).toBeVisible();
+    await expect(page).toHaveScreenshot('textarearich-condensed-macros.png');
+  });
+});
+
+test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () => {
+  const story = 'editors-textarearich-kerebron--with-variables';
+
+  test('TextAreaRich (Kerebron) - Variables menu opens from the toolbar and inserts', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    // The Kerebron editor mounts asynchronously.
+    await page
+      .locator('.kb-editor p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    // The appended menu group may sit behind the “More tools” overflow at
+    // this width — reach the Variables button either way.
+    const directButton = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await directButton.isVisible()) {
+      await directButton.click();
+    } else {
+      await page.locator('.kb-custom-menu__overflow-toggle').click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(
+      menu.getByRole('menuitem', { name: 'Full Name' })
+    ).toBeVisible();
+    await expect(menu.getByPlaceholder('Search variables…')).toBeFocused();
+    await expect(page).toHaveScreenshot(
+      'textarearich-kerebron-variables-menu.png',
+      { animations: 'disabled' }
+    );
+    // Picking an entry closes the menu and inserts the token at the caret.
+    await menu.getByRole('menuitem', { name: 'Case Number' }).click();
+    await expect(menu).toBeHidden();
+    await expect(page.locator('.kb-editor p').first()).toContainText(
+      'case.caseNumber'
+    );
+  });
+
+  test('TextAreaRich (Kerebron) - Variables menu survives editable growth but closes on toolbar reflow', async ({
+    page,
+  }) => {
+    await gotoStory(page, story);
+    await page
+      .locator('.kb-editor p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    const directButton = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await directButton.isVisible()) {
+      await directButton.click();
+    } else {
+      await page.locator('.kb-custom-menu__overflow-toggle').click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu.getByPlaceholder('Search variables…')).toBeFocused();
+
+    // Editable-height churn must NOT dismiss the menu: moving focus into
+    // the portaled panel drops the field's :hover/:focus-within gutter
+    // padding, which can rewrap text and resize the field mid-pick.
+    await page.evaluate(() => {
+      const editor = document.querySelector<HTMLElement>('.kb-editor');
+      if (editor) editor.style.minHeight = '400px';
+    });
+    await page.waitForTimeout(400);
+    await expect(menu).toBeVisible();
+
+    // A genuine toolbar reflow (container resize) closes the menu and hands
+    // focus back to the editor instead of dropping it on <body>.
+    await page.evaluate(() => {
+      const root = document.getElementById('storybook-root');
+      if (root) root.style.width = '420px';
+    });
+    await expect(menu).toBeHidden();
+    await expect(page.locator('[aria-label="Letter body"]')).toBeFocused();
   });
 });

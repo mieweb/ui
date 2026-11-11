@@ -41,6 +41,32 @@ export default defineConfig({
   },
   resolve: {
     alias: [
+      // jsdom cannot drive ProseMirror (async kit mounts, no real
+      // selection/measure), so every unit suite sees the legacy-backed
+      // stand-in for the Kerebron TextAreaRich surface — which the
+      // main-barrel Textarea now renders. The Kerebron engine itself is
+      // verified in the browser (Storybook + visual tests).
+      {
+        find: /^.*\/TextAreaRichKerebron$/,
+        replacement: resolve(
+          __dirname,
+          'src/test/textAreaRichKerebronStub.tsx'
+        ),
+      },
+      ...['core', 'fields', 'adapters', 'renderer', 'builder'].map((pkg) => ({
+        find: new RegExp(`^@esheet/${pkg}$`),
+        replacement: resolve(
+          __dirname,
+          `packages/esheet/packages/${pkg}/src/index.ts`
+        ),
+      })),
+      {
+        find: /^@esheet\/styles$/,
+        replacement: resolve(
+          __dirname,
+          'packages/esheet/packages/styles/src/index.ts'
+        ),
+      },
       {
         find: /^@mieweb\/ui\/components\/(.+)$/,
         replacement: `${resolve(__dirname, 'src/components')}/$1`,

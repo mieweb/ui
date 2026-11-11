@@ -4,6 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { useDirection } from '../../hooks/useDirection';
 import {
   MoreHorizontalIcon,
   ShareIcon,
@@ -210,11 +211,26 @@ function RowActionMenu({
   actions: CountBadgeAction[];
 }) {
   const [open, setOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
 
+  // The menu's inline-end edge hugs the trigger: 'bottom-end' aligns right
+  // edges in LTR, 'bottom-start' aligns left edges in RTL. `useDirection` is
+  // reactive, so an open menu re-anchors when the nearest `dir` changes.
+  const direction = useDirection(buttonRef);
+  const {
+    anchorRef,
+    floatingRef,
+    style: menuStyle,
+  } = useAnchoredPosition<HTMLButtonElement, HTMLDivElement>({
+    open,
+    placement: direction === 'rtl' ? 'bottom-start' : 'bottom-end',
+  });
+
   // Close on outside click
-  const outsideRefs = React.useMemo(() => [menuRef, buttonRef], []);
+  const outsideRefs = React.useMemo(
+    () => [floatingRef, buttonRef],
+    [floatingRef]
+  );
   useClickOutside(outsideRefs, () => setOpen(false), open);
 
   // Close on Escape
@@ -227,25 +243,13 @@ function RowActionMenu({
     return () => document.removeEventListener('keydown', handleKey);
   }, [open]);
 
-  // Calculate position for the portal-rendered menu
-  const [menuPos, setMenuPos] = React.useState<{
-    top: number;
-    left: number;
-  } | null>(null);
-
-  React.useLayoutEffect(() => {
-    if (!open || !buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    setMenuPos({
-      top: rect.bottom + 4,
-      left: rect.right,
-    });
-  }, [open]);
-
   return (
     <div className="relative">
       <button
-        ref={buttonRef}
+        ref={(el) => {
+          buttonRef.current = el;
+          anchorRef.current = el;
+        }}
         type="button"
         onClick={(e) => {
           e.stopPropagation();
@@ -266,17 +270,14 @@ function RowActionMenu({
       </button>
 
       {open &&
-        menuPos &&
         ReactDOM.createPortal(
           <div
-            ref={menuRef}
+            ref={floatingRef}
             role="menu"
-            style={{
-              position: 'fixed',
-              top: menuPos.top,
-              left: menuPos.left,
-              transform: 'translateX(-100%)',
-            }}
+            // Portals under <body> don't inherit a local `dir` from the
+            // trigger subtree; restate the resolved direction.
+            dir={direction}
+            style={menuStyle}
             className={cn(
               'z-[9999] min-w-[10rem]',
               'rounded-lg border border-neutral-200 bg-white py-1 shadow-lg',

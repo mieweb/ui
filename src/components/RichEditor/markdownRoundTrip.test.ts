@@ -14,6 +14,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CoreEditor } from '@kerebron/editor';
 import { createEditorKits } from './editorKits';
+import { createMdyEditorKit, refreshMdyFieldProjections } from './mdyEditorKit';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 
@@ -44,7 +45,13 @@ beforeAll(async () => {
     element: document.body.appendChild(document.createElement('div')),
     uri: 'file:///untitled.md',
     assetLoad,
-    editorKits,
+    editorKits: [
+      ...editorKits,
+      createMdyEditorKit({
+        getFieldIds: () => new Set(['weight']),
+        onFieldActivate: () => undefined,
+      }),
+    ],
   });
 });
 
@@ -53,6 +60,26 @@ afterAll(() => {
 });
 
 describe('markdown mark round-trip', () => {
+  it('preserves MDY field ids and editable headings through the real converter', async () => {
+    expect(
+      await roundTrip('## Assessment\n\nWeight: [198 lb](mdy:weight).')
+    ).toBe('## Assessment\n\nWeight: [198 lb](mdy:weight).');
+  });
+
+  it('refreshes multiline field projections without duplicating their values', async () => {
+    await editor.loadDocumentText(
+      MARKDOWN_TYPE,
+      '## Vitals\n\n[Pulse: 80<br>Temp: 36](mdy:weight).'
+    );
+    refreshMdyFieldProjections(editor, [
+      { id: 'weight', display: 'Pulse: 90\nTemp: 37' },
+    ]);
+    const saved = new TextDecoder()
+      .decode(await editor.saveDocument(MARKDOWN_TYPE))
+      .trim();
+    expect(saved).toBe('## Vitals\n\n[Pulse: 90<br>Temp: 37](mdy:weight).');
+  });
+
   it('keeps the CommonMark marks (control)', async () => {
     expect(await roundTrip('**strong** and *em* and `code`')).toBe(
       '**strong** and *em* and `code`'

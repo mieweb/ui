@@ -92,3 +92,7 @@ declare module '@mieweb/q/universal' {
 }
 
 declare module '@mieweb/q/style.css';
+declare module '@mieweb/q/style.css?inline' {
+  const css: string;
+  export default css;
+}

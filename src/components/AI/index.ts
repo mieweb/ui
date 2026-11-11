@@ -39,6 +39,16 @@ export {
   type ResourceLinkProps,
 } from './MCPToolCall';
 
+// MCP Tool Call Group — a run of calls as compact rows under one header
+export {
+  MCPToolCallGroup,
+  defaultMCPToolCallGroupLabels,
+  type MCPToolCallGroupProps,
+  type MCPToolCallGroupOptions,
+  type MCPToolCallGroupLabels,
+  type MCPToolCallGroupLabelOverrides,
+} from './MCPToolCallGroup';
+
 // AI Message Display
 export {
   AIMessageDisplay,
@@ -73,6 +83,13 @@ export {
   HeyOzwellToggle,
   type HeyOzwellToggleProps,
 } from './HeyOzwell/HeyOzwellToggle';
+export {
+  HeyOzwellSelector,
+  defaultHeyOzwellSelectorLabels,
+  type HeyOzwellSelectorProps,
+  type HeyOzwellSelectorPhase,
+  type HeyOzwellSelectorLabels,
+} from './HeyOzwell/HeyOzwellSelector';
 export { HeyOzwell, type HeyOzwellProps } from './HeyOzwell/HeyOzwell';
 export {
   OzwellSettingsMenu,
@@ -158,6 +175,44 @@ export {
   type UseVisitScribeOptions,
   type UseVisitScribeResult,
 } from './HeyOzwell/useVisitScribe';
+
+// Transcript Player — review a diarized recording: who-spoke-when lanes, waveform, synced transcript.
+export {
+  TranscriptPlayer,
+  type TranscriptPlayerProps,
+  type TranscriptPlayerLabels,
+} from './HeyOzwell/TranscriptPlayer/TranscriptPlayer';
+export { DEFAULT_TRANSCRIPT_PLAYER_LABELS } from './HeyOzwell/TranscriptPlayer/labels';
+export {
+  computePeaks,
+  type WaveformPeaks,
+} from './HeyOzwell/TranscriptPlayer/peaks';
+
+// Nemotron diarization (experimental) — overlap-aware "who spoke when" and the doctor's wake-voice check.
+export {
+  defaultNemotronModel,
+  warmNemotron,
+  type NemotronModel,
+} from './HeyOzwell/nemotron/runNemotron';
+export {
+  useNemotronDiarization,
+  MIN_ENROLL_SECONDS as NEMOTRON_MIN_ENROLL_SECONDS,
+  type UseNemotronDiarizationOptions,
+  type UseNemotronDiarizationResult,
+  type NemotronDiarization,
+  type NemotronVoice,
+  type LiveDiarization,
+} from './HeyOzwell/useNemotronDiarization';
+export {
+  transcriptFromActivity,
+  type SpeakerTimeline,
+} from './HeyOzwell/nemotron/attribution';
+export {
+  useNemotronWakeVoices,
+  type UseNemotronWakeVoicesOptions,
+  type NemotronWakeVoices,
+  type WakeClip,
+} from './HeyOzwell/useNemotronWakeVoices';
 
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {

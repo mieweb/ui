@@ -79,7 +79,7 @@ export function BarChart({ graphic }: { graphic: BarGraphic }) {
           <React.Fragment key={bar.label}>
             {graphic.marker?.atIndex === i && (
               <div className="relative h-full w-px flex-none border-s border-dashed border-current opacity-40">
-                <span className="absolute start-1/2 -top-6 -translate-x-1/2 text-[0.65rem] font-semibold tracking-wide whitespace-nowrap uppercase opacity-100">
+                <span className="absolute start-1/2 -top-6 -translate-x-1/2 text-[0.65rem] font-semibold tracking-wide whitespace-nowrap uppercase opacity-100 rtl:translate-x-1/2">
                   {graphic.marker.label}
                 </span>
               </div>

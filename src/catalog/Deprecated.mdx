@@ -1,0 +1,30 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Deprecated/Overview" />
+
+# Deprecated components
+
+Components tagged `maturity:deprecated` or `maturity:retired` are **hidden from
+the sidebar and search** to keep them out of component selection
+([mieweb/ui#731](https://github.com/mieweb/ui/issues/731)). They remain in the
+library for existing consumers, and their docs pages stay built — this page is
+the directory of what's hidden.
+
+Migration steps live in
+[MIGRATION.md](https://github.com/mieweb/ui/blob/main/MIGRATION.md); each entry
+below links its replacement.
+
+| Component                                                               | Status     | Use instead                                                                   | Why                                                                                                            |
+| ----------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| [TextAreaRich (Legacy)](?path=/docs/deprecated-textarearich--docs)       | Deprecated | [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs)    | Same `TextAreaRichProps` contract on the ProseMirror engine; the `document.execCommand` engine is being removed (mieweb/ui#677). |
+| [RichTextEditor (Legacy)](?path=/docs/deprecated-richtexteditor--docs)   | Deprecated | [TextAreaRich (Kerebron)](?path=/docs/editors-textarearich-kerebron--docs) for HTML with `variableGroups` and dictation, or [RichEditor](?path=/docs/editors-richeditor--docs) for Markdown | `document.execCommand` is deprecated browser API; no new usages (mieweb/ui#692).                                |
+| [AGGrid](?path=/docs/deprecated-aggrid--docs)                            | Deprecated | [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs)                        | Legacy maintenance only; retained for existing `@mieweb/ui/ag-grid` consumers.                                  |
+| [AGGrid Enhanced](?path=/docs/deprecated-aggrid-enhanced--docs)          | Deprecated | [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs)                        | Legacy maintenance only; retained for existing `@mieweb/ui/ag-grid` consumers.                                  |
+
+## Deprecating a component
+
+When you tag a Meta `maturity:deprecated` (or `maturity:retired`), the entry
+disappears from the sidebar and search in the same build — add its row to this
+page **in the same PR**, and move its `title` under the `Deprecated/` tier. See
+[CONTRIBUTING.md](https://github.com/mieweb/ui/blob/main/CONTRIBUTING.md) →
+"Stories & documentation".

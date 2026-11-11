@@ -41,7 +41,14 @@ export * from './components/Checkbox';
 // CodeLookup itself ships a module worker and is NOT exported here (apps import
 // it from their own bundler). Only its worker-free provider/context is safe to
 // ship in the main entry — it distributes an app-injected CodeLookup.
-export * from './components/CodeLookup/context';
+export {
+  CodeLookupProvider,
+  useCodeLookupConfig,
+  type CodeLookupComponent,
+  type CodeLookupMemoryDefaults,
+  type CodeLookupProviderConfig,
+  type CodeLookupProviderProps,
+} from './components/CodeLookup/context';
 export * from './components/ConditionEditor';
 export * from './components/CheckrIntegration';
 export * from './components/ClampedText';
@@ -107,6 +114,7 @@ export * from './components/LanguageSelector';
 export * from './components/ListView';
 export * from './components/LoadingPage';
 export * from './components/LogoUploader';
+export * from './components/MacroLibrary';
 export * from './components/Markdown';
 export * from './components/MedicationList';
 export * from './components/MediaEditor';
@@ -165,12 +173,15 @@ export * from './components/Radio';
 export * from './components/Rating';
 export * from './components/ReadingProgressBar';
 export * from './components/RecordButton';
+export * from './components/DictationButton';
 export * from './components/RecordHeader';
 export * from './components/RecordLayout';
 export * from './components/RecurringServiceCard';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
+export * from './components/TextAreaPlain';
+export * from './components/TextAreaRich';
 export * from './components/RichTextEditor';
 export * from './components/RowActionToolbar';
 export * from './components/ScheduleCalendar';

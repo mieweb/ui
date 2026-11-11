@@ -65,6 +65,8 @@ export const buttonVariants = cva(
         md: 'h-10 px-4 text-base rounded-lg',
         lg: 'h-12 px-6 text-lg rounded-xl',
         icon: 'h-10 w-10 rounded-lg',
+        /** Compact icon-only button for dense toolbars (media controls, list rows). */
+        'icon-sm': 'h-8 w-8 rounded-md',
       },
       fullWidth: {
         true: 'w-full',

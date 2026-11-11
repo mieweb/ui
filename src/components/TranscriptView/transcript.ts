@@ -37,6 +37,8 @@ export interface TranscriptSegment {
   endMs: number;
   /** References Speaker.id when diarization is available */
   speakerId?: string;
+  /** Other Speaker.ids talking at the same time (overlapping speech) */
+  overlapSpeakerIds?: string[];
   words: TranscriptWord[];
 }
 
@@ -46,11 +48,23 @@ export interface Speaker {
   name?: string;
 }
 
+/** One stretch of a speaker talking, straight from diarization; stretches may overlap. */
+export interface SpeakerActivity {
+  speakerId: string;
+  startMs: number;
+  endMs: number;
+}
+
 export interface Transcript {
   durationMs: number;
   speakers?: Speaker[];
   words: TranscriptWord[];
   segments?: TranscriptSegment[];
+  /**
+   * Who spoke when, independent of the words: includes overlap and speech with no transcript
+   * (e.g. "mm-hm"). Consumers without it can derive activity from `segments`.
+   */
+  speakerActivity?: SpeakerActivity[];
 }
 
 /**

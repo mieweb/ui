@@ -1,0 +1,434 @@
+import * as React from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { EncounterVisit, type EncounterVisitProps } from './EncounterVisit';
+import {
+  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+  EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
+} from './definition';
+import { executeEncounterVisitToolCall, type EncounterVisitTools } from './mcp';
+import { MotionProvider } from '../../motion/MotionProvider';
+import { Button } from '../Button';
+import { ButtonGroup } from '../ButtonGroup';
+import { CodeLookup } from '../CodeLookup';
+
+const PATIENT_CONTEXT =
+  '45 yo male with pre-diabetes, back pain and hypertension';
+
+const meta: Meta<typeof EncounterVisit> = {
+  id: 'encounter-orders-encountervisit',
+  title: 'Healthcare/Encounter & orders/EncounterVisit',
+  component: EncounterVisit,
+  tags: ['autodocs', 'scope:domain-specific', 'maturity:experimental'],
+  // Hosts that install @mieweb/ui/motion get spring-driven open/close on the
+  // focus-docked findings panel; without it the CSS fallback applies.
+  decorators: [
+    (Story) => (
+      <MotionProvider>
+        <Story />
+      </MotionProvider>
+    ),
+  ],
+  parameters: {
+    layout: 'fullscreen',
+    docs: {
+      // Each story is a full live visit (eSheet renderer + Kerebron editors);
+      // inlining all of them on one docs page exceeds phone tab memory and
+      // crashes mobile Safari. Lazy iframes load only as they scroll into view.
+      story: {
+        inline: false,
+        iframeHeight: 720,
+      },
+      description: {
+        component: `### What it's for
+
+A mobile-friendly encounter document backed by one **eSheet** response store. Configure major sections as narrative, individual observations, repeatable vitals, medications, allergies, coded conditions, assessment and coded plan orders. HPI is one narrative observation; physical examination can be one narrative, body-system observations, or both. Patient history, review of systems, a plan narrative and follow-up / appointment details are included in the default eleven-section template. Patient identity is not captured.
+
+The stock MedicationReconciliation and AllergyManager lists, ProblemList and Assessment supply the healthcare capture controls. New medications, allergens, conditions and plan orders are captured coded-first through the shared CodeLookup search, with each component's own free-text path available for entries the catalog lacks; sections default to \`requireCoding\`, so uncoded entries render "Coding required" and fail validation until coded. Common findings dock beside each narrative field as a section-specific macro panel that opens while the field has focus and closes when focus leaves; picking a macro inserts its line at the caret and codes the finding, and editing the line away removes its code. Explicit selections append to narrative text without replacing authored content or auto-recording normal findings. The examples use the same **demo \`/codify\` index** as the standalone clinical-list stories. Production applications supply their real CodeLookup component and catalog URL through \`codeLookup\` or an enclosing \`CodeLookupProvider\`. Drug allergens code against the medication catalog; non-drug allergens are recorded as free text through the allergy editor — codes are never inferred from names.
+
+The visit mode dropdown at the start of the always-visible narrative toolbar switches one draft between four projections: **eSheet** offers memory aids and coded capture, **RichEdit** uses Kerebron for headings and free Markdown prose with protected data links, **View** renders the flattened MDY through mieweb/templit for a final report check, and **Export** shows the raw portable MDY document with a button that downloads it as Markdown. View omits uncaptured field prompts and empty section headings, while retaining authored prose and entered values such as zero or a negative choice. Select a linked value in RichEdit to open its eSheet section with related inputs. Changes update every projection of that field. Free prose stays in the document body; it is not automatically promoted to a coded observation.
+
+The visit reads as a continuous report with small outer insets and no nested section cards. Narrative inputs and the document editor grow with their content. A compact sticky section selector is available in eSheet on desktop and phone.
+
+### Use it when
+
+- You want to document a whole visit with the same response data available to a clinician and an MCP agent.
+- Your application owns storage and decides which sections and observations belong to the visit.
+
+### Don't use it when
+
+- You only need a standalone list or panel — [ProblemList](?path=/docs/clinical-lists-problemlist--docs), [MedicationReconciliation](?path=/docs/clinical-lists-medicationlist--docs), [AllergyList](?path=/docs/clinical-lists-allergylist--docs) or [Assessment](?path=/docs/encounter-orders-assessment--docs) used directly.
+- The guided document is not a clinical visit — letters, support tickets and other templated prose use [RichTextEsheet](?path=/docs/editors-richtextesheet--docs), which shares the narrative foundations without coded capture.
+- You need a scheduling backend, clinical decision support, or a signed medical record workflow. These remain host responsibilities.
+
+### Example
+
+Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically. The Kerebron peers documented at \`@mieweb/ui/kerebron\` are required — narrative fields ride the Kerebron \`TextAreaRich\` surface and RichEdit mode uses the full editor: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`. With Kerebron 0.8.12, the host must override the ProseMirror core packages to single versions (\`prosemirror-view\` 1.42.3, \`prosemirror-model\` 1.25.9, \`prosemirror-state\` 1.4.3, \`prosemirror-transform\` 1.10.4); [package-manager setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit) is included in the published package. This repository’s pnpm overrides do not propagate to consumer applications.
+
+\`\`\`tsx
+import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/esheet';
+import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable app bundle
+
+<EncounterVisit
+  definition={{ ...DEFAULT_ENCOUNTER_VISIT_DEFINITION, encounterDate: visit.date }}
+  patientContext="45 yo male with pre-diabetes, back pain and hypertension"
+  initialResponses={savedNativeEsheetResponses}
+  codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+  onChange={(visit) => updateDraft(visit.mdy)}
+  onSubmit={async (visit) => saveVisit(visit)}
+  onToolsReady={(tools) => connectAgent(tools)}
+/>
+\`\`\`
+
+The host supplies the visit’s explicit \`definition.encounterDate\` (YYYY-MM-DD) or the user enters an assertion date when capturing a condition. Clinical dates never default to the current clock. Provide \`messages={{ labels: { "Save visit": "Guardar visita", "Allergies": "Alergias" } }}\` or \`messages.translate(message, values)\` for built-in interface text, including accessible labels, section controls, clinical dialogs and announcements. English source strings are lookup keys; placeholders such as \`{name}\` retain the actual entered name. Author section titles, prompts and common findings in the application’s language. Catalog display names, codes and entered clinical prose are preserved.
+
+Each section has a stable \`id\` and \`kind\`. An \`observations\` section accepts \`narrative: true\` and \`observations: [{ id, label, type?, unit?, code?, options?, required? }]\`. For an exam stored as one observation, choose \`kind: 'narrative'\`. Generated IDs are available through \`getEncounterFieldId\`. Change \`definition.id\` to open another visit; \`initialResponses\` is loaded once per visit. Rebuilding the same definition inline preserves edits. Configuration changes preserve answers; removed fields stay in native responses but are omitted from the current observation export.
+
+\`onChange\`, \`ref.getSnapshot()\`, and the MCP tools expose native responses, observations, a plain data note, portable \`mdy\`, and validation errors. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\`. \`defaultMode\` accepts \`esheet\`, \`rich\`, \`view\`, or \`export\`. YAML contains the native \`form\` / \`response\`, encounter section configuration, and stable MDY field projections; the Markdown body contains headings, prose, and linked values. Existing YAML comments and host metadata survive edits. Free prose remains separate from coded data, and manual changes to linked display text cannot overwrite clinical answers. BP is one observation with systolic/diastolic components and a stable reading group; repeat readings retain timestamp, position and site.
+
+The integration follows [Kerebron #115](https://github.com/mieweb/kerebron/issues/115), [eSheet PR #122](https://github.com/mieweb/eSheet/pull/122), and the [Templit MDY specification](https://github.com/mieweb/templit/blob/main/doc/mdy-specification.md). The first two remain open: this component supplies a local protected-link/resolver bridge over the installed editor. Templit 0.2.0 supplies the actual rendering pipeline. Native eSheet IDs retain their identity; MDY-safe aliases map links to those fields. \`mdy:\` targets avoid Kerebron 0.8.12's rewriting of fragment links.
+
+### MCP integration
+
+Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. Route tools/call through \`executeEncounterVisitToolCall(name, args, tools)\`, using the \`tools\` received by \`onToolsReady\`. The executor returns MCP text content, structuredContent and isError. Tools read/write native clinical fields, retrieve the full MDY (\`encounter_visit_get_mdy\`), replace free document prose (\`encounter_visit_set_document_body\`), validate, get the plain data note, and navigate to a section. Replacing prose retains every coded answer and imported YAML metadata. \`ENCOUNTER_VISIT_SYSTEM_PROMPT\` describes anonymous, evidence-only documentation. The host owns transport, authentication and persistence.
+
+### Limitations
+
+- Save is a host callback, and appointment details are documentation rather than booking. No FHIR Observation or signed-document export is claimed.
+- Validation checks configured required entries, value types, supported ranges, JSON shapes and complete BP pairs. It does not interpret measurements medically.
+- The anonymous example seeds only the facts supplied: age, sex, pre-diabetes, back pain and hypertension. Measurements, exam findings, medications and treatment remain unanswered.
+- The small sample catalog demonstrates interaction. The host supplies its real terminology service; new coded entries cannot be added without it. Imported uncoded legacy entries remain visible and can be corrected.
+- Medication, allergy, condition and plan fields retain the codes actually selected through the existing clinical components. Assessment and orders reuse Assessment's concern / assertion model. The default template and interface are English. Use \`messages\` for interface translations and configure section labels, prompts and common findings in the application’s language. Kerebron toolbar translation remains an upstream limitation.`,
+      },
+    },
+    catalog: {
+      entry: '@mieweb/ui/esheet',
+      peers: [
+        '@esheet/core',
+        '@esheet/fields',
+        '@esheet/renderer',
+        '@esheet/builder',
+      ],
+      relationships: [
+        {
+          type: 'alternative to',
+          target: 'editors-richtextesheet',
+          why: 'RichTextEsheet is the generic esheet-guided document (letters, tickets) without coded clinical capture; EncounterVisit is its clinical configuration.',
+        },
+        {
+          type: 'composes with',
+          target: 'composite-forms-esheet-renderer',
+          why: 'One eSheet renderer owns every narrative, observation and clinical-list response.',
+        },
+        {
+          type: 'composes with',
+          target: 'encounter-orders-assessment',
+          why: 'The assessment field keeps existing concern, assertion and linked-order records.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-medicationlist',
+          why: 'The visit medication section embeds MedicationReconciliation over its eSheet-native records; use it directly for a host-controlled chart list.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-problemlist',
+          why: 'The visit Conditions section renders ProblemList over its eSheet-native concerns; use ProblemList directly for a host-controlled longitudinal chart list.',
+        },
+        {
+          type: 'composes with',
+          target: 'clinical-lists-allergylist',
+          why: 'The visit allergy field embeds AllergyManager with explicit no-known-allergies capture over its eSheet-native records; use it directly for a standalone chart list.',
+        },
+      ],
+    },
+  },
+  args: {
+    definition: {
+      ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+      encounterDate: '2026-10-10', // Explicit date for this fictional visit.
+    },
+    patientContext: PATIENT_CONTEXT,
+    initialResponses: EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
+    codeLookup: {
+      component: CodeLookup,
+      indexUrl: '/codify',
+    },
+    onSubmit: async () => {},
+  },
+};
+export default meta;
+type Story = StoryObj<typeof EncounterVisit>;
+
+export const AnonymousVisit: Story = {};
+
+export const RichEdit: Story = { args: { defaultMode: 'rich' } };
+
+export const FinalView: Story = { args: { defaultMode: 'view' } };
+
+/** Deliberately expanded control text also exercises the inherited clinical translations. */
+export const Localized: Story = {
+  args: {
+    messages: {
+      labels: {
+        'Anonymous patient': 'Paciente anónimo',
+        eSheet: 'Formulario clínico con captura estructurada y codificada',
+        RichEdit: 'Editor de narrativa clínica enriquecida',
+        View: 'Revisión final del documento clínico',
+        'Go to section': 'Ir a la sección del documento clínico',
+        Systolic: 'Sistólica',
+        Diastolic: 'Diastólica',
+        'Add vitals set': 'Agregar un conjunto de signos vitales',
+        'Visit note preview': 'Vista previa del documento clínico',
+        'Save visit': 'Guardar la visita',
+      },
+    },
+  },
+};
+
+export const Mobile: Story = {
+  render: (args) => (
+    <div className="mx-auto max-w-[390px]">
+      <EncounterVisit {...args} />
+    </div>
+  ),
+};
+
+export const NarrativeExam: Story = {
+  args: {
+    definition: {
+      ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+      id: 'narrative-exam-visit',
+      encounterDate: '2026-10-10',
+      sections: DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections.map((section) =>
+        section.id === 'exam'
+          ? { id: 'exam', title: 'Physical examination', kind: 'narrative' }
+          : section
+      ),
+    },
+  },
+};
+
+export const ReadOnly: Story = {
+  args: { readOnly: true },
+  parameters: {
+    a11y: {
+      config: {
+        rules: [
+          // TODO(esheet): eSheet main still emits aria-readonly on generic
+          // field wrapper divs, which axe rejects on role-less elements. The
+          // upstream fix (data-readonly instead) is mieweb/eSheet#235 — drop
+          // this punt once the submodule pin includes it (same punt in
+          // tests/visual/encounter-visit.spec.ts).
+          { id: 'aria-allowed-attr', enabled: false },
+        ],
+      },
+    },
+  },
+};
+
+function McpDemo(args: EncounterVisitProps) {
+  const [tools, setTools] = React.useState<EncounterVisitTools | null>(null);
+  const [result, setResult] = React.useState('');
+  const [body, setBody] = React.useState(
+    '# Encounter visit\n\n## Discussion\n\nFree report prose.'
+  );
+  const [sectionId, setSectionId] = React.useState('plan');
+  const [sectionJson, setSectionJson] = React.useState(
+    JSON.stringify(
+      {
+        orders: [
+          {
+            orderId: 'demo-a1c',
+            type: 'lab',
+            display: 'Hemoglobin A1c',
+            code: {
+              fullid: 'LOINC|4548-4',
+              codetype: 'LOINC',
+              fullcode: '4548-4',
+            },
+          },
+        ],
+      },
+      null,
+      2
+    )
+  );
+  return (
+    <div className="space-y-4">
+      <div className="border-border bg-muted/30 text-foreground rounded-xl border p-4">
+        <h3 className="font-semibold">MCP tools connected to this visit</h3>
+        <p className="text-muted-foreground mt-1 mb-3 text-sm">
+          Try a tools/call against the live form. The BP example uses fictional
+          demo measurements.
+        </p>
+        <ButtonGroup>
+          <Button
+            variant="secondary"
+            disabled={!tools}
+            onClick={() =>
+              tools &&
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_get',
+                    {},
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              )
+            }
+          >
+            Read visit
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!tools}
+            onClick={() =>
+              tools &&
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_get_mdy',
+                    {},
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              )
+            }
+          >
+            Read MDY
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!tools || args.readOnly}
+            onClick={() =>
+              tools &&
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_upsert_vitals',
+                    {
+                      sectionId: 'vitals',
+                      reading: { id: 'demo-bp', systolic: 142, diastolic: 88 },
+                    },
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              )
+            }
+          >
+            Record demo BP via MCP
+          </Button>
+        </ButtonGroup>
+        <label className="mt-3 block text-sm">
+          Coded section
+          <select
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            value={sectionId}
+            onChange={(event) => setSectionId(event.target.value)}
+          >
+            {(args.definition ?? DEFAULT_ENCOUNTER_VISIT_DEFINITION).sections
+              .filter((section) =>
+                [
+                  'medications',
+                  'allergies',
+                  'conditions',
+                  'assessment',
+                  'plan',
+                ].includes(section.kind)
+              )
+              .map((section) => (
+                <option key={section.id} value={section.id}>
+                  {section.title}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label className="mt-2 block text-sm">
+          Coded section JSON
+          <textarea
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            rows={3}
+            value={sectionJson}
+            onChange={(event) => setSectionJson(event.target.value)}
+          />
+        </label>
+        <Button
+          className="mt-2 min-h-11"
+          variant="secondary"
+          disabled={!tools || args.readOnly}
+          onClick={() => {
+            if (!tools) return;
+            try {
+              const value: unknown = JSON.parse(sectionJson);
+              setResult(
+                JSON.stringify(
+                  executeEncounterVisitToolCall(
+                    'encounter_visit_update_section',
+                    { sectionId, value },
+                    tools
+                  ),
+                  null,
+                  2
+                )
+              );
+            } catch {
+              setResult('Enter valid JSON before updating the coded section.');
+            }
+          }}
+        >
+          Update coded section via MCP
+        </Button>
+        <label className="mt-3 block text-sm">
+          Document Markdown body
+          <textarea
+            className="bg-background mt-1 block min-h-11 w-full rounded px-2 py-1 text-base"
+            rows={3}
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+          />
+        </label>
+        <Button
+          className="mt-2 min-h-11"
+          variant="secondary"
+          disabled={!tools || args.readOnly}
+          onClick={() =>
+            tools &&
+            setResult(
+              JSON.stringify(
+                executeEncounterVisitToolCall(
+                  'encounter_visit_set_document_body',
+                  { body },
+                  tools
+                ),
+                null,
+                2
+              )
+            )
+          }
+        >
+          Replace document body via MCP
+        </Button>
+        {result && (
+          <pre
+            aria-label="MCP result"
+            className="bg-background mt-3 max-h-64 overflow-auto rounded-lg p-3 text-xs break-words whitespace-pre-wrap"
+          >
+            {result}
+          </pre>
+        )}
+      </div>
+      <EncounterVisit {...args} onToolsReady={setTools} />
+    </div>
+  );
+}
+
+export const McpInteraction: Story = {
+  render: (args) => <McpDemo {...args} />,
+};

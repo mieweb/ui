@@ -84,6 +84,13 @@ export interface RowActionToolbarProps {
    * @default 'row'
    */
   group?: keyof typeof REVEAL;
+  /**
+   * `'hover'` floats the toolbar over the row on fine-pointer devices and
+   * reveals it on hover/focus; `'always'` keeps it in flow at the end of the
+   * row and always visible on every pointer type.
+   * @default 'hover'
+   */
+  reveal?: 'hover' | 'always';
   className?: string;
   children: React.ReactNode;
 }
@@ -103,6 +110,7 @@ export function RowActionToolbar({
   label,
   align = 'center',
   group = 'row',
+  reveal = 'hover',
   className,
   children,
 }: RowActionToolbarProps) {
@@ -112,21 +120,24 @@ export function RowActionToolbar({
       aria-label={label}
       onKeyDown={toolbarKeyNav}
       className={cn(
-        'z-10 ms-auto flex items-center gap-0.5 transition-opacity',
-        // Inside a grid cell the column already reserves the space, so the
-        // toolbar stays in flow — no absolute overlay. It keeps the card
-        // chrome, though: pair with a `sticky end-0` actions column and it
-        // floats over scrolled-under content at the grid's right edge.
-        group !== 'grid' && [
-          'pointer-fine:absolute',
-          ALIGN[align],
-          'pointer-fine:bg-card pointer-fine:border-border pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
+        'z-10 ms-auto flex items-center gap-0.5',
+        reveal === 'hover' && [
+          'transition-opacity',
+          // Inside a grid cell the column already reserves the space, so the
+          // toolbar stays in flow — no absolute overlay. It keeps the card
+          // chrome, though: pair with a `sticky end-0` actions column and it
+          // floats over scrolled-under content at the grid's right edge.
+          group !== 'grid' && [
+            'pointer-fine:absolute',
+            ALIGN[align],
+            'pointer-fine:bg-card pointer-fine:border-border pointer-fine:rounded-md pointer-fine:border pointer-fine:p-0.5 pointer-fine:shadow-sm',
+          ],
+          group === 'grid' &&
+            'bg-card border-border rounded-md border p-0.5 shadow-sm',
+          'pointer-fine:pointer-events-none pointer-fine:opacity-0',
+          REVEAL[group],
+          'focus-within:pointer-events-auto focus-within:opacity-100',
         ],
-        group === 'grid' &&
-          'bg-card border-border rounded-md border p-0.5 shadow-sm',
-        'pointer-fine:pointer-events-none pointer-fine:opacity-0',
-        REVEAL[group],
-        'focus-within:pointer-events-auto focus-within:opacity-100',
         className
       )}
     >

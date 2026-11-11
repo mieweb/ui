@@ -331,6 +331,47 @@ export const Placements: Story = {
   ),
 };
 
+/**
+ * The panel follows the **trigger's** computed direction, not the document's:
+ * inside a local `dir` island the portaled menu renders with the island's
+ * direction and `bottom-start` aligns to the island's start edge (the right
+ * edge under RTL). Flip the toolbar direction to check the opposite island.
+ */
+export const DirectionIslands: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <div
+        dir="rtl"
+        data-testid="rtl-island"
+        className="rounded-lg border border-dashed border-neutral-300 p-4"
+      >
+        <Dropdown
+          trigger={<Button>قائمة (RTL island)</Button>}
+          placement="bottom-start"
+        >
+          <DropdownLabel>الحساب</DropdownLabel>
+          <DropdownItem>الملف الشخصي</DropdownItem>
+          <DropdownItem>الإعدادات</DropdownItem>
+        </Dropdown>
+      </div>
+      <div
+        dir="ltr"
+        data-testid="ltr-island"
+        className="rounded-lg border border-dashed border-neutral-300 p-4"
+      >
+        <Dropdown
+          trigger={<Button>Menu (LTR island)</Button>}
+          placement="bottom-start"
+        >
+          <DropdownLabel>Account</DropdownLabel>
+          <DropdownItem>Profile</DropdownItem>
+          <DropdownItem>Settings</DropdownItem>
+        </Dropdown>
+      </div>
+    </div>
+  ),
+};
+
 export const Disabled: Story = {
   render: () => (
     <Dropdown trigger={<Button>Disabled Menu</Button>} disabled>

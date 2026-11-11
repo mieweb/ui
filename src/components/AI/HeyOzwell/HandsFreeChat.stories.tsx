@@ -32,6 +32,7 @@ const meta: Meta = {
 - You need multiple speakers attributed in one transcript rather than a turn-taking chat — \`VisitScribe\`.
 - The product's chat is not \`AIChat\` — use \`useHeyOzwell\` and spread \`chatProps\` / \`toggleProps\` onto your own components.
 - You cannot accept an auto-started microphone: \`autoStart\` is hard-wired here, so the permission prompt appears on mount.
+- You only want the wake phrase to open dictation into your own composer, where the user reviews and sends — [DictationButton](?path=/docs/media-dictationbutton--docs) with \`handleRef\` (*Start From Code*). Its text is never auto-sent.
 
 ### Example
 
@@ -53,7 +54,7 @@ import { HandsFreeChat } from '@mieweb/ui';
 ### Limitations
 
 - **No \`onSend\` prop.** Unlike \`HeyOzwell\`, this component always uses the hook's built-in send: a streamed reply from the OpenAI-compatible endpoint in \`localStorage.ozwellConfig\` / \`window.__ozwell\`, or a canned "Heard: …" reply when no key is configured. To route to your own backend use \`useHeyOzwell({ onSend })\` with your own layout. A browser-held API key is visible to users — proxy it in production.
-- **Layout is fixed:** \`height: 100vh\` flex column with the octopus absolutely positioned (\`top: 11px; right: 16px\`) over \`AIChat\`'s header — it is a page, not an embeddable widget, and the overlay is physical (RTL would need repositioning).
+- **Layout is fixed:** \`height: 100vh\` flex column with the octopus absolutely positioned (\`top: 11px; insetInlineEnd: 16px\`) over \`AIChat\`'s header — it is a page, not an embeddable widget; the overlay follows the inline-end corner in RTL.
 - Inherits every dependency of \`HeyOzwell\`: wake models (~6 MB), the speaker runtime (~50 MB, loaded because \`requireDoctor\` defaults to \`true\`), Transformers.js + Whisper (~1.3 GB turbo / ~75 MB base.en) from configurable hosts, OPFS / Cache API / service-worker caching, \`worker-src blob:\` under strict CSP, IndexedDB for voiceprints. \`transcription="server"\` POSTs audio to \`/v1/audio/transcriptions\` on the configured base URL (falls back to on-device on failure); \`conversationMode\` overrides it.
 - **Accessibility as implemented:** the same as \`AIChat\` plus the toggle's \`aria-pressed\`; phase changes surface only as placeholder text and animation (no live region); the composer mic is a controlled \`RecordButton\` whose wrapper intercepts clicks (capture phase) to start/stop the shared recorder, so the button's own \`aria-label\`s describe a recorder it does not run. Errors from model loading appear as "⚠️ …" placeholder text.
 - i18n: title, placeholders and the settings menu are English; wake phrases are fixed English models. Entry \`@mieweb/ui\`.`,

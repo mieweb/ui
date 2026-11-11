@@ -3,6 +3,187 @@
 Breaking-change recipes for `@mieweb/ui` consumers. Each section is anchored
 so release notes and dev-console notices can deep-link to it.
 
+## eSheet and EncounterVisit
+
+The `@mieweb/ui/esheet` entry now includes EncounterVisit. Install matching
+`@esheet/core`, `@esheet/fields`, `@esheet/renderer` and `@esheet/builder` versions
+(0.0.6-17 or newer). They are optional peers because the default UI entry does
+not use eSheet. The shared entry exports the builder even when your application
+only renders visits, so all four peers must be present.
+
+Builder and Renderer import their `@esheet/styles` dependency automatically.
+Remove copied or aliased `renderer/src/index.output.css` and
+`builder/src/index.output.css` files; one shared stylesheet replaces both.
+An explicit CSS entry is available at `@esheet/styles/styles.css`. Continue
+loading `@mieweb/ui/styles.css` for composed UI components.
+
+EncounterVisit's RichEdit mode additionally requires the Kerebron peers
+`@kerebron/editor`, `@kerebron/editor-kits`, `@kerebron/extension-basic-editor`
+and `@kerebron/wasm` (tested together at 0.8.12). Import `@mieweb/ui/kerebron.css`
+and serve `@kerebron/wasm/assets` at `/kerebron-wasm`. Apply the Kerebron patches
+described by the RichEditor documentation for its toolbar and Markdown marks.
+
+**Required for Kerebron 0.8.12:** install the `@kerebron/*` peers at **exactly
+0.8.12** (the tested set) and configure the consuming application's package
+manager to resolve every ProseMirror core package to a **single version**.
+Without this, a fresh install loads multiple copies of `prosemirror-model`
+and typing throws:
+
+```
+RangeError: Can not convert <…> to a Fragment
+(looks like multiple versions of prosemirror-model were loaded)
+```
+
+Two mechanisms split the versions (mieweb/ui#709). First, `@mieweb/ui` and
+Kerebron 0.8.12 both pin `prosemirror-model` 1.25.9 / `prosemirror-state`
+1.4.3 exactly, but Kerebron 0.8.13 pins different versions — a `^0.8.12`
+range drifts onto it, and the exact pins can never dedupe. Second, even with
+matching pins, ProseMirror's own `^`-ranged internal dependencies (for
+example `prosemirror-state → prosemirror-model ^1.0.0`) resolve to the
+newest release on any fresh install; this repository is only protected by
+its frozen lockfile. `pnpm dedupe` cannot fix either case, so overrides are
+required. (`prosemirror-view` additionally needs 1.42.3 rather than
+Kerebron's pinned 1.40.0: the protected MDY link bridge uses 1.42.3, and two
+view instances can make decorations incompatible and leave the older view's
+behavior active.)
+
+The overrides in this library's checkout do not propagate to installed apps.
+
+For pnpm 10, add to the host's `pnpm-workspace.yaml`:
+
+```yaml
+overrides:
+  prosemirror-view: "1.42.3"
+  prosemirror-model: "1.25.9"
+  prosemirror-state: "1.4.3"
+  prosemirror-transform: "1.10.4"
+```
+
+For npm, add to the host's `package.json`:
+
+```json
+{
+  "overrides": {
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
+  }
+}
+```
+
+For Yarn, add to the host's `package.json`:
+
+```json
+{
+  "resolutions": {
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
+  }
+}
+```
+
+If the host also declares any of these packages directly, pin those
+dependencies to the same versions. Reinstall and inspect
+`pnpm why prosemirror-model` / `pnpm why prosemirror-view` (or the
+`npm ls` / `yarn why` equivalents): every resolved instance of each package
+must be a single version. Keep this requirement until a tested Kerebron
+release shares the same ProseMirror versions without an override.
+
+**Recommended for EncounterVisit hosts:** resolve `js-yaml` to **4.3.2 or
+newer**. `@mieweb/templit` 0.2.0 (a direct dependency used by
+`renderEncounterMdy` for the document's YAML envelope) pins js-yaml 4.1.0,
+which lacks the parser merge-limit hardening. This library's checkout applies
+the override locally, but overrides do not propagate to installed apps — add
+the same `js-yaml: ">=4.3.2"` override/resolution shown above for
+`prosemirror-view`, until a Templit release ships the corrected parser.
+
+## Textarea is rich text underneath (0.12.0)
+
+**`Textarea` now renders `TextAreaRich`** — the Kerebron (ProseMirror)
+surface: hidden toolbar, markdown block shortcuts, Notion-style block gutter
+menu — while keeping its plain-text contract: `value`, `defaultValue` and
+`onChange`'s `event.target.value` are still plain strings, `name` still posts
+plain text through a hidden mirror `<textarea>`, and `ref.current.value` /
+`ref.current.focus()` keep working. Formatting is visible while composing but
+flattened to lines when reported — hosts that persist the value store the
+same plain text as before.
+
+**New install requirements (0.12.0).** Because the main bundle's `Textarea`
+now rides the Kerebron engine, the `@kerebron/*` packages are **required
+peers** (only the Yjs collaboration peers — `@kerebron/extension-yjs`,
+`yjs`, `y-protocols` — remain optional):
+
+```sh
+npm install --save-exact @kerebron/editor@0.8.12 @kerebron/editor-kits@0.8.12 \
+  @kerebron/extension-basic-editor@0.8.12 @kerebron/extension-menu@0.8.12 \
+  @kerebron/wasm@0.8.12
+```
+
+```ts
+import '@mieweb/ui/kerebron.css'; // editor styles — alongside styles.css
+```
+
+The editor loads tree-sitter WASM grammars on demand from `/kerebron-wasm`;
+serve `@kerebron/wasm`'s `assets/` directory at that path (or pass your own
+`assetLoad`) if you render Markdown-valued editors (`RichEditor`,
+`CodeEditor`). Hosts that don't want any of this per field can opt out with
+`<Textarea richText={false}>` or `TextAreaPlain` — but the peers must be
+installable for the package to resolve.
+
+Because every consumer now resolves Kerebron, the **ProseMirror version
+overrides and the Kerebron patches** described under
+[eSheet and EncounterVisit](#esheet-and-encountervisit) above also apply to
+every consumer — previously only EncounterVisit RichEdit hosts needed them.
+Note that package managers that auto-install peers (npm 7+, pnpm 8+ by
+default) will pull the `@kerebron/*` packages in on upgrade, but Yarn does
+not — and no package manager adds the CSS import, the wasm assets, or the
+version override for you.
+
+Related renames (also 0.12.0): **`RichTextArea` → `TextAreaRich`**
+(deprecated aliases `RichTextArea` / `RichTextAreaProps` still exported), and
+the previous native implementation is now **`TextAreaPlain`**
+(`textareaVariants` moved with it).
+
+### Pick your lane
+
+| You need…                                                                          | Use                                            |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------- |
+| A multi-line note field storing plain text (the default)                            | `Textarea` — no code changes                    |
+| To **persist** the formatting (value is HTML)                                       | `TextAreaRich`                                  |
+| The native `<textarea>` element: hard `maxLength`, native validation/autofill, drag-resize, floating labels, element-targeting CSS/refs | `TextAreaPlain` — same props as the old `Textarea` — or `<Textarea richText={false}>` to opt out in place |
+
+### Behaviour changes to review
+
+- **`maxLength` is no longer enforced while typing.** The counter
+  (`showCount`) still renders and turns red past the limit. Enforce limits in
+  `onChange` or switch to `TextAreaPlain`.
+- **`labelVariant="floating"`, `resize` and `autoResize={false}` are ignored**
+  (stacked label, no drag handle, always auto-grows) with a one-time dev
+  console warning.
+- **Native validation, autofill and IME/browser integrations** tied to a
+  visible `<textarea>` element no longer apply.
+- **DOM shape changed.** There is no visible `<textarea>`; the surface is a
+  ProseMirror `contenteditable` region (`role="textbox"`, class `kb-editor`)
+  inside the editor chrome, plus a hidden mirror
+  `[data-slot="textarea-mirror"]` carrying `name`/`value`. CSS selectors like
+  `textarea { … }` no longer match — target the existing
+  `[data-slot="textarea-*"]` hooks instead. Tests using
+  `getByRole('textbox')` keep working.
+- **Controlled transforms reset formatting.** Echoing `event.target.value`
+  back unchanged preserves the on-screen formatting; transforming it
+  (uppercasing, trimming) resyncs the editor to plain paragraphs.
+- **Kept working:** `readOnly`, `required`, `rows` (minimum height), `size`,
+  `form`, `onFocus`/`onBlur`/`onKeyDown`/`onKeyUp` (retargeted so
+  `event.target.value` reads plain text), and external
+  `<label htmlFor={id}>` pairs (bridged via `aria-labelledby` plus
+  click-to-focus). `\r\n` in values is normalized to `\n`, and pasted or
+  dropped rich content is filtered through the editor's ProseMirror schema —
+  whatever formatting survives is display-only; the reported value is still
+  plain text.
+
 ## Chat composer
 
 **`MessageComposer` was retired in 0.10.0.** The shared **`ChatComposer`** is

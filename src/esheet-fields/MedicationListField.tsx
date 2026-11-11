@@ -65,6 +65,7 @@ export function MedicationListField({
   response,
   isPreview,
   isEnabled,
+  isReadOnly,
   onResponse,
   codeLookup,
 }: FieldComponentProps & {
@@ -92,7 +93,7 @@ export function MedicationListField({
       title={definition.question ?? 'Presenting medications'}
       quickAddOptions={definition.quickAddOptions}
       codeLookup={codeLookup}
-      readOnly={!(isPreview && isEnabled)}
+      readOnly={!(isPreview && isEnabled) || isReadOnly}
     />
   );
 }

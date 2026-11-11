@@ -6,6 +6,10 @@ import {
   type ComposerModelSelectorProps,
 } from '../AI/ComposerModelSelector';
 import {
+  ComposerSelector,
+  type ComposerSelectorOption,
+} from './ComposerSelector';
+import {
   AttachmentPreviewItem,
   DragDropZone,
   getFileType,
@@ -22,7 +26,6 @@ import {
   AlertTriangleIcon,
   ArrowUpIcon,
   BotIcon,
-  CheckIcon,
   ChevronUpIcon,
   LoaderIcon,
   MicIcon,
@@ -83,17 +86,10 @@ export interface ChatComposerSendMeta {
   sendOption?: string;
 }
 
-/** An agent shown in the composer's agent selector. */
-export interface ChatComposerAgentOption {
-  /** Stable id (returned via `onAgentChange`). */
-  id: string;
-  /** Display label. */
-  label: string;
-  /** Optional leading icon (defaults to a bot glyph in the trigger). */
-  icon?: React.ReactNode;
-  /** Optional secondary text shown in the menu. */
-  description?: string;
-}
+// An interface (not an alias) so hosts can keep augmenting it via declaration merging.
+/** An agent shown in the composer's agent selector (trigger icon defaults to a bot glyph). */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ChatComposerAgentOption extends ComposerSelectorOption {}
 
 /** Imperative handle exposed via `ref` for host-level integrations. */
 export interface ChatComposerHandle {
@@ -275,6 +271,13 @@ export interface ChatComposerProps {
   showModelSelector?: boolean;
   /** Props passed through to the embedded `ComposerModelSelector`. */
   modelSelectorProps?: ComposerModelSelectorProps;
+  /**
+   * Custom node at the end of the bottom row, after the model selector (e.g.
+   * a voice-activation selector). Shows the row even when no built-in
+   * selector is enabled. Interaction state is not managed: pass your own
+   * disabled state when the composer is `disabled`.
+   */
+  selectorsEndSlot?: React.ReactNode;
 
   /** Replaces the composer with a read-only notice. */
   readOnly?: boolean;
@@ -329,15 +332,6 @@ export interface ChatComposerProps {
 const iconButtonClasses = cn(
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
   'text-neutral-500 dark:text-neutral-400',
-  'transition-colors duration-150',
-  'hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
-  'disabled:pointer-events-none disabled:opacity-40'
-);
-
-const selectorTriggerClasses = cn(
-  'flex min-w-0 items-center gap-1 rounded-md px-2 py-1 text-xs',
-  'text-neutral-600 dark:text-neutral-400',
   'transition-colors duration-150',
   'hover:bg-neutral-100 hover:text-neutral-900 dark:hover:bg-neutral-700 dark:hover:text-white',
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
@@ -430,6 +424,7 @@ export const ChatComposer = React.forwardRef<
     onAgentChange,
     showModelSelector = false,
     modelSelectorProps,
+    selectorsEndSlot,
     readOnly = false,
     readOnlyMessage = 'You have read-only access and cannot send messages.',
     onError,
@@ -465,7 +460,6 @@ export const ChatComposer = React.forwardRef<
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [sendMenuOpen, setSendMenuOpen] = React.useState(false);
-  const [agentMenuOpen, setAgentMenuOpen] = React.useState(false);
 
   const isTouchDevice = React.useSyncExternalStore(
     subscribeTouchDevice,
@@ -787,9 +781,10 @@ export const ChatComposer = React.forwardRef<
   const micVisible =
     (showMic || onMicClick !== undefined || micSlot !== undefined) &&
     (micBehavior === 'always' || !hasContent);
-  const showSelectorRow = showAgentSelector || showModelSelector;
-  const selectedAgentOption =
-    agents.find((agent) => agent.id === selectedAgent) ?? null;
+  const showModel = showModelSelector && modelSelectorProps != null;
+  const showSelectorsEnd = showModel || selectorsEndSlot != null;
+  const showSelectorRow =
+    showAgentSelector || showModelSelector || selectorsEndSlot != null;
 
   // One grid: the input sits on row 1 spanning all columns with the `+`/
   // actions on row 2. In the responsive layout, at `md+` the `+`, input and
@@ -1161,72 +1156,33 @@ export const ChatComposer = React.forwardRef<
       className="flex items-center justify-between gap-2 px-2 pt-1"
     >
       {showAgentSelector ? (
-        <Dropdown
-          placement="top-start"
-          open={agentMenuOpen}
-          onOpenChange={setAgentMenuOpen}
-          trigger={
-            <button
-              type="button"
-              data-slot="chat-composer-agent-trigger"
-              aria-label={
-                selectedAgentOption
-                  ? `${agentSelectorLabel}: ${selectedAgentOption.label}`
-                  : agentSelectorLabel
-              }
-              disabled={disabled}
-              className={selectorTriggerClasses}
-            >
-              {selectedAgentOption?.icon ?? (
-                <BotIcon className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              <span className="min-w-0 truncate">
-                {selectedAgentOption?.label ?? agentSelectorLabel}
-              </span>
-              <ChevronUpIcon className="h-3 w-3 shrink-0" aria-hidden="true" />
-            </button>
-          }
-        >
-          {agents.map((agent) => (
-            <DropdownItem
-              key={agent.id}
-              icon={agent.icon}
-              role="menuitemradio"
-              aria-checked={agent.id === selectedAgent}
-              onClick={() => {
-                setAgentMenuOpen(false);
-                onAgentChange?.(agent.id);
-              }}
-            >
-              <span className="flex w-full items-center justify-between gap-2">
-                <span className="min-w-0">
-                  <span className="block truncate">{agent.label}</span>
-                  {agent.description && (
-                    <span className="block truncate text-xs text-neutral-500 dark:text-neutral-400">
-                      {agent.description}
-                    </span>
-                  )}
-                </span>
-                {agent.id === selectedAgent && (
-                  <CheckIcon
-                    className="text-primary-600 dark:text-primary-400 h-4 w-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                )}
-              </span>
-            </DropdownItem>
-          ))}
-        </Dropdown>
+        <ComposerSelector
+          options={agents}
+          value={selectedAgent}
+          onChange={onAgentChange}
+          label={agentSelectorLabel}
+          icon={<BotIcon className="h-3.5 w-3.5" aria-hidden="true" />}
+          disabled={disabled}
+          triggerSlot="chat-composer-agent-trigger"
+        />
       ) : (
         <span aria-hidden="true" />
       )}
 
-      {showModelSelector && modelSelectorProps && (
-        <ComposerModelSelector
-          variant="ghost"
-          {...modelSelectorProps}
-          disabled={disabled || modelSelectorProps.disabled}
-        />
+      {showSelectorsEnd && (
+        <div
+          data-slot="chat-composer-selectors-end"
+          className="flex min-w-0 items-center gap-1"
+        >
+          {showModel && (
+            <ComposerModelSelector
+              variant="ghost"
+              {...modelSelectorProps}
+              disabled={disabled || modelSelectorProps.disabled}
+            />
+          )}
+          {selectorsEndSlot}
+        </div>
       )}
     </div>
   );

@@ -40,10 +40,13 @@ user-facing entry points at the entry point instead.
 
 ## Menus are controlled
 
-The `+` menu and agent menu use controlled `open`/`onOpenChange` because
-`DropdownItem` does **not** close its parent `Dropdown` on click (verified in
-Dropdown.tsx `handleClick`). Every item `onClick` must call the corresponding
-`set…MenuOpen(false)` first.
+The `+` menu and the selector-row menus use controlled `open`/`onOpenChange`
+because `DropdownItem` does **not** close its parent `Dropdown` on click
+(verified in Dropdown.tsx `handleClick`). Every item `onClick` must call the
+corresponding `set…Open(false)` first. Selector-row menus (the agent selector,
+and host selectors such as Hey Ozwell) share `ComposerSelector.tsx`, which owns
+its own open state; change the look there, not per selector. It is internal
+(not exported from `@mieweb/ui`).
 
 ## Error contract
 
@@ -120,11 +123,16 @@ auto-clear-on-send; hosts own the state.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`
   (`variant="ghost"` default, host may override; `disabled` is combined with
   the composer's `disabled` **after** the spread — keep that ordering).
+- `selectorsEndSlot` — host node after the model selector, inside
+  `data-slot="chat-composer-selectors-end"`. It shows the bottom row on its
+  own; same `disabled` contract as `micSlot`. The agent trigger keeps
+  `data-slot="chat-composer-agent-trigger"` for existing CSS and host tests.
 
 ## Visual baseline
 
 `tests/visual/components.spec.ts` snapshots the `WithSelectors` story
-(`chat-composer-with-selectors.png`). Regenerate with
+(`chat-composer-with-selectors.png`) and the `WithSelectorsEndSlot` story
+(`chat-composer-selectors-end-slot*.png`). Regenerate with
 `pnpm playwright test --update-snapshots=all` and **view the PNG** before
 committing. The ghost `ComposerModelSelector` is part of this baseline, so
 changes there show up here too.

@@ -22,7 +22,7 @@ const meta: Meta<typeof EmailEditor> = {
       description: {
         component: `### What it's for
 
-**A block-based email builder: a palette, a drag-to-reorder canvas, per-block settings and global design.** The document is a JSON \`EmailContentTree\` of blocks — \`hero\`, \`columns\`, \`heading\`, \`text\`, \`button\`, \`image\`, \`divider\`, \`spacer\`, \`social\`, \`quote\`, \`table\`, \`html\`, \`footer\` — plus optional \`EmailDesignSettings\` (font, content width, page/content/text/heading/link/button colours). The canvas is a WYSIWYG approximation; **\`renderEmailMjml(tree, { design })\`** serialises the same document to MJML, which the host compiles with \`mjml\` (server) or \`mjml-browser\` into client-safe HTML. Text blocks are edited with \`RichTextEditor\`, so \`mergeTags\` appear in its Variables menu. The model matches Waggleline's email builder field-for-field for this shared block set; product-specific block types must be converted by the host before loading (unrecognised blocks show an unsupported-block placeholder and are left out of the MJML).
+**A block-based email builder: a palette, a drag-to-reorder canvas, per-block settings and global design.** The document is a JSON \`EmailContentTree\` of blocks — \`hero\`, \`columns\`, \`heading\`, \`text\`, \`button\`, \`image\`, \`divider\`, \`spacer\`, \`social\`, \`quote\`, \`table\`, \`html\`, \`footer\` — plus optional \`EmailDesignSettings\` (font, content width, page/content/text/heading/link/button colours). The canvas is a WYSIWYG approximation; **\`renderEmailMjml(tree, { design })\`** serialises the same document to MJML, which the host compiles with \`mjml\` (server) or \`mjml-browser\` into client-safe HTML. Text blocks are edited with the Kerebron-engined \`TextAreaRich\` surface, so \`mergeTags\` appear in its Variables menu. The model matches Waggleline's email builder field-for-field for this shared block set; product-specific block types must be converted by the host before loading (unrecognised blocks show an unsupported-block placeholder and are left out of the MJML).
 
 ### Use it when
 
@@ -31,7 +31,7 @@ const meta: Meta<typeof EmailEditor> = {
 
 ### Don't use it when
 
-- The message is a single formatted body with merge fields (a letter, a note, a reply) — \`RichTextEditor\`.
+- The message is a single formatted body (a letter, a note, a reply) — \`RichEditor\` (\`@mieweb/ui/kerebron\`, Markdown) or \`TextAreaRich\` (same entry, HTML).
 - The content is Markdown, or several people edit it at once — \`RichEditor\`.
 - You need sending, recipients, scheduling, templates or analytics: those are the host's; this component edits a document.
 
@@ -61,10 +61,10 @@ The host owns both values, saves them, and compiles the MJML when sending.
 - **Drag is pointer-only.** Keyboard and screen-reader users add blocks by activating palette buttons (inserted after the selection) and reorder with each block's **Move up / Move down** buttons; adds, moves, duplicates and deletes are announced through a polite live region. Every block's toolbar has a **Select <type>** toggle (\`aria-pressed\`); clicking a block's body does the same for the mouse. Dragging a palette item onto the canvas inserts at the drop position.
 - **Columns hold content blocks only** (no nested columns or heroes); add to a column from the columns block's settings. Columns wrap below ~160px each on narrow canvases; MJML stacks them on mobile.
 - **Undo/redo** (toolbar, ⌘/Ctrl+Z, ⌘/Ctrl+Shift+Z outside text fields) covers the last 50 edits made through the editor; changing \`value\` from outside is not recorded.
-- **Security.** \`text\` and \`html\` blocks are HTML. The canvas renders them through DOMPurify; \`renderEmailMjml\` sanitises them with DOMPurify by default and **throws where no DOM exists** unless you pass \`sanitizeHtml\`. Plain-text fields are escaped, URLs are restricted to http(s)/mailto/tel/anchors/root-relative/\`{{merge}}\`, and colours/gradients that are not plain CSS values are dropped.
+- **Security.** \`text\` and \`html\` blocks are HTML. The canvas renders them through DOMPurify; \`renderEmailMjml\` sanitises them with DOMPurify by default and **throws where no DOM exists** unless you pass \`sanitizeHtml\`. Markup pasted into a text block is filtered through the editor's document schema. Plain-text fields are escaped, URLs are restricted to http(s)/mailto/tel/anchors/root-relative/\`{{merge}}\`, and colours/gradients that are not plain CSS values are dropped.
 - **Email colours are data, not theme.** The canvas shows the email's own colours in both light and dark mode, and is \`dir="ltr"\` like the default MJML output; the surrounding chrome uses \`@mieweb/ui\` tokens and logical (RTL-safe) spacing. The panels stack below \`lg\`.
 - **i18n.** Every chrome string comes from \`labels\` (\`defaultEmailEditorLabels\`); block defaults (\`createEmailBlock\`) and the footer's "Unsubscribe" fallback are English. Social icons in the MJML are MJML's hosted defaults.
-- Depends on \`@dnd-kit/*\`, \`dompurify\`, \`lucide-react\`, \`Tabs\`, \`Button\`, \`Input\`, \`Select\`, \`Switch\`, \`Textarea\`, \`RichTextEditor\`. No peers. Entry \`@mieweb/ui\`.`,
+- Depends on \`@dnd-kit/*\`, \`dompurify\`, \`lucide-react\`, \`Tabs\`, \`Button\`, \`Input\`, \`Select\`, \`Switch\`, \`Textarea\`, and the Kerebron \`TextAreaRich\` surface for text blocks: load \`@mieweb/ui/kerebron.css\` alongside \`styles.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\` (the \`@kerebron/*\` packages are required peers since 0.12). Entry \`@mieweb/ui\`.`,
       },
     },
     catalog: {
@@ -72,13 +72,13 @@ The host owns both values, saves them, and compiles the MJML when sending.
       relationships: [
         {
           type: 'uses',
-          target: 'editors-richtexteditor',
-          why: 'Text blocks are edited with RichTextEditor; mergeTags become its variableGroups.',
+          target: 'editors-textarearich-kerebron',
+          why: 'Text blocks are edited with the Kerebron TextAreaRich surface; mergeTags become its variableGroups.',
         },
         {
           type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'EmailEditor when the message needs layout blocks and is sent as an email; RichTextEditor for a single formatted HTML body.',
+          target: 'editors-richeditor',
+          why: 'EmailEditor when the message needs layout blocks and is sent as an email; a single formatted body belongs in RichEditor.',
         },
       ],
     },

@@ -251,7 +251,11 @@ function Modal({
       */}
       <AnimatedPresence onExitComplete={() => setIsExiting(false)}>
         {open && (
-          <div key="modal-root" className="fixed inset-0 z-50">
+          <div
+            key="modal-root"
+            data-slot="modal-root"
+            className="fixed inset-0 z-50"
+          >
             {/* Overlay backdrop */}
             <Animated
               preset="overlay"

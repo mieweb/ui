@@ -55,7 +55,7 @@ Both components are controlled: \`WebsiteInput\` defaults \`value\` to \`''\`; \
 - \`isValidUrl\` accepts anything \`new URL()\` can parse with \`https://\` prepended — \`"example"\` passes; \`""\` is treated as valid. The value is **not** rewritten with the scheme; the host decides.
 - Hard-coded English: the blur error \`"Please enter a valid URL"\`, the default placeholders, the group's sr-only \`"URL type"\` label and the \`"Add website"\` / \`"Remove website"\` button labels. Only option labels are translatable, via \`typeLabels\`.
 - In the group only the first row gets the visible \`label\`; later rows are unlabelled. Type select ids are \`website-type-{index}\` (duplicates across two groups). Removing a row does not manage focus or announce.
-- The group's select and buttons use hard-coded palette classes (\`border-gray-300\`, \`text-brand-600\`, \`text-red-600\`, \`dark:bg-gray-800\`) rather than semantic tokens. Layouts are flex/\`gap-2\` — RTL-safe. No external dependencies.`,
+- The group's select and buttons use hard-coded palette classes (\`border-gray-300\`, \`text-brand-600\`, \`text-red-600\`, \`dark:bg-gray-800\`) rather than semantic tokens. Layouts are flex/\`gap-2\` — RTL-safe; the URL input is a \`dir="ltr"\` island so URLs keep their order in RTL. No external dependencies.`,
       },
     },
     catalog: {

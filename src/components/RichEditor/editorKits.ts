@@ -11,13 +11,26 @@
  * peers — plain-mode consumers never load them.
  */
 import type { EditorKit } from '@kerebron/editor';
+import type { NodeSpec } from 'prosemirror-model';
 import { AdvancedEditorKit } from '@kerebron/editor-kits/AdvancedEditorKit';
 import {
   ExtensionMediaUpload,
   type MediaUploadOptions,
 } from '@kerebron/extension-basic-editor/ExtensionMediaUpload';
+import {
+  ExtensionCustomMenu,
+  type MenuElement,
+} from '@kerebron/extension-menu';
 
 export type { MediaUploadOptions };
+export type { MenuElement };
+
+/**
+ * Reshape the toolbar menu before it renders: receives the stock menu's
+ * item groups and returns the groups to render. Append custom
+ * {@link MenuElement}s (e.g. a Macros toggle) or drop stock groups.
+ */
+export type ModifyMenu = (menus: MenuElement[][]) => MenuElement[][];
 
 export interface CollabConfig {
   /** Room id — one shared document per room (e.g. a post id). */
@@ -90,35 +103,137 @@ export interface EditorKits {
 const unsafeExtensions = ['autocomplete', 'hover'] as const;
 
 /**
+ * Fix the `shortcode_inline` node's DOM round-trip (mieweb/ui#695).
+ *
+ * The stock node chips `{{merge_tokens}}` into atomic spans but its `toDOM`
+ * drops the braces, so serializing a document back to HTML/text silently
+ * corrupts every merge token. Patch the spec on the kit's own instance:
+ * serialize the braces, strip them again on parse — the `content` attr stays
+ * brace-less, which the input rule and the markdown serializer both rely on.
+ *
+ * Done here, in the kit we ship, so npm consumers on stock
+ * `@kerebron/extension-basic-editor` get the fix too — `@kerebron/*` is
+ * externalized (`tsup.config.ts`), so a workspace-level package patch would
+ * never reach them. Drop once fixed upstream.
+ *
+ * The node is nested: `AdvancedEditorKit` → `ExtensionBasicEditor`, whose
+ * `requires` carries the `BasicEditorKit` extension *instances* (names and
+ * instances mix in `requires`), hence the recursive walk.
+ */
+function fixShortcodeRoundTrip(extensions: unknown[]): void {
+  for (const item of extensions) {
+    if (!item || typeof item !== 'object') continue; // name-only requires
+    const extension = item as {
+      name?: unknown;
+      requires?: unknown;
+      getNodeSpec?: () => NodeSpec;
+    };
+    if (
+      extension.name === 'shortcode_inline' &&
+      typeof extension.getNodeSpec === 'function'
+    ) {
+      const stockSpec = extension.getNodeSpec.bind(extension);
+      extension.getNodeSpec = (): NodeSpec => ({
+        ...stockSpec(),
+        parseDOM: [
+          {
+            tag: 'span.kb-shortcode-inline',
+            getAttrs: (dom) => {
+              const text = dom.textContent ?? '';
+              const match = /^\{\{([^}]+)\}\}$/.exec(text);
+              return { content: match ? match[1] : text || null };
+            },
+          },
+        ],
+        toDOM: (node) => [
+          'span',
+          { class: 'kb-shortcode-inline' },
+          node.attrs.content ? `{{${String(node.attrs.content)}}}` : '',
+        ],
+      });
+      return;
+    }
+    if (Array.isArray(extension.requires)) {
+      fixShortcodeRoundTrip(extension.requires);
+    }
+  }
+}
+
+/**
+ * Remove extensions by name, wherever they sit: extensions nest (e.g.
+ * `ExtensionBasicEditor.requires` carries the BasicEditorKit node instances),
+ * so the walk descends `requires` arrays and filters each level in place.
+ * Name-only (string) requires entries are left alone — they declare ordering,
+ * not instances.
+ */
+function dropNamedExtensions(
+  extensions: unknown[],
+  names: readonly string[]
+): unknown[] {
+  const kept = extensions.filter(
+    (item) =>
+      !(
+        item &&
+        typeof item === 'object' &&
+        'name' in item &&
+        names.includes((item as { name: string }).name)
+      )
+  );
+  for (const item of kept) {
+    if (!item || typeof item !== 'object') continue;
+    const extension = item as { requires?: unknown };
+    if (Array.isArray(extension.requires)) {
+      extension.requires = dropNamedExtensions(extension.requires, names);
+    }
+  }
+  return kept;
+}
+
+/**
  * {@link AdvancedEditorKit} minus {@link unsafeExtensions} (and, for collab
  * mode, minus `history`), with `mediaUpload` reconfigured when the host asks.
  *
  * `AdvancedEditorKit` constructs `ExtensionMediaUpload` with no options, and an
  * extension's options are fixed at construction — so the only way to configure
- * it is to drop that instance and append one of our own.
+ * it is to drop that instance and append one of our own. `modifyMenu` works
+ * the same way: the stock `ExtensionCustomMenu` is constructed with no config,
+ * so customizing the toolbar means replacing it with a configured instance.
  */
 class SafeAdvancedEditorKit implements EditorKit {
   name = 'advanced-editor';
   constructor(
     private readonly forCollab: boolean,
-    private readonly mediaUpload?: MediaUploadOptions
+    private readonly mediaUpload?: MediaUploadOptions,
+    private readonly modifyMenu?: ModifyMenu,
+    private readonly omitExtensions?: readonly string[]
   ) {}
 
   getExtensions() {
     const dropped: string[] = [...unsafeExtensions];
     if (this.forCollab) dropped.push('history');
     if (this.mediaUpload) dropped.push('mediaUpload');
+    if (this.modifyMenu) dropped.push('customMenu');
 
-    const extensions = new AdvancedEditorKit()
+    let extensions = new AdvancedEditorKit()
       .getExtensions()
       .filter(
         (extension) =>
           !('name' in extension && dropped.includes(extension.name))
       );
 
+    if (this.omitExtensions?.length) {
+      extensions = dropNamedExtensions(
+        extensions,
+        this.omitExtensions
+      ) as typeof extensions;
+    }
+    if (this.modifyMenu) {
+      extensions.push(new ExtensionCustomMenu({ modifyMenu: this.modifyMenu }));
+    }
     if (this.mediaUpload) {
       extensions.push(new ExtensionMediaUpload(this.mediaUpload));
     }
+    fixShortcodeRoundTrip(extensions);
     return extensions;
   }
 }
@@ -130,6 +245,9 @@ class SafeAdvancedEditorKit implements EditorKit {
  * room; omit it for a plain local editor. Pass `mediaUpload` to configure how
  * pasted/dropped files are handled — most importantly `uploadHandler`, without
  * which every image is embedded in the document as a base64 `data:` URL.
+ * Pass `omitExtensions` to remove schema extensions by name — the toolbar is
+ * schema-driven, so dropping a node removes its menu items, input rules and
+ * paste handling in one move (e.g. the email surface drops `task_list`).
  *
  * Async because collaborative mode lazy-loads the Yjs kit (and its optional
  * peer deps) on first use; plain mode resolves immediately.
@@ -145,22 +263,36 @@ class SafeAdvancedEditorKit implements EditorKit {
  */
 export async function createEditorKits(
   config?: CollabConfig,
-  mediaUpload?: MediaUploadOptions
+  mediaUpload?: MediaUploadOptions,
+  modifyMenu?: ModifyMenu,
+  omitExtensions?: readonly string[]
 ): Promise<EditorKits> {
   if (!config) {
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      kits: [
+        new SafeAdvancedEditorKit(
+          false,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
+      ],
       collaborative: false,
     };
   }
 
   try {
-    const { HuddleYjsKit, defaultWsUrl } = await import('./collabKit');
+    const { createHuddleYjsKit, defaultWsUrl } = await import('./collabKit');
     const url = config.wsUrl ?? defaultWsUrl();
     return {
       kits: [
-        new SafeAdvancedEditorKit(true, mediaUpload),
-        new HuddleYjsKit(
+        new SafeAdvancedEditorKit(
+          true,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
+        await createHuddleYjsKit(
           url,
           config.params ?? {},
           config.WebSocketPolyfill,
@@ -178,7 +310,14 @@ export async function createEditorKits(
     // Degrading to a local editor must not also drop `mediaUpload`: without it
     // the stock extension comes back and pasted files are embedded as base64.
     return {
-      kits: [new SafeAdvancedEditorKit(false, mediaUpload)],
+      kits: [
+        new SafeAdvancedEditorKit(
+          false,
+          mediaUpload,
+          modifyMenu,
+          omitExtensions
+        ),
+      ],
       collaborative: false,
     };
   }

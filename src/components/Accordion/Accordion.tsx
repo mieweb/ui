@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, type LucideIcon } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 
@@ -46,6 +46,12 @@ export interface AccordionItem {
   title: React.ReactNode;
   /** Panel content (e.g. the answer). */
   content: React.ReactNode;
+  /**
+   * Optional leading icon shown before the title. Pass a library icon
+   * component (lucide-react / `@mieweb/ui` Icons barrel), not an element:
+   * `icon: HelpCircleIcon`. Unsupported values are ignored.
+   */
+  icon?: LucideIcon;
   disabled?: boolean;
 }
 
@@ -76,6 +82,40 @@ export interface AccordionProps
 // =============================================================================
 // Accordion
 // =============================================================================
+
+// Leading icons are restricted to library icon components. Every
+// lucide-react icon (and therefore the `@mieweb/ui` Icons barrel) is a
+// `forwardRef` exotic component, so the guard requires exactly that shape:
+// `$$typeof` of react.forward_ref with a callable `render`. Plain function
+// components, elements (`<Icon />`), strings, memo wrappers, and malformed
+// tagged objects are all rejected, so the slot cannot be abused as a
+// free-form content area and invalid values cannot crash the render.
+// A true identity allowlist would require bundling the entire icon set
+// (defeating lucide's tree-shaking) — the `LucideIcon` type remains the
+// compile-time library-membership contract, and the unit test rendering a
+// real library icon guards this shape against lucide upgrades.
+const FORWARD_REF_TYPE = Symbol.for('react.forward_ref');
+
+function isLibraryIcon(icon: unknown): icon is LucideIcon {
+  return (
+    typeof icon === 'object' &&
+    icon !== null &&
+    (icon as { $$typeof?: unknown }).$$typeof === FORWARD_REF_TYPE &&
+    typeof (icon as { render?: unknown }).render === 'function'
+  );
+}
+
+// Warn once per session (dev builds only) about rejected icon values.
+// Bundlers replace `process.env.NODE_ENV` at build time, so this branch is
+// dead-code-eliminated from production bundles.
+let didWarnInvalidIcon = false;
+function warnInvalidIconOnce(id: string) {
+  if (process.env.NODE_ENV === 'production' || didWarnInvalidIcon) return;
+  didWarnInvalidIcon = true;
+  console.warn(
+    `[@mieweb/ui] Accordion item "${id}": \`icon\` must be a library icon component (e.g. \`icon: HelpCircleIcon\`), not an element or other value. The icon was ignored.`
+  );
+}
 
 /**
  * A vertically stacked set of expandable panels — FAQ lists, settings
@@ -173,6 +213,10 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
           const isOpen = openSet.has(item.id);
           const triggerId = `${baseId}-${item.id}-trigger`;
           const panelId = `${baseId}-${item.id}-panel`;
+          const hasIcon = item.icon !== undefined;
+          const LeadingIcon =
+            hasIcon && isLibraryIcon(item.icon) ? item.icon : null;
+          if (hasIcon && !LeadingIcon) warnInvalidIconOnce(item.id);
           return (
             <div key={item.id} className={cn(itemVariants({ variant }))}>
               <Heading className="m-0">
@@ -190,7 +234,14 @@ export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(
                     'disabled:pointer-events-none disabled:opacity-50'
                   )}
                 >
-                  <span className="text-foreground min-w-0 text-sm font-semibold">
+                  {LeadingIcon ? (
+                    <LeadingIcon
+                      aria-hidden="true"
+                      data-slot="accordion-icon"
+                      className="text-muted-foreground/70 -me-2 h-4 w-4 shrink-0"
+                    />
+                  ) : null}
+                  <span className="text-foreground min-w-0 flex-1 text-sm font-semibold">
                     {item.title}
                   </span>
                   <ChevronDown
