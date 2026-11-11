@@ -57,7 +57,8 @@ const meta: Meta<typeof SuperChatConversations> = {
 
 - You want list + panel with selection wired — \`SuperChatInbox\` already composes this component and handles the mobile master/detail switch.
 - The items are human-to-human conversations with presence, avatars and typing state — Messaging's \`ConversationListItem\` renders \`Conversation\` objects with online indicators and last-seen text.
-- You need grouping (unread / archived) or infinite loading: neither exists; pass a pre-grouped, pre-paged \`conversations\` array.
+- You need grouped sections (unread / archived): the list always sorts every conversation by activity into one flat list, so groups would interleave. Render your own grouped list alongside \`SuperChat\` instead.
+- You need infinite loading: it doesn't exist; pass a pre-paged \`conversations\` array.
 
 ### Header: title, search and filters
 
