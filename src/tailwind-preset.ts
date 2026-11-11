@@ -334,6 +334,11 @@ export const miewebUISafelist = [
   'min-h-[30px]',
   'animate-ozwell-message-flare',
   'grid-cols-[22px_minmax(0,1fr)]',
+  // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
+  'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
+  'sm:w-[var(--superchat-sidebar-width)]',
+  '[&_a]:text-current',
+  '[&_a:hover]:text-current',
   'h-[22px]',
   'w-[22px]',
   'text-[11px]',

@@ -197,9 +197,12 @@ export function SuperChatInbox({
   // On small screens the list and panel can't fit side by side, so we show one
   // at a time (master-detail). `mobileView` tracks which is visible; on `sm`+
   // both are always shown and this state is ignored.
-  const [mobileView, setMobileView] = React.useState<'list' | 'chat'>(
+  const [requestedMobileView, setMobileView] = React.useState<'list' | 'chat'>(
     defaultMobileView
   );
+  // With no conversation to open, the chat pane would be an empty panel with
+  // no way back, so the list shows until there is one.
+  const mobileView = active ? requestedMobileView : 'list';
 
   // The list can't be wider than leaves the panel `MIN_PANEL_WIDTH`, so the
   // width shown, dragged and announced is always the one actually rendered.
@@ -280,7 +283,7 @@ export function SuperChatInbox({
           onNewConversation={onNewConversation}
           listFooter={listFooter}
           className={cn(
-            'w-full sm:w-(--superchat-sidebar-width)',
+            'w-full sm:w-[var(--superchat-sidebar-width)]',
             mobileView === 'chat' && 'hidden sm:flex'
           )}
         />

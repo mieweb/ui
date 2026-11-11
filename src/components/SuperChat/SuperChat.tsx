@@ -202,10 +202,12 @@ export interface SuperChatProps {
 /**
  * Message box props a host may set through `composerProps`. SuperChat owns the
  * draft and the send path, so `value`, `onValueChange` and `onSend` stay its.
+ * `replyTo` / `onCancelReply` are left out: SuperChat's send path doesn't pass
+ * a reply target on to `onMessageSent` yet.
  */
 export type SuperChatComposerProps = Omit<
   ChatComposerProps,
-  'value' | 'onValueChange' | 'onSend'
+  'value' | 'onValueChange' | 'onSend' | 'replyTo' | 'onCancelReply'
 >;
 
 /**
@@ -794,7 +796,12 @@ export function SuperChat({
       const epoch = draftEpochRef.current;
       try {
         const text = message.content;
-        const mentions = detectMentions(text, conversation.participants);
+        // `mentionOptions: []` turns mentions off for the sent message too,
+        // not just the suggestions.
+        const mentions =
+          composerProps?.mentionOptions?.length === 0
+            ? []
+            : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
           message.attachments ?? []
         );
@@ -821,7 +828,7 @@ export function SuperChat({
         }
       }
     },
-    [conversation, onMessageSent]
+    [conversation, onMessageSent, composerProps?.mentionOptions]
   );
 
   return (

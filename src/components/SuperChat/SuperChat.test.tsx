@@ -890,6 +890,27 @@ describe('SuperChat', () => {
         screen.queryByRole('listbox', { name: 'Mention' })
       ).not.toBeInTheDocument();
     });
+
+    it('sends no mentions with an empty mentionOptions', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ mentionOptions: [] }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'ping @Triage');
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'ping @Triage',
+        expect.objectContaining({ mentions: [] })
+      );
+    });
   });
 
   it('opens an @-mention menu and inserts the chosen participant', async () => {
@@ -1921,6 +1942,26 @@ describe('SuperChatInbox', () => {
     };
     expect(panelHidden()).toBe(true);
     expect(panelHidden('chat')).toBe(false);
+  });
+
+  it('keeps the list on screen with defaultMobileView="chat" and no conversations', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={[]}
+          currentParticipantId="u1"
+          defaultMobileView="chat"
+        />
+      </div>
+    );
+    // The empty panel has no Back control, so the list must stay reachable.
+    expect(
+      (
+        container.querySelector(
+          '[data-slot="superchat-conversations"]'
+        ) as HTMLElement
+      ).classList.contains('hidden')
+    ).toBe(false);
   });
 
   describe('resizable sidebar', () => {

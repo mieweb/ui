@@ -359,7 +359,7 @@ export const WithSendOptions: Story = {
     docs: {
       description: {
         story:
-          'Use `sendOptions` for alternative ways to send the draft. The chevron beside send opens them; the chosen id reaches `onSend` as `meta.sendOption`, and the host decides what it means (e.g. open a time picker for "Send later…"). Inside `SuperChat`, a rejected `onMessageSent` puts the draft back, so a cancelled picker can simply reject.',
+          'Use `sendOptions` for alternative ways to send the draft. The chevron beside send opens them; the chosen id reaches `onSend` as `meta.sendOption`, and the host decides what it means (e.g. open a time picker for "Send later…"). Inside `SuperChat`, a rejected `onMessageSent` puts the draft **text** back (unless a newer draft has been typed). Staged attachments are not restored: the composer clears them before the send, so a host that lets a picker cancel a send with files attached must keep and restore those files itself.',
       },
     },
   },
