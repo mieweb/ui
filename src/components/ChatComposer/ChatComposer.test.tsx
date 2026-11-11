@@ -267,6 +267,42 @@ describe('ChatComposer', () => {
         screen.getByRole('button', { name: 'Más opciones de envío' })
       ).toBeDisabled();
     });
+
+    it('moves through the options from the keyboard and returns focus on Escape', async () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={[
+            ...sendOptions,
+            { id: 'off', label: 'Off', disabled: true },
+          ]}
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Later' } });
+      const trigger = screen.getByRole('button', { name: 'More send options' });
+      fireEvent.click(trigger);
+
+      const later = screen.getByRole('menuitem', { name: 'Send later…' });
+      const quiet = screen.getByRole('menuitem', {
+        name: 'Send without notifying',
+      });
+      // The first option takes focus once the menu opens.
+      await vi.waitFor(() => expect(later).toHaveFocus());
+
+      fireEvent.keyDown(later, { key: 'ArrowDown' });
+      expect(quiet).toHaveFocus();
+      // Skips the disabled option and wraps around.
+      fireEvent.keyDown(quiet, { key: 'ArrowDown' });
+      expect(later).toHaveFocus();
+      fireEvent.keyDown(later, { key: 'End' });
+      expect(quiet).toHaveFocus();
+      fireEvent.keyDown(quiet, { key: 'Home' });
+      expect(later).toHaveFocus();
+
+      fireEvent.keyDown(later, { key: 'Escape' });
+      expect(trigger).toHaveFocus();
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
   });
 
   it('supports controlled value', () => {

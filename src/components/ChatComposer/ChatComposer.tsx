@@ -329,6 +329,15 @@ export interface ChatComposerProps {
 // Styles
 // ============================================================================
 
+/** The enabled items of a menu, in order, for keyboard navigation. */
+function enabledMenuItems(root: HTMLElement | null): HTMLButtonElement[] {
+  return Array.from(
+    root?.querySelectorAll<HTMLButtonElement>(
+      '[role="menuitem"]:not(:disabled)'
+    ) ?? []
+  );
+}
+
 const iconButtonClasses = cn(
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
   'text-neutral-500 dark:text-neutral-400',
@@ -460,6 +469,37 @@ export const ChatComposer = React.forwardRef<
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [sendMenuOpen, setSendMenuOpen] = React.useState(false);
+  const sendMenuRef = React.useRef<HTMLDivElement>(null);
+  const sendMenuTriggerRef = React.useRef<HTMLButtonElement>(null);
+  // The send options act as a menu: the first option takes focus on open (the
+  // menu is portaled, so Tab alone would wander elsewhere first).
+  React.useEffect(() => {
+    if (!sendMenuOpen) return;
+    const frame = requestAnimationFrame(() =>
+      enabledMenuItems(sendMenuRef.current)[0]?.focus()
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [sendMenuOpen]);
+  const handleSendMenuKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setSendMenuOpen(false);
+      sendMenuTriggerRef.current?.focus();
+      return;
+    }
+    const items = enabledMenuItems(sendMenuRef.current);
+    if (!items.length) return;
+    const current = items.indexOf(document.activeElement as HTMLButtonElement);
+    const next = {
+      ArrowDown: (current + 1) % items.length,
+      ArrowUp: (current - 1 + items.length) % items.length,
+      Home: 0,
+      End: items.length - 1,
+    }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    items[next].focus();
+  };
 
   const isTouchDevice = React.useSyncExternalStore(
     subscribeTouchDevice,
@@ -1119,6 +1159,7 @@ export const ChatComposer = React.forwardRef<
                 onOpenChange={setSendMenuOpen}
                 trigger={
                   <button
+                    ref={sendMenuTriggerRef}
                     type="button"
                     data-slot="chat-composer-send-options"
                     aria-label={sendOptionsLabel}
@@ -1130,19 +1171,25 @@ export const ChatComposer = React.forwardRef<
                   </button>
                 }
               >
-                {sendOptions.map((option) => (
-                  <DropdownItem
-                    key={option.id}
-                    icon={option.icon}
-                    disabled={option.disabled}
-                    onClick={() => {
-                      setSendMenuOpen(false);
-                      handleSend(option.id);
-                    }}
-                  >
-                    <span className="min-w-0 truncate">{option.label}</span>
-                  </DropdownItem>
-                ))}
+                <div
+                  ref={sendMenuRef}
+                  role="none"
+                  onKeyDown={handleSendMenuKeyDown}
+                >
+                  {sendOptions.map((option) => (
+                    <DropdownItem
+                      key={option.id}
+                      icon={option.icon}
+                      disabled={option.disabled}
+                      onClick={() => {
+                        setSendMenuOpen(false);
+                        handleSend(option.id);
+                      }}
+                    >
+                      <span className="min-w-0 truncate">{option.label}</span>
+                    </DropdownItem>
+                  ))}
+                </div>
               </Dropdown>
             )}
         </div>

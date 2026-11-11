@@ -891,6 +891,35 @@ describe('SuperChat', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('resolves mentions by the token each host mentionOption inserts', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            mentionOptions: [
+              { id: 'u2', label: 'Alice Reyes', value: 'reviewer' },
+              { id: 'team', label: 'Everyone' },
+            ],
+          }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(
+        screen.getByLabelText('Message'),
+        'cc @reviewer and @Everyone, not @Triage'
+      );
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'cc @reviewer and @Everyone, not @Triage',
+        expect.objectContaining({ mentions: ['u2', 'team'] })
+      );
+    });
+
     it('sends no mentions with an empty mentionOptions', async () => {
       const onMessageSent = vi.fn();
       const { default: userEvent } =

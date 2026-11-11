@@ -76,18 +76,33 @@ export function detectMentions(
   text: string,
   participants: Participant[]
 ): string[] {
+  return matchMentionTokens(
+    text,
+    participants
+      .filter((p) => p.kind !== 'system')
+      .map((p) => ({ id: p.id, token: p.name.split(' ')[0] }))
+  );
+}
+
+/**
+ * Ids whose `@token` appears in `text`. Used for a host's own
+ * `mentionOptions`, whose inserted token is `value`, or the first word of
+ * `label` (the same default the composer inserts).
+ */
+export function matchMentionTokens(
+  text: string,
+  entries: { id: string; token: string }[]
+): string[] {
   const ids: string[] = [];
-  for (const p of participants) {
-    if (p.kind === 'system') continue;
-    const token = '@' + p.name.split(' ')[0];
+  for (const { id, token } of entries) {
     // Match a whole mention token only: the `@` must not be preceded by a word
     // character or another `@`, and the token must not be followed by a word
     // character (so `@Triage` does not match `@TriageAgent`).
     const pattern = new RegExp(
-      `(?<![\\w@])${escapeRegExp(token)}(?![\\w])`,
+      `(?<![\\w@])${escapeRegExp('@' + token)}(?![\\w])`,
       'i'
     );
-    if (pattern.test(text)) ids.push(p.id);
+    if (pattern.test(text) && !ids.includes(id)) ids.push(id);
   }
   return ids;
 }

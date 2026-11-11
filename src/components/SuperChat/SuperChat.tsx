@@ -41,6 +41,7 @@ import {
   MessageRow,
   byTime,
   detectMentions,
+  matchMentionTokens,
   filesToComposerAttachments,
   acceptTokensFor,
 } from './parts';
@@ -99,7 +100,10 @@ export interface SuperChatProps {
    * Props for the message box (`ChatComposer`), applied over SuperChat's own
    * defaults: e.g. `placeholder`, `leadingSlot` for the host's own buttons
    * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
-   * `mentionOptions: []` to turn @mentions off. `className` is merged.
+   * `mentionOptions: []` to turn @mentions off. With your own `mentionOptions`,
+   * `onMessageSent`'s `mentions` holds the ids of the options whose token
+   * (`value`, or the first word of `label`) appears in the text. `className`
+   * is merged.
    */
   composerProps?: SuperChatComposerProps;
   /**
@@ -796,12 +800,18 @@ export function SuperChat({
       const epoch = draftEpochRef.current;
       try {
         const text = message.content;
-        // `mentionOptions: []` turns mentions off for the sent message too,
-        // not just the suggestions.
-        const mentions =
-          composerProps?.mentionOptions?.length === 0
-            ? []
-            : detectMentions(text, conversation.participants);
+        // A host's own `mentionOptions` decide what counts as a mention, by
+        // the token each one inserts; `[]` turns mentions off entirely.
+        const hostOptions = composerProps?.mentionOptions;
+        const mentions = hostOptions
+          ? matchMentionTokens(
+              text,
+              hostOptions.map((o) => ({
+                id: o.id,
+                token: o.value ?? o.label.split(' ')[0],
+              }))
+            )
+          : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
           message.attachments ?? []
         );
