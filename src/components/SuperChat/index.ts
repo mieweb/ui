@@ -17,6 +17,7 @@ export { SuperChat, type SuperChatProps } from './SuperChat';
 export {
   SuperChatConversations,
   type SuperChatConversationsProps,
+  type SuperChatConversationsSearch,
 } from './SuperChatConversations';
 
 export { SuperChatInbox, type SuperChatInboxProps } from './SuperChatInbox';
