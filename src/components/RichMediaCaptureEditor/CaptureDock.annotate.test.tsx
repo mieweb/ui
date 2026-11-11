@@ -98,10 +98,12 @@ describe('CaptureDock annotate affordance', () => {
       await screen.findByRole('heading', { name: 'Annotate image' })
     ).toBeInTheDocument();
     // jsdom never loads the image, so the dialog is in its loading state and
-    // Save is disabled — the cancel contract is what jsdom can pin.
+    // Save is inert via aria-disabled (not `disabled`: it must stay in the
+    // focus trap's cached Tab cycle) — the cancel contract is what jsdom
+    // can pin.
     expect(
       screen.getByRole('button', { name: 'Save annotation' })
-    ).toBeDisabled();
+    ).toHaveAttribute('aria-disabled', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() =>
       expect(

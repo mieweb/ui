@@ -495,13 +495,27 @@ export function AnnotateImageDialog({
         )}
       </ModalBody>
       <ModalFooter>
-        <Button variant="outline" onClick={onClose} disabled={saving}>
+        {/* Footer buttons stay *focusable* while inert (aria-disabled, not
+            disabled): Modal's useFocusTrap caches its first/last focusable
+            when the dialog opens, so a Save that enters the focus order
+            only after the image loads would sit outside the Tab cycle —
+            and Tab from it would escape the dialog. Click/Enter no-op via
+            the handler guards instead. */}
+        <Button
+          variant="outline"
+          onClick={() => {
+            if (!saving) onClose();
+          }}
+          aria-disabled={saving}
+          className={cn(saving && 'opacity-60')}
+        >
           {m('Cancel')}
         </Button>
         <Button
           onClick={() => void handleSave()}
-          disabled={!img || saving}
-          isLoading={saving}
+          aria-disabled={!img || saving}
+          aria-busy={saving}
+          className={cn((!img || saving) && 'opacity-60')}
         >
           {m('Save annotation')}
         </Button>

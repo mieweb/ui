@@ -31,28 +31,20 @@ export function useFocusTrap<T extends HTMLElement>(
     if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
 
     const container = containerRef.current;
-    const getFocusable = () =>
-      container.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
+    const focusableElements = container.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
 
-    const initial = getFocusable();
-    if (initial.length === 0) return;
+    if (focusableElements.length === 0) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
 
     // Focus the first element when trap is enabled
-    initial[0].focus();
+    firstElement.focus();
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Tab') return;
-
-      // Recompute per keystroke: dialog content enables/disables and
-      // mounts/unmounts controls while open (e.g. a Save button enabling
-      // after an async load) — cached boundaries would strand them
-      // outside the Tab cycle.
-      const focusableElements = getFocusable();
-      if (focusableElements.length === 0) return;
-      const firstElement = focusableElements[0];
-      const lastElement = focusableElements[focusableElements.length - 1];
 
       if (event.shiftKey) {
         // Shift + Tab
