@@ -95,11 +95,16 @@ const editorRef = useRef<RichEditorHandle>(null);
 
 Files that cannot land as an image/video node (a PDF through Attach file, an oversize image) are skipped and announced in the status line, never thrown.
 
+### Annotating images
+
+Hover any image in the document (or arrow the caret next to it and Tab) and a pencil button opens the **annotate dialog**: draw with the pen, drop text notes, undo, then **Save** flattens the annotations into a new PNG that replaces the image through the same \`mediaUpload\` pipeline — \`RichEditorHandle.replaceImage\` (mieweb/ui#735). Cancel/Escape discards. Annotations are burned in: there is no re-editable annotation layer, and no new document node types. Works for every image regardless of how it arrived — captured, attached, or pasted.
+
 ### Limitations
 
 - **Native document-scanner adapters are unverified on devices**; Storybook exercises Scan document through a mock.
 - The markdown schema has image and video nodes only — no audio.
 - Captures insert **at the caret**, like paste. A caret inside a heading drops the image on markdown serialization (headings cannot carry images); concurrent edits during a slow upload can shift the insertion point.
+- **Annotation needs readable pixels**: an image hosted on another origin without CORS headers taints the export canvas, and Save reports an error instead of producing a PNG. \`blob:\`/\`data:\` URLs — what captures produce — always work.
 - Strings externalize through the shared \`MessagesProvider\` contract (English defaults).`,
       },
     },

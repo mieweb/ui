@@ -306,6 +306,65 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page.getByTestId('html-output')).toContainText('src="blob:');
   });
 
+  // Image annotation (mieweb/ui#735): hover a document image, draw on it in
+  // the dialog, save — the flattened PNG replaces the image node's src
+  // through the same uploadHandler pipeline.
+  test('TextAreaRich Kerebron - annotate flattens and replaces the image', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    // A real decodable PNG — the annotate canvas has to actually load it.
+    const dataUrl = await page.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = 200;
+      c.height = 120;
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = '#cccccc';
+      ctx.fillRect(0, 0, 200, 120);
+      return c.toDataURL('image/png');
+    });
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'evidence.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(dataUrl.split(',')[1], 'base64'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // ProseMirror renders a decorative separator <img> too — pick by alt.
+    const docImage = page.locator('.ProseMirror img[alt="evidence.png"]');
+    const srcBefore = await docImage.getAttribute('src');
+
+    await docImage.hover();
+    await page.waitForTimeout(450); // the affordance's placement settle window
+    await page.locator('[data-slot="annotate-image-button"]').click();
+    const canvas = page.locator('[data-slot="annotate-canvas"]');
+    await expect(canvas).toBeVisible();
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7, {
+      steps: 8,
+    });
+    await page.mouse.up();
+    await page.getByRole('button', { name: 'Save annotation' }).click();
+
+    await expect(page.getByRole('status')).toHaveText('Image annotated', {
+      timeout: 15000,
+    });
+    await expect(canvas).not.toBeVisible();
+    // The node kept its alt but carries the flattened PNG's new upload URL.
+    const srcAfter = await docImage.getAttribute('src');
+    expect(srcAfter).toMatch(/^blob:/);
+    expect(srcAfter).not.toBe(srcBefore);
+    await expect(page.getByTestId('html-output')).toContainText(
+      'alt="evidence.png"'
+    );
+  });
+
   test('DictationButton - Mock provider', async ({ page }) => {
     await gotoStory(page, 'media-dictationbutton--mock-provider');
     await expect(page).toHaveScreenshot('dictation-button-mock-provider.png');

@@ -108,3 +108,58 @@ export async function insertMediaFiles(
 
   return { inserted, skipped };
 }
+
+/**
+ * Swap the `src` of the image node currently showing `oldSrc` for `file`,
+ * pushed through the same upload-or-embed pipeline as insertion — the
+ * annotate flow's "save" (mieweb/ui#735). The node is located *after* the
+ * upload resolves, so edits made while the upload was in flight cannot
+ * misplace the swap; if the image was deleted meanwhile, the replace reports
+ * `false` instead of inserting anything. Other attrs (alt, title) survive.
+ */
+export async function replaceImageSrc(
+  view: MediaInsertView,
+  oldSrc: string,
+  file: File,
+  options: MediaUploadOptions
+): Promise<boolean> {
+  const {
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
+    allowedImageTypes = DEFAULT_IMAGE_TYPES,
+    uploadHandler,
+  } = options;
+
+  if (
+    !matchesType(file, allowedImageTypes) ||
+    file.size > maxFileSize ||
+    !view.state.schema.nodes.image
+  ) {
+    return false;
+  }
+
+  try {
+    const src = uploadHandler
+      ? await uploadHandler(file)
+      : await fileToDataURL(file);
+    let found: number | null = null;
+    view.state.doc.descendants((node, pos) => {
+      if (
+        found === null &&
+        node.type.name === 'image' &&
+        node.attrs.src === oldSrc
+      ) {
+        found = pos;
+      }
+      return found === null;
+    });
+    if (found === null) return false;
+    const node = view.state.doc.nodeAt(found);
+    if (!node) return false;
+    view.dispatch(
+      view.state.tr.setNodeMarkup(found, undefined, { ...node.attrs, src })
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}

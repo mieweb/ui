@@ -15,7 +15,11 @@ import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
 import { MDY_PROJECTION_META } from './mdyTransaction';
-import { insertMediaFiles, type InsertFilesResult } from './insertMediaFiles';
+import {
+  insertMediaFiles,
+  replaceImageSrc,
+  type InsertFilesResult,
+} from './insertMediaFiles';
 import {
   createEditorKits,
   type CollabConfig,
@@ -166,6 +170,16 @@ export interface RichEditorHandle {
    * `getContent`/`focus` only) keep compiling — call as `insertFiles?.()`.
    */
   insertFiles?: (files: File[]) => Promise<InsertFilesResult>;
+  /**
+   * Replace the `src` of the image node currently showing `src` with `file`,
+   * through the same mount-time {@link RichEditorProps.mediaUpload} pipeline
+   * as insertion — the save path of the annotate flow (mieweb/ui#735).
+   * Resolves `false` when the file fails validation, the upload rejects, or
+   * the image left the document mid-upload; nothing throws.
+   *
+   * Optional for the same compatibility reason as `insertFiles`.
+   */
+  replaceImage?: (src: string, file: File) => Promise<boolean>;
 }
 
 /**
@@ -630,6 +644,17 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           return insertMediaFiles(
             editor.view,
             files,
+            mediaUploadRef.current ?? {}
+          );
+        },
+        replaceImage: async (src: string, file: File): Promise<boolean> => {
+          await readyRef.current?.catch(() => undefined);
+          const editor = editorInstance.current;
+          if (!editor) return false;
+          return replaceImageSrc(
+            editor.view,
+            src,
+            file,
             mediaUploadRef.current ?? {}
           );
         },

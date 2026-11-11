@@ -267,7 +267,7 @@ export const WithMediaCapture: Story = {
     docs: {
       description: {
         story:
-          'The `mediaCapture` opt-in docks the capture ribbon above the field; captures land at the caret as image/video nodes through the editor’s `mediaUpload` pipeline (here a mock `uploadHandler` — the `<pre>` echoes the HTML the field emits). Unavailable captures are hidden, and the ribbon disappears entirely while the field is `disabled`/`readOnly`.',
+          'The `mediaCapture` opt-in docks the capture ribbon above the field; captures land at the caret as image/video nodes through the editor’s `mediaUpload` pipeline (here a mock `uploadHandler` — the `<pre>` echoes the HTML the field emits). Unavailable captures are hidden, and the ribbon disappears entirely while the field is `disabled`/`readOnly`. Hover a document image (or arrow the caret next to it) and a pencil button opens the annotate dialog: pen strokes and text notes are flattened into a new PNG that replaces the image through the same upload pipeline (mieweb/ui#735).',
       },
     },
   },
