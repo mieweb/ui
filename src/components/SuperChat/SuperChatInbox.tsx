@@ -75,8 +75,18 @@ export interface SuperChatInboxProps {
   listTitle?: SuperChatConversationsProps['listTitle'];
   /** Host content in the list header, e.g. filters. See {@link SuperChatConversationsProps.listHeader}. */
   listHeader?: SuperChatConversationsProps['listHeader'];
-  /** Search box in the list header; the host filters `conversations`. See {@link SuperChatConversationsProps.search}. */
+  /**
+   * Search box in the list header. The host filters and passes the matches as
+   * `listConversations`. See {@link SuperChatConversationsProps.search}.
+   */
   search?: SuperChatConversationsProps['search'];
+  /**
+   * The conversations the list shows, e.g. search or filter results. Defaults
+   * to `conversations`. The panel still opens from `conversations`, so
+   * narrowing the list never closes the open conversation or drops its
+   * unsent draft.
+   */
+  listConversations?: SuperChatConversation[];
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
@@ -136,6 +146,7 @@ export function SuperChatInbox({
   listTitle,
   listHeader,
   search,
+  listConversations,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -179,7 +190,7 @@ export function SuperChatInbox({
     >
       {showSidebar && (
         <SuperChatConversations
-          conversations={conversations}
+          conversations={listConversations ?? conversations}
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}

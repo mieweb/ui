@@ -46,7 +46,7 @@ const meta: Meta<typeof SuperChatConversations> = {
       description: {
         component: `### What it's for
 
-**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when the requested id disappears the first conversation is highlighted instead. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
+**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when an uncontrolled id disappears the first conversation is highlighted instead; a controlled id that is not in the list (e.g. filtered out by a search) highlights nothing. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
 
 ### Use it when
 
@@ -61,7 +61,7 @@ const meta: Meta<typeof SuperChatConversations> = {
 
 ### Header: title, search and filters
 
-\`listTitle\` replaces the "Conversations" heading (\`null\` hides it). \`search\` adds a labelled search box; the host owns the query (\`value\` / \`onChange\`) and passes \`conversations\` already filtered, so it can match whatever it likes. When a non-empty query leaves the list empty, a \`role="status"\` line says so (\`noResultsLabel\`). \`listHeader\` takes host content under the search box, such as filter \`Select\`s; it stays fixed while the list scrolls. See the **List Header** story.
+\`listTitle\` replaces the "Conversations" heading (\`null\` hides it). \`search\` adds a labelled search box; the host owns the query (\`value\` / \`onChange\`) and passes \`conversations\` already filtered, so it can match whatever it likes. In \`SuperChatInbox\`, pass the matches as \`listConversations\` and keep \`conversations\` whole, so the open conversation (and its unsent draft) stays put while the list narrows. When a non-empty query leaves the list empty, a \`role="status"\` line says so (\`noResultsLabel\`). \`listHeader\` takes host content under the search box, such as filter \`Select\`s; it stays fixed while the list scrolls. See the **List Header** story.
 
 ### Example
 

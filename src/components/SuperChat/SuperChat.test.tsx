@@ -1905,6 +1905,55 @@ describe('SuperChatInbox', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the open conversation and its draft when a search empties the list', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const inbox = (
+      query: string,
+      listConversations?: SuperChatConversation[]
+    ) => (
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={listConversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          search={{ value: query, onChange: () => {} }}
+        />
+      </div>
+    );
+    const { container, rerender } = render(inbox(''));
+    await user.type(screen.getByLabelText('Message'), 'unsent reply');
+
+    rerender(inbox('nothing', []));
+
+    const panel = within(
+      container.querySelector('[data-slot="superchat"]') as HTMLElement
+    );
+    expect(panel.getByText('first conversation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveValue('unsent reply');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'No matching conversations'
+    );
+  });
+
+  it('highlights no row when the open conversation is filtered out of the list', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={conversations.filter((c) => c.id === 'c2')}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const list = screen.getByRole('list');
+    expect(within(list).getByText('Follow-up')).toBeInTheDocument();
+    expect(within(list).queryByText('Intake')).not.toBeInTheDocument();
+    expect(list.querySelector('[aria-current="true"]')).not.toBeInTheDocument();
+  });
+
   it('switches the active panel when another conversation is opened', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();

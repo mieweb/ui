@@ -87,12 +87,16 @@ export function SuperChatConversations({
   // here rather than per row so a row inserted later still pops its badge.
   const [hasMounted, setHasMounted] = React.useState(false);
   React.useEffect(() => setHasMounted(true), []);
-  const requestedId = activeConversationId ?? internalActive;
-  // Fall back to the first conversation when the requested id no longer exists
-  // (e.g. the active conversation was removed) so an item stays highlighted.
-  const activeId = conversations.some((c) => c.id === requestedId)
-    ? requestedId
-    : conversations[0]?.id;
+  // Uncontrolled: fall back to the first conversation when the remembered id
+  // no longer exists (e.g. it was removed) so an item stays highlighted.
+  // Controlled: trust the host. Its active conversation may be filtered out
+  // of this list (a search), and highlighting another row would be wrong.
+  const activeId =
+    activeConversationId !== undefined
+      ? activeConversationId
+      : conversations.some((c) => c.id === internalActive)
+        ? internalActive
+        : conversations[0]?.id;
 
   const sortedConversations = React.useMemo(
     () =>

@@ -703,6 +703,58 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('superchat-playground.png');
   });
 
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`SuperChatConversations - List header${name}`, async ({ page }) => {
+      // Short enough that the list scrolls under the fixed header.
+      await page.setViewportSize({ width: 320, height: 190 });
+      await gotoStory(
+        page,
+        'superchat-conversations-list--list-header',
+        options
+      );
+      const search = page.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      await search.waitFor({ state: 'visible' });
+
+      // The icon sits at the input's inline start, and the text clears it.
+      const icon = page.locator(
+        "[data-slot='superchat-conversations-search'] svg"
+      );
+      const [iconBox, inputBox] = await Promise.all([
+        icon.boundingBox(),
+        search.boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(
+          inputBox!.x + inputBox!.width - (iconBox!.x + iconBox!.width)
+        ).toBeLessThan(24);
+      } else {
+        expect(iconBox!.x - inputBox!.x).toBeLessThan(24);
+      }
+      expect(
+        await search.evaluate((el) => getComputedStyle(el).paddingInlineStart)
+      ).toBe('32px');
+
+      // The header stays put while the list scrolls.
+      const list = page.locator("[data-slot='superchat-conversation-list']");
+      const headerTop = (await search.boundingBox())!.y;
+      const scrolled = await list.evaluate((el) => {
+        el.scrollTop = el.scrollHeight;
+        return el.scrollTop;
+      });
+      expect(scrolled).toBeGreaterThan(0);
+      expect((await search.boundingBox())!.y).toBe(headerTop);
+
+      await expect(page).toHaveScreenshot(
+        `superchat-conversations-list-header${name}.png`
+      );
+    });
+  }
+
   test('SuperChat - Composer selectors', async ({ page }) => {
     // Agent + model selector row in the SuperChat composer.
     await gotoStory(page, 'superchat-superchat-panel--composer-selectors');
