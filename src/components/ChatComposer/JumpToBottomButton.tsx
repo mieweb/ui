@@ -20,6 +20,12 @@ interface JumpToBottomButtonProps {
    * (e.g. `superchat-jump-to-bottom`, `ai-chat-jump-to-bottom`).
    */
   dataSlot: string;
+  /**
+   * Points the control at a different target than the bottom, e.g. a new
+   * reply that landed mid-thread: a visible hint, the accessible name, and the
+   * icon (all three replace the defaults).
+   */
+  target?: { hint: string; ariaLabel: string; icon: React.ReactNode };
 }
 
 /**
@@ -33,14 +39,19 @@ export function JumpToBottomButton({
   hasNewMessages,
   onClick,
   dataSlot,
+  target,
 }: JumpToBottomButtonProps) {
+  const hint = target?.hint ?? (hasNewMessages ? 'New messages' : undefined);
   return (
     <button
       type="button"
       data-slot={dataSlot}
       onClick={onClick}
       aria-label={
-        hasNewMessages ? 'New messages — scroll to bottom' : 'Scroll to bottom'
+        target?.ariaLabel ??
+        (hasNewMessages
+          ? 'New messages — scroll to bottom'
+          : 'Scroll to bottom')
       }
       className={cn(
         'absolute bottom-3 left-1/2 z-20 -translate-x-1/2',
@@ -48,11 +59,11 @@ export function JumpToBottomButton({
         'hover:bg-neutral-50 hover:text-neutral-800',
         'focus-visible:ring-primary-500 focus:outline-none focus-visible:ring-2',
         'dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-100',
-        hasNewMessages && 'ps-3'
+        hint && 'ps-3'
       )}
     >
-      {hasNewMessages && <span>New messages</span>}
-      <ArrowDownIcon size={16} aria-hidden="true" />
+      {hint && <span>{hint}</span>}
+      {target?.icon ?? <ArrowDownIcon size={16} aria-hidden="true" />}
     </button>
   );
 }

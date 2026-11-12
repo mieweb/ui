@@ -163,6 +163,13 @@ export interface SuperChatMessage {
   channel?: SuperChatChannel;
   /** Reference payload when `type === 'ref'`. */
   ref?: SuperChatRef;
+  /**
+   * Id of the message this one replies to. When any message in the thread sets
+   * `parentId`, SuperChat can render the conversation as an indented,
+   * collapsible reply tree (see the `threaded` prop). Replies that share a
+   * parent stay ordered by `time`; an unknown parent is treated as a root.
+   */
+  parentId?: string;
   /** Participant ids addressed via `@`-mention. */
   mentions?: string[];
   /** Custom metadata. */
@@ -220,6 +227,13 @@ export interface SuperChatConversation {
   participants: Participant[];
   /** Ordered thread items. */
   thread: SuperChatMessage[];
+  /**
+   * Nested sub-conversations, e.g. date-range slices of this conversation. The
+   * conversation list renders them as an accordion under this entry (in the
+   * given order), and opening one shows its own `thread` in the panel.
+   * One level only: `children` of a child are ignored by the list and inbox.
+   */
+  children?: SuperChatConversation[];
 }
 
 /** Builds an href for a reference item (e.g. doc/rx/appt deep link). */

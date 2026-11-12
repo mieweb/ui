@@ -132,6 +132,70 @@ export const conversation: SuperChatConversation = {
   ],
 };
 
+// Threaded conversation: `parentId` links replies into a collapsible tree.
+// Siblings (shared parent) stay ordered by time.
+export const threadedConversation: SuperChatConversation = {
+  id: 'c-threaded',
+  title: 'Patient 4821 — Threaded rounds',
+  reference_id: 'patient/4821',
+  unread: 0,
+  participants: [
+    participants.me,
+    participants.nurse,
+    participants.triage,
+    participants.coder,
+  ],
+  thread: [
+    {
+      id: 't1',
+      participantId: 'u1',
+      text: 'Kicking off rounds for **bed 12**. Overnight labs and telemetry, please.',
+      time: '2026-06-07T09:00:00Z',
+    },
+    {
+      id: 't2',
+      participantId: 'a1',
+      parentId: 't1',
+      text: 'Labs: Potassium `5.6 mmol/L` (high), otherwise within range.',
+      time: '2026-06-07T09:00:30Z',
+    },
+    {
+      id: 't3',
+      participantId: 'u1',
+      parentId: 't2',
+      text: 'Hold the ACE inhibitor and repeat a BMP.',
+      time: '2026-06-07T09:01:10Z',
+    },
+    {
+      id: 't4',
+      participantId: 'u2',
+      parentId: 't3',
+      text: 'BMP redrawn — results pending.',
+      time: '2026-06-07T09:02:00Z',
+    },
+    {
+      id: 't5',
+      participantId: 'u2',
+      parentId: 't1',
+      text: 'Telemetry stable overnight, no ectopy.',
+      time: '2026-06-07T09:01:40Z',
+    },
+    {
+      id: 't6',
+      participantId: 'u1',
+      text: 'Separately — **bed 14** discharge paperwork status?',
+      time: '2026-06-07T09:05:00Z',
+    },
+    {
+      id: 't7',
+      participantId: 'a2',
+      parentId: 't6',
+      text: 'Discharge summary drafted; awaiting your sign-off.',
+      time: '2026-06-07T09:05:20Z',
+    },
+  ],
+};
+
 // A richer thread that also exercises the mermaid, NITRO-table, and image
 // plugins (used by the WithRichPlugins / ReadOnly stories).
 export const richConversation: SuperChatConversation = {

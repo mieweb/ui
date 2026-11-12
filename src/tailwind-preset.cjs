@@ -692,6 +692,13 @@ module.exports = {
     'dark:hover:text-neutral-100',
     // FileViewer — fenced code stays LTR inside dir="auto" Markdown.
     '[&_pre]:[direction:ltr]',
+    // SuperChat nested conversations (accordion chevron + indented children).
+    'self-center',
+    'self-start',
+    'rotate-90',
+    'ms-5',
+    'space-y-0.5',
+    'py-1.5',
     'text-[11px]',
     'text-[13px]',
     'px-3.5',
