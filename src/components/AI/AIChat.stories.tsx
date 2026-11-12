@@ -92,6 +92,7 @@ async function send(text: string) {
 - **No live region.** The thread is a plain scrolling \`div\`; new or streamed assistant messages, the typing indicator and the header's "Generating..." text are not announced. \`onSendMessage\` receives trimmed text, plus the staged \`File[]\` as a second argument when attachments are enabled via \`composerProps\` (attachment-only sends deliver \`''\`) — the composer clears optimistically (Enter sends, Shift+Enter newlines, so focus stays in the textarea); if \`onSendMessage\` throws or rejects, the text draft is restored (attachments are not) and the failure is reported through \`composerProps.onError\` ("Failed to send message").
 - Header icon buttons carry English \`aria-label\`s ("Clear chat", "Close chat"); **Stop** is visible text. Suggestion chips are plain \`<button>\`s. \`AIChatModal\` renders \`role="dialog" aria-modal aria-label="AI Assistant Chat"\`, traps focus and closes on Escape; its \`center\` backdrop is a focusable \`role="button"\`.
 - **Sanitisation is the host's.** Default text rendering is \`whitespace-pre-wrap\` plain text; anything you return from \`renderTextContent\` is inserted as-is. Image/file/audio/video block URLs are only guarded against \`javascript:\`.
+- **Custom blocks.** \`renderCustomContent\` works in \`AIChat\`, \`AIMessageDisplay\`, \`AIChatModal\` and \`FloatingAIChat\`; \`OzwellChat\` does not forward it and \`SuperChat\` skips \`custom\` blocks. When a new user turn starts, earlier messages move out of the anchored turn container, so their custom widgets remount and lose local state (e.g. playback position) — keep state that must survive in the host, keyed by \`ctx.messageId\`.
 - \`session.isGenerating\` and \`session.messages\` win over the flat props; \`onToolCall\` / \`onToolComplete\` exist on \`AIChatCallbacks\` but are **never invoked** by this component (tool calls are display-only). \`talkToText\` requires a secure context and microphone permission; the \`duration\` passed to \`onRecordingComplete\` comes from \`RecordButton\` (see Media › RecordButton for its caveats).
 - **i18n / RTL.** Every default string is English ("AI Assistant", "Ask anything...", "How can I help you today?", "Try asking:", "Generating...", "Stop"). User messages align with \`flex-row-reverse\`, and the modal/trigger positions are physical (\`right-4\`, \`left-4\`); the composer itself uses logical properties.
 - **Theming.** Container and header use hard-coded \`neutral-*\`, \`white\`, \`primary-800\` and \`red-*\` utilities rather than semantic tokens. Depends on \`class-variance-authority\`. Entry \`@mieweb/ui\`.`,
@@ -196,7 +197,7 @@ async function send(text: string) {
     renderCustomContent: {
       control: false,
       description:
-        'Render-prop for `custom` blocks: receives the block `data` so a host widget gets a typed payload instead of encoded text.',
+        'Render-prop for `custom` blocks: receives the block `data` so a host widget gets a typed payload instead of encoded text. Not supported by `OzwellChat` or `SuperChat`; widgets remount when a new turn starts (see Limitations).',
       table: { type: { summary: 'AIRenderCustomContent' } },
     },
     toolCallGroup: {
