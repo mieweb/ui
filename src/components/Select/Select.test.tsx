@@ -3,6 +3,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Dropdown, DropdownContent } from '../Dropdown';
+import { Modal } from '../Modal';
 import { Select, type SelectOption } from './Select';
 
 const LOCATION_TYPES: SelectOption[] = [
@@ -16,6 +17,40 @@ const LOCATION_TYPES: SelectOption[] = [
 ];
 
 describe('Select portals', () => {
+  it('contains Tab navigation after opening search in the real Modal', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <>
+        <button>Outside</button>
+        <Modal open onOpenChange={vi.fn()} aria-label="Compose">
+          <Select label="Category" searchable options={LOCATION_TYPES} />
+        </Modal>
+      </>
+    );
+    const trigger = screen.getByRole('combobox', { name: 'Category' });
+    await user.click(trigger);
+    const search = screen.getByRole('textbox', { name: 'Search options' });
+    await user.type(search, 'no such category');
+    await user.tab();
+    expect(trigger).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(search).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Outside' })).not.toHaveFocus();
+  });
+
+  it('keeps searchable popups inside alert dialogs', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div role="alertdialog" aria-modal="true" aria-label="Confirm">
+        <Select label="Category" searchable options={LOCATION_TYPES} />
+      </div>
+    );
+    await user.click(screen.getByRole('combobox', { name: 'Category' }));
+    expect(screen.getByRole('alertdialog')).toContainElement(
+      screen.getByRole('textbox', { name: 'Search options' })
+    );
+  });
+
   it('keeps searchable popups inside the containing modal dialog', async () => {
     const user = userEvent.setup();
     renderWithTheme(

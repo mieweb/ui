@@ -675,8 +675,16 @@ function Select(props: SelectProps) {
               ref={(node) => {
                 dropdownRef.current = node;
                 floatingRef.current = node;
+                // The top layer keeps viewport positioning valid inside transformed dialogs.
+                node?.showPopover?.();
               }}
-              style={dropdownStyle}
+              popover={
+                typeof HTMLElement !== 'undefined' &&
+                'showPopover' in HTMLElement.prototype
+                  ? 'manual'
+                  : undefined
+              }
+              style={{ inset: 'auto', margin: 0, padding: 0, ...dropdownStyle }}
               className={cn(
                 'border-border bg-card rounded-lg border shadow-lg',
                 'flex flex-col overflow-hidden',
@@ -781,8 +789,9 @@ function Select(props: SelectProps) {
                 )}
               </ul>
             </div>,
-            triggerRef.current?.closest('[role="dialog"], dialog') ??
-              document.body
+            triggerRef.current?.closest(
+              '[role="dialog"], [role="alertdialog"], dialog'
+            ) ?? document.body
           )}
       </div>
 
