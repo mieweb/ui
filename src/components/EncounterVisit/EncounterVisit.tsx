@@ -97,10 +97,12 @@ export interface EncounterVisitProps extends Omit<
   /** Connect these tools to the host's MCP transport / agent runtime. */
   onToolsReady?: (tools: EncounterVisitTools) => void;
   /**
-   * Opt-in media capture on the visit's editing surfaces — narrative fields
-   * and RichEdit (mieweb/ui#736). `uploadHandler` is mandatory: captures land
-   * as uploaded `https:`/same-origin URLs, never embedded base64. Default
-   * off — without it sanitization, rendering and exports are unchanged.
+   * Opt-in media capture on the visit's narrative fields and their RichEdit
+   * resolver (mieweb/ui#736) — the RichEdit document itself docks no ribbon,
+   * though pasted/dropped media still upload. `uploadHandler` is mandatory:
+   * captures land as uploaded `https:`/same-origin URLs, never embedded
+   * base64. Default off — without it sanitization, rendering and exports are
+   * unchanged.
    */
   mediaCapture?: EncounterMediaCaptureOptions;
   readOnly?: boolean;
