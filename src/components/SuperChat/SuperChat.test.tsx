@@ -2544,6 +2544,22 @@ describe('SuperChatInbox', () => {
       await user.click(screen.getByRole('button', { name: /^Pharmacy/ }));
       expect(bed14).toHaveAttribute('aria-expanded', 'false');
     });
+
+    it('points aria-controls at the child list even when the id has spaces', () => {
+      render(
+        <SuperChatConversations
+          conversations={[{ ...rooms[0], id: 'bed 12' }]}
+          defaultActiveConversationId="bed 12"
+        />
+      );
+      const header = screen.getByRole('button', { name: /^Bed 12/ });
+      const controls = header.getAttribute('aria-controls')!;
+      expect(controls).not.toMatch(/\s/);
+      expect(document.getElementById(controls)).toHaveAttribute(
+        'data-slot',
+        'superchat-conversation-children'
+      );
+    });
   });
 });
 

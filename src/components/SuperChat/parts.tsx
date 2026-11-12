@@ -1254,6 +1254,7 @@ export const MessageRow = React.memo(function MessageRow({
               replyToggleRef.current?.focus();
               onToggleReplies?.();
             }}
+            aria-expanded={false}
             data-slot="superchat-thread-replies"
             className="mt-0.5 inline-flex items-center gap-1 self-start rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[11px] font-medium text-neutral-600 hover:bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
           >

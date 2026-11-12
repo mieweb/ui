@@ -145,13 +145,15 @@ export function SuperChatConversations({
         role="list"
         className="flex-1 space-y-1 overflow-y-auto px-2 pb-2"
       >
-        {sortedConversations.map((c) => {
+        {sortedConversations.map((c, index) => {
           const last = lastMessageByTime(c.thread);
           const isActive = c.id === activeId;
           const children = c.children ?? [];
           const hasChildren = children.length > 0;
           const expanded = hasChildren && isExpanded(c);
-          const groupId = `${groupIdPrefix}-${c.id}`;
+          // Row position, not `c.id`: an ID with whitespace would turn the
+          // `aria-controls` IDREF into a multi-ID list.
+          const groupId = `${groupIdPrefix}-${index}`;
           return (
             <div key={c.id} role="listitem">
               <button
