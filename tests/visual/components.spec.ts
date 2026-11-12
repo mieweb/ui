@@ -1233,8 +1233,12 @@ test.describe('Visual Regression Tests - Core Components', () => {
       root.setAttribute('data-theme', 'dark');
       root.classList.add('dark');
       root.style.colorScheme = 'light';
-      root.style.setProperty('--mieweb-card', '#111827');
-      root.style.setProperty('--mieweb-card-foreground', '#f9fafb');
+      root.style.setProperty('--mieweb-card', '#111827', 'important');
+      root.style.setProperty(
+        '--mieweb-card-foreground',
+        '#f9fafb',
+        'important'
+      );
     });
     await popup.evaluate((element) => {
       element.style.colorScheme = 'light';
