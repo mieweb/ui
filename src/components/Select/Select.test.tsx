@@ -16,6 +16,19 @@ const LOCATION_TYPES: SelectOption[] = [
 ];
 
 describe('Select portals', () => {
+  it('keeps searchable popups inside the containing modal dialog', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div role="dialog" aria-modal="true" aria-label="Compose">
+        <Select label="Category" searchable options={LOCATION_TYPES} />
+      </div>
+    );
+    await user.click(screen.getByRole('combobox', { name: 'Category' }));
+    const search = screen.getByRole('textbox', { name: 'Search options' });
+    expect(screen.getByRole('dialog')).toContainElement(search);
+    expect(search).toHaveFocus();
+  });
+
   it('selects an option when nested inside a Dropdown portal', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
@@ -91,6 +104,27 @@ describe('Select portals', () => {
 });
 
 describe('Select typeahead', () => {
+  it.each(['ArrowDown', 'ArrowUp', 'Home', 'End'])(
+    'does not select a missing option after a no-match search and %s',
+    async (key) => {
+      const user = userEvent.setup();
+      const onValueChange = vi.fn();
+      renderWithTheme(
+        <Select
+          label="Category"
+          searchable
+          options={LOCATION_TYPES}
+          onValueChange={onValueChange}
+        />
+      );
+      await user.click(screen.getByRole('combobox', { name: 'Category' }));
+      await user.type(screen.getByRole('textbox'), 'no such category');
+      await user.keyboard(`{${key}}{Enter}`);
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(screen.getByText('No results found')).toBeVisible();
+    }
+  );
+
   it.each(['click', 'keyboard'])(
     'focuses search after positioning on %s open so typing needs no extra click',
     async (method) => {

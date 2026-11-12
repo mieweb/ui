@@ -469,7 +469,11 @@ function Select(props: SelectProps) {
             setIsOpen(true);
           } else {
             setHighlightedIndex((prev) =>
-              prev < filteredFlatOptions.length - 1 ? prev + 1 : 0
+              filteredFlatOptions.length === 0
+                ? -1
+                : prev < filteredFlatOptions.length - 1
+                  ? prev + 1
+                  : 0
             );
           }
           break;
@@ -487,14 +491,15 @@ function Select(props: SelectProps) {
         case ' ':
           e.preventDefault();
           if (isOpen && highlightedIndex >= 0) {
-            handleValueChange(filteredFlatOptions[highlightedIndex].value);
+            const option = filteredFlatOptions[highlightedIndex];
+            if (option) handleValueChange(option.value);
           } else if (!isOpen) {
             setIsOpen(true);
           }
           break;
         case 'Home':
           e.preventDefault();
-          setHighlightedIndex(0);
+          setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
           break;
         case 'End':
           e.preventDefault();
@@ -662,7 +667,7 @@ function Select(props: SelectProps) {
           </label>
         )}
 
-        {/* Dropdown (portaled to body to avoid overflow clipping) */}
+        {/* Keep modal popups within their focus and accessibility scope. */}
         {isOpen &&
           createPortal(
             <div
@@ -776,7 +781,8 @@ function Select(props: SelectProps) {
                 )}
               </ul>
             </div>,
-            document.body
+            triggerRef.current?.closest('[role="dialog"], dialog') ??
+              document.body
           )}
       </div>
 
