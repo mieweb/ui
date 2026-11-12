@@ -1255,8 +1255,9 @@ export const MessageRow = React.memo(function MessageRow({
             type="button"
             onClick={() => {
               // The pill unmounts once expanded; keep focus on this thread by
-              // handing it to the persistent collapse toggle first.
-              replyToggleRef.current?.focus();
+              // handing it to the persistent collapse toggle first, without
+              // scrolling a tall message back to its top.
+              replyToggleRef.current?.focus({ preventScroll: true });
               onToggleReplies?.();
             }}
             aria-expanded={false}
