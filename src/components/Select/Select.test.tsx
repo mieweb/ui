@@ -621,3 +621,46 @@ describe('Select multiple', () => {
     ).toHaveFocus();
   });
 });
+
+describe('Select option descriptions', () => {
+  const GROUPINGS: SelectOption[] = [
+    { value: 'day', label: 'Day', description: 'One conversation per date.' },
+    { value: 'ticket', label: 'Ticket' },
+  ];
+
+  it('shows the description under the label without adding it to the name', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<Select aria-label="Group by" options={GROUPINGS} />);
+
+    await user.click(screen.getByRole('combobox', { name: 'Group by' }));
+    const day = screen.getByRole('option', { name: 'Day' });
+    expect(day).toHaveAccessibleDescription('One conversation per date.');
+    expect(screen.getByText('One conversation per date.')).toBeVisible();
+  });
+
+  it('adds no description to an option without one', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(<Select aria-label="Group by" options={GROUPINGS} />);
+
+    await user.click(screen.getByRole('combobox', { name: 'Group by' }));
+    expect(screen.getByRole('option', { name: 'Ticket' })).not.toHaveAttribute(
+      'aria-describedby'
+    );
+  });
+
+  it('shows only the label in the trigger once selected', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <Select aria-label="Group by" options={GROUPINGS} defaultValue="day" />
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Group by' });
+    expect(trigger).toHaveTextContent('Day');
+    expect(trigger).not.toHaveTextContent('One conversation per date.');
+    await user.click(trigger);
+    expect(screen.getByRole('option', { name: 'Day' })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+});

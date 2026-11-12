@@ -62,17 +62,41 @@ const disabledOptions: SelectOption[] = [
   { value: 'elderberry', label: 'Elderberry' },
 ];
 
+const describedOptions: SelectOption[] = [
+  {
+    value: 'day',
+    label: 'Day',
+    description: 'One conversation per date.',
+  },
+  {
+    value: 'person',
+    label: 'Person',
+    description: "Each person's posts for the week.",
+  },
+  {
+    value: 'ticket',
+    label: 'Ticket',
+    description: 'Everything posted about one ticket, by anyone.',
+  },
+];
+
 // =============================================================================
 // Options Map for Controls
 // =============================================================================
 
-type OptionsKey = 'simple' | 'countries' | 'grouped' | 'withDisabled';
+type OptionsKey =
+  | 'simple'
+  | 'countries'
+  | 'grouped'
+  | 'withDisabled'
+  | 'withDescriptions';
 
 const optionsMap: Record<OptionsKey, (SelectOption | SelectGroup)[]> = {
   simple: simpleOptions,
   countries: countryOptions,
   grouped: groupedOptions,
   withDisabled: disabledOptions,
+  withDescriptions: describedOptions,
 };
 
 // =============================================================================
@@ -239,7 +263,13 @@ const [specialty, setSpecialty] = useState('');
   argTypes: {
     optionsKey: {
       control: 'select',
-      options: ['simple', 'countries', 'grouped', 'withDisabled'],
+      options: [
+        'simple',
+        'countries',
+        'grouped',
+        'withDisabled',
+        'withDescriptions',
+      ],
       description: 'Which set of options to display',
       table: {
         defaultValue: { summary: 'simple' },
@@ -352,6 +382,15 @@ export const WithDisabledOptions: Story = {
     optionsKey: 'withDisabled',
     label: 'Fruit',
     placeholder: 'Select a fruit',
+  },
+};
+
+/** `description` adds secondary text under each option's label. The trigger shows the label only. */
+export const WithDescriptions: Story = {
+  args: {
+    optionsKey: 'withDescriptions',
+    label: 'Group by',
+    placeholder: 'Choose a grouping',
   },
 };
 

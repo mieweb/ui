@@ -1212,6 +1212,37 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('select-default.png');
   });
 
+  test('Select - With descriptions (open, narrow)', async ({ page }) => {
+    // Narrow enough that the longest description wraps to a second line.
+    await page.setViewportSize({ width: 320, height: 480 });
+    await gotoStory(page, 'choice-inputs-select--with-descriptions', {
+      args: 'defaultValue:ticket',
+    });
+    await page.getByRole('combobox').click();
+    const option = page.getByRole('option', { name: 'Ticket' });
+    await expect(option).toHaveAttribute('aria-selected', 'true');
+
+    const description = option.locator(
+      "[data-slot='select-option-description']"
+    );
+    const label = option.getByText('Ticket', { exact: true });
+    const check = option.locator('svg');
+    const [descriptionBox, labelBox, checkBox] = await Promise.all([
+      description.boundingBox(),
+      label.boundingBox(),
+      check.boundingBox(),
+    ]);
+    // Wraps rather than truncating: taller than one line of the label.
+    expect(descriptionBox!.height).toBeGreaterThan(labelBox!.height * 1.5);
+    // Starts under the label, and never runs into the checkmark.
+    expect(Math.abs(descriptionBox!.x - labelBox!.x)).toBeLessThan(1);
+    expect(descriptionBox!.x + descriptionBox!.width).toBeLessThanOrEqual(
+      checkBox!.x
+    );
+
+    await expect(page).toHaveScreenshot('select-with-descriptions-open.png');
+  });
+
   test('CountryDropdown - Default (empty placeholder)', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-countrydropdown--default');
     await expect(page).toHaveScreenshot('countrydropdown-default.png');

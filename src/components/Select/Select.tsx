@@ -16,6 +16,12 @@ export interface SelectOption {
   value: string;
   /** Display label for the option */
   label: string;
+  /**
+   * Secondary text shown under the label in the list, e.g. what the option
+   * does. Exposed as the option's description, not part of its name; the
+   * trigger, search and typeahead use the label only.
+   */
+  description?: string;
   /** Whether the option is disabled */
   disabled?: boolean;
   /** Optional group this option belongs to */
@@ -833,6 +839,7 @@ function SelectOptionItem({
   onSelect,
   onMouseEnter,
 }: SelectOptionItemProps) {
+  const descriptionId = React.useId();
   const stopPressPropagation = (event: React.SyntheticEvent) => {
     event.stopPropagation();
   };
@@ -852,6 +859,7 @@ function SelectOptionItem({
       role="option"
       aria-selected={isSelected}
       aria-disabled={option.disabled}
+      aria-describedby={option.description ? descriptionId : undefined}
       data-highlighted={isHighlighted}
       data-disabled={option.disabled}
       tabIndex={isHighlighted ? 0 : -1}
@@ -869,7 +877,22 @@ function SelectOptionItem({
         option.disabled && 'cursor-not-allowed opacity-50'
       )}
     >
-      <span className="flex-1 truncate">{option.label}</span>
+      {option.description ? (
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate">{option.label}</span>
+          {/* Hidden from the option's name; announced via aria-describedby. */}
+          <span
+            id={descriptionId}
+            aria-hidden="true"
+            data-slot="select-option-description"
+            className="text-muted-foreground text-xs whitespace-normal"
+          >
+            {option.description}
+          </span>
+        </span>
+      ) : (
+        <span className="flex-1 truncate">{option.label}</span>
+      )}
       {isSelected && (
         <CheckIcon className="text-primary-800 h-4 w-4 shrink-0" />
       )}
