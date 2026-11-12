@@ -108,3 +108,64 @@ export async function insertMediaFiles(
 
   return { inserted, skipped };
 }
+
+/**
+ * Swap the `src` of the image node currently showing `oldSrc` for `file`,
+ * pushed through the same upload-or-embed pipeline as insertion — the
+ * annotate flow's "save" (mieweb/ui#735). The node is located *after* the
+ * upload resolves, so edits made while the upload was in flight cannot
+ * misplace the swap; if the image was deleted meanwhile, the replace reports
+ * `false` instead of inserting anything. Other attrs (alt, title) survive.
+ *
+ * A src does not uniquely identify a node — attaching the same file twice
+ * yields identical data URLs — so callers pass the `occurrence` index of the
+ * image among same-src images in document order. When duplicates were
+ * added/removed mid-edit the index is re-checked: a single survivor is
+ * unambiguous, otherwise the swap is refused rather than guessed (exact
+ * fidelity under concurrent edits needs placeholder nodes mapped through
+ * transactions — the same trade-off documented on the insert path).
+ */
+export async function replaceImageSrc(
+  view: MediaInsertView,
+  oldSrc: string,
+  file: File,
+  options: MediaUploadOptions,
+  occurrence = 0
+): Promise<boolean> {
+  const {
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
+    allowedImageTypes = DEFAULT_IMAGE_TYPES,
+    uploadHandler,
+  } = options;
+
+  if (
+    !matchesType(file, allowedImageTypes) ||
+    file.size > maxFileSize ||
+    !view.state.schema.nodes.image
+  ) {
+    return false;
+  }
+
+  try {
+    const src = uploadHandler
+      ? await uploadHandler(file)
+      : await fileToDataURL(file);
+    const matches: number[] = [];
+    view.state.doc.descendants((node, pos) => {
+      if (node.type.name === 'image' && node.attrs.src === oldSrc) {
+        matches.push(pos);
+      }
+      return true;
+    });
+    const found = matches.length === 1 ? matches[0] : matches[occurrence];
+    if (found === undefined) return false;
+    const node = view.state.doc.nodeAt(found);
+    if (!node) return false;
+    view.dispatch(
+      view.state.tr.setNodeMarkup(found, undefined, { ...node.attrs, src })
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}

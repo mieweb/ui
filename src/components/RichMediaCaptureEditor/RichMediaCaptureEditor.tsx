@@ -30,7 +30,7 @@ export const RichMediaCaptureEditor = React.forwardRef<
   RichEditorHandle,
   RichMediaCaptureEditorProps
 >(function RichMediaCaptureEditor(
-  { scanDocument, extraCaptures, ...editorProps },
+  { scanDocument, extraCaptures, confirmScreenCapture, ...editorProps },
   ref
 ) {
   const editorRef = React.useRef<RichEditorHandle>(null);
@@ -42,6 +42,8 @@ export const RichMediaCaptureEditor = React.forwardRef<
       getContent: () => editorRef.current!.getContent(),
       focus: () => editorRef.current?.focus(),
       insertFiles: (files: File[]) => editorRef.current!.insertFiles!(files),
+      replaceImage: (src: string, file: File, occurrence?: number) =>
+        editorRef.current!.replaceImage!(src, file, occurrence),
     }),
     []
   );
@@ -50,8 +52,12 @@ export const RichMediaCaptureEditor = React.forwardRef<
     <CaptureDock
       locked={locked}
       insertFiles={(files) => editorRef.current?.insertFiles?.(files)}
+      replaceImage={(src, file, occurrence) =>
+        editorRef.current?.replaceImage?.(src, file, occurrence)
+      }
       scanDocument={scanDocument}
       extraCaptures={extraCaptures}
+      confirmScreenCapture={confirmScreenCapture}
     >
       <RichEditor ref={editorRef} {...editorProps} />
     </CaptureDock>
