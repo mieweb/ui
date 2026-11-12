@@ -1,0 +1,46 @@
+name: Weighbridge
+
+# Pilot of https://github.com/mieweb/weighbridge — weighs the npm package
+# (pack size, per-entry min+gzip bundle size, import time) on every PR and
+# fails if a limit in weighbridge.json is exceeded. Raise a limit in the same
+# PR to consciously accept a weight increase.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  weigh:
+    name: Weigh package
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Weigh
+        uses: mieweb/weighbridge@v1
