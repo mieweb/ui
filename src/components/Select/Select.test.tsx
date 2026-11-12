@@ -3,6 +3,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Dropdown, DropdownContent } from '../Dropdown';
+import { Modal } from '../Modal';
 import { Select, type SelectOption } from './Select';
 
 const LOCATION_TYPES: SelectOption[] = [
@@ -16,6 +17,53 @@ const LOCATION_TYPES: SelectOption[] = [
 ];
 
 describe('Select portals', () => {
+  it('contains Tab navigation after opening search in the real Modal', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <>
+        <button>Outside</button>
+        <Modal open onOpenChange={vi.fn()} aria-label="Compose">
+          <Select label="Category" searchable options={LOCATION_TYPES} />
+        </Modal>
+      </>
+    );
+    const trigger = screen.getByRole('combobox', { name: 'Category' });
+    await user.click(trigger);
+    const search = screen.getByRole('textbox', { name: 'Search options' });
+    await user.type(search, 'no such category');
+    await user.tab();
+    expect(trigger).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(search).toHaveFocus();
+    expect(screen.getByRole('button', { name: 'Outside' })).not.toHaveFocus();
+  });
+
+  it('keeps searchable popups inside alert dialogs', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div role="alertdialog" aria-modal="true" aria-label="Confirm">
+        <Select label="Category" searchable options={LOCATION_TYPES} />
+      </div>
+    );
+    await user.click(screen.getByRole('combobox', { name: 'Category' }));
+    expect(screen.getByRole('alertdialog')).toContainElement(
+      screen.getByRole('textbox', { name: 'Search options' })
+    );
+  });
+
+  it('keeps searchable popups inside the containing modal dialog', async () => {
+    const user = userEvent.setup();
+    renderWithTheme(
+      <div role="dialog" aria-modal="true" aria-label="Compose">
+        <Select label="Category" searchable options={LOCATION_TYPES} />
+      </div>
+    );
+    await user.click(screen.getByRole('combobox', { name: 'Category' }));
+    const search = screen.getByRole('textbox', { name: 'Search options' });
+    expect(screen.getByRole('dialog')).toContainElement(search);
+    expect(search).toHaveFocus();
+  });
+
   it('selects an option when nested inside a Dropdown portal', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
@@ -91,6 +139,82 @@ describe('Select portals', () => {
 });
 
 describe('Select typeahead', () => {
+  it.each([false, true])(
+    'announces the active option from the focused control (searchable: %s)',
+    async (searchable) => {
+      const user = userEvent.setup();
+      renderWithTheme(
+        <Select
+          label="Category"
+          searchable={searchable}
+          options={[
+            {
+              label: 'Locations',
+              options: [
+                { value: 'disabled', label: 'Disabled', disabled: true },
+                ...LOCATION_TYPES.slice(0, 2),
+              ],
+            },
+            ...LOCATION_TYPES.slice(2),
+          ]}
+        />
+      );
+      const trigger = screen.getByRole('combobox', { name: 'Category' });
+      await user.click(trigger);
+      const control = searchable
+        ? screen.getByRole('textbox', { name: 'Search options' })
+        : trigger;
+      const clinicId = screen.getByRole('option', { name: 'Clinic' }).id;
+      expect(control).toHaveFocus();
+      expect(control).toHaveAttribute(
+        'aria-controls',
+        screen.getByRole('listbox').id
+      );
+      expect(control).toHaveAttribute(
+        'aria-activedescendant',
+        screen.getByRole('option', { name: 'Cardiology' }).id
+      );
+      await user.keyboard('{ArrowDown}');
+      expect(control).toHaveAttribute(
+        'aria-activedescendant',
+        screen.getByRole('option', { name: 'Chiropractic' }).id
+      );
+      if (searchable) {
+        await user.type(control, 'clinic');
+        expect(control).toHaveAttribute('aria-activedescendant', clinicId);
+        await user.clear(control);
+        await user.type(control, 'no such category');
+        expect(control).not.toHaveAttribute('aria-activedescendant');
+      } else {
+        await user.keyboard('cli');
+        expect(control).toHaveAttribute('aria-activedescendant', clinicId);
+      }
+      await user.keyboard('{Escape}');
+      expect(trigger).not.toHaveAttribute('aria-activedescendant');
+    }
+  );
+
+  it.each(['ArrowDown', 'ArrowUp', 'Home', 'End'])(
+    'does not select a missing option after a no-match search and %s',
+    async (key) => {
+      const user = userEvent.setup();
+      const onValueChange = vi.fn();
+      renderWithTheme(
+        <Select
+          label="Category"
+          searchable
+          options={LOCATION_TYPES}
+          onValueChange={onValueChange}
+        />
+      );
+      await user.click(screen.getByRole('combobox', { name: 'Category' }));
+      await user.type(screen.getByRole('textbox'), 'no such category');
+      await user.keyboard(`{${key}}{Enter}`);
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(screen.getByText('No results found')).toBeVisible();
+    }
+  );
+
   it.each(['click', 'keyboard'])(
     'focuses search after positioning on %s open so typing needs no extra click',
     async (method) => {

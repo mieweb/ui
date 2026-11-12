@@ -31,20 +31,21 @@ export function useFocusTrap<T extends HTMLElement>(
     if (!enabled || !containerRef.current || isStorybookDocsMode()) return;
 
     const container = containerRef.current;
-    const focusableElements = container.querySelectorAll<HTMLElement>(
-      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-
-    if (focusableElements.length === 0) return;
-
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
+    const getFocusableElements = () =>
+      container.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
 
     // Focus the first element when trap is enabled
-    firstElement.focus();
+    getFocusableElements()[0]?.focus();
 
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Tab') return;
+
+      const focusableElements = getFocusableElements();
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      if (!firstElement || !lastElement) return;
 
       if (event.shiftKey) {
         // Shift + Tab
