@@ -5,6 +5,7 @@ import { useMessages } from '../../utils/messages';
 import {
   PharmacyField,
   transmitRoute,
+  type TransmitRoute,
   type PharmacyCandidate,
   type PharmacyDataSource,
   type PharmacySearchFilters,
@@ -35,7 +36,15 @@ export interface MedicationPharmacyFieldsProps {
   pharmacyId: string | undefined;
   transmission: MedicationTransmission | undefined;
   onChange: (patch: Partial<PharmacyPatch>) => void;
+  /**
+   * Reports the chosen pharmacy's route once it is known. Until the first
+   * report (lookup pending or failed) the route is unconfirmed.
+   */
+  onRouteChange: (route: TransmitRoute | null) => void;
 }
+
+/** Id of the note explaining why Transmit can't be saved yet. */
+export const TRANSMISSION_NOTE_ID = 'med-transmission-note';
 
 /**
  * Pharmacy and Transmission rows of the prescription editor. Transmit is
@@ -47,6 +56,7 @@ export function MedicationPharmacyFields({
   pharmacyId,
   transmission,
   onChange,
+  onRouteChange,
 }: MedicationPharmacyFieldsProps) {
   const m = useMessages();
   const [pharmacy, setPharmacy] = React.useState<PharmacyCandidate | null>(
@@ -60,15 +70,17 @@ export function MedicationPharmacyFields({
   choiceRef.current = choice;
   const onChangeRef = React.useRef(onChange);
   onChangeRef.current = onChange;
+  const onRouteChangeRef = React.useRef(onRouteChange);
+  onRouteChangeRef.current = onRouteChange;
 
   const handlePharmacy = React.useCallback(
     (pharmId: string, candidate: PharmacyCandidate | null) => {
       setPharmacy(candidate);
       setLoaded(true);
       const next: Partial<PharmacyPatch> = { pharmacyId: pharmId || undefined };
-      const canTransmit =
-        candidate !== null && transmitRoute(candidate) !== null;
-      if (!canTransmit && choiceRef.current === 'transmit') {
+      const candidateRoute = candidate ? transmitRoute(candidate) : null;
+      onRouteChangeRef.current(candidateRoute);
+      if (!candidateRoute && choiceRef.current === 'transmit') {
         next.transmission = 'none';
         setAnnouncement(
           m(
@@ -98,6 +110,14 @@ export function MedicationPharmacyFields({
           )
         : m('Choose a pharmacy to transmit.')
       : undefined;
+  // A saved Transmit waits for the pharmacy lookup (which may be slow or
+  // fail); the editor won't save it until the route is confirmed.
+  const pendingNote =
+    choice === 'transmit' && !route
+      ? m(
+          'Transmit can be saved once the pharmacy is confirmed. Choose Print or None to save now.'
+        )
+      : '';
 
   return (
     <>
@@ -138,6 +158,14 @@ export function MedicationPharmacyFields({
         className="text-muted-foreground text-xs empty:hidden"
       >
         {announcement}
+      </p>
+      <p
+        id={TRANSMISSION_NOTE_ID}
+        role="status"
+        aria-live="polite"
+        className="text-muted-foreground text-xs empty:hidden"
+      >
+        {pendingNote}
       </p>
     </>
   );

@@ -133,7 +133,11 @@ initialFilters?, onFiltersChange? }`. Adds a Pharmacy row
   receive it — `transmitRoute(pharmacy)` is `'esend'` (NCPDP + NewRx) or
   `'fax'` (has a fax number) — and its label says which. Otherwise it stays
   visible but disabled with the reason as its description, and a saved
-  `transmit` falls back to `none` with a polite announcement. The library
+  `transmit` falls back to `none` with a polite announcement. Until the
+  pharmacy lookup confirms a route (still loading, or failed), a saved
+  `transmit` can't be saved: Save is disabled and a note beside
+  Transmission, linked to Save with `aria-describedby`, says to wait or
+  choose Print or None, which always save. The library
   never sends or prints; the host performs the saved choice. No other
   readiness rules (prescriber, EPCS, uncoded CP/SP) are enforced here.
 

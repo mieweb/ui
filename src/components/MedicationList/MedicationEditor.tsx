@@ -89,8 +89,10 @@ import { cn } from '../../utils/cn';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 import {
   MedicationPharmacyFields,
+  TRANSMISSION_NOTE_ID,
   type MedicationPharmacyConfig,
 } from './MedicationPharmacyFields';
+import type { TransmitRoute } from '../Pharmacy';
 
 // =============================================================================
 // Types
@@ -1067,9 +1069,17 @@ export function MedicationEditor({
   // an originally coded medication must keep (or replace) its code.
   const unchangedLegacyName =
     medication && !medication.code && draft.name === medication.name;
+  // Transmit is saved only to a pharmacy whose route is confirmed; a pending
+  // or failed lookup leaves it unconfirmed. Print and None always save.
+  const [pharmacyRoute, setPharmacyRoute] = React.useState<
+    TransmitRoute | null | undefined
+  >(undefined);
+  const transmitUnconfirmed =
+    Boolean(pharmacy) && draft.transmission === 'transmit' && !pharmacyRoute;
   const canSave =
     draft.name.trim().length > 0 &&
-    (!requireCode || hasCode || Boolean(unchangedLegacyName));
+    (!requireCode || hasCode || Boolean(unchangedLegacyName)) &&
+    !transmitUnconfirmed;
 
   if (!open) return null;
 
@@ -1454,6 +1464,7 @@ export function MedicationEditor({
                 pharmacyId={draft.pharmacyId}
                 transmission={draft.transmission}
                 onChange={patch}
+                onRouteChange={setPharmacyRoute}
               />
             )}
             <div className="space-y-1.5">
@@ -1494,6 +1505,9 @@ export function MedicationEditor({
             onClose();
           }}
           disabled={!canSave}
+          aria-describedby={
+            transmitUnconfirmed ? TRANSMISSION_NOTE_ID : undefined
+          }
         >
           {m('Save')}
         </Button>

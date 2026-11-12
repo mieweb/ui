@@ -194,6 +194,89 @@ describe('MedicationEditor pharmacy & transmission', () => {
     expect(transmitRadio()).toBeDisabled();
   });
 
+  describe('a saved Transmit before the pharmacy is confirmed', () => {
+    const saveButton = () => screen.getByRole('button', { name: 'Save' });
+    const pendingNote =
+      'Transmit can be saved once the pharmacy is confirmed. Choose Print or None to save now.';
+
+    it('waits for a slow lookup, then saves Transmit to a capable pharmacy', async () => {
+      const { onSave } = renderEditor({
+        medication: {
+          ...lisinopril,
+          pharmacyId: P.main.pharmId,
+          transmission: 'transmit',
+        },
+        pharmacy: {
+          source: createFakePharmacySource({ delayMs: 300 }),
+          patId: 'preferred-and-recent',
+        },
+      });
+      expect(saveButton()).toBeDisabled();
+      expect(saveButton()).toHaveAccessibleDescription(pendingNote);
+      save();
+      expect(onSave).not.toHaveBeenCalled();
+
+      await waitFor(() => expect(saveButton()).toBeEnabled());
+      expect(screen.queryByText(pendingNote)).not.toBeInTheDocument();
+      save();
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pharmacyId: P.main.pharmId,
+          transmission: 'transmit',
+        })
+      );
+    });
+
+    it('waits for a slow lookup, then falls back to None for a print-only pharmacy', async () => {
+      const { onSave } = renderEditor({
+        medication: {
+          ...lisinopril,
+          pharmacyId: P.hilltop.pharmId,
+          transmission: 'transmit',
+        },
+        pharmacy: {
+          source: createFakePharmacySource({ delayMs: 300 }),
+          patId: 'preferred-and-recent',
+        },
+      });
+      expect(saveButton()).toBeDisabled();
+      await waitFor(() => expect(saveButton()).toBeEnabled());
+      save();
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({ transmission: 'none' })
+      );
+    });
+
+    it('never saves Transmit when the lookup fails, but saves Print or None', async () => {
+      const { onSave } = renderEditor({
+        medication: {
+          ...lisinopril,
+          pharmacyId: P.main.pharmId,
+          transmission: 'transmit',
+        },
+        pharmacy: {
+          source: createFakePharmacySource({ failCandidates: true }),
+          patId: 'preferred-and-recent',
+        },
+      });
+      await screen.findByText('The pharmacy list could not be loaded.');
+      expect(saveButton()).toBeDisabled();
+      expect(screen.getByText(pendingNote)).toBeInTheDocument();
+
+      fireEvent.click(
+        within(transmission()).getByRole('radio', { name: 'Print' })
+      );
+      expect(saveButton()).toBeEnabled();
+      save();
+      expect(onSave).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pharmacyId: P.main.pharmId,
+          transmission: 'print',
+        })
+      );
+    });
+  });
+
   it('closes only the pharmacy search on Escape', async () => {
     const onClose = vi.fn();
     renderEditor({ onClose });
