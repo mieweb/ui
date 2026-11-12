@@ -31,6 +31,7 @@ The visit's **Assessment & Plan**: an ordered list (\`items: AssessmentItem[]\` 
 - The host owns the encounter's items and orders and can persist link, order and sequence changes; the chart concerns come from the same model \`ProblemList\` renders.
 - Orders should be **coded** at entry — inject \`CodeLookup\` through \`renderOrderSearch\` (or an ambient \`CodeLookupProvider\`); omit both and the add forms degrade to free text.
 - You need to tailor controls to a workflow: use \`rowActions\`, \`orderActions\`, and \`addModes\` to select from actions the supplied callbacks can execute. Use explicit lists for a restricted workflow; omit them for callback-driven defaults.
+- For a problem-only capture layout, pair \`addModes={['problem']}\` with \`hideSingleAddModeSelector\` and supply \`onAddAssessment\` (see below). Visibility is based on executable modes after callback filtering: \`problem\` requires \`onAddAssessment\`, \`order\` requires \`onAddOrder\`, and \`auto\` requires both. The sole mode still applies automatically when the selector is hidden. The selector remains visible by default or whenever multiple executable modes remain.
 
 ### Don't use it when
 
@@ -74,6 +75,24 @@ const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(null);
 \`\`\`
 
 \`items\` and \`orders\` are encounter state; \`concerns\` is chart state — when a refine / revise lands, append the assertion to the concern **and** repoint the item's \`assertionId\`.
+
+For problem-only capture, keep the host-owned concern and item updates while hiding the redundant mode selector:
+
+\`\`\`tsx
+<Assessment
+  concerns={chartConcerns}
+  items={items}
+  addModes={['problem']}
+  hideSingleAddModeSelector
+  onAddAssessment={(pick) => {
+    const concern = addConcernFromPick(pick);
+    setItems((prev) => [...prev, {
+      concernId: concern.concernId,
+      assertionId: concern.assertions[0].id,
+    }]);
+  }}
+/>
+\`\`\`
 
 ### Limitations
 

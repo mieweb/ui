@@ -91,6 +91,58 @@ describe('Select portals', () => {
 });
 
 describe('Select typeahead', () => {
+  it.each(['click', 'keyboard'])(
+    'focuses search after positioning on %s open so typing needs no extra click',
+    async (method) => {
+      const user = userEvent.setup();
+      const focus = HTMLElement.prototype.focus;
+      const focusSpy = vi
+        .spyOn(HTMLElement.prototype, 'focus')
+        .mockImplementation(function (this: HTMLElement, options) {
+          // Browsers cannot focus the popup while positioning hides it.
+          if (
+            this.closest<HTMLElement>('[data-slot="select-dropdown"]')?.style
+              .visibility === 'hidden'
+          )
+            return;
+          focus.call(this, options);
+        });
+      try {
+        renderWithTheme(
+          <Select
+            aria-label="Location Type"
+            searchable
+            options={LOCATION_TYPES}
+          />
+        );
+        const trigger = screen.getByRole('combobox');
+        for (let attempt = 0; attempt < 2; attempt++) {
+          if (method === 'click') {
+            await user.click(trigger);
+          } else {
+            trigger.focus();
+            await user.keyboard('{ArrowDown}');
+          }
+          const search = screen.getByRole('textbox', {
+            name: 'Search options',
+          });
+          expect(search).toHaveFocus();
+          await user.keyboard('family');
+          expect(search).toHaveValue('family');
+          expect(screen.getAllByRole('option')).toHaveLength(1);
+          expect(screen.getByRole('option')).toHaveTextContent(
+            'Family Care Clinic'
+          );
+          await user.keyboard('{Enter}');
+          expect(trigger).toHaveFocus();
+          expect(trigger).toHaveTextContent('Family Care Clinic');
+        }
+      } finally {
+        focusSpy.mockRestore();
+      }
+    }
+  );
+
   it('jumps to and selects the option matching the typed characters', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
