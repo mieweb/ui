@@ -1,10 +1,12 @@
 import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextEsheet } from './RichTextEsheet';
-import type {
-  RichTextEsheetDefinition,
-  RichTextEsheetParty,
+import {
+  getRichTextEsheetFieldId,
+  type RichTextEsheetDefinition,
+  type RichTextEsheetParty,
 } from './definition';
+import { createRichTextEsheetSnapshot } from './model';
 import { MotionProvider } from '../../motion/MotionProvider';
 
 const LETTER_DEFINITION: RichTextEsheetDefinition = {
@@ -187,18 +189,19 @@ import { RichTextEsheet } from '@mieweb/ui/esheet';
     { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
     { role: 'Provider', name: 'Dr. Casey Morgan', detail: 'NPI 1234567890' },
   ]}
-  // Persist both: responses reopen the draft, MDY is the portable export.
-  onSubmit={(document) =>
-    save({ responses: document.responses, mdy: document.mdy })
-  }
+  // Persist the MDY: it reopens the draft (initialMdy) and is the portable export.
+  onSubmit={(document) => save(document.mdy)}
 />
 \`\`\`
 
+### Modes
+
+The **eSheet**, **RichEdit**, **View** and **Export** modes all share the same native draft: eSheet is the guided section form, RichEdit is a whole-document Kerebron editor whose protected links resolve back into the owning sections, View renders the document, and Export shows the raw MDY with a download button. \`defaultMode\` picks the opening surface and the imperative handle exposes \`setMode\` and \`focusSection\`. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\` and can carry the definition and parties in its front matter, so a definition prop becomes optional. Manual edits to linked display text in RichEdit cannot overwrite section answers — activating a link opens the owning section in a resolver dialog instead.
+
 ### Limitations
 
-- **MDY is export-only.** The Markdown body cannot be loaded back; reopen a draft by passing the saved \`responses\` as \`initialResponses\`.
-- **Rich formatting lives in the responses**, as sanitized markup in response attributes — the MDY body is the plain narrative text.
-- **\`initialResponses\` is read once per \`definition.id\`**; later changes to the prop do not reset an open draft.`,
+- **Linked section text in the Markdown body is a plain-text projection.** Rich formatting inside sections travels in the native response layer of the YAML front matter, not the body; authored RichEdit prose lives in the body as Markdown.
+- **\`initialResponses\` and \`initialMdy\` are read once per document id**; later changes to the props do not reset an open draft.`,
       },
     },
     catalog: {
@@ -246,6 +249,53 @@ export const SupportTicket: Story = {
     definition: TICKET_DEFINITION,
     parties: TICKET_PARTIES,
     onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
+  },
+};
+
+/** The whole-document editor: protected links open their section in a resolver. */
+export const RichEdit: Story = {
+  args: {
+    definition: LETTER_DEFINITION,
+    parties: LETTER_PARTIES,
+    defaultMode: 'rich',
+    onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
+  },
+};
+
+export const FinalView: Story = {
+  args: {
+    definition: LETTER_DEFINITION,
+    parties: LETTER_PARTIES,
+    defaultMode: 'view',
+    onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
+  },
+};
+
+const SAVED_LETTER_MDY = createRichTextEsheetSnapshot(
+  LETTER_DEFINITION,
+  {
+    [getRichTextEsheetFieldId('reason')]: {
+      answer: 'I am referring this patient for routine specialist evaluation.',
+    },
+    [getRichTextEsheetFieldId('closing')]: {
+      answer:
+        'Thank you for seeing this patient. Please contact me with any questions.',
+    },
+  },
+  LETTER_PARTIES
+).mdy;
+
+/**
+ * A saved document restored from its portable MDY alone: the front matter
+ * carries the definition, parties and native responses, so no props beyond
+ * `initialMdy` are required. Read-only still allows mode switching for review.
+ */
+export const RestoredReadOnly: Story = {
+  name: 'Restored from MDY (read-only)',
+  args: {
+    initialMdy: SAVED_LETTER_MDY,
+    defaultMode: 'view',
+    readOnly: true,
   },
 };
 
