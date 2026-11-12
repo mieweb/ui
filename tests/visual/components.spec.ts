@@ -1228,6 +1228,21 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
     await trigger.click();
     const popup = page.locator('[data-slot="select-dropdown"]');
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'light';
+      root.style.setProperty('--mieweb-card', '#111827');
+      root.style.setProperty('--mieweb-card-foreground', '#f9fafb');
+    });
+    await popup.evaluate((element) => {
+      element.style.colorScheme = 'light';
+    });
+    await expect(popup).toHaveCSS('background-color', 'rgb(17, 24, 39)');
+    await expect(
+      popup.locator('[role="option"][aria-selected="false"]').first()
+    ).toHaveCSS('color', 'rgb(249, 250, 251)');
     await expect(
       page.getByRole('dialog').getByRole('textbox', { name: 'Search options' })
     ).toBeVisible();

@@ -139,6 +139,61 @@ describe('Select portals', () => {
 });
 
 describe('Select typeahead', () => {
+  it.each([false, true])(
+    'announces the active option from the focused control (searchable: %s)',
+    async (searchable) => {
+      const user = userEvent.setup();
+      renderWithTheme(
+        <Select
+          label="Category"
+          searchable={searchable}
+          options={[
+            {
+              label: 'Locations',
+              options: [
+                { value: 'disabled', label: 'Disabled', disabled: true },
+                ...LOCATION_TYPES.slice(0, 2),
+              ],
+            },
+            ...LOCATION_TYPES.slice(2),
+          ]}
+        />
+      );
+      const trigger = screen.getByRole('combobox', { name: 'Category' });
+      await user.click(trigger);
+      const control = searchable
+        ? screen.getByRole('textbox', { name: 'Search options' })
+        : trigger;
+      const clinicId = screen.getByRole('option', { name: 'Clinic' }).id;
+      expect(control).toHaveFocus();
+      expect(control).toHaveAttribute(
+        'aria-controls',
+        screen.getByRole('listbox').id
+      );
+      expect(control).toHaveAttribute(
+        'aria-activedescendant',
+        screen.getByRole('option', { name: 'Cardiology' }).id
+      );
+      await user.keyboard('{ArrowDown}');
+      expect(control).toHaveAttribute(
+        'aria-activedescendant',
+        screen.getByRole('option', { name: 'Chiropractic' }).id
+      );
+      if (searchable) {
+        await user.type(control, 'clinic');
+        expect(control).toHaveAttribute('aria-activedescendant', clinicId);
+        await user.clear(control);
+        await user.type(control, 'no such category');
+        expect(control).not.toHaveAttribute('aria-activedescendant');
+      } else {
+        await user.keyboard('cli');
+        expect(control).toHaveAttribute('aria-activedescendant', clinicId);
+      }
+      await user.keyboard('{Escape}');
+      expect(trigger).not.toHaveAttribute('aria-activedescendant');
+    }
+  );
+
   it.each(['ArrowDown', 'ArrowUp', 'Home', 'End'])(
     'does not select a missing option after a no-match search and %s',
     async (key) => {
