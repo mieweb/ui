@@ -305,7 +305,11 @@ export const RestoredReadOnly: Story = {
  * natural for support tickets, where a screenshot says more than a paragraph.
  * The bar starts hidden; reveal it per field from the block (`+`) menu →
  * "Show capture bar". `uploadHandler` is mandatory: captures land as uploaded
- * URLs, never embedded base64 bytes. Screen capture first shows a
+ * URLs, never embedded base64 bytes. Captured images live in the narrative's
+ * response attributes and the MDY front matter — they render in the eSheet
+ * fields but not in RichEdit, View or Export, whose Markdown body projects
+ * each section's plain-text answer (the same boundary as EncounterVisit
+ * narrative images). Screen capture first shows a
  * confirmation, since a shared screen can include content that does not
  * belong in the document. This demo "uploads" to same-origin object URLs,
  * which render during the session but die with the page; a real host returns

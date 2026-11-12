@@ -30,14 +30,18 @@ insertable lines, and are recorded in the MDY front matter. They are not form
 fields; changing parties must not reset a draft (content identity is the
 serialized definition + parties).
 
-The portable output is MDY via `createRichTextEsheetSnapshot`: YAML front
-matter (`richTextEsheet` id/title plus `parties`) and a Markdown body with one
-`##` heading per documented section. Undocumented sections are omitted from
-the body. Authored text stays literal when the body is rendered — Markdown
-punctuation and HTML are escaped and editor line breaks become paragraphs —
-and completion/body honor both `answer` and `selected` native response shapes
-(same rule as encounter MDY). Narrative answers stay plain text in
-`FieldResponse.answer`; rich markup handling lives in the shared
+The portable output is MDY via `createRichTextEsheetSnapshot`. The YAML front
+matter is the canonical store: `mdy` metadata, the generated native `form`,
+the full `response` map (minus the reserved document response), the complete
+definition under `richTextEsheet`, `parties`, and one flat projection per
+section field bridging the native colon-bearing ids to the MDY link grammar.
+The generated Markdown body carries one `##` heading and link per section —
+empty sections included (their links display an em dash); only View prunes
+undocumented sections, as render-only cleanup. Linked display text stays
+literal — Markdown punctuation and HTML are escaped and multi-line answers
+join with `<br>` — and completion/body honor both `answer` and `selected`
+native response shapes (same rule as encounter MDY). Narrative answers stay
+plain text in `FieldResponse.answer`; rich markup handling lives in the shared
 `EsheetNarrativeField`, not here. MDY round-trips: `initialMdy` reopens a
 saved document, takes precedence over `initialResponses`, and can supply the
 definition and parties from its front matter (a mismatched explicit
