@@ -150,6 +150,11 @@ export const RichTextEsheet = React.forwardRef<
       'The MDY document id does not match the supplied definition.'
     );
   }
+  // A native eSheet MDY without richTextEsheet front matter still names its
+  // form; foreign responses must not seed a session under another definition.
+  if (parsed?.form && parsed.form.id !== documentDefinition.id) {
+    throw new Error('The MDY form id does not match the supplied definition.');
+  }
   const documentParties =
     parties ?? getRichTextEsheetMdyParties(parsed?.frontMatter ?? null);
   return (
@@ -245,8 +250,14 @@ const RichTextEsheetSession = React.forwardRef<
   const [snapshot, setSnapshot] = React.useState(() =>
     createRichTextEsheetSnapshot(stable.definition, initialSeed, stable.parties)
   );
-  const [richBodySeed] = React.useState(
-    () => parseRichTextEsheetMdy(snapshot.mdy).body
+  // Until the user authors the document, RichEdit shows the generated
+  // projection of the live snapshot — a mount-time seed would commit a stale
+  // body (missing links added by a configuration change) on the first flush.
+  const richBody = React.useMemo(
+    () =>
+      getRichTextEsheetDocumentBody(snapshot.responses) ??
+      parseRichTextEsheetMdy(snapshot.mdy).body,
+    [snapshot]
   );
   const [mode, setModeState] = React.useState<RichTextEsheetMode>(defaultMode);
   const [modePending, setModePending] = React.useState(false);
@@ -468,6 +479,9 @@ const RichTextEsheetSession = React.forwardRef<
     // the trap's focus scope for keyboard users.
     const inScope = (target: Element): boolean => {
       if (container.contains(target)) return true;
+      // The screen-capture confirmation is a modal alertdialog portaled to
+      // document.body; it owns focus while open — never yank it back.
+      if (target.closest('[role="alertdialog"]')) return true;
       const portal = target.closest<HTMLElement>(
         '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
       );
@@ -570,6 +584,14 @@ const RichTextEsheetSession = React.forwardRef<
         );
         return;
       }
+      // The flush awaited the editor; the host may have revoked submission,
+      // switched to read-only or started another save in the meantime.
+      if (
+        !latest.current.onSubmit ||
+        latest.current.readOnly ||
+        latest.current.saving
+      )
+        return;
       const next = currentSnapshot();
       setShowErrors(true);
       if (next.errors.length > 0) {
@@ -708,10 +730,7 @@ const RichTextEsheetSession = React.forwardRef<
             >
               <DocumentMdyEditor
                 ref={richEditor}
-                body={
-                  getRichTextEsheetDocumentBody(snapshot.responses) ??
-                  richBodySeed
-                }
+                body={richBody}
                 fieldIds={mdyFields.map((field) => field.id)}
                 fields={mdyFields.map((field) => ({
                   id: field.id,

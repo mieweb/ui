@@ -114,6 +114,87 @@ describe('RichTextEsheet mode synchronization', () => {
         />
       )
     ).toThrow('The MDY document id does not match');
+    // A native eSheet MDY without richTextEsheet front matter still names its
+    // form; foreign responses must not seed another definition's session.
+    expect(() =>
+      render(
+        <RichTextEsheet
+          initialMdy={source}
+          definition={{ ...definition, id: 'another-doc' }}
+        />
+      )
+    ).toThrow('The MDY form id does not match');
+  });
+
+  it('regenerates the RichEdit fallback body after a configuration change', async () => {
+    const ref = React.createRef<RichTextEsheetHandle>();
+    const { rerender } = render(
+      <RichTextEsheet ref={ref} definition={definition} />
+    );
+    const summary = await screen.findByRole('textbox', { name: /Summary/ });
+    fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
+    rerender(
+      <RichTextEsheet
+        ref={ref}
+        definition={{
+          ...definition,
+          sections: [
+            ...definition.sections,
+            { id: 'addendum', title: 'Addendum' },
+          ],
+        }}
+      />
+    );
+    await screen.findByRole('textbox', { name: /Addendum/ });
+    selectMode('RichEdit');
+    const editor = await screen.findByRole('textbox', {
+      name: 'Document narrative',
+    });
+    // A mount-time seed would miss the added section's link here…
+    await waitFor(() =>
+      expect((editor as HTMLTextAreaElement).value).toContain('## Addendum')
+    );
+    // …and leaving RichEdit would then commit that stale body.
+    selectMode('eSheet');
+    await waitFor(() =>
+      expect(ref.current!.getSnapshot().mdy).toContain('## Addendum')
+    );
+    expect(ref.current!.getSnapshot().mdy).toContain('Login fails');
+  });
+
+  it('keeps the draft editable after a rejected save', async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error('Storage offline'));
+    render(<RichTextEsheet definition={definition} onSubmit={onSubmit} />);
+    const summary = await screen.findByRole('textbox', { name: /Summary/ });
+    fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save document' }));
+    expect(await screen.findByText('Storage offline')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /Summary/ })).toHaveTextContent(
+      'Login fails'
+    );
+    expect(screen.getByRole('button', { name: 'Save document' })).toBeEnabled();
+  });
+
+  it('keeps a portaled capture confirmation focusable inside the resolver trap', async () => {
+    render(<RichTextEsheet definition={definition} />);
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    await screen.findByRole('dialog', { name: 'Details' });
+    // The screen-capture confirmation portals to document.body as a modal
+    // alertdialog (AlertDialog sets the role on its modal slot). The trap's
+    // focusin listener must not yank focus off its buttons.
+    const modal = document.createElement('div');
+    modal.setAttribute('role', 'alertdialog');
+    const confirm = document.createElement('button');
+    confirm.textContent = 'Capture screen';
+    modal.appendChild(confirm);
+    document.body.appendChild(modal);
+    act(() => confirm.focus());
+    expect(document.activeElement).toBe(confirm);
+    modal.remove();
   });
 
   it('flushes the last rich edit before switching and saving, with section answers retained', async () => {

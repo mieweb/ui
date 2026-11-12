@@ -281,8 +281,14 @@ const EncounterVisitSession = React.forwardRef<
   const [snapshot, setSnapshot] = React.useState(() =>
     createEncounterSnapshot(stableDefinition, initialSeed)
   );
-  const [richBodySeed] = React.useState(
-    () => parseEncounterMdy(snapshot.mdy).body
+  // Until the user authors the document, RichEdit shows the generated
+  // projection of the live snapshot — a mount-time seed would commit a stale
+  // body (missing links added by a configuration change) on the first flush.
+  const richBody = React.useMemo(
+    () =>
+      getEncounterDocumentBody(snapshot.responses) ??
+      parseEncounterMdy(snapshot.mdy).body,
+    [snapshot]
   );
   const [activeSection, setActiveSection] = React.useState(
     stableDefinition.sections[0].id
@@ -540,6 +546,9 @@ const EncounterVisitSession = React.forwardRef<
     // the trap's focus scope for keyboard users.
     const inScope = (target: Element): boolean => {
       if (container.contains(target)) return true;
+      // The screen-capture confirmation is a modal alertdialog portaled to
+      // document.body; it owns focus while open — never yank it back.
+      if (target.closest('[role="alertdialog"]')) return true;
       const portal = target.closest<HTMLElement>(
         '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
       );
@@ -804,9 +813,7 @@ const EncounterVisitSession = React.forwardRef<
               >
                 <EncounterMdyEditor
                   ref={richEditor}
-                  body={
-                    getEncounterDocumentBody(snapshot.responses) ?? richBodySeed
-                  }
+                  body={richBody}
                   fieldIds={mdyFields.map((field) => field.id)}
                   fields={mdyFields.map((field) => ({
                     id: field.id,
