@@ -25,17 +25,19 @@
 }
 
 /* One renderer stays mounted in every mode. The linked-field resolver reveals
-   its section and related inputs rather than creating another clinical store. */
-.encounter-visit
+   its section and related inputs rather than creating another clinical store.
+   The document chrome below (resolver, MDY editor/toolbar, view switcher,
+   rich chrome, MDY view) is shared with RichTextEsheet (mieweb/ui#758). */
+:is(.encounter-visit, .richtext-esheet)
   .encounter-focused
   .renderer-body
   > .field-wrapper:not([data-encounter-focus]) {
   display: none;
 }
 
-.encounter-visit .encounter-mdy-editor,
-.encounter-visit .encounter-mdy-editor .kb-component,
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor,
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor .kb-component,
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor) {
   min-width: 0;
@@ -47,13 +49,13 @@
   overflow: visible;
 }
 
-.encounter-visit .encounter-mdy-editor .kb-component,
-.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor .kb-component,
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor .kb-custom-menu {
   padding-inline: 0;
   border: 0;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   :where(h1, h2, h3, h4, h5, h6) {
@@ -62,29 +64,29 @@
   line-height: 1.4;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   h1 {
   font-size: 1.25rem;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   h2,
-.encounter-visit .encounter-mdy-view h2 {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view h2 {
   font-size: 1.125rem;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   :where(h3, h4, h5, h6) {
   font-size: 1rem;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   :where(ul, ol) {
@@ -92,7 +94,7 @@
   padding-inline: 1.5rem 0;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor) {
   padding-inline: 0;
@@ -100,28 +102,28 @@
   line-height: 1.75;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   ul {
   list-style-type: disc;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   ol {
   list-style-type: decimal;
 }
 
-.encounter-visit
+:is(.encounter-visit, .richtext-esheet)
   .encounter-mdy-editor
   :is(.kb-editor, .kb-custom-menu__editor)
   p {
   margin-block: 0.375rem 0.75rem;
 }
 
-.encounter-visit .encounter-mdy-editor .kb-menu__button {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor .kb-menu__button {
   min-width: 44px;
   min-height: 44px;
 }
@@ -130,12 +132,12 @@
    toolbar buttons never slide underneath it (w-28 switcher + ms-1 inset).
    Margin, not padding: Kerebron sizes its overflow collapse from the
    toolbar's offsetWidth, which includes padding but not margin. */
-.encounter-visit .encounter-mdy-editor .kb-custom-menu {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-editor .kb-custom-menu {
   margin-inline-start: 7.5rem;
 }
 
 /* Above Kerebron's sticky menubar (z-index 1000). */
-.encounter-visit .encounter-view-switch {
+:is(.encounter-visit, .richtext-esheet) .encounter-view-switch {
   z-index: 1001;
 }
 
@@ -143,7 +145,7 @@
    (menubar 1000, switcher 1001) — lift them so the backdrop dims the toolbar
    instead of the toolbar painting over the dialog. Portaled panels (selects,
    lookups) live on body at z-index 9999, so they stay above. */
-.encounter-visit [data-slot='modal-root'] {
+:is(.encounter-visit, .richtext-esheet) [data-slot='modal-root'] {
   z-index: 1002;
 }
 
@@ -157,7 +159,7 @@
 
 /* The switcher's lane shares the toolbar surface so the pinned row reads as
    one continuous bar in every mode. */
-.encounter-visit .encounter-view-switch::before {
+:is(.encounter-visit, .richtext-esheet) .encounter-view-switch::before {
   content: '';
   position: absolute;
   inset-inline-start: 0;
@@ -169,11 +171,12 @@
 
 /* The linked-field resolver is a full-screen takeover; sticky chrome must not
    paint over its backdrop. */
-.encounter-visit .encounter-view-switch[inert] {
+:is(.encounter-visit, .richtext-esheet) .encounter-view-switch[inert] {
   visibility: hidden;
 }
 
-.encounter-visit .encounter-rich-chrome[inert]:not(.encounter-rich-collapsed) {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-chrome[inert]:not(.encounter-rich-collapsed) {
   visibility: hidden;
 }
 
@@ -183,37 +186,51 @@
    chrome itself pins instead — the surface stays opaque so scrolled content
    never bleeds through. The controls keep their layout box (visibility, not
    display) so the bar's height never jumps between modes. */
-.encounter-visit .encounter-rich-collapsed .kb-custom-menu {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-collapsed
+  .kb-custom-menu {
   z-index: 20;
 }
 
 /* Returning to RichEdit fades the controls back into view (base.css zeroes
    transition durations under prefers-reduced-motion). */
-.encounter-visit .encounter-rich-chrome .kb-custom-menu > * {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-chrome
+  .kb-custom-menu
+  > * {
   transition:
     opacity 200ms ease-out,
     transform 200ms ease-out;
 }
 
-.encounter-visit .encounter-rich-collapsed .kb-custom-menu > * {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-collapsed
+  .kb-custom-menu
+  > * {
   visibility: hidden;
   opacity: 0;
   transform: translateY(4px);
 }
 
-.encounter-visit .encounter-rich-collapsed .kb-custom-menu__editor,
-.encounter-visit .encounter-rich-collapsed .kb-custom-menu__overflow-menu {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-collapsed
+  .kb-custom-menu__editor,
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-collapsed
+  .kb-custom-menu__overflow-menu {
   display: none;
 }
 
 /* Kerebron's shell keeps its document padding (60px !important) even with the
    body hidden; drop it so the pinned surface is exactly the toolbar, not a
    dead band. !important is required to beat the library's own !important. */
-.encounter-visit .encounter-rich-collapsed .kb-component {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-rich-collapsed
+  .kb-component {
   padding-block-end: 0 !important;
 }
 
-.encounter-visit .encounter-rich-collapsed {
+:is(.encounter-visit, .richtext-esheet) .encounter-rich-collapsed {
   position: sticky;
   top: 0;
   z-index: 20;
@@ -221,50 +238,57 @@
   background: var(--kb-color-surface-elevated, var(--mieweb-background, #fff));
 }
 
-.encounter-visit .encounter-mdy-view {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view {
   overflow-wrap: anywhere;
   line-height: 1.75;
 }
 
-.encounter-visit .encounter-mdy-view :where(h1, h2, h3, h4, h5, h6) {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-mdy-view
+  :where(h1, h2, h3, h4, h5, h6) {
   margin-block: 1.25rem 0.375rem;
   font-weight: 600;
   line-height: 1.4;
 }
 
-.encounter-visit .encounter-mdy-view h1 {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view h1 {
   font-size: 1.25rem;
 }
 
-.encounter-visit .encounter-mdy-view :where(p, ul, ol, blockquote, pre) {
+:is(.encounter-visit, .richtext-esheet)
+  .encounter-mdy-view
+  :where(p, ul, ol, blockquote, pre) {
   margin-block: 0.375rem 0.75rem;
 }
 
-.encounter-visit .encounter-mdy-view ul,
-.encounter-visit .encounter-mdy-view ol {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view ul,
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view ol {
   padding-inline-start: 1.5rem;
 }
 
-.encounter-visit .encounter-mdy-view ul {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view ul {
   list-style-type: disc;
 }
 
-.encounter-visit .encounter-mdy-view ol {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view ol {
   list-style-type: decimal;
 }
 
-.encounter-visit .encounter-mdy-view :where(pre, table) {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view :where(pre, table) {
   max-width: 100%;
   overflow-x: auto;
 }
 
-.encounter-visit .encounter-mdy-view a {
+:is(.encounter-visit, .richtext-esheet) .encounter-mdy-view a {
   color: var(--mieweb-primary-800);
   text-decoration: underline;
 }
 
-[data-theme='dark'] .encounter-visit .encounter-mdy-view a,
-.dark .encounter-visit .encounter-mdy-view a {
+[data-theme='dark']
+  :is(.encounter-visit, .richtext-esheet)
+  .encounter-mdy-view
+  a,
+.dark :is(.encounter-visit, .richtext-esheet) .encounter-mdy-view a {
   color: var(--mieweb-primary-400);
 }
 

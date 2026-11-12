@@ -85,7 +85,7 @@ describe('RichTextEsheet with the real eSheet renderer', () => {
     const snapshot = onSubmit.mock.calls[0][0];
     expect(snapshot.errors).toEqual([]);
     expect(snapshot.mdy).toContain(
-      '## Reason for referral\n\nRoutine evaluation, please.'
+      '## Reason for referral\n\n[Routine evaluation, please.](mdy:doc_'
     );
     expect(await screen.findByText('Document saved.')).toBeInTheDocument();
   });

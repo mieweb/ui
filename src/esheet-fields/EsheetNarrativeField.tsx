@@ -259,6 +259,23 @@ export interface EsheetNarrativeFieldProps extends FieldComponentProps {
   mediaUpload?: MediaUploadOptions;
 }
 
+/** Surface-ready capture config a host provides through context. */
+export interface EsheetNarrativeMedia {
+  capture: MediaCaptureOptions;
+  mediaUpload: MediaUploadOptions;
+  /** Start each field's capture bar hidden; the block (+) menu reveals it. */
+  defaultCaptureBarVisible?: boolean;
+}
+
+/**
+ * Hands media capture to narrative fields a host cannot prop-drill into —
+ * the field type is registered globally with eSheet (mieweb/ui#758, after
+ * EncounterVisit's context in mieweb/ui#736). Explicit props win over the
+ * context.
+ */
+export const EsheetNarrativeMediaContext =
+  React.createContext<EsheetNarrativeMedia | null>(null);
+
 /** A report-like narrative surface that grows with its content, backed by eSheet text. */
 export function EsheetNarrativeField({
   field,
@@ -281,10 +298,15 @@ export function EsheetNarrativeField({
   const responseRef = React.useRef(response);
   responseRef.current = response;
   const labelId = React.useId();
+  // Registered field instances cannot receive props; hosts hand capture
+  // through the context instead. Explicit props win.
+  const contextMedia = React.useContext(EsheetNarrativeMediaContext);
+  const capture = mediaCapture ?? contextMedia?.capture;
+  const upload = mediaUpload ?? contextMedia?.mediaUpload;
   // No uploadHandler means captures would embed as base64 data: URLs, which
   // the media sanitizer strips — saving a capture would silently destroy it.
   // Refuse the opt-in instead so the field keeps today's behavior.
-  const captureEnabled = Boolean(mediaCapture && mediaUpload?.uploadHandler);
+  const captureEnabled = Boolean(capture && upload?.uploadHandler);
   const sanitizeOptions = React.useMemo<NarrativeSanitizeOptions | undefined>(
     () => (captureEnabled ? { media: true } : undefined),
     [captureEnabled]
@@ -298,10 +320,10 @@ export function EsheetNarrativeField({
   // pipeline reject and announce the file instead.
   const narrativeUpload = React.useMemo<MediaUploadOptions | undefined>(
     () =>
-      captureEnabled && mediaUpload
-        ? { ...mediaUpload, allowedVideoTypes: [] }
+      captureEnabled && upload
+        ? { ...upload, allowedVideoTypes: [] }
         : undefined,
-    [captureEnabled, mediaUpload]
+    [captureEnabled, upload]
   );
   const definition = field.definition as {
     question?: string;
@@ -478,6 +500,8 @@ export function EsheetNarrativeField({
           showMacroLibrary: m('Show macro library'),
           showToolbar: m('Show toolbar'),
           hideToolbar: m('Hide toolbar'),
+          showCaptureBar: m('Show capture bar'),
+          hideCaptureBar: m('Hide capture bar'),
         }}
         sanitizeHtml={sanitize}
         mediaUpload={narrativeUpload}
@@ -485,7 +509,8 @@ export function EsheetNarrativeField({
         // CaptureDock wrapper out and remount the editor (losing undo
         // history) every time the visit locks to save. The surface already
         // locks the dock while read-only.
-        mediaCapture={captureEnabled ? mediaCapture : undefined}
+        mediaCapture={captureEnabled ? capture : undefined}
+        defaultCaptureBarVisible={contextMedia?.defaultCaptureBarVisible}
         className="mt-1"
       />
     </div>

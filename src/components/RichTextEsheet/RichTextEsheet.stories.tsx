@@ -249,6 +249,30 @@ export const SupportTicket: Story = {
   },
 };
 
+/**
+ * Opt-in media capture (mieweb/ui#758, generalized from EncounterVisit's
+ * mieweb/ui#736): every narrative section can dock the capture ribbon —
+ * natural for support tickets, where a screenshot says more than a paragraph.
+ * The bar starts hidden; reveal it per field from the block (`+`) menu →
+ * "Show capture bar". `uploadHandler` is mandatory: captures land as uploaded
+ * URLs, never embedded base64 bytes. Screen capture first shows a
+ * confirmation, since a shared screen can include content that does not
+ * belong in the document. This demo "uploads" to same-origin object URLs,
+ * which render during the session but die with the page; a real host returns
+ * a persistent HTTPS URL.
+ */
+export const WithMediaCapture: Story = {
+  args: {
+    definition: TICKET_DEFINITION,
+    parties: TICKET_PARTIES,
+    mediaCapture: {
+      // Demo only: same-origin object URLs pass the sanitizer but are
+      // session-scoped. Real hosts upload the file and return its stored URL.
+      uploadHandler: async (file) => URL.createObjectURL(file),
+    },
+  },
+};
+
 export const DocumentPreview: Story = {
   name: 'Live MDY output',
   render: function DocumentPreview() {
