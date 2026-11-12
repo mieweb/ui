@@ -816,7 +816,6 @@ const EncounterVisitSession = React.forwardRef<
                   onChange={writeBody}
                   onFieldActivate={(id) => void activateResolver(id)}
                   mediaUpload={media.value?.mediaUpload}
-                  mediaCapture={media.value?.capture}
                   disabled={
                     readOnly ||
                     saving ||

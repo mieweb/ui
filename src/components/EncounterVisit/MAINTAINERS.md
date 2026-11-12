@@ -37,10 +37,13 @@ An MCP text replacement therefore cannot restore stale formatting.
 
 ## Media capture (mieweb/ui#736)
 
-`EncounterVisit.mediaCapture` opts the visit's editing surfaces — narrative
-fields (via `EncounterMediaCaptureContext`, since eSheet fields are registered
-globally and take no props from the visit) and RichEdit — into the capture
-ribbon. `uploadHandler` is mandatory by type: captures land as uploaded
+`EncounterVisit.mediaCapture` opts the visit's narrative fields (via
+`EncounterMediaCaptureContext`, since eSheet fields are registered globally
+and take no props from the visit) into the capture ribbon. RichEdit shows no
+docked ribbon — its chrome's first row belongs to the view switcher's overlay
+lane, and field capture lives in the resolver's narrative field — though
+pasted/dropped media still route through the same `mediaUpload`.
+`uploadHandler` is mandatory by type: captures land as uploaded
 `https:`/same-origin URLs; the relaxed narrative sanitizer
 (`sanitizeNarrativeHtml(html, { media: true })`) strips `data:` and
 cross-origin images, so base64 cannot persist even via paste (same-origin

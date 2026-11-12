@@ -210,8 +210,10 @@ export const NarrativeExam: Story = {
 
 /**
  * Opt-in media capture (mieweb/ui#736): the capture ribbon docks on every
- * narrative field and on RichEdit, and document images grow a hover/keyboard
- * annotate affordance (mieweb/ui#735). `uploadHandler` is mandatory —
+ * narrative field, and document images grow a hover/keyboard annotate
+ * affordance (mieweb/ui#735). RichEdit shows no ribbon of its own — capture
+ * happens in each field's resolver — but pasted media still upload.
+ * `uploadHandler` is mandatory —
  * captures land in the narrative as uploaded `https:`/same-origin URLs, and
  * the relaxed narrative sanitizer strips `data:` images, so base64 cannot
  * persist even via paste. Capture screen first shows a PHI confirmation: a
