@@ -88,6 +88,11 @@ M3 supplies the message model/codecs, M5 supplies usable email display/compositi
 and M6 proves the minimal mail-client integration. This contract uses the same
 Artipod, collaboration, shared-scope, and lifecycle requirements as document mode.
 
+The first MVP uses embedded synthetic raw MIME messages and a hardcoded MDY
+document in Storybook. An actual IMAP server or mail account is not required for
+that check-in. These fixtures enter through the same raw-source contract that a
+future IMAP adapter will use; the component still owns parsing and presentation.
+
 ## Milestone tracker
 
 - [ ] M1 — Shared bindings, Artifact scopes, and acceptance fixtures implemented.
@@ -600,13 +605,44 @@ upstream tracks progress; complete validation with real released/build artifacts
        ownership, reference behavior, limitations, and migration examples. Add focused
        unit tests, browser collaboration/storage tests, and reviewed visual baselines.
        Keep fakes in stories/tests, without a production plaintext fallback.
-9. [ ] Build a minimal mail-client harness: its IMAP adapter fetches synthetic raw
-       message bytes/streams, supplies authorized Artipod bindings, and consumes
-       serialized output for draft save/send. The adapter contains no MIME parser,
-       CID mapping, body-selection, attachment-rendering, or message-rewriting logic.
-       Exercise fetched-message display, reply with a new attachment, serialization,
-       and fresh-instance reopen. Show the same component in an MDY-only host
-       without mail-specific configuration.
+9. [ ] Build the minimal mail-client harness first with embedded synthetic raw
+       MIME fixtures and a hardcoded MDY document in Storybook. No actual IMAP
+       server or mail account is required. The harness supplies raw source,
+       authorized Artipod bindings, and draft-save/send callbacks; replacing its
+       fixture loader with a future IMAP fetch must not change the editor contract.
+       The adapter contains no MIME parser, CID mapping, body-selection,
+       attachment-rendering, or message-rewriting logic. Send prepares complete
+       message bytes and an envelope for inspection; this demo transmits no mail.
+       Show the same component in an MDY-only host without mail configuration.
+
+### First MVP check-in within M5
+
+This is the first user-testable review point, before completing the broader M5
+example and M6 acceptance gate. Provide working Storybook links and reproducible
+steps when the following checks pass:
+
+- [ ] Display embedded synthetic plain, HTML-only, nested multipart, and Unicode
+      email fixtures, including a CID image and a separate attachment. Outside
+      media remains unfetched under the preview policy.
+- [ ] Reply or edit a draft, change its body/headers, attach a small synthetic
+      file, and serialize complete MIME. Distinguish draft and delivery output;
+      delivery returns the transport envelope separately and omits Bcc headers.
+- [ ] Save the canonical email draft and immutable attachment references through
+      real encrypted OPFS, dispose its views, and reopen the same saved Artifact.
+      Verify the saved body and attachment bytes rather than a surviving object URL.
+- [ ] Edit the hardcoded MDY document, preserve its front matter, save through
+      protected storage, and reopen it without mail-specific configuration.
+- [ ] Open two editor views of the same canonical body; an edit in either appears
+      in the other. Detaching one leaves the other and the shared session usable.
+      Exercise lock/unlock and release decrypted previews when locked.
+- [ ] Document the initial 10 MiB buffered-object/message limit and the synthetic
+      demo key setup. The demo may retain a nonextractable key in IndexedDB for
+      reload, but supplies no account authentication and accepts synthetic data only.
+
+Passing this checkpoint does not complete M2, M5, or M6. Full bounded-memory
+streaming/cache behavior, authenticated remote-user collaboration transport,
+production key/authorization integration, 50-field eSheet default/override and
+cross-sheet scenarios, and the full acceptance matrix remain milestone gates.
 
 Done when: the required example works concurrently with real protected storage,
 shared defaults and isolated overrides; imported media survives save/reopen;
@@ -630,6 +666,10 @@ migration, public deprecation notices, and duplicate implementation removal.
        mail and composing replies require no client-specific MIME implementation.
        Verify outgoing messages with an independent mail parser/client as well
        as component reopen; document remaining unsupported content explicitly.
+       Extend the first Storybook checkpoint with production key/authorization
+       integration, authenticated remote-user transport, bounded large-file
+       streaming/cache measurements, and the 50-field/cross-sheet eSheet example.
+       A synthetic local demo or a 10 MiB object cap does not satisfy those gates.
 3. [ ] Verify existing body-only APIs, upload handlers, form events/refs, HTML/plain
        contracts, MDY provenance, clinical/email policies, and collaboration behavior.
        Verify one compatible Yjs/ProseMirror dependency graph and optional entry loading.
