@@ -33,12 +33,19 @@ export interface FileCapturesOptions {
    * pass `null` to disable. Scan document is hidden when none is available.
    */
   scanDocument?: ScanDocument | null;
+  /**
+   * Called before a screen capture starts; resolve `false` to cancel. Lets
+   * clinical hosts interpose a PHI notice — a shared screen can show other
+   * patients' data — before the browser's picker opens (mieweb/ui#736).
+   */
+  confirmScreenCapture?: () => boolean | Promise<boolean>;
 }
 
 export function useFileCaptures({
   onFiles,
   onStatus,
   scanDocument,
+  confirmScreenCapture,
 }: FileCapturesOptions): {
   /** Unavailable entries keep `available: false`; filter before rendering. */
   captures: CaptureAction[];
@@ -87,6 +94,10 @@ export function useFileCaptures({
       label: m('Capture screen'),
       icon: <MonitorUp className={iconClass} aria-hidden="true" />,
       run: runSafely(async () => {
+        if (confirmScreenCapture && !(await confirmScreenCapture())) {
+          onStatus(m('Screen capture cancelled'));
+          return;
+        }
         onFiles([await captureScreenFrame()], m('Screenshot attached'));
       }, m('Screen capture cancelled')),
       available: support.screenshot,

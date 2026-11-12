@@ -136,4 +136,43 @@ describe('RichMediaCaptureEditor', () => {
     await ref.current!.insertFiles!([file]);
     expect(insertFiles).toHaveBeenCalledWith([file]);
   });
+
+  describe('confirmScreenCapture (mieweb/ui#736)', () => {
+    let getDisplayMedia: ReturnType<typeof vi.fn>;
+    beforeEach(() => {
+      getDisplayMedia = vi.fn().mockRejectedValue(new Error('no stream'));
+      Object.defineProperty(navigator, 'mediaDevices', {
+        configurable: true,
+        value: { getDisplayMedia },
+      });
+      return () => {
+        delete (navigator as { mediaDevices?: unknown }).mediaDevices;
+      };
+    });
+
+    it('cancels the capture before the screen picker when refused', async () => {
+      renderWithTheme(
+        <RichMediaCaptureEditor confirmScreenCapture={async () => false} />
+      );
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Capture screen' })
+      );
+      await waitFor(() =>
+        expect(screen.getByRole('status')).toHaveTextContent(
+          'Screen capture cancelled'
+        )
+      );
+      expect(getDisplayMedia).not.toHaveBeenCalled();
+    });
+
+    it('proceeds to the screen picker when confirmed', async () => {
+      renderWithTheme(
+        <RichMediaCaptureEditor confirmScreenCapture={async () => true} />
+      );
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Capture screen' })
+      );
+      await waitFor(() => expect(getDisplayMedia).toHaveBeenCalled());
+    });
+  });
 });

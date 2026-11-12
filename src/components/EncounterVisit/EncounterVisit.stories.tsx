@@ -208,6 +208,31 @@ export const NarrativeExam: Story = {
   },
 };
 
+/**
+ * Opt-in media capture (mieweb/ui#736): the capture ribbon docks on every
+ * narrative field and on RichEdit, and document images grow a hover/keyboard
+ * annotate affordance (mieweb/ui#735). `uploadHandler` is mandatory —
+ * captures land in the narrative as uploaded `https:`/same-origin URLs, and
+ * the relaxed narrative sanitizer strips `data:` images, so base64 cannot
+ * persist even via paste. Capture screen first shows a PHI confirmation: a
+ * shared screen can include other patients' data. Narrative images stay out
+ * of the plain-text answer and the rendered View/Export projections, but raw
+ * MDY front matter and MCP snapshots retain `encounterNarrativeHtml` — image
+ * URLs and alt text included; RichEdit images live in the MDY body and
+ * render in View. This demo "uploads" to same-origin object URLs, which
+ * render during the session but die with the page; a real host returns a
+ * persistent HTTPS URL.
+ */
+export const WithMediaCapture: Story = {
+  args: {
+    mediaCapture: {
+      // Demo only: same-origin object URLs pass the sanitizer but are
+      // session-scoped. Real hosts upload the file and return its stored URL.
+      uploadHandler: async (file) => URL.createObjectURL(file),
+    },
+  },
+};
+
 export const ReadOnly: Story = {
   args: { readOnly: true },
   parameters: {

@@ -32,6 +32,11 @@ import {
 } from './definition';
 import { registerEncounterFieldTypes } from './fields';
 import { EncounterSectionContext } from './EncounterSectionField';
+import {
+  EncounterMediaCaptureContext,
+  useEncounterMediaCapture,
+  type EncounterMediaCaptureOptions,
+} from './mediaCapture';
 import { createEncounterSnapshot } from './model';
 import { createEncounterVisitTools, type EncounterVisitTools } from './mcp';
 import {
@@ -91,6 +96,13 @@ export interface EncounterVisitProps extends Omit<
   onSubmit?: (visit: EncounterVisitSnapshot) => void | Promise<void>;
   /** Connect these tools to the host's MCP transport / agent runtime. */
   onToolsReady?: (tools: EncounterVisitTools) => void;
+  /**
+   * Opt-in media capture on the visit's editing surfaces — narrative fields
+   * and RichEdit (mieweb/ui#736). `uploadHandler` is mandatory: captures land
+   * as uploaded `https:`/same-origin URLs, never embedded base64. Default
+   * off — without it sanitization, rendering and exports are unchanged.
+   */
+  mediaCapture?: EncounterMediaCaptureOptions;
   readOnly?: boolean;
 }
 
@@ -229,6 +241,7 @@ const EncounterVisitSession = React.forwardRef<
     onChange,
     onSubmit,
     onToolsReady,
+    mediaCapture,
     readOnly = false,
     className,
     ...props
@@ -695,6 +708,7 @@ const EncounterVisitSession = React.forwardRef<
       )
     )
   );
+  const media = useEncounterMediaCapture(mediaCapture);
   const componentId = React.useId();
   const resolverTitleId = `${componentId}-resolver-title`;
   const selectId = `${componentId}-section`;
@@ -801,6 +815,8 @@ const EncounterVisitSession = React.forwardRef<
                   }))}
                   onChange={writeBody}
                   onFieldActivate={(id) => void activateResolver(id)}
+                  mediaUpload={media.value?.mediaUpload}
+                  mediaCapture={media.value?.capture}
                   disabled={
                     readOnly ||
                     saving ||
@@ -896,19 +912,21 @@ const EncounterVisitSession = React.forwardRef<
               </div>
             )}
             <EncounterSectionContext.Provider value={true}>
-              <EsheetRenderer
-                key={fieldsSettled ? 'settled' : 'priming'}
-                ref={renderer}
-                formDataInput={rendererInput.definition}
-                initialResponses={rendererInput.responses}
-                onReady={handleReady}
-                strict
-                readOnly={readOnly || saving}
-                fitToContainer
-                topNavigation={false}
-                bottomNavigation={false}
-                className="encounter-visit-renderer"
-              />
+              <EncounterMediaCaptureContext.Provider value={media.value}>
+                <EsheetRenderer
+                  key={fieldsSettled ? 'settled' : 'priming'}
+                  ref={renderer}
+                  formDataInput={rendererInput.definition}
+                  initialResponses={rendererInput.responses}
+                  onReady={handleReady}
+                  strict
+                  readOnly={readOnly || saving}
+                  fitToContainer
+                  topNavigation={false}
+                  bottomNavigation={false}
+                  className="encounter-visit-renderer"
+                />
+              </EncounterMediaCaptureContext.Provider>
             </EncounterSectionContext.Provider>
           </div>
           {mode === 'view' && <EncounterMdyView source={snapshot.mdy} />}
@@ -950,6 +968,7 @@ const EncounterVisitSession = React.forwardRef<
           )}
         </ButtonGroup>
       </footer>
+      {media.dialog}
     </div>
   );
 });

@@ -35,6 +35,33 @@ and MCP tools. Sanitized markup is retained in native response `attributes`
 both the recorded baseline and the markup's text match the current answer.
 An MCP text replacement therefore cannot restore stale formatting.
 
+## Media capture (mieweb/ui#736)
+
+`EncounterVisit.mediaCapture` opts the visit's editing surfaces — narrative
+fields (via `EncounterMediaCaptureContext`, since eSheet fields are registered
+globally and take no props from the visit) and RichEdit — into the capture
+ribbon. `uploadHandler` is mandatory by type: captures land as uploaded
+`https:`/same-origin URLs; the relaxed narrative sanitizer
+(`sanitizeNarrativeHtml(html, { media: true })`) strips `data:` and
+cross-origin images, so base64 cannot persist even via paste (same-origin
+`blob:` object URLs pass the origin check but are session-scoped — durable
+storage is the uploadHandler's job). Without the opt-in the sanitizer config
+is unchanged — keep its strict branch byte-identical. Capture-screen always
+interposes the PHI notice (a shared screen can show other patients' data); a
+host-supplied `confirmScreenCapture` replaces it only because the notice
+becomes the host's responsibility.
+
+Image handling per narrative-HTML consumer (images never contribute to
+`answer`/`encounterNarrativeText`, so the forgery gate
+`narrativeText(html) === answer` holds with media present by construction):
+
+| Consumer | Handling |
+| --- | --- |
+| Narrative field editor | Renders opt-in images from `encounterNarrativeHtml`. |
+| MDY body / View / Export | Narrative fields project their plain `answer` into the rendered document: images are **stripped**. RichEdit-mode images live in the MDY body as markdown and render in View (the report profile allows `img`; its `data:` passthrough predates this feature and is only reachable for RichEdit prose). |
+| Raw MDY / MCP snapshots | **Not redacted.** The MDY front matter carries the full `response` map and MCP `getVisit`/`getMdy` return it: `encounterNarrativeHtml` retains image URLs and alt text. Hosts needing media-free payloads must strip them downstream. |
+| MCP / LLM narrative tools | Read `answer` text: images are **stripped**, alt text is not surfaced. |
+
 Common findings are configured on narrative sections and text observations.
 They dock beside the narrative field as a section-specific macro group that
 opens while the field has focus and closes when focus leaves (the field sets

@@ -49,6 +49,7 @@ export {
   registerEsheetNarrativeFieldType,
   sanitizeNarrativeHtml,
   type EsheetNarrativeFieldProps,
+  type NarrativeSanitizeOptions,
 } from './esheet-fields/EsheetNarrativeField';
 export {
   EsheetSectionContext,

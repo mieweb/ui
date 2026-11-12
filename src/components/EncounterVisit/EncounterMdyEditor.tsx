@@ -10,6 +10,11 @@ import {
 } from 'react';
 import type { CoreEditor } from '@kerebron/editor';
 import { RichEditor, type RichEditorHandle } from '../RichEditor/RichEditor';
+import type { MediaUploadOptions } from '../RichEditor';
+import {
+  CaptureDock,
+  type MediaCaptureOptions,
+} from '../RichMediaCaptureEditor/CaptureDock';
 import { useEncounterMessages } from './messages';
 import {
   createMdyEditorKit,
@@ -25,6 +30,10 @@ export interface EncounterMdyEditorProps {
   onChange: (body: string) => void;
   onFieldActivate: (id: string) => void;
   disabled?: boolean;
+  /** How captured/pasted media files are uploaded (mieweb/ui#736). */
+  mediaUpload?: MediaUploadOptions;
+  /** Docks the capture ribbon above the document. Default off. */
+  mediaCapture?: MediaCaptureOptions;
 }
 
 export type EncounterMdyEditorHandle = RichEditorHandle;
@@ -34,7 +43,16 @@ export const EncounterMdyEditor = forwardRef<
   EncounterMdyEditorHandle,
   EncounterMdyEditorProps
 >(function EncounterMdyEditor(
-  { body, fields = [], fieldIds, onChange, onFieldActivate, disabled = false },
+  {
+    body,
+    fields = [],
+    fieldIds,
+    onChange,
+    onFieldActivate,
+    disabled = false,
+    mediaUpload,
+    mediaCapture,
+  },
   ref
 ) {
   const m = useEncounterMessages();
@@ -98,6 +116,27 @@ export const EncounterMdyEditor = forwardRef<
     return () => editor.removeEventListener('doc:loaded', loaded);
   }, [editor, fields]);
 
+  const inert = disabled || loadFailed || editor === null;
+  const document = (
+    <RichEditor
+      ref={richEditor}
+      value={body}
+      onChange={onChange}
+      onError={() => {
+        status.current.loadFailed = true;
+        setLoadFailed(true);
+      }}
+      onReady={(next) => {
+        status.current.editor = next;
+        setEditor(next);
+      }}
+      disabled={inert}
+      aria-label={m('Encounter narrative')}
+      editorKits={editorKits}
+      mediaUpload={mediaUpload}
+      className="encounter-mdy-editor"
+    />
+  );
   return (
     <>
       {loadFailed && (
@@ -107,23 +146,22 @@ export const EncounterMdyEditor = forwardRef<
           )}
         </p>
       )}
-      <RichEditor
-        ref={richEditor}
-        value={body}
-        onChange={onChange}
-        onError={() => {
-          status.current.loadFailed = true;
-          setLoadFailed(true);
-        }}
-        onReady={(next) => {
-          status.current.editor = next;
-          setEditor(next);
-        }}
-        disabled={disabled || loadFailed || editor === null}
-        aria-label={m('Encounter narrative')}
-        editorKits={editorKits}
-        className="encounter-mdy-editor"
-      />
+      {mediaCapture ? (
+        <CaptureDock
+          locked={inert}
+          insertFiles={(files) => richEditor.current?.insertFiles?.(files)}
+          replaceImage={(src, file, occurrence) =>
+            richEditor.current?.replaceImage?.(src, file, occurrence)
+          }
+          scanDocument={mediaCapture.scanDocument}
+          extraCaptures={mediaCapture.extraCaptures}
+          confirmScreenCapture={mediaCapture.confirmScreenCapture}
+        >
+          {document}
+        </CaptureDock>
+      ) : (
+        document
+      )}
     </>
   );
 });
