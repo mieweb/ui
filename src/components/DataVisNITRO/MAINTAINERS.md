@@ -6,7 +6,7 @@
 
 ## What's in here
 
-Compatibility re-exports and Storybook examples for MIE's **datavis** engine, exported from a **separate entry** ([src/datavis.ts](../../datavis.ts) → `@mieweb/ui/datavis`):
+Compatibility re-exports for MIE's **datavis** engine, exported from a **separate entry** ([src/datavis.ts](../../datavis.ts) → `@mieweb/ui/datavis`). The Storybook examples live in the datavis submodule at [packages/datavis/stories/](https://github.com/mieweb/datavis/tree/main/stories) and are globbed into this repo's Storybook by [.storybook/main.ts](../../../.storybook/main.ts):
 
 - `DataVisNitroSource` — declares a data source (`type: 'http' | 'local' | 'file'`)
   and publishes a view through `DataVisNitroContext`.
