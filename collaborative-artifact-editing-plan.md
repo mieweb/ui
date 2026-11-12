@@ -1,4 +1,4 @@
-# Collaborative Artifact editing and MIME support: implementation plan
+# Collaborative Artifact editing, MIME email, and MDY support: implementation plan
 
 Status: draft for review, updated from the agreed storage and collaboration model.
 This plan coordinates `mieweb/kerebron`, `mieweb/artipod`, `mieweb/eSheet`,
@@ -9,10 +9,18 @@ contains the plan only.
 
 ## Goal and delivery approach
 
-Build a collaborative rich-media component on protected Artipod storage. Support
-MDY and MIME documents, inline images/video, ordinary attachments, and approved
-external media URLs. New documents default to MDY; saving an imported document
-retains its format unless the user explicitly exports another format.
+Build a collaborative rich-media component on protected Artipod storage that
+handles almost all message display and composition work for an email client.
+An IMAP client should be able to pass in a fetched raw message and obtain a
+usable message view/composer with minimal integration. The component handles
+MIME parsing/writing, body selection, message headers, inline images/video,
+attachments, and approved external media references.
+
+MIME email is a first-class use case covering both display and composition.
+Prefer MDY for systems that do not want to implement MIME: new
+ordinary documents default to MDY, while new email messages use MIME. Saving
+an imported message or document retains its format unless the user explicitly
+exports another format.
 
 Implement the new path alongside existing components, demonstrate compatibility,
 obtain affected owners' approval, then migrate and clean up. Preserve existing
@@ -29,13 +37,64 @@ body-only consumers do not load them at startup.
 Check a milestone only after its tasks and acceptance criteria have evidence.
 Source investigation is completed below; there is no preliminary research milestone.
 
+## MIME/email and MDY contract
+
+The intended email-client integration is: fetch a raw message, pass its source
+and authorized Artifact binding to the component, and consume complete-message
+output through host-provided draft-save/send callbacks. The caller must not need
+its own MIME parser/writer, CID resolver, body-selection rules, attachment UI,
+email header editor, or HTML sanitizer. Evaluate the "almost all" goal through
+that working integration and its acceptance criteria.
+
+- **MIME/email mode:** accept complete Internet message bytes as a stream or
+  protected source handle, including messages fetched over IMAP. Handle display,
+  new composition, draft editing, reply, reply-all, and forwarding. Serialize a
+  complete message with its headers, supported body alternatives, inline parts,
+  and attachments, ready for the host's mail adapter.
+- **MDY/document mode:** prefer MDY when the host does not need MIME. Offer the
+  same body/media editing experience without requiring that host to construct
+  message headers or multipart structures. Preserve MDY metadata and durable
+  attachment references; do not invent a new MDY binary container.
+- **Format selection:** honor an explicit input format/mode and declared source
+  media type. Define bounded source recognition for undeclared inputs; do not
+  rely only on a filename extension. In email mode, plain-only, HTML-only, and
+  ordinary single-part messages stay email messages; absence of multipart
+  structure or a MIME-Version header does not select MDY. Invalid declared MIME
+  produces a recoverable diagnostic while retaining its source, rather than
+  silently reinterpreting it as MDY. Persist the selected source format on the
+  shared Artifact so every editor uses the same interpretation.
+- **Serialization purpose:** distinguish source-preserving export, editable draft
+  save, and delivery serialization. Source export may retain original bytes;
+  draft save retains authorized draft fields, including Bcc. Delivery produces
+  normalized message bytes with Bcc recipients omitted from delivered headers
+  and returns the transport recipient envelope separately for the host adapter.
+  The caller selects the purpose; it must not have to rewrite exported headers
+  itself or treat a source/draft export as delivery output.
+- **MIME conventions:** handle the message/header and part relationships needed
+  for real mail: encoded and folded headers, addresses and threading, charsets,
+  transfer encodings, nested multipart structures, alternative bodies, inline
+  CID/Content-Location media, attachment names/dispositions, and attached messages.
+  Preserve unknown parts/headers and source bytes as specified below. Explicitly
+  identify unsupported media and signed/encrypted content; never discard it or
+  claim that editing preserved a signature's validity.
+- **Ownership:** the component and its shared codecs own message presentation,
+  composition, and serialization. The host owns IMAP/SMTP or equivalent network
+  adapters, account authentication, mailbox operations, sender identity, send-time
+  policy, and transport recipient envelopes, plus existing authorization/storage
+  services. Those callbacks must remain small; MIME work belongs in the component
+  and codecs rather than being repeated by each mail client.
+
+M3 supplies the message model/codecs, M5 supplies usable email display/composition,
+and M6 proves the minimal mail-client integration. This contract uses the same
+Artipod, collaboration, shared-scope, and lifecycle requirements as document mode.
+
 ## Milestone tracker
 
 - [ ] M1 — Shared bindings, Artifact scopes, and acceptance fixtures implemented.
 - [ ] M2 — Protected Artipod storage, streaming, and shared lifecycle validated.
-- [ ] M3 — Kerebron shared-body bindings and preserving MDY/MIME codecs work.
+- [ ] M3 — Kerebron shared-body bindings, MIME message codecs, and MDY preservation work.
 - [ ] M4 — eSheet and yorm support inherited scopes and shared document references.
-- [ ] M5 — Experimental UI demonstrates shared inputs and cross-eSheet editing.
+- [ ] M5 — Experimental UI demonstrates email display/composition and shared eSheet editing.
 - [ ] M6 — Integration, owner approvals, and coordinated releases are complete.
 - [ ] M7 — Approved existing callers migrate incrementally.
 - [ ] M8 — Approved deprecations and duplicate-code cleanup are complete.
@@ -151,14 +210,14 @@ flowchart TB
 
 ## Repository responsibilities
 
-| Repository        | Additive work                                                                                                                                                                                                                                               |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mieweb/kerebron` | Generic borrowed body/media bindings, configurable Yjs fragment ownership, shared insertion primitives, headless MDY/MIME codecs. Proposed codec package names: `@kerebron/documents` and `@kerebron/document-mime`; neither creates a new DocumentSession. |
-| `mieweb/artipod`  | Managed protected persistence, authorized group/Artifact resolution, streaming encrypted attachment I/O, bounded caching, durability, sync, and shared consumer/lock lifecycle.                                                                             |
-| `mieweb/eSheet`   | First-class optional default Artifact scope, question overrides/document-reference field binding, FileStore bridge, strict schema/builder/MCP preservation, and FormStore integration.                                                                      |
-| `mieweb/yorm`     | Reuse existing DocumentSession; add typed body/metadata/manifest materialization and policy-safe granular bindings, protected persistence integration, and transport validation coverage.                                                                   |
-| `mieweb/ui`       | Provider composition, thin media/document editors, existing capture/annotation UI, attachment views, and realistic Storybook/browser workflows.                                                                                                             |
-| Host application  | Authenticated identity, permissions, reference resolution/provisioning, room authorization, approved external URL policy, and domain-specific response semantics.                                                                                           |
+| Repository        | Additive work                                                                                                                                                                                                                                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mieweb/kerebron` | Generic borrowed body/media bindings, configurable Yjs fragment ownership, shared insertion primitives, headless MIME message/header codecs and composition helpers, and MDY codecs. Proposed codec package names: `@kerebron/documents` and `@kerebron/document-mime`; neither creates a new DocumentSession. |
+| `mieweb/artipod`  | Managed protected persistence, authorized group/Artifact resolution, streaming encrypted attachment I/O, bounded caching, durability, sync, and shared consumer/lock lifecycle.                                                                                                                                |
+| `mieweb/eSheet`   | First-class optional default Artifact scope, question overrides/document-reference field binding, FileStore bridge, strict schema/builder/MCP preservation, and FormStore integration.                                                                                                                         |
+| `mieweb/yorm`     | Reuse existing DocumentSession; add typed body/metadata/manifest materialization and policy-safe granular bindings, protected persistence integration, and transport validation coverage.                                                                                                                      |
+| `mieweb/ui`       | Provider composition, reusable MIME email display/composer and MDY document views, existing capture/annotation UI, attachment views, and minimal mail-client/Storybook/browser workflows.                                                                                                                      |
+| Host application  | Authenticated identity, permissions, reference resolution/provisioning, room authorization, approved external URL policy, domain response semantics, and small mail fetch/draft-save/send/account adapters.                                                                                                    |
 
 Suggested UI concepts are an app-level `ArtipodProvider`, an inherited
 `ArtifactScopeProvider`, and an `ArtifactDocumentEditor` used by both referenced
@@ -290,6 +349,9 @@ Owner: all integration tracks. Prerequisite: review of this plan.
        interfaces in their owning packages. Specify identity, authorization resolution,
        lifetime ownership, fragment/layout version, and optional immutable revision.
        Kerebron receives opaque bindings, without importing Artipod/yorm SDKs.
+       Define the MIME/email and MDY input/output contract above, including source
+       streams/handles, persisted format selection, complete-message output, and
+       small host draft-save/send callbacks.
 2. [ ] Specify the default/override contract above, including nested groups,
        stable field/row paths, lazy default provisioning, explicit document-reference
        questions, and failure before attachment writes when scope is unavailable.
@@ -318,13 +380,16 @@ Owner: all integration tracks. Prerequisite: review of this plan.
 7. [ ] Commit synthetic fixtures and an expected-results manifest covering the
        acceptance matrix. Include the exact eSheet A/B/standalone example, multiple
        users, denied overrides, nested MIME, and small/large media with known hashes.
+       Include raw fetched-mail fixtures, email display/composition expectations,
+       MDY inputs, and invalid or undeclared source-format cases.
 8. [ ] Notify the review contacts, confirm accountable owners, and create the
        review register. Review concrete TypeScript interfaces, layout/permission
        rules, and fixture expectations across repositories before parallel coding.
 
 Done when: each track can implement against shared interfaces and fixtures;
 Artifact/Artipod distinctions, scope resolution, authority, snapshot semantics,
-privacy lifecycle, and memory budgets are explicit. Owner decisions are tracked.
+privacy lifecycle, memory budgets, and minimal MIME/email versus MDY integration
+contracts are explicit. Owner decisions are tracked.
 
 ## M2 — Establish protected Artipod storage and lifecycle
 
@@ -393,15 +458,23 @@ while M2 is built; exercise the real adapter at M6.
        raw source. Preserve unknown keys, comments, quoting, line endings, field links,
        and no-op source. Explicit metadata edits must actually update metadata.
        MDY exports need durable representable media URLs or an explicit loss/error
-       result; do not invent an MDY binary manifest.
+       result; do not invent an MDY binary manifest. Make this the preferred
+       ordinary-document path for hosts that do not need MIME.
 7. [ ] Select a MIME parser/writer using an incremental-processing fixture spike.
        Verify Deno/browser/npm compatibility, license, and measured memory behavior.
        Stream original source and decoded attachments to protected storage; keep
        source handles/part metadata instead of a complete message string in the view.
+       Check conformance against the MIME/message standards in the source map and
+       the interoperability fixture manifest, rather than a few HTML-email samples.
 8. [ ] Implement nested mixed/alternative/related bodies, charset/base64/quoted-
        printable decoding, CID/Content-Location scope, filenames/dispositions, repeated
        headers, attached messages, external references, and opaque unknown parts.
        Select the supported body and retain original source/part relationships.
+       Support plain-only/HTML-only messages, encoded/folded and internationalized
+       headers/addresses, Unicode subjects/display names/filenames, and continued/
+       encoded MIME parameters. Follow host transport capabilities for outgoing
+       internationalized mail and surface incompatibilities before send.
+       Include fixtures for realistic imperfect mail with recoverable diagnostics.
 9. [ ] Sanitize rendering, apply remote-media policy before assigning DOM URLs,
        report unsupported formatting, and preserve signed/encrypted messages as opaque
        read-only source initially. Edited export regenerates supported HTML/plain-text
@@ -413,11 +486,29 @@ while M2 is built; exercise the real adapter at M6.
         Stream encoding/output; explicit authorized download/export is a separate host
         action from automatic browser persistence. Add codec/media/multi-editor tests
         to normal CI, including source preservation and concurrent snapshot export.
+11. [ ] Implement the shared message-header model and complete-message writer:
+        From/Reply-To, To/Cc/Bcc, Subject, Date/Message-ID, and reply-threading fields.
+        Keep message headers distinct from rich-text bodies and the host's transport
+        recipient envelope. Preserve imported headers; encode/fold new values,
+        validate edits, and prevent header injection. Keep Bcc recipients out of
+        delivered headers while retaining authorized draft/transport information.
+        Expose distinct source export, draft-save, and delivery purposes; delivery
+        returns normalized message bytes and the recipient envelope separately.
+        Define host overrides for sender identity and send-time values. Add reply,
+        reply-all, quoting, and inline/attached-message forward helpers so clients
+        do not implement their own message-rewriting rules.
+12. [ ] Implement deterministic MIME/email versus MDY routing from the agreed
+        contract. New email composition produces MIME; non-MIME document hosts
+        default to MDY. Recognized or declared email never silently becomes MDY
+        after a parser failure. Persist format with the shared Artifact and test
+        consistent routing across reopen and multiple editors.
 
 Done when: two borrowed editor views converge and detach safely; MDY preserves
-its envelope; MIME edits survive fresh-session reopen with intact media and
-unknown parts. Large attachments remain outside Y.Doc/whole-message buffers,
-and unsupported/lossy conversions are reported without discarding the source.
+its envelope; complete MIME messages can be displayed, composed, replied to,
+forwarded, and reopened with intact headers, media, and unknown parts. The host
+does not implement MIME interpretation or message rewriting. Large attachments
+remain outside Y.Doc/whole-message buffers, and unsupported/lossy conversions
+are reported without discarding the source.
 
 ## M4 — Implement eSheet and yorm integrations
 
@@ -499,15 +590,30 @@ upstream tracks progress; complete validation with real released/build artifacts
 7. [ ] Add MDY/MIME import, source-format save, and explicit export stories. Dispose
        views and reopen saved Artifacts in fresh instances to prove durability.
        Do not use story mock object URLs as persistence evidence.
+       Add usable email display and composer modes with header/recipient controls,
+       body alternatives, inline media, attachment management, new message, edit
+       draft, reply/reply-all, and both inline and attached-message forwarding.
+       Supply accessible pending/error states and host draft-save/send callbacks.
+       Pass draft serialization to draft-save callbacks and delivery bytes plus
+       the separate recipient envelope to send callbacks.
 8. [ ] Follow theme/labels/accessibility/RTL/catalog conventions and document provider
        ownership, reference behavior, limitations, and migration examples. Add focused
        unit tests, browser collaboration/storage tests, and reviewed visual baselines.
        Keep fakes in stories/tests, without a production plaintext fallback.
+9. [ ] Build a minimal mail-client harness: its IMAP adapter fetches synthetic raw
+       message bytes/streams, supplies authorized Artipod bindings, and consumes
+       serialized output for draft save/send. The adapter contains no MIME parser,
+       CID mapping, body-selection, attachment-rendering, or message-rewriting logic.
+       Exercise fetched-message display, reply with a new attachment, serialization,
+       and fresh-instance reopen. Show the same component in an MDY-only host
+       without mail-specific configuration.
 
 Done when: the required example works concurrently with real protected storage,
 shared defaults and isolated overrides; imported media survives save/reopen;
-50 views do not create 50 storage roots or duplicate binary caches. Existing
-components still run on their established path while this example is reviewed.
+50 views do not create 50 storage roots or duplicate binary caches. The mail-client
+harness demonstrates minimal caller glue for display/composition, and an MDY-only
+host uses the preferred simpler format. Existing components still run on their
+established path while these examples are reviewed.
 
 ## M6 — Integration, owner approvals, and releases
 
@@ -520,6 +626,10 @@ migration, public deprecation notices, and duplicate implementation removal.
 2. [ ] Run the full acceptance matrix and repository checks below. Record exact
        versions, fixture hashes, memory measurements, browser storage inspections,
        and reproducible multi-user demo steps in the linked PRs.
+       Review the minimal mail-client adapter to verify that fetching/displaying
+       mail and composing replies require no client-specific MIME implementation.
+       Verify outgoing messages with an independent mail parser/client as well
+       as component reopen; document remaining unsupported content explicitly.
 3. [ ] Verify existing body-only APIs, upload handlers, form events/refs, HTML/plain
        contracts, MDY provenance, clinical/email policies, and collaboration behavior.
        Verify one compatible Yjs/ProseMirror dependency graph and optional entry loading.
@@ -606,32 +716,37 @@ APIs pass, and storage/collaboration ownership is consistent across all consumer
 Use real protected browser storage and multiple independent editor connections
 where indicated. Tests must reopen saved content after disposing preview URLs.
 
-| Case                                | Required result                                                                                                                                                                                                             |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Terminology/identity                | Artifacts are items, Artipods group them. Artifact/field/row/definition/document IDs and saved revisions remain distinct.                                                                                                   |
-| eSheet A default                    | Uploader, 50 inputs and image questions share the default Artifact scope/Artipod A; each field retains independent content. Last-visit editor is also inside A.                                                             |
-| Explicit override                   | Last-visit input selects its referenced Artifact in Artipod B; default siblings stay in A. Same-pod overrides also work.                                                                                                    |
-| Missing default                     | Attachment-free sheet works. First attachment provisions an authorized default or fails before persistent writes.                                                                                                           |
-| Concurrent first attachments        | Two fields/tabs/users with no default use one host-coordinated get-or-create keyed by response identity; both retain the same authorized default after retry and reopen.                                                    |
-| Denied/unavailable override         | Clear state, no default fallback, no unauthorized read/write and no wrong-record capture completion.                                                                                                                        |
-| Cross-sheet document                | eSheet A, another definition/instance, another user and a standalone editor converge on the same note Artifact without cloning it.                                                                                          |
-| Same definition, separate responses | Defaults remain isolated unless the host explicitly binds the same Artifact. Remount/reordered rows preserve stable identities.                                                                                             |
-| Shared lifecycle                    | One app-owned root serves multiple Artipods and 50 views. Detaching one input leaves others working; deleting a sheet reference leaves shared documents intact.                                                             |
-| Collaborative bodies/fields         | Two views of one body and two distinct bodies converge; concurrent form/prose changes survive; undo/origins/presence are scoped correctly.                                                                                  |
-| Host authority/policy               | No second canonical store; read-only peers receive updates. Unauthorized registered/introduced-root mutations, including changes invisible in JSON, are rejected before persistence/fan-out for Update and SyncStep2.       |
-| Snapshot/export race                | Full snapshot including deletion history is coherent with attachment versions; newer live edits remain dirty after export completion.                                                                                       |
-| Offline/reordered sync              | Compatible canonical histories merge add/delete/replace without resurrecting content; duplicate notifications do not reseed. Incompatible lineage/schema is an explicit conflict.                                           |
-| Large encrypted attachments         | Real OPFS ingest, hashing, encryption, save/reopen, transfer, playback and MIME export stay within the documented memory/cache budget; quotas and aborts are handled.                                                       |
-| Encrypted restart/lock              | Unexpired-grant offline reopen works. Persisted source, names, metadata, thumbnails and scratch outputs contain no plaintext test marker; expiry/logout/account switch stops access/views and requires authorized recovery. |
-| Live collaboration transport        | Authenticated, authorized protected connections cover body, metadata, proposals and awareness; room/Artifact denial and account changes cannot leak or replay unauthorized state.                                           |
-| External media cache policy         | Approved external URLs use the managed fetch/preview policy; ungoverned HTTP/service-worker caching is blocked or the reference remains unfetched.                                                                          |
-| Upload/save failures                | No ready reference before durable bytes, no saved revision on failed flush, no stale insertion after scope change/lock. Pending capture recovery and partial cleanup follow policy.                                         |
-| Primary MIME email                  | HTML/plain bodies, CID image, MP4, PDF, unknown part and external media survive paragraph edit + capture + attachment + export/reopen; decoded untouched hashes match.                                                      |
-| MIME structure/source               | Nested alternative/related ordering, CID/location scope, repeated headers, filenames and attached messages survive. No-edit export reproduces source bytes.                                                                 |
-| MDY preservation                    | New documents default to MDY; body edits preserve raw YAML; explicit metadata changes work; unknown fields and protected links survive.                                                                                     |
-| Unsupported/lossy export            | Unknown/signed/encrypted content retained with explicit limits; missing references or unrepresentable MDY assets reported without silent loss.                                                                              |
-| Legacy consumers                    | Existing body strings, URL media, native events/refs, HTML rejection behavior, clinical/email policies and collaboration keep their recorded contracts.                                                                     |
-| Approvals                           | Every migration, public deprecation and removal has the applicable recorded owner approval and published replacement/version evidence.                                                                                      |
+| Case                                | Required result                                                                                                                                                                                                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Terminology/identity                | Artifacts are items, Artipods group them. Artifact/field/row/definition/document IDs and saved revisions remain distinct.                                                                                                                                   |
+| eSheet A default                    | Uploader, 50 inputs and image questions share the default Artifact scope/Artipod A; each field retains independent content. Last-visit editor is also inside A.                                                                                             |
+| Explicit override                   | Last-visit input selects its referenced Artifact in Artipod B; default siblings stay in A. Same-pod overrides also work.                                                                                                                                    |
+| Missing default                     | Attachment-free sheet works. First attachment provisions an authorized default or fails before persistent writes.                                                                                                                                           |
+| Concurrent first attachments        | Two fields/tabs/users with no default use one host-coordinated get-or-create keyed by response identity; both retain the same authorized default after retry and reopen.                                                                                    |
+| Denied/unavailable override         | Clear state, no default fallback, no unauthorized read/write and no wrong-record capture completion.                                                                                                                                                        |
+| Cross-sheet document                | eSheet A, another definition/instance, another user and a standalone editor converge on the same note Artifact without cloning it.                                                                                                                          |
+| Same definition, separate responses | Defaults remain isolated unless the host explicitly binds the same Artifact. Remount/reordered rows preserve stable identities.                                                                                                                             |
+| Shared lifecycle                    | One app-owned root serves multiple Artipods and 50 views. Detaching one input leaves others working; deleting a sheet reference leaves shared documents intact.                                                                                             |
+| Collaborative bodies/fields         | Two views of one body and two distinct bodies converge; concurrent form/prose changes survive; undo/origins/presence are scoped correctly.                                                                                                                  |
+| Host authority/policy               | No second canonical store; read-only peers receive updates. Unauthorized registered/introduced-root mutations, including changes invisible in JSON, are rejected before persistence/fan-out for Update and SyncStep2.                                       |
+| Snapshot/export race                | Full snapshot including deletion history is coherent with attachment versions; newer live edits remain dirty after export completion.                                                                                                                       |
+| Offline/reordered sync              | Compatible canonical histories merge add/delete/replace without resurrecting content; duplicate notifications do not reseed. Incompatible lineage/schema is an explicit conflict.                                                                           |
+| Large encrypted attachments         | Real OPFS ingest, hashing, encryption, save/reopen, transfer, playback and MIME export stay within the documented memory/cache budget; quotas and aborts are handled.                                                                                       |
+| Encrypted restart/lock              | Unexpired-grant offline reopen works. Persisted source, names, metadata, thumbnails and scratch outputs contain no plaintext test marker; expiry/logout/account switch stops access/views and requires authorized recovery.                                 |
+| Live collaboration transport        | Authenticated, authorized protected connections cover body, metadata, proposals and awareness; room/Artifact denial and account changes cannot leak or replay unauthorized state.                                                                           |
+| External media cache policy         | Approved external URLs use the managed fetch/preview policy; ungoverned HTTP/service-worker caching is blocked or the reference remains unfetched.                                                                                                          |
+| Upload/save failures                | No ready reference before durable bytes, no saved revision on failed flush, no stale insertion after scope change/lock. Pending capture recovery and partial cleanup follow policy.                                                                         |
+| Minimal mail-client integration     | Host fetches a raw message stream, supplies authorized bindings, and consumes output for save/send. Display and reply with attachments require no caller MIME parser, CID resolver, body-selection logic, attachment UI, or message rewriting.              |
+| Email display/composition           | Plain-only, HTML-only and nested multipart messages display; new message, draft edit, reply/reply-all and both forward modes serialize complete messages accepted by an independent parser/client. Headers, recipients and threading are correct.           |
+| Serialization purposes              | Source export preserves no-op bytes; draft save retains authorized Bcc/draft data; delivery omits Bcc recipients from headers and returns their transport envelope separately. The host never rewrites MIME to make an export sendable.                     |
+| Header/encoding interoperability    | Encoded/folded/repeated and internationalized headers, Unicode filenames and continued parameters survive. Outgoing alternatives, boundaries and encodings are coherent; edited headers cannot inject fields; Bcc recipients stay out of delivered headers. |
+| Format selection                    | Email input and new email use MIME; non-MIME document hosts prefer MDY. Single-part mail stays email; invalid declared MIME retains source and reports diagnostics. Format remains consistent across editors and reopen.                                    |
+| Primary MIME email                  | HTML/plain bodies, CID image, MP4, PDF, unknown part and external media survive paragraph edit + capture + attachment + export/reopen; decoded untouched hashes match.                                                                                      |
+| MIME structure/source               | Nested alternative/related ordering, CID/location scope, repeated headers, filenames and attached messages survive. No-edit export reproduces source bytes.                                                                                                 |
+| MDY preservation                    | Non-MIME document hosts default to MDY without mail configuration; body edits preserve raw YAML; explicit metadata changes work; unknown fields and protected links survive.                                                                                |
+| Unsupported/lossy export            | Unknown/signed/encrypted content retained with explicit limits; missing references or unrepresentable MDY assets reported without silent loss.                                                                                                              |
+| Legacy consumers                    | Existing body strings, URL media, native events/refs, HTML rejection behavior, clinical/email policies and collaboration keep their recorded contracts.                                                                                                     |
+| Approvals                           | Every migration, public deprecation and removal has the applicable recorded owner approval and published replacement/version evidence.                                                                                                                      |
 
 ## Source map
 
@@ -643,7 +758,7 @@ new work. Follow each repository's own contributor/agent guidance.
 - **eSheet:** [root guidance](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/AGENTS.md), [renderer](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/packages/renderer/src/lib/EsheetRenderer.tsx), [strict definitions](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/packages/core/src/lib/types.ts), [FileStore](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/packages/core/src/lib/file-store.ts), [collaboration contract](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/apps/docs/docs/advanced/collaboration.md), [upstream MDY helpers](https://github.com/mieweb/eSheet/blob/518885ca9d7ef060a8450a3d22e86c7ee1af3b4a/packages/fields-documents/src/mdy.ts).
 - **yorm:** [DocumentSession](https://github.com/mieweb/yorm/blob/458c9e423d95895a29bc98b3323aa2842d6f101c/packages/yjs/src/createYorm.ts), [JSON codec](https://github.com/mieweb/yorm/blob/458c9e423d95895a29bc98b3323aa2842d6f101c/packages/yjs/src/codecs/json.ts), [runtime snapshots](https://github.com/mieweb/yorm/blob/458c9e423d95895a29bc98b3323aa2842d6f101c/packages/yjs/src/runtime/memory.ts), [server guard](https://github.com/mieweb/yorm/blob/458c9e423d95895a29bc98b3323aa2842d6f101c/packages/server/src/websocket/index.ts), [eSheet demo](https://github.com/mieweb/yorm/blob/458c9e423d95895a29bc98b3323aa2842d6f101c/examples/patient-collab-demo/README.md).
 - **UI:** [contributing](https://github.com/mieweb/ui/blob/7aa294d430ef0e3bbaf106c3eded8a394b60c771/CONTRIBUTING.md), [RichEditor](https://github.com/mieweb/ui/blob/7aa294d430ef0e3bbaf106c3eded8a394b60c771/src/components/RichEditor/RichEditor.tsx), [CaptureDock](https://github.com/mieweb/ui/blob/7aa294d430ef0e3bbaf106c3eded8a394b60c771/src/components/RichMediaCaptureEditor/CaptureDock.tsx), [EncounterVisit notes](https://github.com/mieweb/ui/blob/7aa294d430ef0e3bbaf106c3eded8a394b60c771/src/components/EncounterVisit/MAINTAINERS.md), [EmailEditor notes](https://github.com/mieweb/ui/blob/7aa294d430ef0e3bbaf106c3eded8a394b60c771/src/components/EmailEditor/MAINTAINERS.md).
-- **Formats:** [MDY draft](https://github.com/mieweb/templit/blob/8b57fe1c8fe7f0d149db00a64092531c4b1b1d56/doc/mdy-specification.md), [MIME multipart](https://www.rfc-editor.org/rfc/rfc2046.html), [related parts](https://www.rfc-editor.org/rfc/rfc2387.html), [CID](https://www.rfc-editor.org/rfc/rfc2392.html), [Content-Location](https://www.rfc-editor.org/rfc/rfc2557.html).
+- **Formats:** [MDY draft](https://github.com/mieweb/templit/blob/8b57fe1c8fe7f0d149db00a64092531c4b1b1d56/doc/mdy-specification.md), [Internet message format](https://www.rfc-editor.org/rfc/rfc5322.html), [MIME bodies/encodings](https://www.rfc-editor.org/rfc/rfc2045.html), [MIME multipart](https://www.rfc-editor.org/rfc/rfc2046.html), [encoded headers](https://www.rfc-editor.org/rfc/rfc2047.html), [MIME conformance](https://www.rfc-editor.org/rfc/rfc2049.html), [Content-Disposition](https://www.rfc-editor.org/rfc/rfc2183.html), [encoded parameters](https://www.rfc-editor.org/rfc/rfc2231.html), [internationalized headers](https://www.rfc-editor.org/rfc/rfc6532.html), [related parts](https://www.rfc-editor.org/rfc/rfc2387.html), [CID](https://www.rfc-editor.org/rfc/rfc2392.html), [Content-Location](https://www.rfc-editor.org/rfc/rfc2557.html).
 
 ## Parallel implementation and PR sequence
 
