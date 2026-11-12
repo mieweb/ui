@@ -681,12 +681,18 @@ interface MessageRowProps {
    */
   threaded?: boolean;
   /**
-   * Author of the message this one replies to. Added to the row's accessible
-   * name so the reply relationship is not conveyed by indentation alone.
+   * Names the message this one replies to (e.g. "reply to Alice"). Added to the
+   * row's accessible name so the relationship is not conveyed by indentation alone.
    */
-  replyToName?: string;
+  replyToLabel?: string;
   /** Number of nested replies under this message; shows the collapse toggle when > 0. */
   replyCount?: number;
+  /** Collapsed-replies pill text. */
+  repliesLabel?: string;
+  /** Accessible name of the reply toggle while collapsed. */
+  expandRepliesLabel?: string;
+  /** Accessible name of the reply toggle while expanded. */
+  collapseRepliesLabel?: string;
   /** Whether this message's replies are currently collapsed. */
   collapsed?: boolean;
   /** Toggle this message's collapsed state. */
@@ -718,8 +724,11 @@ export const MessageRow = React.memo(function MessageRow({
   mediaErrorLabel,
   mediaRetryLabel,
   threaded = false,
-  replyToName,
+  replyToLabel,
   replyCount = 0,
+  repliesLabel,
+  expandRepliesLabel,
+  collapseRepliesLabel,
   collapsed = false,
   onToggleReplies,
 }: MessageRowProps) {
@@ -992,7 +1001,7 @@ export const MessageRow = React.memo(function MessageRow({
       data-slot="superchat-message"
       role="article"
       aria-label={`${authorName}, ${formatTime(message.time)}${
-        replyToName ? `, reply to ${replyToName}` : ''
+        replyToLabel ? `, ${replyToLabel}` : ''
       }`}
       className={cn(
         'group flex gap-2',
@@ -1043,11 +1052,7 @@ export const MessageRow = React.memo(function MessageRow({
               type="button"
               onClick={onToggleReplies}
               aria-expanded={!collapsed}
-              aria-label={
-                collapsed
-                  ? `Expand ${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}`
-                  : 'Collapse replies'
-              }
+              aria-label={collapsed ? expandRepliesLabel : collapseRepliesLabel}
               data-slot="superchat-thread-toggle"
               className="-ms-1 inline-flex h-4 w-4 shrink-0 items-center justify-center self-center rounded text-neutral-500 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
             >
@@ -1263,7 +1268,7 @@ export const MessageRow = React.memo(function MessageRow({
               aria-hidden="true"
               className="rtl:-scale-x-100"
             />
-            {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+            {repliesLabel}
           </button>
         )}
       </div>

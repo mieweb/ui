@@ -1681,6 +1681,38 @@ describe('SuperChat threading', () => {
     expect(screen.getByText('nested reply')).toBeInTheDocument();
   });
 
+  it('localizes reply controls through threadLabels', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={threaded}
+          currentParticipantId="u1"
+          threadLabels={{
+            replyCount: (n) => `${n} respuestas`,
+            expandReplies: (n) => `Mostrar ${n} respuestas`,
+            collapseReplies: 'Ocultar respuestas',
+            replyTo: (author) => `respuesta a ${author}`,
+          }}
+        />
+      </div>
+    );
+    expect(
+      screen.getByRole('article', { name: /respuesta a Alice Reyes$/ })
+    ).toHaveTextContent('reply one');
+    const toggles = screen.getAllByRole('button', {
+      name: 'Ocultar respuestas',
+    });
+    await user.click(toggles[0]);
+    expect(
+      screen.getByRole('button', { name: 'Mostrar 2 respuestas' })
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByRole('button', { name: '2 respuestas' })
+    ).toBeInTheDocument();
+  });
+
   it('defaultCollapsed hides replies on first render', () => {
     render(
       <div style={{ height: 400 }}>

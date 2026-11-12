@@ -67,6 +67,12 @@ const meta: Meta<typeof SuperChat> = {
       description: 'Collapse every thread with replies on first render.',
       table: { category: 'Behavior' },
     },
+    threadLabels: {
+      control: false,
+      description:
+        'Localized reply toggle, replies pill, "reply to" and "New reply" text. Count and author entries are functions for pluralization.',
+      table: { category: 'Rendering' },
+    },
     currentParticipantId: {
       control: 'select',
       options: ['u1', 'u2', 'a1', 'a2'],

@@ -46,6 +46,7 @@ export type {
   SuperChatMediaItem,
   SuperChatMediaFeedProps,
   SuperChatMediaLabels,
+  SuperChatThreadLabels,
   SuperChatView,
   SuperChatItemType,
   SuperChatChannel,

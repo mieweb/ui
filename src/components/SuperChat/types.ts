@@ -128,6 +128,22 @@ export interface SuperChatMediaLabels {
   unknownAuthor: string;
 }
 
+/** Labels for threaded replies; count/name entries are functions for plurals. */
+export interface SuperChatThreadLabels {
+  /** Collapsed-replies pill text, e.g. "2 replies". */
+  replyCount: (count: number) => string;
+  /** Accessible name of the reply toggle while collapsed. */
+  expandReplies: (count: number) => string;
+  /** Accessible name of the reply toggle while expanded. */
+  collapseReplies: string;
+  /** Appended to a reply's accessible name, e.g. "reply to Alice". */
+  replyTo: (author: string) => string;
+  /** Jump-control hint when a reply lands out of view. */
+  newReply: string;
+  /** Accessible name of that jump control. */
+  showNewReply: string;
+}
+
 /**
  * A single thread item. Preserves the `chat-component` thread-item shape
  * (`senderId`/`sender_name`/`channel`/`time`/`text`) while adding a

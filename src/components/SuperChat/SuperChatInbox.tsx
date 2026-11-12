@@ -71,6 +71,8 @@ export interface SuperChatInboxProps {
   threaded?: SuperChatProps['threaded'];
   /** Collapse every thread with replies on first render; see {@link SuperChatProps.defaultCollapsed}. */
   defaultCollapsed?: SuperChatProps['defaultCollapsed'];
+  /** Localized reply-thread text; see {@link SuperChatProps.threadLabels}. */
+  threadLabels?: SuperChatProps['threadLabels'];
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
   /** Build hrefs for `ref` thread items. */
@@ -130,6 +132,7 @@ export function SuperChatInbox({
   virtualized,
   threaded,
   defaultCollapsed,
+  threadLabels,
   showSidebar = true,
   linkBuilder,
   defaultCopyFormat,
@@ -216,6 +219,7 @@ export function SuperChatInbox({
           virtualized={virtualized}
           threaded={threaded}
           defaultCollapsed={defaultCollapsed}
+          threadLabels={threadLabels}
           linkBuilder={linkBuilder}
           defaultCopyFormat={defaultCopyFormat}
           onMessageSent={onMessageSent}

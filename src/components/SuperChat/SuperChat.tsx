@@ -61,10 +61,23 @@ import type {
   SuperChatMediaFeedProps,
   SuperChatMediaItem,
   SuperChatMediaLabels,
+  SuperChatThreadLabels,
   SuperChatView,
   SuperChatRef,
   SuperChatRenderPlugin,
 } from './types';
+
+const repliesText = (count: number) =>
+  `${count} ${count === 1 ? 'reply' : 'replies'}`;
+
+const DEFAULT_THREAD_LABELS: SuperChatThreadLabels = {
+  replyCount: repliesText,
+  expandReplies: (count) => `Expand ${repliesText(count)}`,
+  collapseReplies: 'Collapse replies',
+  replyTo: (author) => `reply to ${author}`,
+  newReply: 'New reply',
+  showNewReply: 'New reply — show it',
+};
 
 // ============================================================================
 // SuperChat (single-conversation panel)
@@ -126,6 +139,8 @@ export interface SuperChatProps {
   threaded?: boolean;
   /** Collapse every thread with replies on first render. Defaults to `false`. */
   defaultCollapsed?: boolean;
+  /** Localized reply toggle, replies pill, reply relationship and jump-control text. */
+  threadLabels?: Partial<SuperChatThreadLabels>;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /**
@@ -222,6 +237,7 @@ export function SuperChat({
   virtualized = false,
   threaded,
   defaultCollapsed = false,
+  threadLabels,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -262,6 +278,10 @@ export function SuperChat({
     playMedia: 'Play',
     unknownAuthor: 'Unknown',
     ...mediaLabels,
+  };
+  const threadText: SuperChatThreadLabels = {
+    ...DEFAULT_THREAD_LABELS,
+    ...threadLabels,
   };
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
@@ -931,13 +951,24 @@ export function SuperChat({
           mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
           mediaRetryLabel={mediaFeedProps?.labels?.retry}
           threaded
-          replyToName={
+          replyToLabel={
             node.parent
-              ? (participantById.get(node.parent.message.participantId)?.name ??
-                'Unknown')
+              ? threadText.replyTo(
+                  participantById.get(node.parent.message.participantId)
+                    ?.name ?? labels.unknownAuthor
+                )
               : undefined
           }
           replyCount={node.descendantCount}
+          repliesLabel={
+            hasReplies ? threadText.replyCount(node.descendantCount) : undefined
+          }
+          expandRepliesLabel={
+            hasReplies
+              ? threadText.expandReplies(node.descendantCount)
+              : undefined
+          }
+          collapseRepliesLabel={threadText.collapseReplies}
           collapsed={collapsedIds.has(m.id)}
           onToggleReplies={hasReplies ? getToggleHandler(m.id) : undefined}
         />
@@ -1247,8 +1278,8 @@ export function SuperChat({
                   target={
                     unseenReplyId
                       ? {
-                          hint: 'New reply',
-                          ariaLabel: 'New reply — show it',
+                          hint: threadText.newReply,
+                          ariaLabel: threadText.showNewReply,
                           icon: (
                             <Reply
                               size={16}
