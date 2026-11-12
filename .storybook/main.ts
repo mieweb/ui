@@ -261,6 +261,14 @@ const config: StorybookConfig = {
         'lucide-react',
         'react',
         'react-dom',
+        // Every borrowed body must share the host's CRDT and editor constructors.
+        'yjs',
+        'y-protocols',
+        'prosemirror-model',
+        'prosemirror-state',
+        'prosemirror-view',
+        '@kerebron/editor',
+        '@kerebron/extension-basic-editor',
       ]),
     );
 
