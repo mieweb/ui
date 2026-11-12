@@ -70,7 +70,10 @@ export function useEncounterMediaCapture(
   }, []);
 
   const value = React.useMemo<EncounterMediaCapture | null>(() => {
-    if (!options) return null;
+    // The type makes uploadHandler mandatory, but an untyped host can still
+    // omit it — RichEdit would then embed captures as base64 data: URLs.
+    // Refuse the opt-in at runtime, as the narrative fields do.
+    if (typeof options?.uploadHandler !== 'function') return null;
     return {
       mediaUpload: {
         ...options.mediaUpload,
@@ -84,7 +87,7 @@ export function useEncounterMediaCapture(
     };
   }, [options, confirmPhi]);
 
-  const dialog = options ? (
+  const dialog = value ? (
     <AlertDialog
       open={phiOpen}
       onOpenChange={(open) => {

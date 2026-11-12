@@ -58,8 +58,9 @@ Image handling per narrative-HTML consumer (images never contribute to
 | Consumer | Handling |
 | --- | --- |
 | Narrative field editor | Renders opt-in images from `encounterNarrativeHtml`. |
-| MDY body / View / Export | Narrative fields project their plain `answer`: images are **stripped**. RichEdit-mode images live in the MDY body as markdown and render in View (the report profile allows `img`; its `data:` passthrough predates this feature and is only reachable for RichEdit prose). |
-| MCP / LLM tools | Read `answer` text: images are **stripped**, alt text is not surfaced. |
+| MDY body / View / Export | Narrative fields project their plain `answer` into the rendered document: images are **stripped**. RichEdit-mode images live in the MDY body as markdown and render in View (the report profile allows `img`; its `data:` passthrough predates this feature and is only reachable for RichEdit prose). |
+| Raw MDY / MCP snapshots | **Not redacted.** The MDY front matter carries the full `response` map and MCP `getVisit`/`getMdy` return it: `encounterNarrativeHtml` retains image URLs and alt text. Hosts needing media-free payloads must strip them downstream. |
+| MCP / LLM narrative tools | Read `answer` text: images are **stripped**, alt text is not surfaced. |
 
 Common findings are configured on narrative sections and text observations.
 They dock beside the narrative field as a section-specific macro group that

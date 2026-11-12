@@ -216,10 +216,12 @@ export const NarrativeExam: Story = {
  * the relaxed narrative sanitizer strips `data:` images, so base64 cannot
  * persist even via paste. Capture screen first shows a PHI confirmation: a
  * shared screen can include other patients' data. Narrative images stay out
- * of the plain-text answer, View/Export projections and MCP tools; RichEdit
- * images live in the MDY body and render in View. This demo "uploads" to
- * same-origin object URLs, which render during the session but die with the
- * page; a real host returns a persistent HTTPS URL.
+ * of the plain-text answer and the rendered View/Export projections, but raw
+ * MDY front matter and MCP snapshots retain `encounterNarrativeHtml` — image
+ * URLs and alt text included; RichEdit images live in the MDY body and
+ * render in View. This demo "uploads" to same-origin object URLs, which
+ * render during the session but die with the page; a real host returns a
+ * persistent HTTPS URL.
  */
 export const WithMediaCapture: Story = {
   args: {

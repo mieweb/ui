@@ -45,6 +45,21 @@ describe('useEncounterMediaCapture (mieweb/ui#736)', () => {
     expect(results).toEqual([null]);
   });
 
+  it('refuses the opt-in when an untyped host omits uploadHandler', () => {
+    // Without the runtime guard RichEdit would render the dock and embed
+    // captures as base64 data: URLs — the exact thing #736 forbids.
+    let result: ReturnType<typeof useEncounterMediaCapture> | undefined;
+    function Probe() {
+      result = useEncounterMediaCapture(
+        {} as unknown as EncounterMediaCaptureOptions
+      );
+      return null;
+    }
+    renderWithTheme(<Probe />);
+    expect(result!.value).toBeNull();
+    expect(result!.dialog).toBeNull();
+  });
+
   it('wires the mandatory uploadHandler into the upload options', () => {
     let value: ReturnType<typeof useEncounterMediaCapture>['value'] = null;
     function Probe() {

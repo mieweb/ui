@@ -31,8 +31,8 @@ export const TextAreaRichKerebron = React.forwardRef<
 >(function TextAreaRichKerebron(
   // The Kerebron-only media/extension props have no legacy counterpart; the
   // capture ribbon itself is browser-verified. A marker element lets suites
-  // assert the opt-in reached the surface.
-  { mediaCapture, mediaUpload: _mediaUpload, omitExtensions: _omit, ...props },
+  // assert the opt-in (and its upload tuning) reached the surface.
+  { mediaCapture, mediaUpload, omitExtensions: _omit, ...props },
   ref
 ) {
   // The legacy surface forwards its ref to the contenteditable region.
@@ -47,7 +47,14 @@ export const TextAreaRichKerebron = React.forwardRef<
   });
   return (
     <>
-      {!!mediaCapture && <div data-testid="capture-ribbon-stub" />}
+      {!!mediaCapture && (
+        <div
+          data-testid="capture-ribbon-stub"
+          data-videos-disabled={
+            mediaUpload?.allowedVideoTypes?.length === 0 ? 'true' : undefined
+          }
+        />
+      )}
       <TextAreaRichLegacy
         {...(props as TextAreaRichProps)}
         ref={(node: HTMLDivElement | null) => {

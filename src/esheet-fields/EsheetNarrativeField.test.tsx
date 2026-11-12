@@ -220,4 +220,63 @@ describe('EsheetNarrativeField media capture opt-in (mieweb/ui#736)', () => {
       container.querySelector('img[src="https://cdn.example/scan.png"]')
     ).toBeInTheDocument();
   });
+
+  it('keeps an image-only narrative when a common finding is picked', () => {
+    // Images never contribute to the answer, so an image-only narrative has
+    // an empty answer — the finding must append to the image, not replace it.
+    let latest: FieldResponse | undefined;
+    function Harness() {
+      const [response, setResponse] = React.useState<FieldResponse>({
+        answer: '',
+        attributes: {
+          narrativeText: '',
+          narrativeHtml: '<img src="https://cdn.example/scan.png" alt="scan">',
+        },
+      } as unknown as FieldResponse);
+      latest = response;
+      return (
+        <EsheetNarrativeField
+          {...props()}
+          response={response}
+          onResponse={setResponse}
+          mediaCapture
+          mediaUpload={{ uploadHandler }}
+        />
+      );
+    }
+    renderWithTheme(<Harness />);
+    fireEvent.focus(screen.getByRole('textbox'));
+    fireEvent.click(screen.getByRole('button', { name: /No fever/ }));
+    expect(latest?.answer).toBe('No fever reported.');
+    expect(latest?.attributes?.narrativeHtml).toBe(
+      '<img src="https://cdn.example/scan.png" alt="scan"><p>No fever reported.</p>'
+    );
+  });
+
+  it('disables video uploads: the sanitizer would strip them after upload', () => {
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props()}
+        mediaCapture
+        mediaUpload={{ uploadHandler, allowedVideoTypes: ['^video/'] }}
+      />
+    );
+    expect(screen.getByTestId('capture-ribbon-stub')).toHaveAttribute(
+      'data-videos-disabled',
+      'true'
+    );
+  });
+
+  it('keeps the capture dock mounted while read-only (no editor remount)', () => {
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props({ isReadOnly: true })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    // The surface locks the dock itself; unmounting it would remount the
+    // editor (losing undo history) on every save lock/unlock.
+    expect(screen.getByTestId('capture-ribbon-stub')).toBeInTheDocument();
+  });
 });

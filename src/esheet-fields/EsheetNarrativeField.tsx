@@ -282,6 +282,16 @@ export function EsheetNarrativeField({
     (value: string) => sanitizeNarrativeHtml(value, sanitizeOptions),
     [sanitizeOptions]
   );
+  // The narrative sanitizer only admits `img`: a video would upload, report
+  // success, then be stripped on publish. An empty video allowlist makes the
+  // pipeline reject and announce the file instead.
+  const narrativeUpload = React.useMemo<MediaUploadOptions | undefined>(
+    () =>
+      captureEnabled && mediaUpload
+        ? { ...mediaUpload, allowedVideoTypes: [] }
+        : undefined,
+    [captureEnabled, mediaUpload]
+  );
   const definition = field.definition as {
     question?: string;
     unit?: string;
@@ -395,9 +405,21 @@ export function EsheetNarrativeField({
           const next = applyNarrativeFinding(previous, finding, attributes);
           if (next === previous) return true;
           const answer = previous?.answer ?? '';
+          const previousHtml = responseHtml(
+            previous,
+            attributes,
+            sanitizeOptions
+          );
+          // An image-only narrative has an empty answer (images never
+          // contribute text), so judge existing content by the restored HTML
+          // when media is enabled; without the opt-in the answer alone
+          // decides, exactly as before.
+          const hasContent = answer.trim()
+            ? true
+            : captureEnabled && previousHtml.includes('<img');
           const nextHtml = hasNarrativeFindingText(answer, finding.text)
-            ? responseHtml(previous, attributes, sanitizeOptions)
-            : `${answer.trim() ? responseHtml(previous, attributes, sanitizeOptions) : ''}<p>${textToHtml(finding.text)}</p>`;
+            ? previousHtml
+            : `${hasContent ? previousHtml : ''}<p>${textToHtml(finding.text)}</p>`;
           publish(nextHtml, previous, getNarrativeFindings(next, attributes));
           return true;
         }}
@@ -447,8 +469,12 @@ export function EsheetNarrativeField({
           hideToolbar: m('Hide toolbar'),
         }}
         sanitizeHtml={sanitize}
-        mediaUpload={captureEnabled ? mediaUpload : undefined}
-        mediaCapture={captureEnabled && !readOnly ? mediaCapture : undefined}
+        mediaUpload={narrativeUpload}
+        // Mounted regardless of readOnly: unmounting would swap the
+        // CaptureDock wrapper out and remount the editor (losing undo
+        // history) every time the visit locks to save. The surface already
+        // locks the dock while read-only.
+        mediaCapture={captureEnabled ? mediaCapture : undefined}
         className="mt-1"
       />
     </div>
