@@ -621,23 +621,25 @@ This is the first user-testable review point, before completing the broader M5
 example and M6 acceptance gate. Provide working Storybook links and reproducible
 steps when the following checks pass:
 
-- [ ] Display embedded synthetic plain, HTML-only, nested multipart, and Unicode
+- [x] Display embedded synthetic plain, HTML-only, nested multipart, and Unicode
       email fixtures, including a CID image and a separate attachment. Outside
       media remains unfetched under the preview policy.
-- [ ] Reply or edit a draft, change its body/headers, attach a small synthetic
+- [x] Reply or edit a draft, change its body/headers, attach a small synthetic
       file, and serialize complete MIME. Distinguish draft and delivery output;
       delivery returns the transport envelope separately and omits Bcc headers.
-- [ ] Save the canonical email draft and immutable attachment references through
+- [x] Save the canonical email draft and immutable attachment references through
       real encrypted OPFS, dispose its views, and reopen the same saved Artifact.
       Verify the saved body and attachment bytes rather than a surviving object URL.
-- [ ] Edit the hardcoded MDY document, preserve its front matter, save through
+- [x] Edit the hardcoded MDY document, preserve its front matter, save through
       protected storage, and reopen it without mail-specific configuration.
-- [ ] Open two editor views of the same canonical body; an edit in either appears
+- [x] Open two editor views of the same canonical body; an edit in either appears
       in the other. Detaching one leaves the other and the shared session usable.
       Exercise lock/unlock and release decrypted previews when locked.
-- [ ] Document the initial 10 MiB buffered-object/message limit and the synthetic
+- [x] Document the initial 10 MiB buffered-object/message limit and the synthetic
       demo key setup. The demo may retain a nonextractable key in IndexedDB for
       reload, but supplies no account authentication and accepts synthetic data only.
+
+Evidence recorded November 12, 2026: [UI Storybook MVP PR #757](https://github.com/mieweb/ui/pull/757), [Kerebron PR #164](https://github.com/mieweb/kerebron/pull/164), and [Artipod PR #148](https://github.com/mieweb/artipod/pull/148). The local browser workflow verified the checks above, including full MDY reload and sibling detach/remount. UI validation passed 2,755 unit tests, typecheck, lint, formatting, package build, and static Storybook build. The authored CLI browser suite still needs execution; no visual baselines or release approvals are implied by this checkpoint.
 
 Passing this checkpoint does not complete M2, M5, or M6. Full bounded-memory
 streaming/cache behavior, authenticated remote-user collaboration transport,
