@@ -15,6 +15,29 @@
 import { describe, expect, it } from 'vitest';
 import { sanitizeNarrativeHtml } from './EsheetNarrativeField';
 
+// Some jsdom versions deny localStorage to opaque origins with a throwing
+// getter, which would crash the shared setup's hooks (even its `typeof`
+// guard invokes the getter). Module scope runs at collection — before any
+// beforeAll executes — so probe here and install a plain mock only if needed.
+try {
+  void window.localStorage;
+} catch {
+  const storage = new Map<string, string>();
+  Object.defineProperty(window, 'localStorage', {
+    configurable: true,
+    value: {
+      get length() {
+        return storage.size;
+      },
+      clear: () => storage.clear(),
+      getItem: (key: string) => storage.get(key) ?? null,
+      setItem: (key: string, value: string) => storage.set(key, value),
+      removeItem: (key: string) => storage.delete(key),
+      key: (index: number) => Array.from(storage.keys())[index] ?? null,
+    },
+  });
+}
+
 const img = (src: string) => `<p>Note</p><img src="${src}" alt="scan">`;
 
 describe('sanitizeNarrativeHtml in an opaque-origin host (mieweb/ui#736)', () => {
