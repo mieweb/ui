@@ -70,15 +70,16 @@ export function SuperChatConversations({
 
   // Accordion: at most one entry is open. By default it is the entry holding
   // the active item. A header click records an explicit choice (`null` = all
-  // closed) scoped to the entry it selected, so the choice lapses as soon as
-  // the selection moves to another entry (e.g. the host selects elsewhere).
+  // closed) scoped to the entry it selected, so the choice is discarded as
+  // soon as the selection moves to another entry (e.g. the host selects
+  // elsewhere) and returning to the entry starts expanded again.
   const [openChoice, setOpenChoice] = React.useState<{
     topId: string;
     openId: string | null;
   }>();
   // An active child always keeps its parent open, and that supersedes (and
   // discards) any earlier open/closed choice for the parent.
-  if (active?.parent && openChoice?.topId === active.parent.id) {
+  if (openChoice && (active?.parent || openChoice.topId !== activeTopId)) {
     setOpenChoice(undefined);
   }
   const openId = active?.parent

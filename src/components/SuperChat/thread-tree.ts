@@ -182,7 +182,7 @@ export function collapsibleIds(roots: ThreadNode[]): Set<string> {
     if (node.children.length > 0 && canToggleReplies(node.message)) {
       ids.add(node.message.id);
     }
-    stack.push(...node.children);
+    for (const child of node.children) stack.push(child);
   }
   return ids;
 }

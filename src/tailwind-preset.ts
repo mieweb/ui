@@ -956,6 +956,8 @@ export const miewebUISafelist = [
   'dark:hover:bg-neutral-700',
   'dark:hover:text-neutral-100',
   // SuperChat nested conversations (accordion chevron + indented children).
+  'self-center',
+  'self-start',
   'rotate-90',
   'ms-5',
   'space-y-0.5',

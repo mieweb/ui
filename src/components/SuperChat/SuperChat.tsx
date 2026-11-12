@@ -504,6 +504,9 @@ export function SuperChat({
   );
   const useThreaded =
     threadingPossible && (threaded === true || threadTree.hasThreading);
+  // Only the threaded layout can reveal a reply target (e.g. after switching
+  // to `virtualized`), so the jump control falls back to its flat behavior.
+  if (!useThreaded && unseenReplyId !== null) setUnseenReplyId(null);
 
   // Collapse state is the user's per-message choices layered over
   // `defaultCollapsed`: thread updates (appends, edits, streaming) keep the
@@ -615,10 +618,35 @@ export function SuperChat({
     prevThreadLengthRef.current = threadLength;
     if (grew && activeView === 'media') pendingMediaAppendRef.current = true;
     const prevIds = prevMessageIdsRef.current;
+    const sortedThread = [...conversation.thread].sort(byTime);
+    // Threaded: a reply that lands away from the newest edge (under an older
+    // root, or inside a collapsed branch) shows nothing new where the reader
+    // is, so incoming ones point the jump control at themselves, in either
+    // order and whether or not an own message arrived in the same update.
+    let addedAllAwayFromEdge = false;
+    if (grew && useThreaded) {
+      const added = sortedThread.filter((message) => !prevIds.has(message.id));
+      const addedIds = new Set(added.map((message) => message.id));
+      // The run of new visible rows at the newest edge is what the reader sees.
+      const atEdge = new Set<string>();
+      const count = visibleThreadNodes.length;
+      for (let i = 0; i < count; i++) {
+        const id =
+          visibleThreadNodes[order === 'desc' ? i : count - 1 - i].message.id;
+        if (!addedIds.has(id)) break;
+        atEdge.add(id);
+      }
+      const away = added.filter((message) => !atEdge.has(message.id));
+      addedAllAwayFromEdge = away.length === added.length;
+      const incomingAway = away.filter(
+        (message) => message.participantId !== currentParticipantId
+      );
+      if (incomingAway.length > 0) setUnseenReplyId(incomingAway.at(-1)!.id);
+    }
     // The latest newly appended own message (in thread order) starts a turn.
     let turnStart: string | undefined;
     if (grew && currentParticipantId) {
-      for (const message of [...conversation.thread].sort(byTime)) {
+      for (const message of sortedThread) {
         if (
           !prevIds.has(message.id) &&
           message.participantId === currentParticipantId
@@ -653,26 +681,9 @@ export function SuperChat({
         setTurnStartId(turnStart);
       }
     } else if (grew) {
-      if (useThreaded) {
-        // A reply to an older root lands mid-thread (or inside a collapsed
-        // branch), where following the bottom would show nothing new: point
-        // the jump control at it instead.
-        const added = [...conversation.thread]
-          .sort(byTime)
-          .filter((message) => !prevIds.has(message.id));
-        // The trailing run of new visible rows is what landed at the bottom.
-        const addedIds = new Set(added.map((message) => message.id));
-        const atBottom = new Set<string>();
-        for (let i = visibleThreadNodes.length - 1; i >= 0; i--) {
-          const id = visibleThreadNodes[i].message.id;
-          if (!addedIds.has(id)) break;
-          atBottom.add(id);
-        }
-        const midThread = added.filter((message) => !atBottom.has(message.id));
-        if (midThread.length > 0) setUnseenReplyId(midThread.at(-1)!.id);
-        if (midThread.length === added.length) return;
-      }
-      const newest = [...conversation.thread].sort(byTime).at(-1);
+      // Following the bottom would show nothing new; the jump control has it.
+      if (addedAllAwayFromEdge) return;
+      const newest = sortedThread.at(-1);
       if (newest?.status === 'streaming') {
         // An incoming stream fills below the fold instead of pushing the
         // view: reveal its first line if we were following, then hold
@@ -831,11 +842,13 @@ export function SuperChat({
   // branch-targeting layout effect an own threaded send uses.
   const handleJumpToReply = React.useCallback(() => {
     if (!unseenReplyId) return;
+    // The control can unmount once the target clears; keep focus in the thread.
+    threadRef.current?.focus({ preventScroll: true });
     revealMessage(unseenReplyId);
     anchoredTurnRef.current = null;
     setTurnStartId(unseenReplyId);
     setUnseenReplyId(null);
-  }, [unseenReplyId, revealMessage]);
+  }, [unseenReplyId, revealMessage, threadRef]);
 
   const participantById = React.useMemo(() => {
     const map = new Map<string, Participant>();
@@ -1218,7 +1231,7 @@ export function SuperChat({
             fade, so the button's `-translate-x-1/2` never meets a motion
             transform. */}
           <AnimatedPresence>
-            {order !== 'desc' && (!isAtBottom || unseenReplyId) && (
+            {((order !== 'desc' && !isAtBottom) || unseenReplyId) && (
               <Animated
                 key="jump-to-bottom"
                 preset="fade"
