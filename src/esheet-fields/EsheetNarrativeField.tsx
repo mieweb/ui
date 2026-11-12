@@ -72,7 +72,18 @@ const NARRATIVE_TAGS = [
 function allowedNarrativeImageSrc(src: string): boolean {
   try {
     const url = new URL(src, window.location.href);
-    return url.protocol === 'https:' || url.origin === window.location.origin;
+    if (url.protocol === 'https:') return true;
+    // Opaque origins serialize as 'null': in an opaque-origin host (a
+    // file-based WebView, a sandboxed iframe) a data: URL's origin would
+    // "equal" the host's, re-admitting embedded bytes. DOMPurify exempts
+    // img data: URIs from its URI policy, so this is the only gate — such
+    // hosts may only use https: image URLs.
+    if (url.origin === 'null' || window.location.origin === 'null')
+      return false;
+    return (
+      (url.protocol === 'http:' || url.protocol === 'blob:') &&
+      url.origin === window.location.origin
+    );
   } catch {
     return false;
   }
