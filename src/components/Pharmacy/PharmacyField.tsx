@@ -60,7 +60,9 @@ export const PharmacyField = React.forwardRef<
 >(function PharmacyField({ messages, ...props }, ref) {
   return (
     <MessagesProvider messages={messages}>
-      <PharmacyFieldBody ref={ref} {...props} />
+      {/* A new patient starts fresh: no override, selection or open search
+          carries over from the previous one. */}
+      <PharmacyFieldBody key={props.patId} ref={ref} {...props} />
     </MessagesProvider>
   );
 });

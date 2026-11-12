@@ -47,7 +47,8 @@ export interface PharmacySearchProps {
   onOpenChange: (open: boolean) => void;
   /**
    * Filters shown when the modal opens, usually from the patient's address.
-   * Passing a new object resets the filters, so keep it stable.
+   * A new object replaces the filters until the user edits them; after that
+   * the user's choices win. Keep it stable.
    */
   initialFilters?: PharmacySearchFilters;
   /** Called after each filter change, so the host can remember them. */
@@ -152,19 +153,22 @@ function PharmacySearchBody({
   onChoose,
   onMakePreferred,
   showIds,
+  onSavingChange,
 }: Omit<
   PharmacySearchProps,
   'open' | 'messages' | 'className' | 'returnFocusRef'
->) {
+> & { onSavingChange: (saving: boolean) => void }) {
   const m = useMessages();
   const methodText = useMethodText();
   const idPrefix = React.useId();
 
   const [filters, setFilters] = React.useState(initialFilters);
+  const [filtersEdited, setFiltersEdited] = React.useState(false);
   const [appliedInitial, setAppliedInitial] = React.useState(initialFilters);
   if (appliedInitial !== initialFilters) {
     setAppliedInitial(initialFilters);
-    setFilters(initialFilters);
+    // A late default (e.g. the patient's address) must not undo user edits.
+    if (!filtersEdited) setFilters(initialFilters);
   }
 
   const [query, setQuery] = React.useState('');
@@ -176,6 +180,7 @@ function PharmacySearchBody({
   const updateFilters = (patch: Partial<PharmacySearchFilters>) => {
     const next = { ...filters, ...patch };
     setFilters(next);
+    setFiltersEdited(true);
     onFiltersChange?.(next);
   };
 
@@ -218,17 +223,34 @@ function PharmacySearchBody({
     ? preferredPharmacyChoice(selectedPharmacy)
     : null;
 
+  // A save that settles after this dialog is gone must not act on a later one.
+  const mountedRef = React.useRef(true);
+  React.useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const setSavingState = (next: boolean) => {
+    setSaving(next);
+    onSavingChange(next);
+  };
+
   const makePreferred = async () => {
     if (!choice || !onMakePreferred) return;
-    setSaving(true);
+    setSavingState(true);
     setSaveFailed(false);
     try {
       await onMakePreferred(choice);
     } catch {
-      setSaving(false);
+      if (!mountedRef.current) return;
+      setSavingState(false);
       setSaveFailed(true);
       return;
     }
+    if (!mountedRef.current) return;
+    setSavingState(false);
     finish(choice.pharmId);
   };
 
@@ -275,9 +297,12 @@ function PharmacySearchBody({
     <>
       <ModalHeader>
         <ModalTitle>{m('Pharmacy Search')}</ModalTitle>
-        <ModalClose aria-label={m('Close')} />
+        <ModalClose aria-label={m('Close')} disabled={saving} />
       </ModalHeader>
-      <ModalBody className="flex flex-col gap-5">
+      <ModalBody
+        className="flex flex-col gap-5"
+        onKeyDown={preventImplicitSubmit}
+      >
         <RadioGroup
           name="pharm_search_method"
           label={m('Filter Method')}
@@ -410,7 +435,12 @@ function PharmacySearchBody({
           <Autocomplete<Pharmacy>
             label={m('Search')}
             placeholder={m('Pharmacy name')}
-            items={readiness.status === 'ready' ? [...results] : []}
+            // Rows from superseded criteria must not be pickable mid-search.
+            items={
+              readiness.status === 'ready' && !resultsLoading
+                ? [...results]
+                : []
+            }
             getItemKey={(pharmacy) => pharmacy.pharmId}
             renderItem={(pharmacy) => (
               <span className="flex items-start gap-2">
@@ -584,6 +614,23 @@ function useReturnFocus(
   }, [open, returnFocusRef]);
 }
 
+const BUTTON_INPUT_TYPES = new Set(['button', 'submit', 'reset', 'image']);
+
+/**
+ * Modal renders in place, so inside a host `<form>` Enter in a field would
+ * submit that form. Buttons keep their own Enter activation.
+ */
+function preventImplicitSubmit(event: React.KeyboardEvent<HTMLElement>) {
+  const target = event.target;
+  if (
+    event.key === 'Enter' &&
+    target instanceof HTMLInputElement &&
+    !BUTTON_INPUT_TYPES.has(target.type)
+  ) {
+    event.preventDefault();
+  }
+}
+
 export function PharmacySearch({
   open,
   onOpenChange,
@@ -593,15 +640,34 @@ export function PharmacySearch({
   ...props
 }: PharmacySearchProps) {
   useReturnFocus(open, returnFocusRef);
+  // Escape, the backdrop and the close button can't dismiss a pending save.
+  const savingRef = React.useRef(false);
+  const handleOpenChange = React.useCallback(
+    (next: boolean) => {
+      if (!next && savingRef.current) return;
+      onOpenChange(next);
+    },
+    [onOpenChange]
+  );
+  const handleSavingChange = React.useCallback((saving: boolean) => {
+    savingRef.current = saving;
+  }, []);
+  React.useEffect(() => {
+    if (!open) savingRef.current = false;
+  }, [open]);
   return (
     <MessagesProvider messages={messages}>
       <Modal
         open={open}
-        onOpenChange={onOpenChange}
+        onOpenChange={handleOpenChange}
         size="2xl"
         className={className}
       >
-        <PharmacySearchBody onOpenChange={onOpenChange} {...props} />
+        <PharmacySearchBody
+          onOpenChange={onOpenChange}
+          onSavingChange={handleSavingChange}
+          {...props}
+        />
       </Modal>
     </MessagesProvider>
   );

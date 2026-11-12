@@ -74,7 +74,7 @@ const canESend = pharmacy !== null && serviceLevelFlags(pharmacy).newRx;
 
 - **Accessibility, RTL and i18n** are those of PharmacyInput and PharmacySearch; \`messages\` reaches both. Focus returns to the search button when the search closes, in every browser (the field passes the button as \`returnFocusRef\`).
 - **Data.** Errors from \`getCandidates\` show a generic message under the field; search errors show in the result list; \`setPreferred\` errors keep the search open. Patient-level authorization is the server's job.
-- **State.** The field owns the selection: after each load it applies the default (even when the reloaded list is unchanged, e.g. choosing the same pharmacy again) and reports it through \`onValueChange\`; manual choices are reported the same way.
+- **State.** The field owns the selection: after each load it applies the default (even when the reloaded list is unchanged, e.g. choosing the same pharmacy again) and reports it through \`onValueChange\`; manual choices are reported the same way. Changing \`patId\` starts over: the previous patient's search result, selection and open search don't carry over.
 - **Dependencies.** Main \`@mieweb/ui\` entry; no peers.`,
       },
     },

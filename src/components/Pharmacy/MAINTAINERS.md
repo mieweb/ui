@@ -29,6 +29,12 @@ graph TB
 
 ## Invariants
 
+- **State is per patient.** `PharmacyField` keys its body by `patId`; never hoist the override or selection above that key.
+- **A save never outlives its dialog.** `PharmacySearch` blocks dismissal while saving and ignores a settle after unmount, so it can't close or overwrite a reopened search.
+- **Results always match the current criteria.** Rows are hidden while `resultsLoading`, and `initialFilters` stop replacing the filters once the user edits them.
+- **No implicit form submission.** Enter in a dialog text input is cancelled at `ModalBody` because `Modal` renders inside the host's `<form>`.
+- **`required` uses custom validity.** The `"0"` placeholder is non-empty, so `PharmacyInput` sets the select's custom validity instead of relying on native `required`.
+
 - **Fixed WebChart defects stay fixed.** Each has a test:
   - Make Preferred is disabled without a selection, and `preferredPharmacyChoice` returns `null` for an empty id, so the mail-order slot is never cleared by accident.
   - Only one candidate is selected when the patient has a local and a mail-order preferred pharmacy.

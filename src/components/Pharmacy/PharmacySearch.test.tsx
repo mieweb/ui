@@ -300,6 +300,88 @@ describe('PharmacySearch', () => {
     expect(searchBox()).not.toHaveFocus();
   });
 
+  it('ignores dismissal while a save is pending, then closes once', async () => {
+    let resolveSave: () => void = () => {};
+    const onMakePreferred = vi.fn(
+      () => new Promise<void>((resolve) => (resolveSave = resolve))
+    );
+    const { props } = renderSearch({
+      selectedPharmacy: P.main,
+      onMakePreferred,
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Make Preferred' }));
+    });
+    expect(screen.getByRole('button', { name: 'Close' })).toBeDisabled();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(props.onOpenChange).not.toHaveBeenCalled();
+
+    await act(async () => resolveSave());
+    expect(props.onChoose).toHaveBeenCalledTimes(1);
+    expect(props.onOpenChange).toHaveBeenCalledTimes(1);
+    expect(props.onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('drops a save that settles after the dialog closed', async () => {
+    let resolveSave: () => void = () => {};
+    const onMakePreferred = vi.fn(
+      () => new Promise<void>((resolve) => (resolveSave = resolve))
+    );
+    const { props, rerender } = renderSearch({
+      selectedPharmacy: P.main,
+      onMakePreferred,
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Make Preferred' }));
+    });
+    // The host closes it anyway, then reopens a fresh search.
+    rerender({ open: false });
+    rerender({ open: true, selectedPharmacy: P.corner });
+    await act(async () => resolveSave());
+    expect(props.onChoose).not.toHaveBeenCalled();
+    expect(props.onOpenChange).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole('dialog', { name: 'Pharmacy Search' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps Enter in its fields from submitting a surrounding form', () => {
+    const onSubmit = vi.fn((e: React.FormEvent) => e.preventDefault());
+    const props: PharmacySearchProps = {
+      open: true,
+      onOpenChange: vi.fn(),
+      initialFilters,
+      results: [],
+      onSearchRequest: vi.fn(),
+      selectedPharmacy: null,
+      onSelectPharmacy: vi.fn(),
+      onChoose: vi.fn(),
+    };
+    renderWithTheme(
+      <form onSubmit={onSubmit}>
+        <PharmacySearch {...props} />
+      </form>
+    );
+    const postal = screen.getByLabelText('Postal code');
+    expect(fireEvent.keyDown(postal, { key: 'Enter' })).toBe(false);
+    expect(fireEvent.keyDown(searchBox(), { key: 'Enter' })).toBe(false);
+    // Buttons keep their own Enter activation.
+    expect(
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Use Once' }), {
+        key: 'Enter',
+      })
+    ).toBe(true);
+  });
+
+  it('keeps user-edited filters when new initial filters arrive', () => {
+    const { rerender } = renderSearch({
+      initialFilters: filtersFromLocation(null),
+    });
+    fireEvent.click(method('Phone'));
+    rerender({ initialFilters });
+    expect(method('Phone')).toBeChecked();
+  });
+
   it('hides Make Preferred when the host cannot save', () => {
     renderSearch({ onMakePreferred: undefined });
     expect(

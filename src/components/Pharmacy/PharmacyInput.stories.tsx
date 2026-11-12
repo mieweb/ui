@@ -47,6 +47,7 @@ Leave \`value\` unset so the input re-applies the default selection whenever \`c
 ### Limitations
 
 - **Accessibility.** A native \`<select>\` with a visible \`<label>\`; the search button is \`aria-label="Search pharmacies"\`; \`loading\` sets \`aria-busy\` and \`error\` renders a \`role="alert"\` message linked with \`aria-describedby\`.
+- **Validation.** \`required\` works with native form validation even though the placeholder posts \`"0"\`: the select reports "Choose a pharmacy." as its custom validity until a pharmacy is chosen.
 - **Data.** Ranking, the 5-row limit and the override row belong to the host (see \`PharmacyDataSource.getCandidates\`). The input only chooses among what it is given.
 - **RTL.** The select and button join with logical corner utilities; option text follows the document direction.
 - **i18n.** Built-in strings go through \`messages\` (\`MessagesProvider\` keys are the English text: "Pharmacy", "Choose Pharmacy...", "Search pharmacies", "Loading pharmacies…"). Option labels are pharmacy data and are not translated.

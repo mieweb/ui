@@ -67,6 +67,8 @@ test.describe('Pharmacy', () => {
 
   test('PharmacySearch - Details panel branches', async ({ page }) => {
     await gotoStory(page, 'encounter-orders-pharmacysearch--details-panel');
+    // Web fonts can be slow; don't spend the screenshot's budget on them.
+    await page.evaluate(() => document.fonts.ready);
     await expect(page).toHaveScreenshot('pharmacy-info-branches.png', {
       animations: 'disabled',
     });

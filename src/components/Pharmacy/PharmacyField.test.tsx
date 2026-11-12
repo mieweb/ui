@@ -269,6 +269,101 @@ describe('PharmacyField', () => {
     expect(result.current.selectedPharmacy?.pharmId).toBe(P.main.pharmId);
   });
 
+  it('starts fresh when the patient changes', async () => {
+    const source = createFakePharmacySource();
+    const getCandidates = vi.spyOn(source, 'getCandidates');
+    const { rerender } = renderWithTheme(
+      <PharmacyField source={source} patId="preferred-and-recent" />
+    );
+    await flush();
+    await openSearch();
+    await searchAndPick('lake', /Lakeview/);
+    fireEvent.click(within(dialog()).getByRole('button', { name: 'Use Once' }));
+    await flush();
+    expect(select().value).toBe(P.lakeview.pharmId);
+
+    rerender(<PharmacyField source={source} patId="two-preferred" />);
+    await flush();
+    expect(getCandidates).toHaveBeenLastCalledWith(
+      'two-preferred',
+      undefined,
+      expect.anything()
+    );
+    expect(select().value).toBe(P.corner.pharmId);
+    expect(
+      screen.queryByRole('option', { name: /Lakeview/ })
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector<HTMLInputElement>('input[name="pharm_id"]')?.value
+    ).toBe('');
+  });
+
+  it('keeps filters the user edited when the patient address arrives late', async () => {
+    await setup('preferred-and-recent', {}, (source) => ({
+      ...source,
+      getPatientLocation: (patId, signal) =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve(source.getPatientLocation(patId, signal)),
+            2000
+          )
+        ),
+    }));
+    await openSearch();
+    fireEvent.click(within(dialog()).getByRole('radio', { name: 'Phone' }));
+    fireEvent.change(within(dialog()).getByPlaceholderText('Phone number'), {
+      target: { value: '260-555' },
+    });
+    await flush(2500);
+    expect(
+      within(dialog()).getByRole('radio', { name: 'Phone' })
+    ).toBeChecked();
+    expect(within(dialog()).getByPlaceholderText('Phone number')).toHaveValue(
+      '260-555'
+    );
+  });
+
+  it('applies the late patient address when the filters are untouched', async () => {
+    await setup('preferred-and-recent', {}, (source) => ({
+      ...source,
+      getPatientLocation: (patId, signal) =>
+        new Promise((resolve) =>
+          setTimeout(
+            () => resolve(source.getPatientLocation(patId, signal)),
+            2000
+          )
+        ),
+    }));
+    await openSearch();
+    expect(within(dialog()).getByLabelText('Postal code')).toHaveValue('');
+    await flush(2500);
+    expect(within(dialog()).getByLabelText('Postal code')).toHaveValue('46805');
+  });
+
+  it('never offers results from superseded criteria while searching', async () => {
+    await setup('preferred-and-recent', { delayMs: 500 });
+    await openSearch();
+    await flush(600);
+    fireEvent.change(searchBox(), { target: { value: 'c' } });
+    await flush(PHARMACY_SEARCH_DEBOUNCE_MS + 600);
+    expect(result(/Corner Drug/)).toBeInTheDocument();
+
+    fireEvent.click(
+      within(dialog()).getByRole('checkbox', { name: 'Mail Only' })
+    );
+    await flush(50);
+    const listbox = screen.getByRole('listbox');
+    expect(within(listbox).queryAllByRole('option')).toHaveLength(0);
+    expect(within(listbox).getByText('Searching…')).toBeInTheDocument();
+
+    await flush(PHARMACY_SEARCH_DEBOUNCE_MS + 600);
+    // Only mail-order pharmacies match now; Corner Drug is gone.
+    expect(resultTexts()).toEqual([
+      expect.stringContaining('CareMail Pharmacy'),
+      expect.stringContaining('MailMeds Direct'),
+    ]);
+  });
+
   it('hides NPI pharmacies unless Exclude NPI is cleared', async () => {
     await setup();
     await openSearch();

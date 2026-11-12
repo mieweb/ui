@@ -182,6 +182,33 @@ describe('PharmacyInput', () => {
     );
   });
 
+  it('fails native validation on the placeholder when required', () => {
+    const { rerender } = renderWithTheme(
+      <PharmacyInput candidates={storyCandidates('no-history')} required />
+    );
+    expect(select().value).toBe('0');
+    expect(select()).toBeRequired();
+    expect(select().checkValidity()).toBe(false);
+    expect(select().validationMessage).toBe('Choose a pharmacy.');
+
+    rerender(
+      <PharmacyInput candidates={storyCandidates('single-faxed')} required />
+    );
+    expect(select().value).toBe(P.oldTown.pharmId);
+    expect(select().checkValidity()).toBe(true);
+  });
+
+  it('stays valid on the placeholder when not required', () => {
+    renderWithTheme(<PharmacyInput candidates={[]} />);
+    expect(select().checkValidity()).toBe(true);
+  });
+
+  it('forwards its ref to the select', () => {
+    const ref = { current: null as HTMLSelectElement | null };
+    renderWithTheme(<PharmacyInput ref={ref} candidates={[]} />);
+    expect(ref.current).toBe(select());
+  });
+
   it('translates built-in labels', () => {
     renderWithTheme(
       <PharmacyInput

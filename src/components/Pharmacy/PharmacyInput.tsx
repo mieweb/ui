@@ -115,6 +115,7 @@ const PharmacyInputField = React.forwardRef<
       size,
       id,
       disabled,
+      required,
       className,
       ...selectProps
     },
@@ -157,6 +158,24 @@ const PharmacyInputField = React.forwardRef<
       ? selected
       : placeholderValue;
 
+    // The legacy "0" placeholder is a non-empty value, so native `required`
+    // would accept it. Mark it missing explicitly while keeping "0" as the
+    // posted value WebChart expects.
+    const selectRef = React.useRef<HTMLSelectElement | null>(null);
+    const setSelectRef = React.useCallback(
+      (node: HTMLSelectElement | null) => {
+        selectRef.current = node;
+        if (typeof ref === 'function') ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref]
+    );
+    const missing = Boolean(required) && selectValue === placeholderValue;
+    const missingMessage = m('Choose a pharmacy.');
+    React.useEffect(() => {
+      selectRef.current?.setCustomValidity(missing ? missingMessage : '');
+    }, [missing, missingMessage]);
+
     const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       const next = normalizePharmId(
         event.target.value === placeholderValue ? '' : event.target.value
@@ -176,12 +195,13 @@ const PharmacyInputField = React.forwardRef<
         </Label>
         <div data-slot="pharmacy-input-group" className="flex w-full">
           <select
-            ref={ref}
+            ref={setSelectRef}
             id={selectId}
             name={name}
             value={selectValue}
             onChange={handleChange}
             disabled={disabled}
+            required={required}
             aria-busy={loading || undefined}
             aria-invalid={error ? true : undefined}
             aria-describedby={error ? errorId : undefined}
