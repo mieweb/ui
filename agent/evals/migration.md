@@ -11,7 +11,8 @@ format and scoring. MIG-1 through MIG-5 are the icon-compliance cases
 - **Expect:** No — every icon comes from `lucide-react`: the `*Icon` aliases
   re-exported from `@mieweb/ui` (188 icons) or direct `lucide-react` imports.
   `@fortawesome/*` is ESLint-blocked; mixed sets break consistency.
-- **Agent:** MIE UI Migration Agent
+- **Agent:** MIE UI Design Agent (icon policy is the orchestrator's own
+  domain via the icons skill; Migration enforces it during audits)
 - **Source:** mieweb-ui.instructions.md — Rule 17; agent/skills/mieweb-ui-icons/SKILL.md
 
 ### MIG-2 — Icon-only control labeling
@@ -159,7 +160,8 @@ dark`, missing var fallbacks (transparent renders), wrong PostCSS plugin,
   entry?"
 - **Expect:** No — the catalog is inventory, not an API reference. Verify
   props in the Storybook docs or the public types before prescribing usage.
-- **Agent:** MIE UI Migration Agent
+- **Agent:** MIE UI Design Agent (catalog interpretation is the
+  orchestrator's own domain — "thin orchestrator owns selection")
 - **Source:** agent/agents/mieweb-ui-migration.agent.md — Rule 4
 
 ### MIG-18 — Behavior-preserving replacements

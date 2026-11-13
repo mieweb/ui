@@ -46,7 +46,10 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 - **Agent** — the specialist that should end up answering. When the question
   is posed to the MIE UI Design Agent, correct routing to this agent (or a
   correct direct answer where the orchestrator owns the domain, e.g.
-  selection) is part of the pass criteria.
+  selection) is part of the pass criteria. Some questions legitimately
+  straddle domains (a file's primary agent vs. the shipped routing table);
+  the key names the routing-table owner, and a parenthetical explains the
+  split — grade routing against the key, not the file it lives in.
 - **Source** — where the known-good answer lives, so graders can re-verify
   and corpus fixes have a target.
 
