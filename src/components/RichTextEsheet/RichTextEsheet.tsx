@@ -251,15 +251,6 @@ const RichTextEsheetSession = React.forwardRef<
   const [snapshot, setSnapshot] = React.useState(() =>
     createRichTextEsheetSnapshot(stable.definition, initialSeed, stable.parties)
   );
-  // Until the user authors the document, RichEdit shows the generated
-  // projection of the live snapshot — a mount-time seed would commit a stale
-  // body (missing links added by a configuration change) on the first flush.
-  const richBody = React.useMemo(
-    () =>
-      getRichTextEsheetDocumentBody(snapshot.responses) ??
-      parseRichTextEsheetMdy(snapshot.mdy).body,
-    [snapshot]
-  );
   const [mode, setModeState] = React.useState<RichTextEsheetMode>(defaultMode);
   const [modePending, setModePending] = React.useState(false);
   const [pendingSection, setPendingSection] = React.useState<string | null>(
@@ -291,6 +282,26 @@ const RichTextEsheetSession = React.forwardRef<
     () => ({ definition: form, responses: responses.current }),
     [form]
   );
+  // Until the user authors the document, RichEdit shows a generated skeleton.
+  // Key it to the configuration, not the live snapshot: the always-mounted
+  // editor reloads the whole document whenever `body` changes, which must not
+  // happen for every keystroke in an eSheet field — answer-only updates reach
+  // the editor through its `fields` projection refresh instead. A config
+  // change still regenerates, so a mount-time seed never commits a stale body
+  // missing newly added links on the first flush.
+  const generatedBody = React.useMemo(
+    () =>
+      parseRichTextEsheetMdy(
+        createRichTextEsheetSnapshot(
+          stable.definition,
+          responses.current,
+          stable.parties
+        ).mdy
+      ).body,
+    [stable]
+  );
+  const richBody =
+    getRichTextEsheetDocumentBody(snapshot.responses) ?? generatedBody;
 
   const currentSnapshot = React.useCallback(() => {
     const { stable } = latest.current;
@@ -434,15 +445,25 @@ const RichTextEsheetSession = React.forwardRef<
     },
     [flushEditor]
   );
+  // Nested modals portal to document.body, over the resolver: the capture
+  // confirmation (alertdialog, ignores Escape by design) and the annotation
+  // editor (dialog, refuses dismissal while saving). While one is open it
+  // owns Escape and focus; acting on the resolver underneath would desync
+  // Modal's scroll lock and strand the nested dialog over a hidden editor.
+  const nestedDialog = React.useCallback(
+    () =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '[role="dialog"], [role="alertdialog"]'
+        )
+      ).find((dialog) => !resolverTrap.current?.contains(dialog)) ?? null,
+    []
+  );
   useEscapeKey(
     React.useCallback(() => {
-      // The screen-capture confirmation is a modal alertdialog that ignores
-      // Escape by design — the same scope exception as the focus trap below.
-      // Closing the resolver beneath it would also desync Modal's scroll
-      // lock and leave the page unscrollable after the confirmation closes.
-      if (document.querySelector('[role="alertdialog"]')) return;
+      if (nestedDialog()) return;
       closeResolver();
-    }, [closeResolver]),
+    }, [closeResolver, nestedDialog]),
     resolverField !== null
   );
 
@@ -490,9 +511,10 @@ const RichTextEsheetSession = React.forwardRef<
     // the trap's focus scope for keyboard users.
     const inScope = (target: Element): boolean => {
       if (container.contains(target)) return true;
-      // The screen-capture confirmation is a modal alertdialog portaled to
-      // document.body; it owns focus while open — never yank it back.
-      if (target.closest('[role="alertdialog"]')) return true;
+      // Nested modals (capture confirmation, annotation editor) portal to
+      // document.body; they own focus while open — never yank it back.
+      const dialog = target.closest('[role="alertdialog"], [role="dialog"]');
+      if (dialog && !container.contains(dialog)) return true;
       const portal = target.closest<HTMLElement>(
         '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
       );

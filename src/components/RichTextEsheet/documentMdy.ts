@@ -632,28 +632,73 @@ export function createMdyDocumentEngine<
     return retired;
   };
 
+  /** Reverse `linkId`, accepting only ids that round-trip exactly. */
+  const decodeLinkId = (id: string): string | undefined => {
+    const prefix = `${config.linkPrefix}_`;
+    if (!id.startsWith(prefix)) return undefined;
+    const hex = id.slice(prefix.length);
+    if (!/^(?:[0-9a-f]{2})+$/.test(hex)) return undefined;
+    const fieldId = new TextDecoder().decode(
+      Uint8Array.from(hex.match(/../g) ?? [], (pair) => parseInt(pair, 16))
+    );
+    return linkId(fieldId) === id ? fieldId : undefined;
+  };
+
+  /**
+   * Link projections present in authored prose whose fields no longer exist.
+   * Locally authored drafts carry no imported front matter, so their stale
+   * links are only discoverable in the body itself.
+   */
+  const retiredFieldsFromBody = (
+    body: string,
+    activeIds: ReadonlySet<string>
+  ): MdyDocumentField[] => {
+    const retired = new Map<string, MdyDocumentField>();
+    for (const link of fieldLinkSpans(body)) {
+      if (activeIds.has(link.id) || retired.has(link.id)) continue;
+      const fieldId = decodeLinkId(link.id);
+      if (fieldId === undefined) continue;
+      retired.set(link.id, {
+        id: link.id,
+        fieldId,
+        sectionId: '',
+        label: 'Field no longer configured',
+        display: 'Field no longer configured',
+      });
+    }
+    return [...retired.values()];
+  };
+
   /**
    * Projections imported with the document whose fields were since removed.
    * Lets live editors normalize retired links the same way `create` does,
    * without round-tripping the authored body through serialization.
    */
   function retiredFields(snapshot: TSnapshot): MdyDocumentField[] {
-    const reserved = snapshot.responses[config.documentFieldId];
-    const source = reserved?.attributes?.mdyFrontMatterSource;
-    const split = typeof source === 'string' ? splitSource(source) : undefined;
-    if (!split) return [];
-    const document = parseDocument(split.yamlSource, { uniqueKeys: true });
-    if (
-      document.errors.length ||
-      document.warnings.length ||
-      !isMap(document.contents)
-    )
-      return [];
-    const existing: unknown = document.toJS({ maxAliasCount: 100 });
     const activeIds = new Set(
       config.getFields(snapshot).map((field) => field.id)
     );
-    return findRetiredFields(existing, activeIds);
+    const reserved = snapshot.responses[config.documentFieldId];
+    const retired = new Map<string, MdyDocumentField>();
+    const source = reserved?.attributes?.mdyFrontMatterSource;
+    const split = typeof source === 'string' ? splitSource(source) : undefined;
+    if (split) {
+      const document = parseDocument(split.yamlSource, { uniqueKeys: true });
+      if (
+        !document.errors.length &&
+        !document.warnings.length &&
+        isMap(document.contents)
+      ) {
+        const existing: unknown = document.toJS({ maxAliasCount: 100 });
+        for (const field of findRetiredFields(existing, activeIds))
+          retired.set(field.id, field);
+      }
+    }
+    // Imported entries win: they carry the original sectionId.
+    if (typeof reserved?.answer === 'string')
+      for (const field of retiredFieldsFromBody(reserved.answer, activeIds))
+        if (!retired.has(field.id)) retired.set(field.id, field);
+    return [...retired.values()];
   }
 
   /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
@@ -812,7 +857,16 @@ export function createMdyDocumentEngine<
       document.delete(field.id);
       changed = true;
     }
-    refreshedBody = refreshLinks(refreshedBody, removedFields);
+    // Links authored before a section was removed may predate any imported
+    // front matter (fresh local drafts): normalize those too.
+    const removedIds = new Set(removedFields.map((field) => field.id));
+    const bodyRetired = retiredFieldsFromBody(refreshedBody, activeIds).filter(
+      (field) => !removedIds.has(field.id)
+    );
+    refreshedBody = refreshLinks(refreshedBody, [
+      ...removedFields,
+      ...bodyRetired,
+    ]);
     const oldMdy = record(existing) && record(existing.mdy) ? existing.mdy : {};
     const metadata = {
       ...oldMdy,

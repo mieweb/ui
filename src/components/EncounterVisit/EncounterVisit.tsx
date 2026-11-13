@@ -281,15 +281,6 @@ const EncounterVisitSession = React.forwardRef<
   const [snapshot, setSnapshot] = React.useState(() =>
     createEncounterSnapshot(stableDefinition, initialSeed)
   );
-  // Until the user authors the document, RichEdit shows the generated
-  // projection of the live snapshot — a mount-time seed would commit a stale
-  // body (missing links added by a configuration change) on the first flush.
-  const richBody = React.useMemo(
-    () =>
-      getEncounterDocumentBody(snapshot.responses) ??
-      parseEncounterMdy(snapshot.mdy).body,
-    [snapshot]
-  );
   const [activeSection, setActiveSection] = React.useState(
     stableDefinition.sections[0].id
   );
@@ -332,6 +323,22 @@ const EncounterVisitSession = React.forwardRef<
     () => ({ definition: form, responses: responses.current }),
     [form]
   );
+  // Until the user authors the document, RichEdit shows a generated skeleton.
+  // Key it to the configuration, not the live snapshot: the always-mounted
+  // editor reloads the whole document whenever `body` changes, which must not
+  // happen for every keystroke in an eSheet field — answer-only updates reach
+  // the editor through its `fields` projection refresh instead. A config
+  // change still regenerates, so a mount-time seed never commits a stale body
+  // missing newly added links on the first flush.
+  const generatedBody = React.useMemo(
+    () =>
+      parseEncounterMdy(
+        createEncounterSnapshot(stableDefinition, responses.current).mdy
+      ).body,
+    [stableDefinition]
+  );
+  const richBody =
+    getEncounterDocumentBody(snapshot.responses) ?? generatedBody;
 
   const writeBody = React.useCallback((body: string) => {
     if (latest.current.readOnly || latest.current.saving) return;

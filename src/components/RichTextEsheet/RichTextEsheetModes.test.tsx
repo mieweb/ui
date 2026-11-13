@@ -222,6 +222,60 @@ describe('RichTextEsheet mode synchronization', () => {
     );
   });
 
+  it('ignores Escape and keeps focus while an annotation dialog is open', async () => {
+    render(<RichTextEsheet definition={definition} />);
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    await screen.findByRole('dialog', { name: 'Details' });
+    // The annotate-image Modal is a plain role="dialog" portaled to
+    // document.body that refuses dismissal while its upload is saving —
+    // Escape falls through to the resolver's document listener, and the
+    // trap's focusin listener sees focus outside the resolver.
+    const modal = document.createElement('div');
+    modal.setAttribute('role', 'dialog');
+    const save = document.createElement('button');
+    save.textContent = 'Save annotation';
+    modal.appendChild(save);
+    document.body.appendChild(modal);
+    act(() => save.focus());
+    expect(document.activeElement).toBe(save);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
+    modal.remove();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Details' })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it('does not reload the rich editor for answer-only eSheet edits', async () => {
+    render(<RichTextEsheet definition={definition} />);
+    const summary = await screen.findByRole('textbox', { name: /Summary/ });
+    fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
+    selectMode('RichEdit');
+    const editor = await screen.findByRole('textbox', {
+      name: 'Document narrative',
+    });
+    // The skeleton body is keyed to the configuration: answer edits reach
+    // the live editor through its fields projection refresh (not exercised
+    // by this stub), never by regenerating the body — the always-mounted
+    // editor would otherwise reload the whole document per keystroke.
+    expect((editor as HTMLTextAreaElement).value).toContain('## Summary');
+    expect((editor as HTMLTextAreaElement).value).not.toContain('Login fails');
+    // Serialization refreshes projected displays, so no content is lost.
+    selectMode('View');
+    await waitFor(() =>
+      expect(
+        screen.getByRole('region', { name: 'Document preview' })
+      ).toHaveTextContent('Login fails')
+    );
+  });
+
   it('keeps retired links protected instead of opening their resolver', async () => {
     // Author under the full definition, then reopen after `details` was
     // removed from a same-id configuration: the imported link is retired.

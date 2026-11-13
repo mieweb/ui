@@ -179,6 +179,34 @@ describe('RichTextEsheet MDY round trip', () => {
     });
   });
 
+  it('retires removed-section links in locally authored drafts too', () => {
+    // Authoring in RichEdit stores only the body — no imported front matter
+    // to index retired links from; they are found in the prose itself.
+    const body = parseRichTextEsheetMdy(createRichTextEsheetMdy(input)).body;
+    const narrowed = {
+      ...definition,
+      sections: definition.sections.filter(
+        (section) => section.id !== 'reason'
+      ),
+    };
+    const responses = {
+      [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: { answer: body },
+    };
+    const retired = getRichTextEsheetRetiredMdyFields({
+      definition: narrowed,
+      responses,
+    });
+    expect(retired).toHaveLength(1);
+    expect(retired[0]).toMatchObject({
+      fieldId: reasonId,
+      display: 'Field no longer configured',
+    });
+    // View/Export serialization normalizes the stale link the same way.
+    const snapshot = createRichTextEsheetSnapshot(narrowed, responses);
+    expect(snapshot.mdy).toContain('[Field no longer configured](mdy:doc_');
+    expect(snapshot.mdy).not.toContain('Routine evaluation, please.');
+  });
+
   it('renders projected section content to HTML', async () => {
     const rendered = await renderRichTextEsheetMdy(
       createRichTextEsheetMdy(input)
