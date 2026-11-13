@@ -470,7 +470,10 @@ const RichTextEsheetSession = React.forwardRef<
       if (nestedDialog()) return;
       closeResolver();
     }, [closeResolver, nestedDialog]),
-    resolverField !== null
+    resolverField !== null,
+    // Exclusive: an enclosing Modal host must not also close on the same
+    // keypress; the nestedDialog guard covers non-library dialogs.
+    true
   );
 
   React.useEffect(() => {

@@ -192,12 +192,18 @@ function Modal({
   // by `Animated`, which is element-agnostic.
   const focusTrapRef = useFocusTrap<HTMLElement>(isGuarded);
 
-  // Handle escape key
-  useEscapeKey(() => {
-    if (closeOnEscape && open) {
-      onOpenChange(false);
-    }
-  }, open);
+  // Handle escape key — exclusive, so a stacked overlay above this modal
+  // (nested modal, linked-section resolver) owns Escape and only the topmost
+  // layer dismisses per keypress.
+  useEscapeKey(
+    () => {
+      if (closeOnEscape && open) {
+        onOpenChange(false);
+      }
+    },
+    open,
+    true
+  );
 
   // Handle overlay click
   const handleOverlayClick = React.useCallback(

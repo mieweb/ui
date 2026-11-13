@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Document } from 'yaml';
+import { Modal } from '../Modal/Modal';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
 import {
   getRichTextEsheetFieldId,
@@ -297,6 +298,33 @@ describe('RichTextEsheet mode synchronization', () => {
         screen.queryByRole('dialog', { name: 'Details' })
       ).not.toBeInTheDocument()
     );
+  });
+
+  it('dismisses one overlay layer per Escape inside a library Modal host', async () => {
+    // Modal and the resolver both listen for Escape on document; exclusive
+    // ownership makes only the topmost layer act per keypress — the host
+    // must not close together with the resolver.
+    const onOpenChange = vi.fn();
+    render(
+      <Modal open onOpenChange={onOpenChange} aria-label="Host modal">
+        <RichTextEsheet definition={definition} />
+      </Modal>
+    );
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    await screen.findByRole('dialog', { name: 'Details' });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Details' })
+      ).not.toBeInTheDocument()
+    );
+    expect(onOpenChange).not.toHaveBeenCalled();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it('does not reload the rich editor for answer-only eSheet edits', async () => {
