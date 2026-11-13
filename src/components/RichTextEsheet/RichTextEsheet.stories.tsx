@@ -340,6 +340,11 @@ export const DocumentPreview: Story = {
         />
         <pre
           dir="ltr"
+          role="region"
+          aria-label="Live MDY output"
+          // tabIndex makes this scrollable region keyboard-accessible (axe: scrollable-region-focusable)
+          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          tabIndex={0}
           className="bg-muted min-w-0 overflow-auto rounded-lg p-3 text-xs"
         >
           {mdy}
