@@ -445,18 +445,24 @@ const RichTextEsheetSession = React.forwardRef<
     },
     [flushEditor]
   );
-  // Nested modals portal to document.body, over the resolver: the capture
-  // confirmation (alertdialog, ignores Escape by design) and the annotation
-  // editor (dialog, refuses dismissal while saving). While one is open it
-  // owns Escape and focus; acting on the resolver underneath would desync
-  // Modal's scroll lock and strand the nested dialog over a hidden editor.
+  // Nested modals render over the resolver: the capture confirmation
+  // (alertdialog, ignores Escape by design) and the annotation editor
+  // (dialog, refuses dismissal while saving) — the latter renders inline, so
+  // a capture annotated inside the resolver is a descendant of the trap.
+  // While one is open it owns Escape and focus; acting on the resolver
+  // underneath would desync Modal's scroll lock and strand the nested dialog
+  // over a hidden editor. A dialog that contains the trap is not nested —
+  // it's the resolver itself or an enclosing host modal.
   const nestedDialog = React.useCallback(
     () =>
       Array.from(
         document.querySelectorAll<HTMLElement>(
           '[role="dialog"], [role="alertdialog"]'
         )
-      ).find((dialog) => !resolverTrap.current?.contains(dialog)) ?? null,
+      ).find(
+        (dialog) =>
+          !resolverTrap.current || !dialog.contains(resolverTrap.current)
+      ) ?? null,
     []
   );
   useEscapeKey(
@@ -511,10 +517,12 @@ const RichTextEsheetSession = React.forwardRef<
     // the trap's focus scope for keyboard users.
     const inScope = (target: Element): boolean => {
       if (container.contains(target)) return true;
-      // Nested modals (capture confirmation, annotation editor) portal to
-      // document.body; they own focus while open — never yank it back.
+      // Nested modals (capture confirmation, annotation editor) render
+      // outside the trap; they own focus while open — never yank it back.
+      // A dialog containing the trap is the enclosing host modal, not a
+      // nested one: focus escaping to it must still be pulled back.
       const dialog = target.closest('[role="alertdialog"], [role="dialog"]');
-      if (dialog && !container.contains(dialog)) return true;
+      if (dialog && !dialog.contains(container)) return true;
       const portal = target.closest<HTMLElement>(
         '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
       );
