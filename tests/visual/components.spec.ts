@@ -258,7 +258,10 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('RichMediaCaptureEditor - Attach file round-trips into markdown via uploadHandler', async ({
     page,
   }) => {
-    await gotoStory(page, 'editors-richmediacaptureeditor--with-upload-handler');
+    await gotoStory(
+      page,
+      'editors-richmediacaptureeditor--with-upload-handler'
+    );
     // Insertion happens at the caret, exactly like paste — put it in the
     // paragraph (markdown headings cannot carry images through serialization).
     await page
@@ -266,13 +269,11 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .click();
     // The unrestricted hidden input backs "Attach file" (the other is
     // accept="image/*" for Capture image).
-    await page
-      .locator('input[type="file"]:not([accept])')
-      .setInputFiles({
-        name: 'note-photo.png',
-        mimeType: 'image/png',
-        buffer: Buffer.from('fake-png-bytes'),
-      });
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
     await expect(page.getByRole('status')).toHaveText('Attached', {
       timeout: 15000,
     });
@@ -1210,6 +1211,60 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Select - Default', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-select--default');
     await expect(page).toHaveScreenshot('select-default.png');
+  });
+
+  test('Select - Search stays anchored inside a transformed dialog', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-select--searchable');
+    const trigger = page.getByRole('combobox').first();
+    await trigger.evaluate((element) => {
+      const wrapper = element.closest<HTMLElement>(
+        '[data-slot="select-wrapper"]'
+      )!;
+      wrapper.setAttribute('role', 'dialog');
+      wrapper.setAttribute('aria-modal', 'true');
+      wrapper.style.transform = 'translate(80px, 40px) scale(0.9)';
+    });
+    await trigger.click();
+    const popup = page.locator('[data-slot="select-dropdown"]');
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'light';
+      root.style.setProperty('--mieweb-card', '#111827', 'important');
+      root.style.setProperty(
+        '--mieweb-card-foreground',
+        '#f9fafb',
+        'important'
+      );
+    });
+    await popup.evaluate((element) => {
+      element.style.colorScheme = 'light';
+    });
+    await expect(popup).toHaveCSS('background-color', 'rgb(17, 24, 39)');
+    await expect(
+      popup.locator('[role="option"][aria-selected="false"]').first()
+    ).toHaveCSS('color', 'rgb(249, 250, 251)');
+    await expect(
+      page.getByRole('dialog').getByRole('textbox', { name: 'Search options' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('textbox', { name: 'Search options' })
+    ).toBeFocused();
+    await expect
+      .poll(async () => {
+        const anchor = await trigger.boundingBox();
+        const menu = await popup.boundingBox();
+        if (!anchor || !menu) return Infinity;
+        return Math.max(
+          Math.abs(menu.x - anchor.x),
+          Math.abs(menu.y - anchor.y - anchor.height - 4),
+          Math.abs(menu.width - anchor.width)
+        );
+      })
+      .toBeLessThan(2);
   });
 
   test('CountryDropdown - Default (empty placeholder)', async ({ page }) => {
