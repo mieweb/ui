@@ -42,6 +42,17 @@ type AIRenderTextContent = (
 This is the seam the "markdown + image + mermaid + editable messages" feature
 should plug into — don't fork the message renderer.
 
+## Extension point: `renderCustomContent`
+
+For host widgets driven by structured data (e.g. a speaker-transcript player),
+push a `{ type: 'custom', data }` block and pass `renderCustomContent(data, ctx)`
+to `AIChat` / `AIMessageDisplay`. Don't encode such data into a `text` block.
+
+- `data` is `unknown` and opaque to the library; the host owns its shape and
+  should use its own discriminator (e.g. `data.kind`).
+- The result is mounted **without** the `prose` wrapper used for text.
+- Without the render-prop a `custom` block renders nothing.
+
 ## Invariants & gotchas
 
 - **One autodocs page per CSF file.** Stories are split into
@@ -59,7 +70,8 @@ should plug into — don't fork the message renderer.
   ones. Inline images use the Messaging attachment
   lightbox.
 - Content block types live in `AIMessageContent` (`text` / `tool_use` /
-  `tool_result` / `thinking` / `code`). Adding a block type means updating both
+  `tool_result` / `thinking` / `code` / `image` / `file` / `audio` / `video` /
+  `custom`). Adding a block type means updating both
   the type union and `AIMessageDisplay`'s switch.
 - `ThinkingBlock` auto-collapses its `CollapsiblePill` on the streaming → done
   transition (one-shot `autoCollapsed` state; the user can re-expand). Blocks
