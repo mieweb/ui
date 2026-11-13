@@ -251,6 +251,25 @@ test.describe('Visual Regression Tests - Core Components', () => {
     ).toBeVisible();
   });
 
+  // Clicking right after mount can land before ProseMirror is interactive,
+  // leaving the caret at the document start (the heading) — and headings drop
+  // images in markdown serialization, so the round-trip silently loses the
+  // capture on slow CI runners. Retry until the caret really sits in the
+  // target paragraph.
+  async function placeCaretInParagraph(page: Page, text: string) {
+    const paragraph = page.locator('.ProseMirror p', { hasText: text });
+    await expect(async () => {
+      await paragraph.click();
+      expect(
+        await page.evaluate(() => {
+          const node = window.getSelection()?.anchorNode;
+          const element = node instanceof Element ? node : node?.parentElement;
+          return element?.closest('p')?.textContent ?? '';
+        })
+      ).toContain(text);
+    }).toPass();
+  }
+
   // Real-editor round-trip (mieweb/ui#733): capture → uploadHandler → image
   // node in the live Kerebron document → serialized markdown. Complements the
   // unit tests, which mock the editor because tree-sitter WASM can't run in
@@ -264,9 +283,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
     // Insertion happens at the caret, exactly like paste — put it in the
     // paragraph (markdown headings cannot carry images through serialization).
-    await page
-      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
-      .click();
+    await placeCaretInParagraph(page, 'Attach evidence below.');
     // The unrestricted hidden input backs "Attach file" (the other is
     // accept="image/*" for Capture image).
     await page.locator('input[type="file"]:not([accept])').setInputFiles({
@@ -291,9 +308,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     page,
   }) => {
     await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
-    await page
-      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
-      .click();
+    await placeCaretInParagraph(page, 'Attach evidence below.');
     await page.locator('input[type="file"]:not([accept])').setInputFiles({
       name: 'note-photo.png',
       mimeType: 'image/png',
