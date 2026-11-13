@@ -509,7 +509,7 @@ const EncounterVisitSession = React.forwardRef<
   );
   // Exclusive: an enclosing Modal host must not also close on the keypress
   // that dismisses the resolver (one overlay layer per Escape).
-  useEscapeKey(closeResolver, resolverField !== null, true);
+  useEscapeKey(closeResolver, resolverField !== null, resolverTrap);
 
   React.useEffect(() => {
     const container = resolverTrap.current;
