@@ -317,6 +317,8 @@ export const miewebUISafelist = [
   'grid-cols-[minmax(8rem,1.1fr)_minmax(7rem,0.9fr)_minmax(10rem,1.5fr)_5.5rem_2.5rem]',
   'sm:grid-cols-[minmax(8rem,1.1fr)_minmax(7rem,0.9fr)_minmax(10rem,1.5fr)_5.5rem_2.5rem]',
   'sm:!grid',
+  // MedicationEditor compound ingredient rows (drug/form/strength/qty/unit/remove).
+  'grid-cols-[2fr_1fr_1fr_0.8fr_1fr_2rem]',
   'border-border/70',
   '[&_[data-slot=radio-group-items]]:gap-2',
   'sm:[&_[data-slot=radio-group-legend]]:sr-only',
