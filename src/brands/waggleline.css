@@ -167,13 +167,17 @@ kbd {
    Smooth Theme Transitions
    ============================================ */
 
-*,
-*::before,
-*::after {
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    color 0.3s ease;
+/* In the base layer so any `transition-*` utility on an element wins; an
+   unlayered rule would beat every layered utility regardless of specificity. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
 }
 
 /* Disable transitions on page load */
