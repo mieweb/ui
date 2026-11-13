@@ -5,6 +5,7 @@ import { conversations } from './storyData';
 import { fullHeightChat } from '../../../.storybook/full-height';
 import { MotionProvider } from '../../motion/MotionProvider';
 import { Button } from '../Button';
+import { Select } from '../Select';
 
 // ============================================================================
 // Meta
@@ -30,6 +31,13 @@ const meta: Meta<typeof SuperChatConversations> = {
     className: { control: false },
     onConversationOpened: { control: false, table: { category: 'Callbacks' } },
     onNewConversation: { control: false, table: { category: 'Callbacks' } },
+    listTitle: {
+      control: 'text',
+      description: 'Heading above the list; `null` hides it.',
+      table: { category: 'Header' },
+    },
+    listHeader: { control: false, table: { category: 'Header' } },
+    search: { control: false, table: { category: 'Header' } },
   },
   parameters: {
     layout: 'fullscreen',
@@ -38,7 +46,7 @@ const meta: Meta<typeof SuperChatConversations> = {
       description: {
         component: `### What it's for
 
-**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when the requested id disappears the first conversation is highlighted instead. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
+**The SuperChat conversation switcher: a sidebar listing host-owned conversations, newest activity first, with unread badges, last-message preview and an optional "+" action.** \`SuperChatConversations\` takes \`conversations: SuperChatConversation[]\` and sorts them by \`lastActivity\` (falling back to the latest message \`time\`). Selection is controlled with \`activeConversationId\` or uncontrolled with \`defaultActiveConversationId\` (default: the first conversation); when an uncontrolled id disappears the first conversation is highlighted instead; a controlled id that is not in the list (e.g. filtered out by a search) highlights nothing. \`onConversationOpened(conversation)\` fires on click; \`onNewConversation\` adds the "New conversation" button. It renders an \`<aside aria-label="Conversations">\` (\`data-slot="superchat-conversations"\`) with a \`role="list"\` of \`role="listitem"\` buttons, the active one marked \`aria-current="true"\`; the unread count carries an \`sr-only\` "unread messages" suffix. Fixed \`w-64\` with a trailing border; override with \`className\`.
 
 ### Use it when
 
@@ -49,7 +57,12 @@ const meta: Meta<typeof SuperChatConversations> = {
 
 - You want list + panel with selection wired — \`SuperChatInbox\` already composes this component and handles the mobile master/detail switch.
 - The items are human-to-human conversations with presence, avatars and typing state — Messaging's \`ConversationListItem\` renders \`Conversation\` objects with online indicators and last-seen text.
-- You need search, filtering, grouping (unread / archived) or infinite loading: none exist; pass a pre-filtered, pre-paged \`conversations\` array.
+- You need grouped sections (unread / archived): the list always sorts every conversation by activity into one flat list, so groups would interleave. Render your own grouped list alongside \`SuperChat\` instead.
+- You need infinite loading: it doesn't exist; pass a pre-paged \`conversations\` array.
+
+### Header: title, search and filters
+
+\`listTitle\` replaces the "Conversations" heading (\`null\` hides it). \`search\` adds a labelled search box; the host owns the query (\`value\` / \`onChange\`) and passes \`conversations\` already filtered, so it can match whatever it likes. In \`SuperChatInbox\`, pass the matches as \`listConversations\` and keep \`conversations\` whole, so the open conversation (and its unsent draft) stays put while the list narrows. When a non-empty query leaves the list empty, a \`role="status"\` line says so (\`noResultsLabel\`). \`listHeader\` takes host content under the search box, such as filter \`Select\`s; it stays fixed while the list scrolls. See the **List Header** story.
 
 ### Example
 
@@ -149,6 +162,59 @@ function ControlledList() {
 
 export const Controlled: Story = {
   render: () => <ControlledList />,
+};
+
+// ============================================================================
+// List header
+// ============================================================================
+
+/** Search and a filter, both owned by the host, which filters the array it passes in. */
+function ListHeaderDemo() {
+  const [query, setQuery] = React.useState('');
+  const [show, setShow] = React.useState('all');
+  const visible = conversations.filter(
+    (c) =>
+      (show === 'all' || (c.unread ?? 0) > 0) &&
+      c.title.toLowerCase().includes(query.trim().toLowerCase())
+  );
+  return (
+    <SuperChatConversations
+      conversations={visible}
+      listTitle="Patients"
+      search={{
+        value: query,
+        onChange: setQuery,
+        placeholder: 'Search patients…',
+      }}
+      listHeader={
+        <Select
+          label="Show"
+          hideLabel
+          size="sm"
+          value={show}
+          onValueChange={setShow}
+          options={[
+            { value: 'all', label: 'All conversations' },
+            { value: 'unread', label: 'Unread only' },
+          ]}
+        />
+      }
+      onConversationOpened={(c) => console.log('opened', c.id)}
+      onNewConversation={() => console.log('new conversation')}
+    />
+  );
+}
+
+export const ListHeader: Story = {
+  render: () => <ListHeaderDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A custom `listTitle`, a `search` box and a filter `Select` in `listHeader`. The host filters `conversations` on both; type something that matches nothing to see the no-results status.',
+      },
+    },
+  },
 };
 
 // ============================================================================

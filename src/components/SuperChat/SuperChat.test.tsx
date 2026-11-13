@@ -1698,6 +1698,135 @@ describe('SuperChatConversations', () => {
     await user.click(screen.getByLabelText('New conversation'));
     expect(onNewConversation).toHaveBeenCalled();
   });
+
+  describe('list header', () => {
+    it('renders exactly as before when no header props are passed', () => {
+      const { container } = render(
+        <SuperChatConversations conversations={conversations} />
+      );
+      expect(screen.getByText('Conversations')).toBeInTheDocument();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-header"]')
+      ).toBeNull();
+    });
+
+    it('replaces the heading with listTitle', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle="Work sessions"
+        />
+      );
+      expect(screen.getByText('Work sessions')).toBeInTheDocument();
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+    });
+
+    it('hides the heading row when listTitle is null and there is no new button', () => {
+      const { container } = render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-title"]')
+      ).toBeNull();
+    });
+
+    it('keeps the new-conversation button when listTitle is null', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+          onNewConversation={() => {}}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('New conversation')).toBeInTheDocument();
+    });
+
+    it('renders listHeader content above the list', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listHeader={<button type="button">Group by: Day</button>}
+        />
+      );
+      const filter = screen.getByRole('button', { name: 'Group by: Day' });
+      const list = screen.getByRole('list');
+      expect(
+        filter.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('renders a labelled search box that reports each change', async () => {
+      const onChange = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ value: '', onChange }}
+        />
+      );
+      const box = screen.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      expect(box).toHaveAttribute('placeholder', 'Search…');
+      await user.type(box, 'a');
+      expect(onChange).toHaveBeenCalledWith('a');
+    });
+
+    it('uses the host labels for the search box', () => {
+      render(
+        <SuperChatConversations
+          conversations={[]}
+          search={{
+            value: 'zzz',
+            onChange: () => {},
+            label: 'Search posts',
+            placeholder: 'Search posts, people…',
+            noResultsLabel: 'No matching posts',
+          }}
+        />
+      );
+      expect(
+        screen.getByRole('searchbox', { name: 'Search posts' })
+      ).toHaveAttribute('placeholder', 'Search posts, people…');
+      expect(screen.getByRole('status')).toHaveTextContent('No matching posts');
+    });
+
+    it('announces no results only when a query matches nothing', () => {
+      const search = { value: '', onChange: () => {} };
+      const { rerender } = render(
+        <SuperChatConversations conversations={[]} search={search} />
+      );
+      // An empty query with an empty list is not a "no results" state.
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ ...search, value: 'Intake' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={[]}
+          search={{ ...search, value: 'nothing' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'No matching conversations'
+      );
+    });
+  });
 });
 
 describe('SuperChatInbox', () => {
@@ -1750,6 +1879,79 @@ describe('SuperChatInbox', () => {
     expect(panel).not.toBeNull();
     const thread = within(panel as HTMLElement);
     expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('passes the list header props through to the conversation list', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          listTitle="Days"
+          listHeader={<span>Team: Platform</span>}
+          search={{ value: '', onChange: () => {} }}
+        />
+      </div>
+    );
+    const list = within(
+      container.querySelector(
+        '[data-slot="superchat-conversations"]'
+      ) as HTMLElement
+    );
+    expect(list.getByText('Days')).toBeInTheDocument();
+    expect(list.getByText('Team: Platform')).toBeInTheDocument();
+    expect(
+      list.getByRole('searchbox', { name: 'Search conversations' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the open conversation and its draft when a search empties the list', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const inbox = (
+      query: string,
+      listConversations?: SuperChatConversation[]
+    ) => (
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={listConversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          search={{ value: query, onChange: () => {} }}
+        />
+      </div>
+    );
+    const { container, rerender } = render(inbox(''));
+    await user.type(screen.getByLabelText('Message'), 'unsent reply');
+
+    rerender(inbox('nothing', []));
+
+    const panel = within(
+      container.querySelector('[data-slot="superchat"]') as HTMLElement
+    );
+    expect(panel.getByText('first conversation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveValue('unsent reply');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'No matching conversations'
+    );
+  });
+
+  it('highlights no row when the open conversation is filtered out of the list', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={conversations.filter((c) => c.id === 'c2')}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const list = screen.getByRole('list');
+    expect(within(list).getByText('Follow-up')).toBeInTheDocument();
+    expect(within(list).queryByText('Intake')).not.toBeInTheDocument();
+    expect(list.querySelector('[aria-current="true"]')).not.toBeInTheDocument();
   });
 
   it('switches the active panel when another conversation is opened', async () => {
