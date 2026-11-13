@@ -197,6 +197,57 @@ describe('RichTextEsheet mode synchronization', () => {
     modal.remove();
   });
 
+  it('ignores Escape in the resolver while a capture confirmation is open', async () => {
+    render(<RichTextEsheet definition={definition} />);
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    await screen.findByRole('dialog', { name: 'Details' });
+    // AlertDialog ignores Escape by design, so the key falls through to the
+    // resolver's document listener. Closing the resolver underneath would
+    // desync Modal's scroll lock and leave the page unscrollable.
+    const modal = document.createElement('div');
+    modal.setAttribute('role', 'alertdialog');
+    document.body.appendChild(modal);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
+    modal.remove();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Details' })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it('keeps retired links protected instead of opening their resolver', async () => {
+    // Author under the full definition, then reopen after `details` was
+    // removed from a same-id configuration: the imported link is retired.
+    const authored = createRichTextEsheetSnapshot(definition, {
+      [getRichTextEsheetFieldId('details')]: { answer: 'Old details answer' },
+    }).mdy;
+    render(
+      <RichTextEsheet
+        initialMdy={authored}
+        definition={{
+          ...definition,
+          sections: [{ id: 'summary', title: 'Summary' }],
+        }}
+      />
+    );
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    // The stub activates the LAST projected field id, which is the retired
+    // `details` link appended after the active sections.
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    // Retired links have no section to resolve; nothing may open.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
   it('flushes the last rich edit before switching and saving, with section answers retained', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
     const onSubmit = vi.fn();

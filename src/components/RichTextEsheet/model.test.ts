@@ -6,6 +6,7 @@ import {
 import {
   createRichTextEsheetMdy,
   getRichTextEsheetMdyParties,
+  getRichTextEsheetRetiredMdyFields,
   parseRichTextEsheetMdy,
   renderRichTextEsheetMdy,
   richTextEsheetDocumentResponse,
@@ -147,6 +148,35 @@ describe('RichTextEsheet MDY round trip', () => {
     expect(snapshot.mdy).toContain('[Routine evaluation, please.](mdy:doc_');
     // The reserved carrier never leaks into the exported response map.
     expect(snapshot.mdy).not.toContain(RICHTEXT_ESHEET_DOCUMENT_FIELD_ID);
+  });
+
+  it('reports imported links whose sections were removed as retired', () => {
+    const imported = createRichTextEsheetMdy(input);
+    const responses = {
+      [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]:
+        richTextEsheetDocumentResponse(imported),
+    };
+    // Every imported link still has its section: nothing is retired.
+    expect(
+      getRichTextEsheetRetiredMdyFields({ definition, responses })
+    ).toEqual([]);
+    // A same-id definition that drops a section leaves its imported link
+    // behind; editors use this projection to normalize and protect it.
+    const retired = getRichTextEsheetRetiredMdyFields({
+      definition: {
+        ...definition,
+        sections: definition.sections.filter(
+          (section) => section.id !== 'reason'
+        ),
+      },
+      responses,
+    });
+    expect(retired).toHaveLength(1);
+    expect(retired[0]).toMatchObject({
+      fieldId: reasonId,
+      sectionId: 'reason',
+      display: 'Field no longer configured',
+    });
   });
 
   it('renders projected section content to HTML', async () => {

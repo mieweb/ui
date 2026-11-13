@@ -36,6 +36,7 @@ import {
   getRichTextEsheetDocumentBody,
   getRichTextEsheetMdyFields,
   getRichTextEsheetMdyParties,
+  getRichTextEsheetRetiredMdyFields,
   parseRichTextEsheetMdy,
   renderRichTextEsheetMdy,
   richTextEsheetDocumentResponse,
@@ -433,7 +434,17 @@ const RichTextEsheetSession = React.forwardRef<
     },
     [flushEditor]
   );
-  useEscapeKey(closeResolver, resolverField !== null);
+  useEscapeKey(
+    React.useCallback(() => {
+      // The screen-capture confirmation is a modal alertdialog that ignores
+      // Escape by design — the same scope exception as the focus trap below.
+      // Closing the resolver beneath it would also desync Modal's scroll
+      // lock and leave the page unscrollable after the confirmation closes.
+      if (document.querySelector('[role="alertdialog"]')) return;
+      closeResolver();
+    }, [closeResolver]),
+    resolverField !== null
+  );
 
   React.useEffect(() => {
     const container = resolverTrap.current;
@@ -511,6 +522,16 @@ const RichTextEsheetSession = React.forwardRef<
   }, [resolverField]);
 
   const mdyFields = getRichTextEsheetMdyFields(snapshot);
+  // A same-id definition can drop sections after the document was authored.
+  // View/Export normalize those retired links through the engine's create
+  // pass; the live editor needs the same projections so RichEdit shows
+  // “Field no longer configured” too — protected, with prose/caret/undo
+  // intact — instead of the stale, editable answer.
+  const retiredMdyFields = React.useMemo(
+    () => getRichTextEsheetRetiredMdyFields(snapshot),
+    [snapshot]
+  );
+  const editorFields = [...mdyFields, ...retiredMdyFields];
   const resolvedField = mdyFields.find((field) => field.id === resolverField);
   const resolvedNativeFieldId = resolvedField?.fieldId;
   const resolvedSectionId = resolvedField?.sectionId;
@@ -731,14 +752,19 @@ const RichTextEsheetSession = React.forwardRef<
               <DocumentMdyEditor
                 ref={richEditor}
                 body={richBody}
-                fieldIds={mdyFields.map((field) => field.id)}
-                fields={mdyFields.map((field) => ({
+                fieldIds={editorFields.map((field) => field.id)}
+                fields={editorFields.map((field) => ({
                   id: field.id,
                   display: field.display,
                   label: field.label,
                 }))}
                 onChange={writeBody}
-                onFieldActivate={(id) => void activateResolver(id)}
+                onFieldActivate={(id) => {
+                  // Retired links have no section to resolve; they stay
+                  // protected, normalized prose.
+                  if (!mdyFields.some((field) => field.id === id)) return;
+                  void activateResolver(id);
+                }}
                 disabled={
                   readOnly ||
                   saving ||

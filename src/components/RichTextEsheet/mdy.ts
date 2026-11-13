@@ -52,6 +52,13 @@ export function getRichTextEsheetMdyFields(
   });
 }
 
+/** Links imported with the document whose sections were since removed. */
+export function getRichTextEsheetRetiredMdyFields(
+  snapshot: RichTextEsheetMdyInput
+): RichTextEsheetMdyField[] {
+  return engine.retiredFields(snapshot);
+}
+
 function initialBody(
   snapshot: RichTextEsheetMdyInput,
   fields: RichTextEsheetMdyField[],

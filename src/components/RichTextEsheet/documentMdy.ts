@@ -133,6 +133,8 @@ export interface MdyDocumentEngine<
   documentResponse(source: string): FieldResponse;
   /** Update existing projections only: unlinked prose and removed links stay authored. */
   refreshLinks(body: string, fields: MdyDocumentField[]): string;
+  /** Projections imported with the document whose fields were since removed. */
+  retiredFields(snapshot: TSnapshot): MdyDocumentField[];
 }
 
 function record(value: unknown): value is Record<string, unknown> {
@@ -604,6 +606,56 @@ export function createMdyDocumentEngine<
       (byte) => byte.toString(16).padStart(2, '0')
     ).join('')}`;
 
+  /** Flat link projections in the front matter whose fields no longer exist. */
+  const findRetiredFields = (
+    existing: unknown,
+    activeIds: ReadonlySet<string>
+  ): MdyDocumentField[] => {
+    if (!record(existing)) return [];
+    const retired: MdyDocumentField[] = [];
+    for (const [id, value] of Object.entries(existing)) {
+      if (
+        !activeIds.has(id) &&
+        record(value) &&
+        typeof value.fieldId === 'string' &&
+        id === linkId(value.fieldId)
+      ) {
+        retired.push({
+          id,
+          fieldId: value.fieldId,
+          sectionId: typeof value.sectionId === 'string' ? value.sectionId : '',
+          label: 'Field no longer configured',
+          display: 'Field no longer configured',
+        });
+      }
+    }
+    return retired;
+  };
+
+  /**
+   * Projections imported with the document whose fields were since removed.
+   * Lets live editors normalize retired links the same way `create` does,
+   * without round-tripping the authored body through serialization.
+   */
+  function retiredFields(snapshot: TSnapshot): MdyDocumentField[] {
+    const reserved = snapshot.responses[config.documentFieldId];
+    const source = reserved?.attributes?.mdyFrontMatterSource;
+    const split = typeof source === 'string' ? splitSource(source) : undefined;
+    if (!split) return [];
+    const document = parseDocument(split.yamlSource, { uniqueKeys: true });
+    if (
+      document.errors.length ||
+      document.warnings.length ||
+      !isMap(document.contents)
+    )
+      return [];
+    const existing: unknown = document.toJS({ maxAliasCount: 100 });
+    const activeIds = new Set(
+      config.getFields(snapshot).map((field) => field.id)
+    );
+    return findRetiredFields(existing, activeIds);
+  }
+
   /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
   function parse(source: string): ParsedMdyDocument<TDefinition> {
     const split = splitSource(source);
@@ -755,27 +807,10 @@ export function createMdyDocumentEngine<
     let changed = false;
     const existing: unknown = document.toJS({ maxAliasCount: 100 });
     const activeIds = new Set(fields.map((field) => field.id));
-    const removedFields: MdyDocumentField[] = [];
-    if (record(existing)) {
-      for (const [id, value] of Object.entries(existing)) {
-        if (
-          !activeIds.has(id) &&
-          record(value) &&
-          typeof value.fieldId === 'string' &&
-          id === linkId(value.fieldId)
-        ) {
-          document.delete(id);
-          changed = true;
-          removedFields.push({
-            id,
-            fieldId: value.fieldId,
-            sectionId:
-              typeof value.sectionId === 'string' ? value.sectionId : '',
-            label: 'Field no longer configured',
-            display: 'Field no longer configured',
-          });
-        }
-      }
+    const removedFields = findRetiredFields(existing, activeIds);
+    for (const field of removedFields) {
+      document.delete(field.id);
+      changed = true;
     }
     refreshedBody = refreshLinks(refreshedBody, removedFields);
     const oldMdy = record(existing) && record(existing.mdy) ? existing.mdy : {};
@@ -931,5 +966,6 @@ export function createMdyDocumentEngine<
     updateDocumentBody,
     documentResponse,
     refreshLinks,
+    retiredFields,
   };
 }
