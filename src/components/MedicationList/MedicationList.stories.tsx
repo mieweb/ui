@@ -96,6 +96,11 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
         },
         {
           type: 'composes with',
+          target: 'encounter-orders-pharmacyfield',
+          why: 'A prescription form pairs MedicationEditor (what is prescribed) with PharmacyField (where it is sent); the PharmacyField page shows the host wiring.',
+        },
+        {
+          type: 'composes with',
           target: 'encounter-orders-ordereditor',
           why: "OrderEditor morphs into this folder's MedicationEditor for medication orders and maps AssessmentOrder ⇄ Medication.",
         },

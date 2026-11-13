@@ -11,8 +11,10 @@ import { Meta } from '@storybook/addon-docs/blocks';
 > order in full → `OrderEditor` (morphs by type). What is _due_ from surveillance programs
 > and quality measures → `HealthSurveillance` (`PatientHistory` + `programs.json`). The banner
 > at the top of a **patient** page → `PatientHeader`; of a **case** page → `CaseManagementHeader`.
-> Canned reports from a WebChart-style backend → `WebChartReportViewer`. None of them talks to a
-> server — every backend contract is props in, callbacks out.
+> Canned reports from a WebChart-style backend → `WebChartReportViewer`. Where the prescription
+> goes → `PharmacyField` (or `PharmacyInput` + `PharmacySearch`). None of them talks to a
+> server — every backend contract is props in, callbacks out, or async functions the host
+> supplies (`PharmacyDataSource`).
 
 ## Which one?
 
@@ -25,6 +27,9 @@ import { Meta } from '@storybook/addon-docs/blocks';
 | [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)               | The page **is the patient**: demographics, status dot, allergy / medication / alert / provider rows, flag ribbon, `CountBadge` actions, ⋮ menu with built-in Contact / Add / Edit Patient modals                                                  | The page is a case — `CaseManagementHeader`; a generic titled page — `PageHeader`; you need the full editable lists — `AllergyList` / `MedicationList`      |
 | [CaseManagementHeader](?path=/docs/encounter-orders-casemanagementheader--docs) | The page **is a case**: `CaseContextBar` (case #, status, type, editing users, `collabStatus` slot) over the patient identity row, Add Case Note / Close Case, collapsible details grid with Days Open, `alert` slot, fully translatable `labels` | The page is the patient's chart — `PatientHeader`; a generic titled page — `PageHeader`                                                                     |
 | [WebChartReportViewer](?path=/docs/encounter-orders-webchartreportviewer--docs) | Browsing **canned system reports** (grid of cards) and viewing one in a modal with a date range; result rendered by shape — HTML string, rows → `Table`, object → key/value                                                                       | Interactive analysis of rows — DataVis NITRO; a single fixed dataset — `Table`; untrusted HTML results (rendered unsanitised)                               |
+| [PharmacyField](?path=/docs/encounter-orders-pharmacyfield--docs) | A prescription form needs the patient's pharmacy and the host can implement a `PharmacyDataSource`: short list, directory search, details and Make Preferred, all wired | Your own state layer already holds the candidates or results — use the two parts |
+| [PharmacyInput](?path=/docs/encounter-orders-pharmacyinput--docs) | The host holds the candidate list: native select (preferred first, recent next) with the default-selection rule, a search button and WebChart's form fields | You have a data source and want it wired — `PharmacyField` |
+| [PharmacySearch](?path=/docs/encounter-orders-pharmacysearch--docs) | Finding a pharmacy in the directory by postal code, state/city, phone or fax, then Use Once or Make Preferred; results and details are props | Searching anything other than pharmacies — `Autocomplete` in a `Modal` |
 
 ## Data contracts
 
@@ -48,8 +53,11 @@ and headings disappear from View.
 | `PatientHeader`        | `PatientData`, `AllergyItem[]`, `MedicationItem[]`, `comments: string[]` — display strings                                                                                      | `onOverflowAction`, `onAddItem(type, formData)`, `onEditPatient(formData)`                                                           |
 | `CaseManagementHeader` | `CaseInfo`, `CasePatient`, `CaseDetailItem[]`, `editingUsers`, `labels`                                                                                                         | `onAddCaseNote`, `onCloseCase`, `onExpandedChange`, `onBack`                                                                         |
 | `WebChartReportViewer` | `SystemReport[]`, `currentReport`, `reportResult: { data?: string \| object \| object[]; error?; success? }`, loading flags, `dateRange`                                        | `onReportSelect`, `onRefreshReports` / `onRefreshReport`, `onDateRangeChange`, `onReconnect` — the host calls WebChart (or anything) |
+| `PharmacyInput` | `PharmacyCandidate[]` (ranked by the host), `overridePharmId`, `loading` / `error` | `onValueChange(pharmId, candidate)`, `onSearchClick`; form fields `pharmacy` + `pharm_id` |
+| `PharmacySearch` | `initialFilters`, `results`, `selectedPharmacy`, `cityOptions`, `stateOptions` | `onSearchRequest(params)`, `onSelectPharmacy`, `onChoose(pharmId)`, `onMakePreferred({ id, idType, roleId })` |
+| `PharmacyField` | `source: PharmacyDataSource`, `patId`, `initialPharmId` | `onValueChange`, `onCandidatesLoaded` |
 
-All six ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injected into
+All nine ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injected into
 `Assessment` and `OrderEditor`) is **not** in the package build — see
 [Clinical lists](?path=/docs/healthcare-clinical-lists-overview--docs).
 
@@ -79,6 +87,11 @@ All six ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injec
   renders whatever `reports` / `reportResult` the host fetched from WebChart's system-report
   API — or a proxy, a FHIR operation, static JSON. Pair `ReportTimeRange` with your own
   fetch to drive `dateRange`.
+- **Pharmacy: the field, its parts, or the rules.** `PharmacyField` is `PharmacyInput` +
+  `PharmacySearch` wired through `usePharmacyCandidates` / `usePharmacySearch` to a
+  `PharmacyDataSource`. Use the parts when your own state layer already holds candidates or
+  results. Pair the field with `MedicationEditor` in a prescription form; the option's `newrx`
+  attribute (or `serviceLevelFlags`) tells the host whether the prescription can be e-sent.
 
 ## Shared limitations
 
@@ -102,6 +115,8 @@ All six ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (injec
   status greens / reds. Only `CaseManagementHeader` (`labels`) and `WebChartReportViewer`
   (partial `labels`) externalise strings; `Assessment`, `OrderEditor`, `HealthSurveillance` and
   `PatientHeader` are English constants.
-- **Persistence and fetching are yours.** Every component is controlled; nothing here calls
-  WebChart, FHIR or any API, and `HealthSurveillance`'s `programs.json` and `CodeLookup`'s
+- **Persistence and fetching are yours.** Every component is controlled except `PharmacyField`
+  (and `PharmacyInput` when `value` is omitted), which owns its selection and reports it through
+  `onValueChange`; nothing here calls
+  WebChart, FHIR or any API (`PharmacyField` only awaits the host's `PharmacyDataSource`), and `HealthSurveillance`'s `programs.json` and `CodeLookup`'s
   shards must be served by the host.
