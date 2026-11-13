@@ -145,7 +145,8 @@ format and scoring. (Pure foundation/setup breakage lives in
   `tailwind-preset.ts` and includes `info` + `chart`). Published consumers
   are unaffected by #628 — that drift is the repo's hand-maintained
   `src/tailwind-preset.cjs`, an in-repo/Storybook concern only.
-- **Agent:** MIE UI Styling Agent
+- **Agent:** MIE UI Install Agent (preset/safelist/content setup is install
+  plumbing per the orchestrator routing table)
 - **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — TW3 row; issue #628 (open, in-repo scope)
 
 ### STY-15 — TW3 safelist
@@ -187,7 +188,8 @@ format and scoring. (Pure foundation/setup breakage lives in
 - **Expect:** It's largely redundant (TW4 auto-detects content) but harmless;
   the `@source` directive in CSS is what reliably picks up classes from
   `node_modules`.
-- **Agent:** MIE UI Styling Agent
+- **Agent:** MIE UI Install Agent (Tailwind pipeline config is install
+  plumbing per the orchestrator routing table)
 - **Source:** lessons/tailwind4-integration.md — Tailwind Config
 
 ### STY-19 — Runtime brand switching
