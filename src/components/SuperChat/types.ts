@@ -128,6 +128,12 @@ export interface SuperChatMediaLabels {
   unknownAuthor: string;
 }
 
+/** Labels for per-message states in the thread. */
+export interface SuperChatMessageLabels {
+  /** Prefix of a scheduled message's indicator, before its time. */
+  scheduled: string;
+}
+
 /**
  * A single thread item. Preserves the `chat-component` thread-item shape
  * (`senderId`/`sender_name`/`channel`/`time`/`text`) while adding a
@@ -159,6 +165,12 @@ export interface SuperChatMessage {
   editedAt?: Date | string;
   /** Delivery/generation status. */
   status?: AIMessageStatus;
+  /**
+   * When the message is scheduled to be delivered. While set, the bubble is
+   * drawn as pending (dashed outline) with a "Scheduled · {time}" indicator.
+   * The host owns delivery: clear it once the message has gone out.
+   */
+  scheduledFor?: Date | string;
   /** Channel the item belongs to. */
   channel?: SuperChatChannel;
   /** Reference payload when `type === 'ref'`. */

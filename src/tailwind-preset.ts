@@ -334,6 +334,18 @@ export const miewebUISafelist = [
   'min-h-[30px]',
   'animate-ozwell-message-flare',
   'grid-cols-[22px_minmax(0,1fr)]',
+  // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
+  'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
+  'sm:w-[var(--superchat-sidebar-width)]',
+  '[&_a]:text-current',
+  '[&_a:hover]:text-current',
+  'start-[3px]',
+  'group-hover:bg-primary-500',
+  'group-focus-visible:bg-primary-600',
+  // AIMessage pending (scheduled) bubble
+  'border-neutral-400',
+  'dark:border-neutral-500',
+  'dark:bg-transparent',
   'h-[22px]',
   'w-[22px]',
   'text-[11px]',

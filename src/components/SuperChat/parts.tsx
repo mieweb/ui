@@ -11,6 +11,7 @@ import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
+  Clock as ClockIcon,
   Ellipsis as EllipsisIcon,
   Pencil as PencilIcon,
 } from 'lucide-react';
@@ -45,6 +46,17 @@ export function formatTime(time: Date | string): string {
   });
 }
 
+/** "Thu, Oct 1, 9:00 AM" in the user's locale — for times that may not be today. */
+export function formatDateTime(time: Date | string): string {
+  return new Date(time).toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export function byTime(a: SuperChatMessage, b: SuperChatMessage): number {
   return new Date(a.time).getTime() - new Date(b.time).getTime();
 }
@@ -64,20 +76,56 @@ export function detectMentions(
   text: string,
   participants: Participant[]
 ): string[] {
-  const ids: string[] = [];
-  for (const p of participants) {
-    if (p.kind === 'system') continue;
-    const token = '@' + p.name.split(' ')[0];
-    // Match a whole mention token only: the `@` must not be preceded by a word
-    // character or another `@`, and the token must not be followed by a word
-    // character (so `@Triage` does not match `@TriageAgent`).
+  return matchMentionTokens(
+    text,
+    participants
+      .filter((p) => p.kind !== 'system')
+      .map((p) => ({ id: p.id, token: p.name.split(' ')[0] }))
+  );
+}
+
+/** Letters, digits and combining marks in any script, plus `_`. */
+const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
+
+/**
+ * Ids whose `@token` appears in `text`, in `entries` order. Used for a host's
+ * own `mentionOptions`, whose inserted token is `value`, or the first word of
+ * `label` (the same default the composer inserts).
+ *
+ * Only whole tokens count: the `@` must not follow a letter, digit or another
+ * `@`, and the token must not run on into a letter or digit, in any script
+ * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
+ * the longest one at that spot wins, so `@john.doe` is not also `@john`;
+ * entries with the same token all match it (two people named Alex).
+ */
+export function matchMentionTokens(
+  text: string,
+  entries: { id: string; token: string }[]
+): string[] {
+  const found = new Set<string>();
+  const taken: [number, number][] = [];
+  const longestFirst = [...entries].sort(
+    (a, b) => b.token.length - a.token.length
+  );
+  for (const { id, token } of longestFirst) {
     const pattern = new RegExp(
-      `(?<![\\w@])${escapeRegExp(token)}(?![\\w])`,
-      'i'
+      `(?<![${MENTION_WORD}@])${escapeRegExp('@' + token)}(?![${MENTION_WORD}])`,
+      'giu'
     );
-    if (pattern.test(text)) ids.push(p.id);
+    for (const match of text.matchAll(pattern)) {
+      const start = match.index;
+      const end = start + match[0].length;
+      // A shorter token inside a longer one's match is rejected, but the same
+      // span counts for every entry that inserts that token (two "Alex"es).
+      const sameSpan = taken.some(([s, e]) => s === start && e === end);
+      if (!sameSpan && taken.some(([s, e]) => start < e && s < end)) continue;
+      if (!sameSpan) taken.push([start, end]);
+      found.add(id);
+    }
   }
-  return ids;
+  return entries
+    .map((e) => e.id)
+    .filter((id, i, all) => found.has(id) && all.indexOf(id) === i);
 }
 
 export function lastMessageByTime(
@@ -654,6 +702,8 @@ interface MessageRowProps {
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /** Prefix of the scheduled indicator, before its time. */
+  scheduledLabel?: string;
 }
 
 /**
@@ -680,6 +730,7 @@ export const MessageRow = React.memo(function MessageRow({
   playMediaLabel = 'Play',
   mediaErrorLabel,
   mediaRetryLabel,
+  scheduledLabel = 'Scheduled',
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -820,6 +871,9 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
+  const scheduled = message.scheduledFor
+    ? `${scheduledLabel} · ${formatDateTime(message.scheduledFor)}`
+    : null;
 
   const startEdit = () => {
     const el = bubbleRef.current;
@@ -943,7 +997,7 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}`}
+      aria-label={`${authorName}, ${formatTime(message.time)}${scheduled ? `, ${scheduled}` : ''}`}
       className={cn(
         'group flex gap-2',
         isSelf ? 'flex-row-reverse' : 'flex-row'
@@ -1010,6 +1064,15 @@ export const MessageRow = React.memo(function MessageRow({
               (edited)
             </span>
           )}
+          {scheduled && (
+            <span
+              data-slot="superchat-scheduled-indicator"
+              className="inline-flex items-center gap-1 text-[10px] font-medium text-neutral-600 dark:text-neutral-300"
+            >
+              <ClockIcon size={10} aria-hidden="true" />
+              {scheduled}
+            </span>
+          )}
         </div>
 
         {/* w-full keeps this row at thread width even under the column's
@@ -1026,6 +1089,7 @@ export const MessageRow = React.memo(function MessageRow({
             data-slot="superchat-bubble"
             variant={isSelf ? 'user' : 'assistant'}
             hasError={message.status === 'error'}
+            pending={!!message.scheduledFor}
             className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
           >
             {isEditing ? (

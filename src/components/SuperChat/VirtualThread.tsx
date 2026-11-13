@@ -53,6 +53,8 @@ export interface VirtualThreadProps {
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
+  /** Prefix of a scheduled message's indicator, forwarded to each row. */
+  scheduledLabel?: string;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -81,6 +83,7 @@ export function VirtualThread({
   playMediaLabel,
   mediaErrorLabel,
   mediaRetryLabel,
+  scheduledLabel,
   scrollRef,
   contentRef,
   containerProps,
@@ -143,6 +146,7 @@ export function VirtualThread({
                   playMediaLabel={playMediaLabel}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
+                  scheduledLabel={scheduledLabel}
                 />
               </div>
             </div>
