@@ -12,6 +12,8 @@ export const entries = {
   datavis: 'src/datavis.ts',
   esheet: 'src/esheet.ts',
   kerebron: 'src/kerebron.ts',
+  // Protected collaborative MIME/MDY integration; its peers stay opt-in.
+  artipod: 'src/artipod.ts',
   // Opt-in animation layer. Separate entry so `motion` stays out of the main
   // bundle for apps that never import it. See: src/motion/entry.ts
   motion: 'src/motion/entry.ts',
