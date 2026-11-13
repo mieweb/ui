@@ -3,7 +3,6 @@ import type {
   FieldResponse,
   FormDefinition,
 } from '@esheet/core';
-import { stringify } from 'yaml';
 import type { NarrativeFinding } from '../../esheet-fields/narrativeFindings';
 
 /** A person or system the document references, e.g. a patient and a provider. */
@@ -47,10 +46,15 @@ export interface RichTextEsheetIssue {
   message: string;
 }
 
+/** The document surfaces; all modes share the same native draft. */
+export type RichTextEsheetMode = 'esheet' | 'rich' | 'view' | 'export';
+
 export interface RichTextEsheetSnapshot {
   definition: RichTextEsheetDefinition;
   /** Native eSheet responses — the canonical draft state. */
   responses: RichTextEsheetResponses;
+  /** The parties the document references, retained in the MDY front matter. */
+  parties?: RichTextEsheetParty[];
   /** Ids of sections with recorded content. */
   documentedSections: string[];
   /** Required sections still missing content. */
@@ -236,70 +240,10 @@ function selectedText(selected: unknown): string {
 }
 
 /** Normalize the supported native response shapes — text answers and selections. */
-function sectionText(
+export function getRichTextEsheetSectionText(
   responses: RichTextEsheetResponses,
   sectionId: string
 ): string {
   const response = responses[getRichTextEsheetFieldId(sectionId)];
   return valueText(response?.answer) || selectedText(response?.selected);
-}
-
-// Mirrors EncounterVisit's mdy.ts escaping; consolidate in Phase 3 of #665.
-function markdownText(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/[\\[\]`*_~<>]/g, '\\$&');
-}
-
-function markdownHeading(value: string): string {
-  return markdownText(value).replace(/\r?\n/g, ' · ');
-}
-
-/** Authored plain text stays literal; editor line breaks become Markdown paragraphs. */
-function markdownBody(value: string): string {
-  return value
-    .split(/\r?\n/)
-    .map((line) =>
-      markdownText(line.trim())
-        // Neutralize block openers (headings, lists, thematic breaks) at line start.
-        .replace(/^([#+-])/, '\\$1')
-        .replace(/^(\d+)([.)])/, '$1\\$2')
-    )
-    .filter(Boolean)
-    .join('\n\n');
-}
-
-/** Derive the full document state — progress, validation and portable MDY — from native responses. */
-export function createRichTextEsheetSnapshot(
-  definition: RichTextEsheetDefinition,
-  responses: RichTextEsheetResponses,
-  parties?: RichTextEsheetParty[]
-): RichTextEsheetSnapshot {
-  validateRichTextEsheetDefinition(definition);
-  const documentedSections = definition.sections
-    .filter((section) => sectionText(responses, section.id).length > 0)
-    .map((section) => section.id);
-  const errors = definition.sections
-    .filter(
-      (section) => section.required && !documentedSections.includes(section.id)
-    )
-    .map((section) => ({
-      sectionId: section.id,
-      message: `${section.title} is required.`,
-    }));
-  const frontMatter: Record<string, unknown> = {
-    richTextEsheet: { id: definition.id, title: definition.title },
-    ...(parties?.length ? { parties } : {}),
-  };
-  const body = definition.sections
-    .filter((section) => documentedSections.includes(section.id))
-    .map(
-      (section) =>
-        `## ${markdownHeading(section.title)}\n\n${markdownBody(
-          sectionText(responses, section.id)
-        )}`
-    )
-    .join('\n\n');
-  const mdy = `---\n${stringify(frontMatter)}---\n\n# ${markdownHeading(
-    definition.title
-  )}\n${body ? `\n${body}\n` : ''}`;
-  return { definition, responses, documentedSections, errors, mdy };
 }
