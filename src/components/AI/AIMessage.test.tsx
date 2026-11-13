@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { AIMessageDisplay } from './AIMessage';
@@ -138,5 +138,58 @@ describe('AIMessageDisplay thinking block', () => {
       'aria-expanded',
       'true'
     );
+  });
+});
+
+describe('AIMessageDisplay custom block', () => {
+  const message = (content: AIMessage['content']): AIMessage => ({
+    id: 'msg-custom',
+    role: 'user',
+    status: 'complete',
+    timestamp: new Date('2026-01-01T10:00:00Z'),
+    content,
+  });
+  const data = { kind: 'widget', id: 'w-1' };
+
+  it('passes the typed data and context to renderCustomContent, outside the prose wrapper', () => {
+    const renderCustomContent = vi.fn(() => <div data-testid="widget" />);
+    renderWithTheme(
+      <AIMessageDisplay
+        message={message([{ type: 'custom', data }])}
+        renderCustomContent={renderCustomContent}
+      />
+    );
+
+    expect(renderCustomContent).toHaveBeenCalledWith(data, {
+      messageId: 'msg-custom',
+      streaming: false,
+      role: 'user',
+    });
+    expect(screen.getByTestId('widget').closest('.prose')).toBeNull();
+  });
+
+  it('renders nothing for a custom block without renderCustomContent', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={message([{ type: 'custom', data }])} />
+    );
+
+    expect(
+      container.querySelector('[data-slot="ai-message-bubble"] > div')
+    ).toBeEmptyDOMElement();
+  });
+
+  it('renders text that looks like an encoded payload as text, never as a custom block', () => {
+    const encoded = '\u0001ozwell-speaker-transcript\u0001{"v":1,"chatId":"c"}';
+    const renderCustomContent = vi.fn(() => <div data-testid="widget" />);
+    renderWithTheme(
+      <AIMessageDisplay
+        message={message([{ type: 'text', text: encoded }])}
+        renderCustomContent={renderCustomContent}
+      />
+    );
+
+    expect(renderCustomContent).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('widget')).not.toBeInTheDocument();
+    expect(screen.getByText(encoded)).toBeInTheDocument();
   });
 });
