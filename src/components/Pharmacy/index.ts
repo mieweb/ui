@@ -42,6 +42,7 @@ export {
   PreferredPharmacyRole,
   serviceLevelFlags,
   ServiceLevel,
+  transmitRoute,
   type CandidateRank,
   type Pharmacy,
   type PharmacyCandidate,
@@ -55,4 +56,5 @@ export {
   type PharmacyServiceFlags,
   type PreferredPharmacyChoice,
   type PreferredPharmacyRoleId,
+  type TransmitRoute,
 } from './pharmacy';

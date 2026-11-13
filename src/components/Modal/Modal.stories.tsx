@@ -64,6 +64,7 @@ The host owns \`open\`; keep form state in the form so closing discards it predi
 
 - \`role="dialog"\` + \`aria-modal\`, labelled by \`ModalTitle\` (or pass \`aria-label\`). Focus is trapped and moved to the first focusable element on open; **focus is not returned to the trigger on close** — handle that in \`onOpenChange\` when it matters.
 - Body scroll is locked while open (reference-counted, so nested modals are safe). Background content is not made \`inert\`.
+- Escape closes the innermost dialog: a \`Modal\` rendered inside another one's content (e.g. a picker opened from a form dialog) handles Escape, and the outer one ignores it until the inner one closes.
 - Fixed \`z-50\` layer, not portalled: render it outside any ancestor with \`transform\`/\`overflow\` or it will clip.
 - Full-screen on mobile means the footer sits at the bottom of the viewport; test with the keyboard open.
 

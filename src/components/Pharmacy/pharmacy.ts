@@ -174,6 +174,20 @@ export function pharmacyTypeLabel(
   return null;
 }
 
+/**
+ * How "Transmit" reaches a pharmacy: e-prescribe when it is in the SureScripts
+ * directory and accepts NewRx, else fax when it has a fax number, else `null`
+ * (print only). Mirrors PharmacyInfo's New / Fax Only / Print Only branches.
+ */
+export type TransmitRoute = 'esend' | 'fax';
+
+export function transmitRoute(
+  pharmacy: Pick<Pharmacy, 'ncpdpid' | 'fax' | 'serviceLevel'>
+): TransmitRoute | null {
+  if (pharmacy.ncpdpid && serviceLevelFlags(pharmacy).newRx) return 'esend';
+  return pharmacy.fax ? 'fax' : null;
+}
+
 /** Which preferred slot a pharmacy fills. */
 export function preferredRoleId(
   pharmacy: Pick<Pharmacy, 'mailOrder'>

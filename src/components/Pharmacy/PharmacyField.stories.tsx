@@ -57,17 +57,16 @@ const source: PharmacyDataSource = {
 
 Create the source once (module scope or \`useMemo\`). The field reads the latest one on each call but does not reload when it changes.
 
-**With MedicationEditor.** The editor captures what is prescribed; the field captures where it goes. The host owns both and decides how to transmit:
+**With MedicationEditor.** Pass the same source to the editor's \`pharmacy\` prop. It embeds this field and a Transmit / Print / None choice, and saves \`pharmacyId\` and \`transmission\` on the medication. The host performs the choice; \`transmitRoute(pharmacy)\` tells it whether Transmit means e-prescribe or fax:
 
 \`\`\`tsx
-const [pharmacy, setPharmacy] = useState<PharmacyCandidate | null>(null);
-const canESend = pharmacy !== null && serviceLevelFlags(pharmacy).newRx;
-
-<PharmacyField source={source} patId={patId} onValueChange={(_, p) => setPharmacy(p)} />
-<MedicationEditor open={editing} medication={med} onSave={setMed} onClose={close} />
-<Button disabled={!med || !pharmacy} onClick={() => send(med, pharmacy, canESend ? 'erx' : 'fax')}>
-  {canESend ? 'E-send' : 'Fax'}
-</Button>
+<MedicationEditor
+  open={editing}
+  medication={med}
+  pharmacy={{ source, patId }}
+  onSave={(saved) => persist(saved)}   // saved.pharmacyId, saved.transmission
+  onClose={close}
+/>
 \`\`\`
 
 ### Limitations
@@ -94,7 +93,7 @@ const canESend = pharmacy !== null && serviceLevelFlags(pharmacy).newRx;
         {
           type: 'composes with',
           target: 'clinical-lists-medicationlist',
-          why: 'A prescription form pairs MedicationEditor (what is prescribed) with PharmacyField (where it is sent); the host checks serviceLevelFlags(pharmacy).newRx to choose e-send or fax.',
+          why: "A prescription form pairs MedicationEditor (what is prescribed) with PharmacyField (where it is sent); MedicationEditor's pharmacy prop embeds this field with a Transmit / Print / None choice.",
         },
       ],
     },

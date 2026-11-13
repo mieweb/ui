@@ -43,6 +43,8 @@ import {
  * | Indication     | Diagnosis/Primary                      |
  * | Prescriber     | Prescriber                             |
  * | Pharmacy notes | Note                                   |
+ * | Pharmacy       | Pharmacy (with `pharmacy` prop)        |
+ * | Transmission   | — (host acts on the saved choice)      |
  */
 
 import * as React from 'react';
@@ -85,6 +87,12 @@ import { Calculator } from 'lucide-react';
 import { Autocomplete } from '../Autocomplete';
 import { cn } from '../../utils/cn';
 import { useCodeLookupConfig } from '../CodeLookup/context';
+import {
+  MedicationPharmacyFields,
+  TRANSMISSION_NOTE_ID,
+  type MedicationPharmacyConfig,
+} from './MedicationPharmacyFields';
+import type { TransmitRoute } from '../Pharmacy';
 
 // =============================================================================
 // Types
@@ -170,6 +178,12 @@ export interface MedicationEditorProps {
    * (`uncodedType === 'CP'`).
    */
   collectCompoundIngredients?: boolean;
+  /**
+   * Adds Pharmacy (`PharmacyField`) and Transmission (Transmit / Print / None)
+   * rows above the pharmacy notes, saved as `pharmacyId` and `transmission`.
+   * Omit to leave the editor as is.
+   */
+  pharmacy?: MedicationPharmacyConfig;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete medication on save */
@@ -767,6 +781,7 @@ export function MedicationEditor({
   prescribers,
   sigTerms,
   collectCompoundIngredients,
+  pharmacy,
   onClose,
   onSave,
 }: MedicationEditorProps): React.JSX.Element | null {
@@ -1054,9 +1069,17 @@ export function MedicationEditor({
   // an originally coded medication must keep (or replace) its code.
   const unchangedLegacyName =
     medication && !medication.code && draft.name === medication.name;
+  // Transmit is saved only to a pharmacy whose route is confirmed; a pending
+  // or failed lookup leaves it unconfirmed. Print and None always save.
+  const [pharmacyRoute, setPharmacyRoute] = React.useState<
+    TransmitRoute | null | undefined
+  >(undefined);
+  const transmitUnconfirmed =
+    Boolean(pharmacy) && draft.transmission === 'transmit' && !pharmacyRoute;
   const canSave =
     draft.name.trim().length > 0 &&
-    (!requireCode || hasCode || Boolean(unchangedLegacyName));
+    (!requireCode || hasCode || Boolean(unchangedLegacyName)) &&
+    !transmitUnconfirmed;
 
   if (!open) return null;
 
@@ -1435,6 +1458,15 @@ export function MedicationEditor({
                 />
               </div>
             </div>
+            {pharmacy && (
+              <MedicationPharmacyFields
+                config={pharmacy}
+                pharmacyId={draft.pharmacyId}
+                transmission={draft.transmission}
+                onChange={patch}
+                onRouteChange={setPharmacyRoute}
+              />
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="med-pharmacy-notes">{m('Pharmacy notes')}</Label>
               <Textarea
@@ -1467,10 +1499,15 @@ export function MedicationEditor({
                 uncodedType === 'CP'
                   ? draft.compoundIngredients?.filter((i) => i.name.trim())
                   : undefined,
+              // the editor shows "None" until another choice is made
+              ...(pharmacy && { transmission: draft.transmission ?? 'none' }),
             });
             onClose();
           }}
           disabled={!canSave}
+          aria-describedby={
+            transmitUnconfirmed ? TRANSMISSION_NOTE_ID : undefined
+          }
         >
           {m('Save')}
         </Button>

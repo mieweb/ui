@@ -90,8 +90,9 @@ All nine ship from the main `@mieweb/ui` entry with no peers. `CodeLookup` (inje
 - **Pharmacy: the field, its parts, or the rules.** `PharmacyField` is `PharmacyInput` +
   `PharmacySearch` wired through `usePharmacyCandidates` / `usePharmacySearch` to a
   `PharmacyDataSource`. Use the parts when your own state layer already holds candidates or
-  results. Pair the field with `MedicationEditor` in a prescription form; the option's `newrx`
-  attribute (or `serviceLevelFlags`) tells the host whether the prescription can be e-sent.
+  results. `MedicationEditor`'s `pharmacy` prop embeds the field with a Transmit / Print / None
+  choice; Transmit is enabled when `transmitRoute(pharmacy)` is `'esend'` or `'fax'`, and the
+  host performs the saved `transmission`.
 
 ## Shared limitations
 

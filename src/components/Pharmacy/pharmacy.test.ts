@@ -14,6 +14,7 @@ import {
   preferredPharmacyChoice,
   preferredRoleId,
   serviceLevelFlags,
+  transmitRoute,
   type CandidateRank,
   type Pharmacy,
   type PharmacyCandidate,
@@ -129,6 +130,32 @@ describe('classification', () => {
   it('maps mail order to role 6 and everything else to role 5', () => {
     expect(preferredRoleId({ mailOrder: true })).toBe(6);
     expect(preferredRoleId({ mailOrder: false })).toBe(5);
+  });
+
+  it.each([
+    ['e-prescribes a NewRx pharmacy', { serviceLevel: 3 }, 'esend'],
+    [
+      'faxes an NPI-only pharmacy',
+      { pharmId: 'N1', ncpdpid: '', npi: '1', serviceLevel: 0 },
+      'fax',
+    ],
+    [
+      'faxes a directory pharmacy without NewRx (Fax Only)',
+      { serviceLevel: 0 },
+      'fax',
+    ],
+    [
+      'cannot transmit to a print-only pharmacy',
+      { serviceLevel: 0, fax: '' },
+      null,
+    ],
+    [
+      'does not e-send NewRx without an NCPDP id',
+      { ncpdpid: '', npi: '1', serviceLevel: 1, fax: '' },
+      null,
+    ],
+  ] as const)('transmitRoute %s', (_, overrides, route) => {
+    expect(transmitRoute(pharmacy(overrides))).toBe(route);
   });
 
   it('builds the Make Preferred request, stripping the NPI prefix', () => {

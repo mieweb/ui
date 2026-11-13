@@ -104,6 +104,8 @@ different medication reseeds the draft.
 | Substitution (radio)                          | `substitution` (`'0'`/`'1'`)   | Substitutions (DAW)                  |
 | Start / End date                              | `startDate`, `endDate`         | WrittenDate / EffectiveDate          |
 | Pharmacy notes                                | `pharmacyNotes`                | Note                                 |
+| Pharmacy (with the `pharmacy` prop)           | `pharmacyId`                   | Pharmacy                             |
+| Transmission (Transmit / Print / None)        | `transmission`                 | — (the host acts on the choice)      |
 
 Optional editor props (also accepted by `MedicationReconciliation` as
 `editorOptions`):
@@ -119,6 +121,25 @@ Optional editor props (also accepted by `MedicationReconciliation` as
   (drug, form, strength, quantity, unit per row) for a compound medication
   (`uncodedType === 'CP'`); stored in `compoundIngredients`. Hidden when
   omitted or when the medication isn't a compound.
+
+Editor-only prop (not part of `editorOptions`):
+
+- `pharmacy` — `{ source, patId, showIds?, stateOptions?, canMakePreferred?,
+initialFilters?, onFiltersChange? }`. Adds a Pharmacy row
+  (`PharmacyField`, loaded from the host's
+  `PharmacyDataSource`) and a Transmission choice above the pharmacy notes,
+  saved as `pharmacyId` and `transmission` (`'none'` until the prescriber
+  picks another). **Transmit** is enabled only when the chosen pharmacy can
+  receive it — `transmitRoute(pharmacy)` is `'esend'` (NCPDP + NewRx) or
+  `'fax'` (has a fax number) — and its label says which. Otherwise it stays
+  visible but disabled with the reason as its description, and a saved
+  `transmit` falls back to `none` with a polite announcement. Until the
+  pharmacy lookup confirms a route (still loading, or failed), a saved
+  `transmit` can't be saved: Save is disabled and a note beside
+  Transmission, linked to Save with `aria-describedby`, says to wait or
+  choose Print or None, which always save. The library
+  never sends or prints; the host performs the saved choice. No other
+  readiness rules (prescriber, EPCS, uncoded CP/SP) are enforced here.
 
 Derived fields ("auto"):
 

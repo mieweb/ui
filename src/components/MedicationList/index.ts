@@ -9,6 +9,7 @@ export {
   type CompoundIngredient,
   type MedicationStatus,
   type MedicationAction,
+  type MedicationTransmission,
   type UncodedMedicationType,
 } from './MedicationList';
 
@@ -30,6 +31,8 @@ export {
   type MedicationLookupProps,
   type MedicationLookupResult,
 } from './MedicationEditor';
+
+export { type MedicationPharmacyConfig } from './MedicationPharmacyFields';
 
 export {
   parseSig,

@@ -47,6 +47,7 @@ graph TB
 - **Legacy form contract.** Select `name="pharmacy"`, placeholder `"0"`, hidden `pharm_id`, and raw `ncpdpid` / `npi` / `newrx` option attributes are read by WebChart's `refill_id.html`. Don't rename them; the `data-*` twins are for new hosts.
 
 - **Focus return lives in `PharmacySearch`** (`useReturnFocus`), because `Modal`'s `useFocusTrap` does not restore focus. It prefers `returnFocusRef`, since Safari and macOS Firefox do not focus a clicked button; the `document.activeElement` fallback is captured in a layout effect, before the trap moves focus. Remove it if `Modal` gains focus restore.
+- **`transmitRoute` is the only transmit rule in the library.** MedicationEditor's Transmission row (`MedicationList/MedicationPharmacyFields.tsx`) enables Transmit from it. Keep it in step with PharmacyInfo's New / Fax Only / Print Only branches. Broader readiness (prescriber, EPCS, PDMP) belongs to draft PR #538's `validatePrescription`, whose `transmit` stage currently rejects fax-only pharmacies.
 - **Selection reset rules differ by layer.** Uncontrolled `PharmacyInput` reapplies the default when the list's _contents_ change (a new array with the same ids keeps the user's choice). `PharmacyField` controls the input and reapplies per completed _load_, so choosing the same pharmacy again still selects it.
 
 ## Autocomplete usage
