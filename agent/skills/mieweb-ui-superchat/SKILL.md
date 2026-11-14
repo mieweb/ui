@@ -12,8 +12,9 @@ Verify props against the installed `.d.ts` — never invent.
 ## Which chat surface?
 
 - **AIChat** — one user ↔ one assistant; you own transport and push
-  `AIMessage[]` whose `status` (`generating`/`complete`/`error`) drives the
-  typing indicator. `FloatingAIChat`/`AIChatModal` for a corner popup.
+  `AIMessage[]` of `content[]` blocks with `status`
+  (`pending`/`streaming`/`complete`/`error`) and flip the separate
+  `isGenerating` busy flag. `FloatingAIChat`/`AIChatModal` for a corner popup.
 - **OzwellChat** — the Ozwell-branded shell around AIChat (thinking-mode
   menu, warning strip, model picker, footer). Generic assistants use AIChat.
 - **SuperChat / SuperChatInbox** — multi-participant (humans + agents) chat;
@@ -61,10 +62,13 @@ Verify props against the installed `.d.ts` — never invent.
 The host owns state, fetching, subscriptions, and navigation; the components
 never reach the network. Three rules carry the whole lesson:
 
-1. **Return the promise from `on*` callbacks** (`void | Promise<void>`): the
-   module awaits it for pending state and rolls back on rejection.
-   `onMessageSent={(text, meta) => api.send(text)}` — not a `void`-swallowed
-   call that resolves instantly.
+1. **Return the promise from `on*` callbacks** (`void | Promise<void>`) —
+   it's the only failure signal the module gets. Scope the expectation to
+   each callback's real behavior: SuperChat awaits `onMessageSent` and, on
+   rejection, restores the user's draft text (attachments are not
+   restaged); pending indicators, retry, and rolling back host-appended
+   messages are the **host's** job. Standalone `ChatComposer` leaves
+   pending/restore to the host entirely.
 2. **Pass `onOpen` and `getHref` together** where offered: `getHref` keeps
    rows real anchors (middle-click, copy-link), `onOpen` intercepts
    left-click for client routing. `onOpen` alone degrades rows to buttons.
@@ -87,9 +91,12 @@ collection-view props** (`items`/`accessors` belong to the views family).
 ## Streaming & scroll
 
 - SuperChat: `isStreaming` turns send into stop; `onStop` is required while
-  it's true; `stopLabel` localizes it. AIChat/OzwellChat: stream by mutating
-  the last message's text while `status: 'generating'` — the typing
-  indicator and token append fall out of the data.
+  it's true; `stopLabel` localizes it. AIChat/OzwellChat: stream by
+  appending an assistant message with `status: 'streaming'` and immutably
+  updating its text `content` block as tokens arrive (there is no top-level
+  `text` field); flip to `'complete'`/`'error'` when done. `isGenerating` is
+  the separate busy flag that drives the typing indicator and header Stop
+  button.
 - **`useStickToBottom`** (main entry) is the scroll engine the chat surfaces
   share: `containerRef` + `contentRef`, `isAtBottom`, `scrollToBottom`,
   `followIfPinned()` (follow only if pinned; returns whether it did),
@@ -103,18 +110,22 @@ collection-view props** (`items`/`accessors` belong to the views family).
 
 ## Markdown & sanitization
 
-- **The `renderTextContent` seam owns sanitization — nothing sanitizes AI
-  output for you.** SuperChat ships `createMarkdownRenderer` (base Markdown
-  core; plugins opt in via the plugins subpath). Standalone AIChat/AIMessage
-  render plain text until you pass a renderer.
+- **The `renderTextContent` seam owns rendering — but the defaults differ.**
+  SuperChat defaults it to `createMarkdownRenderer` (sanitizing unless
+  `trustedContent`), so Markdown works out of the box there; plugins opt in
+  via the plugins subpath. Standalone AIChat/AIMessageDisplay render plain
+  text until the host passes a renderer — and a host-supplied renderer owns
+  its own sanitization.
 - SuperChat `trustedContent: true` skips sanitization — host-authored
   content only, never model output.
 
 ## Media in the conversation
 
 - Attachments live **on the message**: `SuperChatMessage.media[]`
-  (`SuperChatMediaAttachment`: `kind: 'image' | 'video' | 'audio' |
-  'youtube' | 'file'`, `src`, `poster`, `title`, `caption`, `alt`). The
+  (`SuperChatMediaAttachment`: a **required host-assigned `id`** plus the
+  `MediaFeedMedia` fields — `kind: 'image' | 'video' | 'audio' | 'youtube'`,
+  `src`, `poster`, `alt` — and optional `title`/`caption`; there is no
+  `file` kind — generic files need the host's own rendering path). The
   thread previews them inline (`MessageMedia`); "Play/Open" switches the
   inbox to its media view, which is a `MediaFeed` fed by
   `getConversationMediaItems(conversation)` — same message data, no second
@@ -122,16 +133,20 @@ collection-view props** (`items`/`accessors` belong to the views family).
 - Composer side: `acceptedFileTypes` (default `['image', 'video', 'audio',
   'pdf']`) stages `ComposerAttachment`s (`{ id, name, type, dataUrl }`)
   handed to `onMessageSent`'s meta; the host uploads and writes the
-  `media[]` records back into conversation state. `canSendWhenEmpty` allows
-  attachment-only sends.
+  `media[]` records back into conversation state. Attachment-only sends
+  work by default — staged attachments count as content; `canSendWhenEmpty`
+  is a standalone-`ChatComposer` prop for sending with *nothing* staged and
+  is not exposed by SuperChat/SuperChatInbox.
 
 ## Media components — mind the clock units
 
 - **`AudioPlayer` speaks seconds; `MediaPlayer`, `TranscriptView` and
   `MediaEditor` speak milliseconds.** Pair transcript components with
   `MediaPlayer`, not `AudioPlayer`.
-- `MediaPlayer` — native `<audio>`/`<video>` (or `kind="youtube"`), browser
-  or touch-first overlay controls, localized `labels`. `AudioPlayer` — one
+- `MediaPlayer` — native `<audio>`/`<video>` only (`kind: 'video' | 'audio'`),
+  browser or touch-first overlay controls, localized `labels`; YouTube
+  resources belong to `MediaFeed`'s embed renderer, not MediaPlayer.
+  `AudioPlayer` — one
   styled clip (`inline`/`compact`/`waveform`); pass `preload={false}` in
   lists. `MediaFeed` — host-owned collection, one active player, immersive
   viewer; controlled `playbackRequest` drives playback from outside.
@@ -163,10 +178,10 @@ collection-view props** (`items`/`accessors` belong to the views family).
 | Symptom | Likely cause |
 | --- | --- |
 | `SuperChat` import fails from the root | It's subpath-only: `@mieweb/ui/components/SuperChat` |
-| Send looks stuck / failures don't roll back | `on*` callback swallowed the promise — return it |
+| Failed send silently loses the draft | `onMessageSent` swallowed its promise — return it so SuperChat's restore path fires; pending/retry UI is host-owned |
 | Streamed reply doesn't follow / page jumps while reading | `useStickToBottom` contract: follows only when pinned near bottom; use `followIfPinned`/`anchorToTurnStart`, don't force-scroll |
 | No jump-to-bottom button | `order="desc"` — by design |
-| Markdown renders as plain text | No `renderTextContent`; wire `createMarkdownRenderer` (plugins via the `/plugins` subpath) |
+| Markdown renders as plain text in AIChat/AIMessageDisplay | No renderer wired — pass `renderTextContent` (`createMarkdownRenderer`); SuperChat already defaults to it |
 | Code/math blocks dead | Plugin not registered, or katex CSS missing |
 | Waveform never renders | Optional peer `wavesurfer.js` missing (console.error only) |
 | Transcript highlight drifts | Seconds vs milliseconds mismatch — `AudioPlayer` is the odd one out |

@@ -39,20 +39,23 @@ instead).
 1. **Host owns the data.** Every surface here is a headless module: state,
    fetching, subscriptions, and navigation live in the app. If the consumer
    expects the component to fetch, stream, or persist, that's the finding.
-2. **Check the wiring rules.** `on*` callbacks must return their promises
-   (pending state + rollback ride on them); `onOpen` pairs with `getHref`;
-   adapters stay referentially stable.
-3. **Streaming is data, not props.** AI replies stream by mutating the last
-   message while its `status` is `generating`; SuperChat's `isStreaming`
-   only swaps send⇄stop. Scroll behavior belongs to `useStickToBottom` —
-   follow-if-pinned, never force-scroll a reading user.
+2. **Check the wiring rules.** `on*` callbacks must return their promises —
+   that's the module's only failure signal (SuperChat restores the failed
+   draft text; pending/retry UI stays host-owned); `onOpen` pairs with
+   `getHref`; adapters stay referentially stable.
+3. **Streaming is data, not props.** AI replies stream by immutably updating
+   an assistant message's text `content` block while its `status` is
+   `streaming` (with the separate `isGenerating` busy flag); SuperChat's
+   `isStreaming` only swaps send⇄stop. Scroll behavior belongs to
+   `useStickToBottom` — follow-if-pinned, never force-scroll a reading user.
 4. **Mind the entry points and the clocks.** The SuperChat family and its
    render plugins are subpath imports; everything else is main-entry.
    `AudioPlayer` speaks seconds; `MediaPlayer`/`TranscriptView`/
    `MediaEditor` speak milliseconds.
-5. **Sanitization is the host's job.** The `renderTextContent` seam owns it;
-   `createMarkdownRenderer` is the shipped core and `trustedContent` is for
-   host-authored content only — never model output.
+5. **Sanitization is the host's seam.** The `renderTextContent` seam owns
+   rendering; SuperChat defaults to the sanitizing `createMarkdownRenderer`,
+   standalone AIChat renders plain text until the host wires one, and
+   `trustedContent` is for host-authored content only — never model output.
 6. **Carry the a11y posture.** SuperChat's thread is `role="log"`; AIChat's
    thread has no live region (the host wraps it); recorders fail silently
    without secure context + mic permission; `labels` props localize the

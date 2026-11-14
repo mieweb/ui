@@ -50,11 +50,13 @@ stick-to-bottom behavior — without inventing API.
 
 - **Ask:** "Sending a message shows no pending state, and failed sends
   don't roll back."
-- **Expect:** The `onMessageSent` handler swallowed its promise — return
-  it (`(text, meta) => api.send(...)`); the module awaits it for pending
-  UI and rolls back on rejection.
+- **Expect:** Two parts: (1) return the promise from `onMessageSent` — it's
+  the module's only failure signal, and SuperChat's restore path (failed
+  draft text comes back) rides on it; (2) pending indicators, retry, and
+  rolling back host-appended messages are the host's job — the module never
+  promised them. Claiming the module provides pending/rollback UI FAILS.
 - **Agent:** MIE UI SuperChat Agent
-- **Source:** lessons/wiring-headless-modules.md — rule 1
+- **Source:** lessons/wiring-headless-modules.md — rule 1; SuperChat.tsx handleComposerSend
 
 ### SC-6 — Streaming wiring (SuperChat)
 
@@ -70,10 +72,12 @@ stick-to-bottom behavior — without inventing API.
 ### SC-7 — Streaming wiring (AIChat)
 
 - **Ask:** "Which prop streams tokens into AIChat?"
-- **Expect:** There is no token prop — streaming is data: append a message
-  with `status: 'generating'` and mutate its text as tokens arrive; flip to
-  `'complete'` (or `'error'`) when done. The typing indicator falls out of
-  the status.
+- **Expect:** There is no token prop — streaming is data: append an
+  assistant message with `status: 'streaming'` and immutably update its
+  text `content` block as tokens arrive (no top-level `text` field); flip
+  to `'complete'` (or `'error'`) when done, with the separate `isGenerating`
+  flag driving the busy indicator. Inventing `status: 'generating'` or a
+  top-level text field FAILS.
 - **Agent:** MIE UI SuperChat Agent
 - **Source:** mieweb-ui-superchat skill — Streaming & scroll; selection-guidance.md — AIChat
 
@@ -102,11 +106,11 @@ stick-to-bottom behavior — without inventing API.
 ### SC-10 — Markdown renders as plain text
 
 - **Ask:** "My assistant's Markdown shows as literal asterisks in AIChat."
-- **Expect:** Rendering is the `renderTextContent` seam — nothing renders
-  Markdown until the host passes a renderer. Wire
-  `createMarkdownRenderer()` (from `@mieweb/ui/components/SuperChat`);
-  code/math/mermaid/genui blocks are opt-in plugins from
-  `/components/SuperChat/plugins` (math also needs the katex CSS).
+- **Expect:** Standalone AIChat/AIMessageDisplay render plain text until the
+  host passes `renderTextContent` — wire `createMarkdownRenderer()` (from
+  `@mieweb/ui/components/SuperChat`); code/math/mermaid/genui blocks are
+  opt-in plugins from `/components/SuperChat/plugins` (math also needs the
+  katex CSS). Note SuperChat itself already defaults to this renderer.
 - **Agent:** MIE UI SuperChat Agent
 - **Source:** mieweb-ui-superchat skill — Markdown & sanitization; SuperChat/plugins/index.ts
 
@@ -128,9 +132,11 @@ stick-to-bottom behavior — without inventing API.
 - **Expect:** The composer stages `ComposerAttachment`s
   (`{ id, name, type, dataUrl }`, gated by `acceptedFileTypes`) and hands
   them to `onMessageSent`'s meta; the **host** uploads and writes
-  `SuperChatMediaAttachment` records into the message's `media[]` — there
-  is no second media store. `canSendWhenEmpty` allows attachment-only
-  sends.
+  `SuperChatMediaAttachment` records (required `id`; `kind` limited to
+  image/video/audio/youtube) into the message's `media[]` — there is no
+  second media store. Attachment-only sends work by default — staged
+  attachments count as content (`canSendWhenEmpty` is a
+  standalone-ChatComposer prop, not a SuperChat one).
 - **Agent:** MIE UI SuperChat Agent
 - **Source:** mieweb-ui-superchat skill — Media in the conversation; SuperChat README
 
@@ -163,7 +169,9 @@ stick-to-bottom behavior — without inventing API.
   `DictationButton`; one-tap capture returning an audio `Blob` →
   `RecordButton`; deliberate take with review/waveform → `AudioRecorder`;
   multi-speaker diarization → `VisitScribe`.
-- **Agent:** MIE UI SuperChat Agent
+- **Agent:** MIE UI Design Agent (component selection is the orchestrator's
+  domain — same split as SC-3; the SuperChat Agent owns wiring the chosen
+  recorder)
 - **Source:** mieweb-ui-superchat skill — Media components; src/catalog/Media.mdx
 
 ### SC-16 — Silent microphone
@@ -193,8 +201,10 @@ stick-to-bottom behavior — without inventing API.
   AIChat **no** — its thread has no live region; the host wraps it in an
   `aria-live` container (or uses Messaging's `MessageList`). Claiming
   AIChat announces by default FAILS.
-- **Agent:** MIE UI SuperChat Agent
-- **Source:** mieweb-ui-superchat skill — A11y & i18n posture
+- **Agent:** MIE UI A11y Agent (cross-cutting a11y audits win the routing
+  tie-break no matter the component; the component facts live in the
+  superchat skill)
+- **Source:** mieweb-ui-superchat skill — A11y & i18n posture; agent/agents/mieweb-ui-design.agent.md — tie-breakers
 
 ### SC-19 — Inbox is not a collection view
 
