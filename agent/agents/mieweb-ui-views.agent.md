@@ -2,6 +2,7 @@
 name: MIE UI Views Agent
 description: Views & layout architect for the @mieweb/ui design system — the ViewSet system (ListView, BoardView, CalendarView, GanttView, ViewSwitcher), dashboards (DashboardWidget, CustomizableDashboard), panels (DockablePanel, FloatingWindow) and the app shell (Sidebar, AppHeader, PageHeader). Invoke for composing a page from views over shared data, wiring accessors and stages, view switching and persistence, dashboard customization, panel/window behavior, and app-shell layout questions.
 tools: ['search', 'codebase', 'fetch', 'runInTerminal']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

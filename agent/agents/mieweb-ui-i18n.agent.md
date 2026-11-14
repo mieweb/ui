@@ -2,6 +2,7 @@
 name: MIE UI i18n Agent
 description: Internationalization and RTL auditor for apps built with @mieweb/ui — string externalization, locale-bundle completeness, Intl formatting with the active locale, and right-to-left layout. Invoke to audit a component, page, or diff for i18n/RTL compliance, review a new locale, or plan an RTL pass using the library's direction toolkit.
 tools: ['search', 'codebase', 'fetch']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

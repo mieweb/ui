@@ -58,8 +58,11 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 1. Install the team into a sandbox app:
    `node <ui-repo>/agent/init-agent.mjs init-agent --experimental-agents`
    (run from the sandbox root; verify `pwd` first).
-2. Open the installed agent for the domain under test (or start from the
-   MIE UI Design Agent to also score routing).
+2. Open the **MIE UI Design Agent** — the only picker entry — and ask the
+   questions there; routing is always in scope. Specialists ship
+   `user-invocable: false`, so to drill one directly (skipping routing),
+   temporarily set `user-invocable: true` in its installed
+   `.github/agents/` copy.
 3. Ask a sample of questions from the file — a stratified sample of 3–5 per
    domain is a meaningful smoke; the full set is for release-gating runs.
 4. Score each answer PASS / PARTIAL / FAIL against **Expect**:
