@@ -40,7 +40,6 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | Question is about…                                   | Delegate to            |
 | ---------------------------------------------------- | ---------------------- |
 | install / peer deps / preset / safelist / `@source`  | MIE UI Install Agent   |
-| wiring headless modules (SuperChat) to data          | MIE UI Install Agent   |
 | tokens, CSS vars, Tailwind classes, brands, dark     | MIE UI Styling Agent   |
 | ARIA, keyboard nav, screen readers, contrast         | MIE UI A11y Agent      |
 | translations, locale bundles, Intl formats, RTL      | MIE UI i18n Agent      |
@@ -49,9 +48,10 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 | DataVis NITRO config (sources, columns, features, operations), eSheet Builder/Renderer, grid debugging | MIE UI Grids Agent |
 | charts, maps, globes, decks, org charts (Sparkline, Deck, Globe, PointMap, OrgChart, report sections) | MIE UI DataVis Agent |
 | views & layout (ViewSet, ListView/BoardView/CalendarView/GanttView, ViewSwitcher), dashboards, DockablePanel/FloatingWindow, app shell (Sidebar, AppHeader, PageHeader) | MIE UI Views Agent |
+| chat & media conversation — SuperChat/Inbox wiring, AIChat/OzwellChat, ChatComposer, Messaging, streaming/stick-to-bottom, players/recorders/transcripts, DocumentScanner | MIE UI SuperChat Agent |
 
-More specialists (SuperChat) land in later phases; until one ships, answer its domain
-from the skills and the component docs, or defer (below).
+For a domain with no specialist, answer from the skills and the component docs,
+or defer (below).
 
 **Tie-breakers:**
 

@@ -164,12 +164,12 @@ format and scoring.
   data?"
 - **Expect:** Write an adapter in the app — the module never fetches,
   subscribes, or navigates. `SuperChatInbox` has its own props
-  (`conversations`, `onMessageSent`, `onConversationOpened`) — never hand it
-  collection-view props. `ViewSet` wiring (items, accessors,
-  promise-returning `on*` callbacks) is the Views Agent's domain — redirect
-  it there.
-- **Agent:** MIE UI Install Agent
-- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Wiring headless modules; lessons/wiring-headless-modules.md
+  (`conversations`, `onMessageSent`, promise-returning `on*` callbacks) —
+  never hand it collection-view props. `ViewSet` wiring is the Views
+  Agent's domain; chat/media wiring is the SuperChat Agent's.
+- **Agent:** MIE UI SuperChat Agent (headless chat wiring moved off the
+  Install Agent in #609 — Install keeps package/peer/CSS setup only)
+- **Source:** mieweb-ui-superchat skill — wiring contract; lessons/wiring-headless-modules.md
 
 ### INS-18 — Dark-mode plumbing
 
