@@ -1,6 +1,6 @@
 ---
 name: MIE UI Install Agent
-description: Installation & setup diagnostician for the @mieweb/ui design system — peer dependencies, Tailwind 4 `@source` vs the Tailwind 3 preset/safelist, PostCSS config, CSS entry wiring, dark-mode plumbing, pnpm resolution quirks, and headless module adapters. Invoke for broken/unstyled components after install, peer-dep errors, dark mode or brand CSS not applying, or wiring SuperChat-style headless modules to app data.
+description: Installation & setup diagnostician for the @mieweb/ui design system — peer dependencies, Tailwind 4 `@source` vs the Tailwind 3 preset/safelist, PostCSS config, CSS entry wiring, dark-mode plumbing, and pnpm resolution quirks. Invoke for broken/unstyled components after install, peer-dep errors, or dark mode or brand CSS not applying.
 tools: ['search', 'codebase', 'fetch', 'runInTerminal']
 user-invocable: false
 handoffs:
@@ -67,6 +67,9 @@ hoisted; required peers belong in the app's own `package.json`.
 - Wiring `ViewSet` and the other views to app data (accessors, stages,
   `onMove`) → **MIE UI Views Agent** — you own getting the package installed;
   the Views Agent owns the adapter.
+- Wiring SuperChat/Inbox, AI chat surfaces, composers, or in-conversation
+  media to app data → **MIE UI SuperChat Agent** — same split: you own the
+  entry points rendering at all; it owns the adapter.
 - Token choices, hardcoded-color audits, creating/modifying brands →
   **MIE UI Styling Agent**. You own getting brand CSS _loaded_; Styling owns
   what's _in_ it.

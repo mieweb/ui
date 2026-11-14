@@ -16,7 +16,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | ------------------------------ | ------------------------------------ | ---------------------- |
 | [selection.md](./selection.md) | Component selection / catalog        | MIE UI Design Agent    |
 | [styling.md](./styling.md)     | Styling, tokens, brands, dark mode   | MIE UI Styling Agent   |
-| [install.md](./install.md)     | Install, CSS foundation, wiring      | MIE UI Install Agent   |
+| [install.md](./install.md)     | Install, CSS foundation              | MIE UI Install Agent   |
 | [a11y.md](./a11y.md)           | Accessibility                        | MIE UI A11y Agent      |
 | [i18n.md](./i18n.md)           | Internationalization / RTL           | MIE UI i18n Agent      |
 | [migration.md](./migration.md) | Migration / compliance (incl. icons) | MIE UI Migration Agent |
@@ -24,6 +24,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | [grids.md](./grids.md)         | DataVis NITRO + eSheet grids         | MIE UI Grids Agent     |
 | [datavis.md](./datavis.md)     | Charts / maps / decks / org charts   | MIE UI DataVis Agent   |
 | [views.md](./views.md)         | Views / dashboards / panels / shell  | MIE UI Views Agent     |
+| [superchat.md](./superchat.md) | Chat / AI messages / media convo     | MIE UI SuperChat Agent |
 
 ## Entry format
 
