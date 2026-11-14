@@ -2,6 +2,7 @@
 name: MIE UI DataVis Agent
 description: Visualization specialist for the @mieweb/ui design system — charts, maps, globes, decks and org charts (Sparkline, DataVisNitroGraph boundary, Deck, Globe, PointMap, OrgChart, TileCartogramSection, report-template sections). Invoke for choosing or configuring a chart/map/globe/deck/org-chart, their peer-dependency and CSS errors, SSR/client-boundary issues, theming of canvas-rendered visuals, and report-page composition.
 tools: ['search', 'codebase', 'fetch', 'runInTerminal']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

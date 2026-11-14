@@ -63,6 +63,11 @@ execution decisions). Summarized here as the citable spec.
    stays byte-identical to today's behavior (instructions file + `AGENTS.md`
    block). The default flips on in P5.2
    ([#607](https://github.com/mieweb/ui/issues/607)) — the official launch.
+10. **Single front door.** Only the orchestrator is user-invocable; every
+    specialist ships `user-invocable: false` and is reached via subagent
+    delegation from the Design Agent. The orchestrator's only handoff is
+    **Build it** (approved spec → default agent, which can edit files).
+    Decided in [#764](https://github.com/mieweb/ui/issues/764).
 
 ## Naming & layout
 
@@ -121,6 +126,7 @@ tools: [<minimal set for the persona>]
 # auditors:        ['search', 'codebase', 'fetch'] — no edit/terminal tools
 # fixers:          add 'editFiles'
 # diagnosticians:  add 'runInTerminal' only if the workflow runs commands
+user-invocable: false # specialists only — the orchestrator omits this (rule 10)
 handoffs: # where useful — auditors always include an "Apply Fixes" handoff
   - label: Apply Fixes
     agent: agent
