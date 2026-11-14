@@ -75,8 +75,10 @@ stick-to-bottom behavior — without inventing API.
 - **Expect:** There is no token prop — streaming is data: append an
   assistant message with `status: 'streaming'` and immutably update its
   text `content` block as tokens arrive (no top-level `text` field); flip
-  to `'complete'` (or `'error'`) when done, with the separate `isGenerating`
-  flag driving the busy indicator. Inventing `status: 'generating'` or a
+  to `'complete'` (or `'error'`) when done. Typing dots come from a
+  `'streaming'` message with empty `content[]`; the separate `isGenerating`
+  flag drives the header's Generating text and Stop button only with
+  `showHeader` plus `onCancel`. Inventing `status: 'generating'` or a
   top-level text field FAILS.
 - **Agent:** MIE UI SuperChat Agent
 - **Source:** mieweb-ui-superchat skill — Streaming & scroll; selection-guidance.md — AIChat
@@ -177,9 +179,11 @@ stick-to-bottom behavior — without inventing API.
 ### SC-16 — Silent microphone
 
 - **Ask:** "RecordButton does nothing when tapped on our staging site."
-- **Expect:** Recorders need a secure context (HTTPS) plus mic permission,
-  and denial surfaces only through `onError`/`onRecordingError` — wire
-  those handlers and check the context before suspecting the component.
+- **Expect:** Recorders need a secure context (HTTPS) plus mic permission.
+  RecordButton/AudioRecorder surface denial only through
+  `onError`/`onRecordingError` — wire those handlers and check the context
+  before suspecting the component. (DictationButton additionally announces
+  the error in its `role="status"` region.)
 - **Agent:** MIE UI SuperChat Agent
 - **Source:** mieweb-ui-superchat skill — Entries, deps, SSR / troubleshooting table
 

@@ -57,9 +57,10 @@ instead).
    standalone AIChat renders plain text until the host wires one, and
    `trustedContent` is for host-authored content only — never model output.
 6. **Carry the a11y posture.** SuperChat's thread is `role="log"`; AIChat's
-   thread has no live region (the host wraps it); recorders fail silently
-   without secure context + mic permission; `labels` props localize the
-   hard-coded strings. Don't trade these away.
+   thread has no live region (the host wraps it); AudioRecorder/RecordButton
+   fail silently without secure context + mic permission, while
+   DictationButton announces errors via its `role="status"` region; `labels`
+   props localize the hard-coded strings. Don't trade these away.
 7. **Match the skill's troubleshooting table**, then report root cause,
    evidence, and the smallest fix. Offer **Apply Fixes** for the edit.
 

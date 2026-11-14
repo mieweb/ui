@@ -39,28 +39,40 @@ Verify props against the installed `.d.ts` — never invent.
   SuperChatConversations, `createMarkdownRenderer`,
   `getConversationMediaItems`, all types). Rich render plugins are a second
   opt-in subpath `@mieweb/ui/components/SuperChat/plugins` (code, math,
-  mermaid, genui, image, NITRO-table, attachment) — each lazy-loads its
-  heavy dependency (math needs `katex/dist/katex.min.css`).
+  mermaid, genui, image, NITRO-table, attachment). Mermaid and the NITRO
+  grid lazy-load their heavy implementations; the code and math plugins
+  import `rehype-highlight` / `remark-math` + `rehype-katex` **eagerly** —
+  a missing peer fails when the plugins entry loads, before any block
+  renders (math also needs `katex/dist/katex.min.css`).
 - Everything else here — AIChat/OzwellChat/AIMessage/MCPToolCall,
   ChatComposer, Messaging, all media components, `useStickToBottom`,
   `JumpToBottomButton` — exports from the **main** entry.
 - SuperChat prose rendering needs the `@tailwindcss/typography` peer or
   `prose` classes do nothing.
 - `AudioPlayer variant="waveform"` and `AudioRecorder showWaveform` (default
-  true) dynamically import optional peer `wavesurfer.js` (>=7); when it's
-  missing you get a `console.error`, not an exception.
+  true) dynamically import optional peer `wavesurfer.js` (>=7). AudioPlayer
+  catches the missing peer and logs a `console.error`; AudioRecorder's
+  import is uncaught — absence surfaces as an unhandled promise rejection.
 - Recorders (`AudioRecorder`, `RecordButton`, `DictationButton`) need a
-  secure context + microphone permission; denial surfaces only through
-  `onError`/`onRecordingError`. All of this is client-only — keep it behind
-  a client boundary.
+  secure context + microphone permission. `AudioRecorder`/`RecordButton`
+  surface denial only through `onError`/`onRecordingError`;
+  `DictationButton` also announces localized status/errors through an
+  always-mounted `role="status"` region (visually hidden when `showStatus`
+  is false) and updates its accessible label. All of this is client-only —
+  keep it behind a client boundary.
 - `DictationButton` transcribes on-device (Whisper) by default or via a host
   `transcribe` provider, and returns **text only** — it never hands you the
-  audio `Blob` (that's `RecordButton`/`AudioRecorder`).
+  audio `Blob` (that's `RecordButton`/`AudioRecorder`). The default provider
+  keeps the audio local but **downloads** the transformers.js runtime and
+  Whisper model assets on first use (large, browser-cached) — offline or
+  strict-CSP hosts must provision those assets or supply `transcribe`.
 
 ## The headless wiring contract
 
 The host owns state, fetching, subscriptions, and navigation; the components
-never reach the network. Three rules carry the whole lesson:
+never put conversation data on the network (the one asset exception is
+DictationButton's default Whisper download, above). Three rules carry the
+whole lesson:
 
 1. **Return the promise from `on*` callbacks** (`void | Promise<void>`) —
    it's the only failure signal the module gets. Scope the expectation to
@@ -94,9 +106,11 @@ collection-view props** (`items`/`accessors` belong to the views family).
   it's true; `stopLabel` localizes it. AIChat/OzwellChat: stream by
   appending an assistant message with `status: 'streaming'` and immutably
   updating its text `content` block as tokens arrive (there is no top-level
-  `text` field); flip to `'complete'`/`'error'` when done. `isGenerating` is
-  the separate busy flag that drives the typing indicator and header Stop
-  button.
+  `text` field); flip to `'complete'`/`'error'` when done. Typing dots
+  render for a `'streaming'` message whose `content[]` is still empty. The
+  separate `isGenerating` flag drives the header's "Generating…" text and
+  Stop button — and only when `showHeader` is on and `onCancel` is wired
+  (OzwellChat renders that header off and exposes no generation cancel).
 - **`useStickToBottom`** (main entry) is the scroll engine the chat surfaces
   share: `containerRef` + `contentRef`, `isAtBottom`, `scrollToBottom`,
   `followIfPinned()` (follow only if pinned; returns whether it did),
@@ -183,7 +197,7 @@ collection-view props** (`items`/`accessors` belong to the views family).
 | No jump-to-bottom button | `order="desc"` — by design |
 | Markdown renders as plain text in AIChat/AIMessageDisplay | No renderer wired — pass `renderTextContent` (`createMarkdownRenderer`); SuperChat already defaults to it |
 | Code/math blocks dead | Plugin not registered, or katex CSS missing |
-| Waveform never renders | Optional peer `wavesurfer.js` missing (console.error only) |
+| Waveform never renders | Optional peer `wavesurfer.js` missing — AudioPlayer logs a console.error; AudioRecorder leaves an unhandled rejection |
 | Transcript highlight drifts | Seconds vs milliseconds mismatch — `AudioPlayer` is the odd one out |
-| Mic silently does nothing | Insecure context or permission denied — only `onError`/`onRecordingError` fires |
+| Mic silently does nothing | Insecure context or permission denied — AudioRecorder/RecordButton report it only via `onError`/`onRecordingError`; DictationButton also announces it in its `role="status"` region |
 | Screen reader silent during AI replies | AIChat thread has no `aria-live` — host wraps it |
