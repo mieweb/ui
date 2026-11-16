@@ -40,12 +40,14 @@ vi.mock('./DocumentMdyEditor', async () => {
         onChange,
         onFieldActivate,
         disabled,
+        mediaUpload,
       }: {
         body: string;
         fieldIds: string[];
         onChange: (body: string) => void;
         onFieldActivate: (id: string) => void;
         disabled: boolean;
+        mediaUpload?: { uploadHandler?: unknown };
       },
       ref
     ) {
@@ -59,6 +61,11 @@ vi.mock('./DocumentMdyEditor', async () => {
       }));
       return (
         <>
+          <span data-testid="editor-media-upload">
+            {typeof mediaUpload?.uploadHandler === 'function'
+              ? 'host'
+              : 'default'}
+          </span>
           <textarea
             ref={input}
             aria-label="Document narrative"
@@ -161,6 +168,24 @@ describe('RichTextEsheet mode synchronization', () => {
       expect(ref.current!.getSnapshot().mdy).toContain('## Addendum')
     );
     expect(ref.current!.getSnapshot().mdy).toContain('Login fails');
+  });
+
+  it('forwards the host upload pipeline to the rich editor', async () => {
+    render(
+      <RichTextEsheet
+        definition={definition}
+        mediaCapture={{ uploadHandler: async () => 'https://cdn/img.png' }}
+      />
+    );
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    // Pasted or dropped media must flow through the host's uploadHandler and
+    // limits, never RichEditor's base64/object-URL defaults.
+    await waitFor(() =>
+      expect(screen.getByTestId('editor-media-upload')).toHaveTextContent(
+        'host'
+      )
+    );
   });
 
   it('keeps the draft editable after a rejected save', async () => {

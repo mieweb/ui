@@ -802,6 +802,9 @@ const RichTextEsheetSession = React.forwardRef<
                   if (!mdyFields.some((field) => field.id === id)) return;
                   void activateResolver(id);
                 }}
+                // Pasted or dropped media must use the host's uploadHandler
+                // and limits, not RichEditor's base64/object-URL defaults.
+                mediaUpload={media.value?.mediaUpload}
                 disabled={
                   readOnly ||
                   saving ||
