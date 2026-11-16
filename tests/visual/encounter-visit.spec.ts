@@ -744,6 +744,60 @@ test('encounter visit follows the dark Enterprise Health theme', async ({
   await expect(page).toHaveScreenshot('encounter-mobile-dark.png');
 });
 
+test('RichEdit docks no capture ribbon; the resolver keeps capture available', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(
+    '/iframe.html?id=encounter-orders-encountervisit--with-media-capture&viewMode=story'
+  );
+  // The opt-in is active: eSheet narrative fields dock the ribbon.
+  await expect(
+    page.getByRole('toolbar', { name: 'Record and capture' }).first()
+  ).toBeVisible();
+
+  await selectVisitMode(page, 'RichEdit');
+  const editor = page.getByRole('textbox', { name: 'Encounter narrative' });
+  await expect(editor).toContainText('back pain', { timeout: 30000 });
+
+  // The chrome's first row belongs to the view switcher's overlay lane — no
+  // ribbon docks on the document (mieweb/ui#751)…
+  const chrome = page.locator('.encounter-rich-chrome');
+  await expect(chrome.locator('[data-slot="capture-ribbon"]')).toHaveCount(0);
+  // …and the Kerebron toolbar shares the switcher's row, starting after its
+  // reserved lane instead of being displaced to a second row.
+  const switcherBounds = (await page
+    .getByRole('combobox', { name: 'Visit mode' })
+    .boundingBox())!;
+  const toolbarBounds = (await chrome
+    .locator('.kb-custom-menu')
+    .boundingBox())!;
+  expect(toolbarBounds.x).toBeGreaterThanOrEqual(
+    switcherBounds.x + switcherBounds.width
+  );
+  expect(toolbarBounds.y).toBeLessThan(
+    switcherBounds.y + switcherBounds.height
+  );
+
+  // Capture stays available where fields are edited: the linked-field
+  // resolver's narrative field docks the ribbon.
+  const linkedHpi = editor.getByRole('button', {
+    name: /^Linked field: History of present illness/,
+  });
+  await expect(linkedHpi).toBeVisible({ timeout: 30000 });
+  await linkedHpi.press('Enter');
+  const resolver = page.getByRole('dialog', {
+    name: 'History of present illness',
+    exact: true,
+  });
+  await expect(resolver).toBeVisible();
+  await expect(
+    resolver.getByRole('toolbar', { name: 'Record and capture' })
+  ).toBeVisible();
+  await resolver.getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(resolver).toHaveCount(0);
+});
+
 test('narratives use the phone width and grow with entered content', async ({
   page,
 }) => {
