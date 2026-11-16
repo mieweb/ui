@@ -5,6 +5,18 @@ of the default UI bundle. `definition.ts` generates a native eSheet document;
 the renderer's FormStore owns answers. Custom fields serialize structured data
 into `FieldResponse.answer`. Do not introduce a second clinical state store.
 
+Since mieweb/ui#758 the generic document machinery lives in
+`../RichTextEsheet`: the MDY engine factory (`documentMdy.ts`), the document
+surfaces (`DocumentMdyEditor`, `DocumentMdyView`, `DocumentExportView`,
+`report.ts`) and the media-capture hook. `EncounterMdyEditor`,
+`EncounterMdyView`, `EncounterExportView`, `report.ts` and `mediaCapture.tsx`
+here are thin wrappers that supply visit wording and clinical PHI copy. Keep
+the dependency one-way — this component imports from RichTextEsheet, never the
+reverse — and keep clinical wording out of the shared modules. The shared
+chrome stylesheet `src/styles/encounter-visit.css` is scoped
+`:is(.encounter-visit, .richtext-esheet)`; keep both hosts in any selector
+change.
+
 The form, RichEdit and view surfaces share the same FormStore responses. The
 portable document is MDY: YAML front matter retains the generated form, native
 `response` map and `encounterDefinition`, while its Markdown body is stored in
@@ -40,7 +52,9 @@ An MCP text replacement therefore cannot restore stale formatting.
 `EncounterVisit.mediaCapture` opts the visit's editing surfaces — narrative
 fields (via `EncounterMediaCaptureContext`, since eSheet fields are registered
 globally and take no props from the visit) and RichEdit — into the capture
-ribbon. `uploadHandler` is mandatory by type: captures land as uploaded
+ribbon. `useEncounterMediaCapture` delegates to RichTextEsheet's
+`useDocumentMediaCapture`, adding the clinical PHI confirmation copy.
+`uploadHandler` is mandatory by type: captures land as uploaded
 `https:`/same-origin URLs; the relaxed narrative sanitizer
 (`sanitizeNarrativeHtml(html, { media: true })`) strips `data:` and
 cross-origin images, so base64 cannot persist even via paste (same-origin

@@ -220,6 +220,12 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * surface only — same contract as `RichMediaCaptureEditor` (mieweb/ui#734).
    */
   mediaCapture?: boolean | MediaCaptureOptions;
+  /**
+   * Whether the capture bar starts visible when `mediaCapture` is enabled;
+   * the block (`+`) menu toggle reveals or hides it either way. Mount-time
+   * static, like `mediaCapture` itself. Default `true`.
+   */
+  defaultCaptureBarVisible?: boolean;
 }
 
 const TextAreaRichKerebron = React.forwardRef<
@@ -254,6 +260,7 @@ const TextAreaRichKerebron = React.forwardRef<
       mediaUpload,
       omitExtensions,
       mediaCapture,
+      defaultCaptureBarVisible = true,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
@@ -287,9 +294,12 @@ const TextAreaRichKerebron = React.forwardRef<
     const [uncontrolledToolbar, setUncontrolledToolbar] =
       React.useState(defaultToolbar);
     const toolbarVisible = (toolbar ?? uncontrolledToolbar) === 'visible';
-    // The mediaCapture ribbon defaults visible (the host opted in); the block
-    // menu lets users reclaim the space, mirroring the toolbar toggle.
-    const [captureBarVisible, setCaptureBarVisible] = React.useState(true);
+    // The mediaCapture ribbon defaults visible (the host opted in) unless the
+    // host starts it hidden; the block menu lets users toggle the space,
+    // mirroring the toolbar toggle.
+    const [captureBarVisible, setCaptureBarVisible] = React.useState(
+      defaultCaptureBarVisible
+    );
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
     const [isEmpty, setIsEmpty] = React.useState(true);
