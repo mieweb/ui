@@ -15,6 +15,7 @@
 import * as React from 'react';
 import { useVirtualizer, type VirtualItem } from '@tanstack/react-virtual';
 import { MessageRow } from './parts';
+import type { MCPToolCallGroupOptions } from '../AI/MCPToolCallGroup';
 import type {
   AIRenderTextContent,
   Participant,
@@ -75,6 +76,8 @@ export interface VirtualThreadProps {
   renderMessageMedia?: SuperChatRenderMessageMedia;
   /** The attachment cards' box, a CSS length, forwarded to each row. */
   mediaMaxSize?: string;
+  /** Tool-call grouping options, forwarded to each row. */
+  toolCallGroup?: MCPToolCallGroupOptions;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -119,6 +122,7 @@ export function VirtualThread({
   scheduledLabel,
   renderMessageMedia,
   mediaMaxSize,
+  toolCallGroup,
   scrollRef,
   contentRef,
   layoutRef,
@@ -203,6 +207,7 @@ export function VirtualThread({
                   scheduledLabel={scheduledLabel}
                   renderMessageMedia={renderMessageMedia}
                   mediaMaxSize={mediaMaxSize}
+                  toolCallGroup={toolCallGroup}
                 />
               </div>
             </div>

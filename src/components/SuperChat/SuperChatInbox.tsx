@@ -79,6 +79,11 @@ export interface SuperChatInboxProps {
   /** Props for the active panel's message box (see {@link SuperChatProps.composerProps}). */
   composerProps?: SuperChatComposerProps;
   /**
+   * Group consecutive tool calls with approval controls in the active panel
+   * (see {@link SuperChatProps.toolCallGroup}).
+   */
+  toolCallGroup?: SuperChatProps['toolCallGroup'];
+  /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
@@ -196,6 +201,7 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   composerProps,
+  toolCallGroup,
   acceptedFileTypes,
   attachmentDataUrls,
   maxFileSize,
@@ -369,6 +375,7 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           composerProps={composerProps}
+          toolCallGroup={toolCallGroup}
           acceptedFileTypes={acceptedFileTypes}
           attachmentDataUrls={attachmentDataUrls}
           maxFileSize={maxFileSize}

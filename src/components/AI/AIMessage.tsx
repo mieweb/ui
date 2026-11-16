@@ -725,4 +725,11 @@ export function AIMessageDisplay({
   );
 }
 
-export { MessageAvatar, AITypingIndicator, ChatBubble, bubbleVariants };
+export {
+  MessageAvatar,
+  AITypingIndicator,
+  ChatBubble,
+  bubbleVariants,
+  // Internal: shared with SuperChat so reasoning renders the same in both.
+  ThinkingBlock,
+};

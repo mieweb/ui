@@ -293,6 +293,8 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Message actions slot** | `superchat-message-actions-slot`       | `div`                                  | Beside the text bubble, on its outer side by the avatar: the overflow (⋯) and the actions bar.                                             |
 | **Message meta**         | `superchat-message-meta`               | `div`                                  | Author name, role label, and timestamp.                                                                                                    |
 | **Bubble**               | `superchat-bubble`                     | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                                                              |
+| **Tool-call group**      | `ai-tool-call-group`                   | `div`                                  | A run of consecutive tool calls (with `toolCallGroup`), with approve/deny controls.                                                        |
+| **Thinking**             | `ai-message-thinking`                  | `div` → `button` (disclosure)          | Collapsible reasoning from a `thinking` block, outside the answer body.                                                                    |
 | **Message actions**      | `superchat-message-actions`            | `div`                                  | Hover-revealed icon stack in the actions slot, in the avatar's column level with the bubble; buttons expose `superchat-action-{id}` slots. |
 | **Overflow (⋯)**         | `superchat-overflow-button`            | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.                                           |
 | **Editor attachments**   | `superchat-message-editor-attachments` | `ul` (`Attachments`)                   | While editing, the message's attachments, each with a remove button.                                                                       |
@@ -352,6 +354,7 @@ uncontrolled).
 | `trustedContent`              | `boolean`                                                                 | `false`            | Skip sanitization — **only** for host-authored content.                                                                                                            |
 | `readOnly`                    | `boolean`                                                                 | `false`            | Disable the composer.                                                                                                                                              |
 | `composerProps`               | `SuperChatComposerProps`                                                  | —                  | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
+| `toolCallGroup`               | `MCPToolCallGroupOptions`                                                 | —                  | Group consecutive tool calls with approve/deny controls in the active panel. See [Tool calls & thinking](#tool-calls--thinking).                                   |
 | `attachmentDataUrls`          | `boolean`                                                                 | `true`             | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                              |
 | `maxFileSize`                 | `number \| (file) => number \| undefined`                                 | 25 MB              | Largest file the composer takes; a function sets it per file.                                                                                                      |
 | `order`                       | `'asc' \| 'desc'`                                                         | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
@@ -393,6 +396,7 @@ Renders exactly one conversation.
 | `trustedContent`       | `boolean`                                                                 | `false`                              | Skip sanitization — **only** for host-authored content.                                                                                                                                                                                                                          |
 | `readOnly`             | `boolean`                                                                 | `false`                              | Disable the composer.                                                                                                                                                                                                                                                            |
 | `composerProps`        | `SuperChatComposerProps`                                                  | —                                    | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`.                                                                                                               |
+| `toolCallGroup`        | `MCPToolCallGroupOptions`                                                 | —                                    | Opt in to grouped tool calls, as in `AIChat`: consecutive `tool_use` blocks render as one `MCPToolCallGroup` with your `onApprove`/`onDeny` and `labels`. See [Tool calls & thinking](#tool-calls--thinking).                                                                    |
 | `attachmentDataUrls`   | `boolean`                                                                 | `true`                               | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                                                                                                                                            |
 | `maxFileSize`          | `number \| (file) => number \| undefined`                                 | 25 MB                                | Largest file the composer takes; a function sets it per file.                                                                                                                                                                                                                    |
 | `order`                | `'asc' \| 'desc'`                                                         | `'asc'`                              | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                                                                                                                                   |
@@ -557,6 +561,50 @@ always available.
 > Copying uses the async Clipboard API (`navigator.clipboard.write`), which requires
 > a secure context (HTTPS or `localhost`). On older browsers it falls back to a
 > plain-text `writeText`.
+
+Reasoning (`thinking` blocks) is not part of the answer, so every copy format
+leaves it out.
+
+---
+
+## Tool calls & thinking
+
+A message's `content` blocks reuse the AI module's displays, so an agent turn
+looks the same in `SuperChat` as in `AIChat`.
+
+**Tool calls.** By default each `tool_use` block renders as its own
+`MCPToolCallDisplay` pill. Pass `toolCallGroup` (on `SuperChat` or
+`SuperChatInbox`, the same `MCPToolCallGroupOptions` `AIChat` takes) and each run
+of consecutive `tool_use` blocks renders as one `MCPToolCallGroup`: a "Running N
+tools" / "Used N tools" header over a compact row per call. Calls with status
+`'awaiting-approval'` show **Allow once**, **Always allow** and **Deny**, wired to
+your callbacks; the group collapses itself once every call has settled, while
+calls that still need the user, or failed, stay listed.
+
+```tsx
+<SuperChatInbox
+  conversations={conversations}
+  currentParticipantId="u1"
+  toolCallGroup={{
+    // `always` is true for "Always allow". Return a promise to show a busy row.
+    onApprove: (call, { always }) => approveTool(call.id, always),
+    onDeny: (call) => denyTool(call.id),
+    labels: { allowOnce: 'Allow', deny: 'Block' }, // optional overrides
+  }}
+/>
+```
+
+The host owns the calls: update each `toolCall.status` (e.g. to `'running'`,
+then `'success'` or `'denied'`) in the conversation to move the group along. The
+callbacks are read when a button is pressed, so an inline object doesn't
+re-render every message; keep `labels` stable (`useMemo` or a module constant).
+
+**Thinking.** `thinking` blocks render as the AI module's collapsible reasoning
+pill, visually distinct from the answer. It stays open with a "Thinking" label
+while it is the newest thing in a streaming message, and folds to "Thought for
+Ns" as soon as anything renders after it — the answer text, a tool call — or the
+message stops streaming. Finished messages show it collapsed; the user can
+always expand it. An explicit `collapsed` on the block sets its starting state.
 
 ---
 
