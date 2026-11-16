@@ -5,6 +5,8 @@ export {
 } from './EncounterVisit';
 export * from './types';
 export * from './definition';
+export * from './defaultForm';
+export * from './legacy';
 export * from './model';
 export * from './mcp';
 export * from './mdy';

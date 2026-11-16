@@ -6,7 +6,10 @@ import { getEncounterFieldId } from './definition';
 import { parseEncounterMdy, type EncounterMdyField } from './mdy';
 import { createEncounterSnapshot } from './model';
 import { createEncounterReportHtml } from './report';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 const definition: EncounterVisitDefinition = {
   id: 'view-test',
@@ -23,6 +26,8 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const form = encounterFormFromLegacy(definition);
+
 function field(id: string, label: string, empty: boolean): EncounterMdyField {
   return { id, label, empty, fieldId: id, sectionId: id, display: '—' };
 }
@@ -36,7 +41,7 @@ function report(html: string, fields: EncounterMdyField[]) {
 
 describe('Encounter MDY final report', () => {
   it('shows captured values without blank field prompts or empty section headings', async () => {
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Supplied history.' },
     });
     render(<EncounterMdyView source={snapshot.mdy} />);
@@ -58,7 +63,7 @@ describe('Encounter MDY final report', () => {
   });
 
   it('removes the whole empty report and restores a section when a value is captured', async () => {
-    const blank = createEncounterSnapshot(definition, {
+    const blank = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: ' \n ' },
     });
     const { container, rerender } = render(
@@ -71,7 +76,7 @@ describe('Encounter MDY final report', () => {
       container.querySelector('.encounter-mdy-view')?.textContent?.trim()
     ).toBe('');
     expect(screen.queryAllByRole('heading')).toHaveLength(0);
-    const captured = createEncounterSnapshot(definition, {
+    const captured = createEncounterSnapshot(form, {
       [getEncounterFieldId('exam', 'pulse')]: { answer: '0' },
     });
     rerender(<EncounterMdyView source={captured.mdy} />);

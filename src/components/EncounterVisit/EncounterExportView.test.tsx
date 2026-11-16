@@ -4,13 +4,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EncounterExportView } from './EncounterExportView';
 import { getEncounterFieldId } from './definition';
 import { createEncounterSnapshot } from './model';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 const definition: EncounterVisitDefinition = {
   id: 'export-test',
   title: 'Visit export',
   sections: [{ id: 'hpi', title: 'History', kind: 'narrative' }],
 };
+
+const form = encounterFormFromLegacy(definition);
 
 const mockCreateObjectURL = vi.fn(() => 'blob:visit');
 const mockRevokeObjectURL = vi.fn();
@@ -27,7 +32,7 @@ afterEach(() => {
 
 describe('EncounterExportView', () => {
   it('shows the portable MDY document verbatim, including front matter', () => {
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Supplied history.' },
     });
     const { container } = render(
@@ -41,7 +46,7 @@ describe('EncounterExportView', () => {
   });
 
   it('downloads the document as a Markdown file and releases the blob URL', async () => {
-    const snapshot = createEncounterSnapshot(definition, {});
+    const snapshot = createEncounterSnapshot(form, {});
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {});

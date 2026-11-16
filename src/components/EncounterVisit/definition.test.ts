@@ -1,17 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
-  createEncounterFormDefinition,
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
   getEncounterFieldId,
   getEncounterSectionFieldIds,
-  validateEncounterDefinition,
+  validateEncounterForm,
 } from './definition';
-import type {
-  EncounterNarrativeFinding,
-  EncounterSectionDefinition,
-  EncounterVisitDefinition,
-} from './types';
+import {
+  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+  encounterFormFromLegacy,
+  validateEncounterDefinition,
+  type EncounterSectionDefinition,
+  type EncounterVisitDefinition,
+} from './legacy';
+import type { EncounterNarrativeFinding } from './types';
 
 const finding: EncounterNarrativeFinding = {
   id: 'finding',
@@ -27,7 +28,7 @@ function definition(
 }
 
 function fieldsFor(section: EncounterSectionDefinition) {
-  const field = createEncounterFormDefinition(definition(section)).pages[0]
+  const field = encounterFormFromLegacy(definition(section)).pages[0]
     .fields?.[0];
   if (field?.fieldType !== 'section') throw new Error('Expected a section');
   return field.fields ?? [];
@@ -203,9 +204,7 @@ describe('encounter finding configuration', () => {
   );
 
   it('provides short uncoded suggestion lists for every default narrative without selecting them', () => {
-    const form = createEncounterFormDefinition(
-      DEFAULT_ENCOUNTER_VISIT_DEFINITION
-    );
+    const form = encounterFormFromLegacy(DEFAULT_ENCOUNTER_VISIT_DEFINITION);
     const narratives = form.pages[0].fields?.flatMap((section) =>
       section.fieldType === 'section'
         ? (section.fields ?? []).filter(
@@ -244,9 +243,16 @@ describe('structured encounter section definitions', () => {
   ] as const)(
     'maps %s to its healthcare component with coding required',
     (kind, fieldType) => {
-      expect(fieldsFor({ id: kind, title: kind, kind })[0]).toMatchObject({
+      const unset = fieldsFor({ id: kind, title: kind, kind })[0];
+      expect(unset).toMatchObject({
         id: getEncounterFieldId(kind, 'value'),
         fieldType,
+      });
+      // Unset stays unstamped so views round-trip; consumers default to true.
+      expect(unset._sourceData).not.toHaveProperty('encounterRequireCoding');
+      expect(
+        fieldsFor({ id: kind, title: kind, kind, requireCoding: true })[0]
+      ).toMatchObject({
         _sourceData: { encounterRequireCoding: true },
       });
       expect(
@@ -298,9 +304,28 @@ describe('structured encounter section definitions', () => {
     });
   });
 
+  it('rejects a native form whose top-level fields are not sections', () => {
+    const form = encounterFormFromLegacy(
+      definition({ id: 'vitals', title: 'Vitals', kind: 'vitals' })
+    );
+    const section = form.pages[0].fields?.[0];
+    const broken = {
+      ...form,
+      pages: [
+        {
+          ...form.pages[0],
+          fields: section?.fieldType === 'section' ? section.fields : [],
+        },
+      ],
+    } as typeof form;
+    expect(() => validateEncounterForm(broken)).toThrow(
+      'every top-level encounter field must be a section'
+    );
+  });
+
   it('rejects a nonboolean coding requirement before creating a form', () => {
     expect(() =>
-      createEncounterFormDefinition(
+      encounterFormFromLegacy(
         definition({
           id: 'plan',
           title: 'Plan',

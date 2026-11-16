@@ -7,7 +7,10 @@ import {
 } from './EncounterMdyEditor';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -158,7 +161,7 @@ describe('EncounterMdyEditor setup failure recovery', () => {
     render(
       <EncounterVisit
         ref={ref}
-        definition={definition}
+        form={encounterFormFromLegacy(definition)}
         initialResponses={original}
         defaultMode="rich"
       />

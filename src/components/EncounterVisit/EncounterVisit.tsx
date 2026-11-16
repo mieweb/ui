@@ -25,11 +25,12 @@ import {
   updateEncounterDocumentBody,
 } from './mdy';
 import {
-  createEncounterFormDefinition,
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+  getEncounterFormSections,
   getEncounterSectionFieldId,
   getEncounterSectionFieldIds,
 } from './definition';
+import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
+import { encounterFormFromLegacy } from './legacy';
 import { registerEncounterFieldTypes } from './fields';
 import { EncounterSectionContext } from './EncounterSectionField';
 import {
@@ -44,9 +45,9 @@ import {
   useEncounterMessages,
   type EncounterVisitMessages,
 } from './messages';
+import type { FormDefinition } from '@esheet/core';
 import type {
   EncounterResponses,
-  EncounterVisitDefinition,
   EncounterVisitSnapshot,
   EncounterVisitMode,
 } from './types';
@@ -80,9 +81,9 @@ export interface EncounterVisitProps extends Omit<
   codeLookup?: CodeLookupProviderConfig;
   /** Translate built-in labels and messages while retaining native coded data. */
   messages?: EncounterVisitMessages;
-  /** Sections and their narrative / observation granularity. */
-  definition?: EncounterVisitDefinition;
-  /** Loaded once per definition.id. Change the id to open another visit. */
+  /** The native eSheet form: sections and their observation granularity. */
+  form?: FormDefinition;
+  /** Loaded once per form.id. Change the id to open another visit. */
   initialResponses?: EncounterResponses;
   /** Portable MDY draft, loaded once per visit id. Takes precedence over initialResponses. */
   initialMdy?: string;
@@ -133,7 +134,7 @@ export const EncounterVisit = React.forwardRef<
   EncounterVisitHandle,
   EncounterVisitProps
 >(function EncounterVisit(
-  { definition, initialMdy, codeLookup, messages, ...props },
+  { form, initialMdy, codeLookup, messages, ...props },
   ref
 ) {
   const inheritedCodeLookup = useCodeLookupConfig();
@@ -141,8 +142,12 @@ export const EncounterVisit = React.forwardRef<
     () => (initialMdy === undefined ? null : parseEncounterMdy(initialMdy)),
     [initialMdy]
   );
-  const visitDefinition =
-    definition ?? parsed?.definition ?? DEFAULT_ENCOUNTER_VISIT_DEFINITION;
+  // Prefer the one-time legacy import over a stamped form: #762 documents
+  // carry complete section metadata there that their saved forms predate.
+  const importedForm = parsed?.definition
+    ? encounterFormFromLegacy(parsed.definition)
+    : parsed?.form;
+  const visitForm = form ?? importedForm ?? DEFAULT_ENCOUNTER_FORM;
   const loadErrors =
     parsed?.diagnostics.filter(
       (diagnostic) =>
@@ -153,23 +158,23 @@ export const EncounterVisit = React.forwardRef<
       `Unable to load encounter MDY: ${loadErrors.map((diagnostic) => diagnostic.message).join(' ')}`
     );
   }
-  if (parsed && !parsed.definition && !definition) {
+  if (parsed && !importedForm && !form) {
     throw new Error(
-      'Supply an encounter definition to open a native eSheet MDY without encounterDefinition.'
+      'Supply an encounter form to open a native eSheet MDY that carries none.'
     );
   }
-  if (parsed?.definition && parsed.definition.id !== visitDefinition.id) {
-    throw new Error('The MDY visit id does not match the supplied definition.');
+  if (parsed?.definition && parsed.definition.id !== visitForm.id) {
+    throw new Error('The MDY visit id does not match the supplied form.');
   }
-  if (parsed?.form && parsed.form.id !== visitDefinition.id) {
-    throw new Error('The MDY form id does not match the encounter definition.');
+  if (parsed?.form && parsed.form.id !== visitForm.id) {
+    throw new Error('The MDY form id does not match the encounter form.');
   }
-  if (parsed?.form && !parsed.definition) {
-    const fieldShapes = (
-      form: ReturnType<typeof createEncounterFormDefinition>
-    ) => {
+  if (parsed?.form && parsed.form !== visitForm) {
+    const fieldShapes = (candidate: FormDefinition) => {
       const shapes: { id: string; shape: unknown }[] = [];
-      const visitFields = (fields: (typeof form.pages)[number]['fields']) =>
+      const visitFields = (
+        fields: (typeof candidate.pages)[number]['fields']
+      ) =>
         fields?.forEach((field) => {
           const native = field as unknown as Record<string, unknown>;
           const source = native._sourceData as
@@ -198,24 +203,21 @@ export const EncounterVisit = React.forwardRef<
           });
           if ('fields' in field) visitFields(field.fields);
         });
-      form.pages.forEach((page) => visitFields(page.fields));
+      candidate.pages.forEach((page) => visitFields(page.fields));
       return JSON.stringify(shapes.sort((a, b) => a.id.localeCompare(b.id)));
     };
-    if (
-      fieldShapes(parsed.form) !==
-      fieldShapes(createEncounterFormDefinition(visitDefinition))
-    ) {
+    if (fieldShapes(parsed.form) !== fieldShapes(visitForm)) {
       throw new Error(
-        'The MDY fields do not match the supplied encounter definition.'
+        'The MDY fields do not match the supplied encounter form.'
       );
     }
   }
   const session = (
     <EncounterVisitSession
-      key={visitDefinition.id}
+      key={visitForm.id}
       {...props}
       initialMdy={initialMdy}
-      definition={visitDefinition}
+      form={visitForm}
       ref={ref}
     />
   );
@@ -230,10 +232,10 @@ export const EncounterVisit = React.forwardRef<
 
 const EncounterVisitSession = React.forwardRef<
   EncounterVisitHandle,
-  EncounterVisitProps & { definition: EncounterVisitDefinition }
+  EncounterVisitProps & { form: FormDefinition }
 >(function EncounterVisitSession(
   {
-    definition,
+    form,
     initialResponses,
     initialMdy,
     defaultMode = 'esheet',
@@ -261,14 +263,14 @@ const EncounterVisitSession = React.forwardRef<
   }, []);
   const m = useEncounterMessages();
   // Content identity prevents a host's inline config object from resetting answers.
-  const definitionJson = JSON.stringify(definition);
-  const stableDefinition = React.useMemo(
-    () => JSON.parse(definitionJson) as EncounterVisitDefinition,
-    [definitionJson]
+  const formJson = JSON.stringify(form);
+  const stableForm = React.useMemo(
+    () => JSON.parse(formJson) as FormDefinition,
+    [formJson]
   );
-  const form = React.useMemo(
-    () => createEncounterFormDefinition(stableDefinition),
-    [stableDefinition]
+  const sections = React.useMemo(
+    () => getEncounterFormSections(stableForm),
+    [stableForm]
   );
   const [initialSeed] = React.useState(() => {
     if (initialMdy === undefined) return initialResponses ?? {};
@@ -279,11 +281,9 @@ const EncounterVisitSession = React.forwardRef<
     };
   });
   const [snapshot, setSnapshot] = React.useState(() =>
-    createEncounterSnapshot(stableDefinition, initialSeed)
+    createEncounterSnapshot(stableForm, initialSeed)
   );
-  const [activeSection, setActiveSection] = React.useState(
-    stableDefinition.sections[0].id
-  );
+  const [activeSection, setActiveSection] = React.useState(sections[0].id);
   const [mode, setModeState] = React.useState<EncounterVisitMode>(defaultMode);
   const [modePending, setModePending] = React.useState(false);
   const [pendingSection, setPendingSection] = React.useState<string | null>(
@@ -300,7 +300,8 @@ const EncounterVisitSession = React.forwardRef<
   const root = React.useRef<HTMLDivElement>(null);
   const unsubscribe = React.useRef<(() => void) | null>(null);
   const latest = React.useRef({
-    definition: stableDefinition,
+    form: stableForm,
+    sections,
     onChange,
     onSubmit,
     readOnly,
@@ -309,7 +310,8 @@ const EncounterVisitSession = React.forwardRef<
     m,
   });
   latest.current = {
-    definition: stableDefinition,
+    form: stableForm,
+    sections,
     onChange,
     onSubmit,
     readOnly,
@@ -320,8 +322,8 @@ const EncounterVisitSession = React.forwardRef<
   const responses = React.useRef(initialSeed);
   // Preserve answers when section configuration changes within this visit.
   const rendererInput = React.useMemo(
-    () => ({ definition: form, responses: responses.current }),
-    [form]
+    () => ({ form: stableForm, responses: responses.current }),
+    [stableForm]
   );
   // Until the user authors the document, RichEdit shows a generated skeleton.
   // Key it to the configuration, not the live snapshot: the always-mounted
@@ -333,9 +335,9 @@ const EncounterVisitSession = React.forwardRef<
   const generatedBody = React.useMemo(
     () =>
       parseEncounterMdy(
-        createEncounterSnapshot(stableDefinition, responses.current).mdy
+        createEncounterSnapshot(stableForm, responses.current).mdy
       ).body,
-    [stableDefinition]
+    [stableForm]
   );
   const richBody =
     getEncounterDocumentBody(snapshot.responses) ?? generatedBody;
@@ -406,11 +408,7 @@ const EncounterVisitSession = React.forwardRef<
 
   const focusSection = React.useCallback(
     (sectionId: string) => {
-      if (
-        !latest.current.definition.sections.some(
-          (section) => section.id === sectionId
-        )
-      )
+      if (!latest.current.sections.some((section) => section.id === sectionId))
         return;
       void setMode('esheet', sectionId);
     },
@@ -443,7 +441,7 @@ const EncounterVisitSession = React.forwardRef<
 
   const [tools] = React.useState(() =>
     createEncounterVisitTools({
-      getDefinition: () => latest.current.definition,
+      getForm: () => latest.current.form,
       getResponses: () => {
         if (!renderer.current) throw new Error('Visit renderer is not ready.');
         return renderer.current.getRawResponse();
@@ -470,7 +468,7 @@ const EncounterVisitSession = React.forwardRef<
     () => ({
       getSnapshot: () =>
         createEncounterSnapshot(
-          latest.current.definition,
+          latest.current.form,
           renderer.current?.getRawResponse() ?? responses.current
         ),
       getTools: () => tools,
@@ -619,7 +617,7 @@ const EncounterVisitSession = React.forwardRef<
     const publish = () => {
       responses.current = store.getState().responses;
       const next = createEncounterSnapshot(
-        latest.current.definition,
+        latest.current.form,
         responses.current
       );
       setSnapshot(next);
@@ -646,12 +644,10 @@ const EncounterVisitSession = React.forwardRef<
   }, [onToolsReady, tools]);
   React.useEffect(() => () => unsubscribe.current?.(), []);
   React.useEffect(() => {
-    if (
-      !stableDefinition.sections.some((section) => section.id === activeSection)
-    ) {
-      setActiveSection(stableDefinition.sections[0].id);
+    if (!sections.some((section) => section.id === activeSection)) {
+      setActiveSection(sections[0].id);
     }
-  }, [stableDefinition, activeSection]);
+  }, [sections, activeSection]);
 
   const submit = async () => {
     if (
@@ -681,7 +677,7 @@ const EncounterVisitSession = React.forwardRef<
       )
         return;
       const next = createEncounterSnapshot(
-        latest.current.definition,
+        latest.current.form,
         renderer.current?.getRawResponse() ?? responses.current
       );
       setShowErrors(true);
@@ -719,7 +715,7 @@ const EncounterVisitSession = React.forwardRef<
     }
   };
 
-  const documentedSections = snapshot.definition.sections.filter((section) =>
+  const documentedSections = sections.filter((section) =>
     getEncounterSectionFieldIds(section).some((fieldId) =>
       snapshot.observations.some(
         (observation) => observation.fieldId === fieldId
@@ -749,7 +745,9 @@ const EncounterVisitSession = React.forwardRef<
           <p className="text-muted-foreground text-xs">
             {m('Anonymous patient')}
           </p>
-          <h2 className="text-lg font-semibold">{m(stableDefinition.title)}</h2>
+          <h2 className="text-lg font-semibold">
+            {m(stableForm.title ?? stableForm.id)}
+          </h2>
           {patientContext && (
             <p
               dir="auto"
@@ -763,7 +761,7 @@ const EncounterVisitSession = React.forwardRef<
           <bdi>
             {m('{count} of {total} sections documented', {
               count: documentedSections.length,
-              total: stableDefinition.sections.length,
+              total: sections.length,
             })}
           </bdi>
         </p>
@@ -864,7 +862,7 @@ const EncounterVisitSession = React.forwardRef<
                   value={activeSection}
                   onChange={(event) => focusSection(event.target.value)}
                 >
-                  {stableDefinition.sections.map((section) => (
+                  {sections.map((section) => (
                     <option key={section.id} value={section.id}>
                       {m(section.title)}
                     </option>
@@ -932,7 +930,7 @@ const EncounterVisitSession = React.forwardRef<
                 <EsheetRenderer
                   key={fieldsSettled ? 'settled' : 'priming'}
                   ref={renderer}
-                  formDataInput={rendererInput.definition}
+                  formDataInput={rendererInput.form}
                   initialResponses={rendererInput.responses}
                   onReady={handleReady}
                   strict
@@ -949,7 +947,7 @@ const EncounterVisitSession = React.forwardRef<
           {mode === 'export' && (
             <EncounterExportView
               source={snapshot.mdy}
-              fileName={`${stableDefinition.id}.md`}
+              fileName={`${stableForm.id}.md`}
             />
           )}
         </div>

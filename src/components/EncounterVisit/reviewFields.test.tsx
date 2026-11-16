@@ -20,10 +20,7 @@ vi.mock(
   '../../components/TextAreaRich/TextAreaRichKerebron',
   () => import('../../test/textAreaRichKerebronStub')
 );
-import {
-  createEncounterFormDefinition,
-  validateEncounterDefinition,
-} from './definition';
+import { encounterFormFromLegacy, validateEncounterDefinition } from './legacy';
 
 function props(answer: string, fieldType: string): FieldComponentProps {
   return {
@@ -162,14 +159,14 @@ describe('encounter review regressions', () => {
         { id: 'conditions', title: 'Conditions', kind: 'conditions' as const },
       ],
     };
-    const form = createEncounterFormDefinition({
+    const form = encounterFormFromLegacy({
       ...def,
       encounterDate: '2000-02-29',
     });
     expect(form.pages[0].fields?.[0]).toMatchObject({
       fields: [{ _sourceData: { encounterDate: '2000-02-29' } }],
     });
-    expect(JSON.stringify(createEncounterFormDefinition(def))).not.toContain(
+    expect(JSON.stringify(encounterFormFromLegacy(def))).not.toContain(
       'encounterDate'
     );
   });

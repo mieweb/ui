@@ -3,7 +3,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 vi.mock('./EncounterMdyEditor', () => {
   throw new Error('Optional Kerebron dependency is unavailable');
@@ -14,6 +17,8 @@ const definition: EncounterVisitDefinition = {
   title: 'Anonymous visit',
   sections: [{ id: 'hpi', title: 'HPI', kind: 'narrative' }],
 };
+
+const form = encounterFormFromLegacy(definition);
 
 describe('EncounterVisit optional rich editor failure', () => {
   beforeEach(() => {
@@ -31,7 +36,7 @@ describe('EncounterVisit optional rich editor failure', () => {
       render(
         <EncounterVisit
           ref={ref}
-          definition={definition}
+          form={form}
           initialResponses={original}
           defaultMode={defaultMode}
         />

@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
 import {
-  createEncounterFormDefinition,
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
   getEncounterFieldId,
   getEncounterSectionFieldIds,
   getEncounterSectionFieldId,
 } from './definition';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 import {
   createEncounterSnapshot,
   parseEncounterAssessment,
@@ -16,11 +19,7 @@ import {
   validateEncounterResponses,
   validateEncounterVitals,
 } from './model';
-import type {
-  EncounterAssessmentValue,
-  EncounterResponses,
-  EncounterVisitDefinition,
-} from './types';
+import type { EncounterAssessmentValue, EncounterResponses } from './types';
 
 const definition: EncounterVisitDefinition = {
   id: 'visit',
@@ -71,6 +70,8 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const form = encounterFormFromLegacy(definition);
+
 const assessment: EncounterAssessmentValue = {
   concerns: [
     {
@@ -103,7 +104,6 @@ function custom(sectionId: string, value: unknown): EncounterResponses {
 
 describe('encounter definition', () => {
   it('keeps configurable fields inside native eSheet sections', () => {
-    const form = createEncounterFormDefinition(definition);
     const sections = form.pages[0].fields;
     expect(sections).toHaveLength(definition.sections.length);
     expect(sections?.every((section) => section.fieldType === 'section')).toBe(
@@ -150,13 +150,13 @@ describe('encounter definition', () => {
 
   it('rejects duplicate and invalid configuration instead of losing answers', () => {
     expect(() =>
-      createEncounterFormDefinition({
+      encounterFormFromLegacy({
         ...definition,
         sections: [definition.sections[0], definition.sections[0]],
       })
     ).toThrow('duplicate section');
     expect(() =>
-      createEncounterFormDefinition({
+      encounterFormFromLegacy({
         id: 'visit',
         title: 'Visit',
         sections: [
@@ -173,7 +173,7 @@ describe('encounter definition', () => {
       })
     ).toThrow('duplicate observation');
     expect(() =>
-      createEncounterFormDefinition({
+      encounterFormFromLegacy({
         id: 'visit',
         title: 'Visit',
         sections: [
@@ -187,14 +187,14 @@ describe('encounter definition', () => {
       })
     ).toThrow('requires options');
     expect(() =>
-      createEncounterFormDefinition({
+      encounterFormFromLegacy({
         id: 'visit',
         title: 'Visit',
         sections: [{ id: 'exam', title: 'Exam', kind: 'observations' }],
       })
     ).toThrow('no fields');
     expect(() =>
-      createEncounterFormDefinition({ ...definition, sections: [] })
+      encounterFormFromLegacy({ ...definition, sections: [] })
     ).toThrow('at least one section');
   });
 });
@@ -213,7 +213,7 @@ describe('encounter observations and note', () => {
       },
       legacy: { answer: 'Kept from an earlier definition' },
     };
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     expect(snapshot.errors).toEqual([]);
     expect(snapshot.observations).toHaveLength(5);
     expect(
@@ -249,7 +249,7 @@ describe('encounter observations and note', () => {
         { id: 'repeat', systolic: 138, diastolic: 88, pulse: 76 },
       ],
     });
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     const pressures = snapshot.observations.filter(
       (observation) => observation.label === 'Blood pressure'
     );
@@ -279,7 +279,7 @@ describe('encounter observations and note', () => {
 
   it('retains a partial blood pressure and reports why it is incomplete', () => {
     const snapshot = createEncounterSnapshot(
-      definition,
+      form,
       custom('vitals', { readings: [{ id: 'partial', systolic: 145 }] })
     );
     expect(snapshot.errors).toContainEqual(
@@ -309,7 +309,7 @@ describe('encounter observations and note', () => {
       ],
     };
     const responses = custom('vitals', value);
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     expect(snapshot.errors).toContainEqual(
       expect.objectContaining({
         code: 'invalid-number',
@@ -342,7 +342,7 @@ describe('encounter observations and note', () => {
       inputDrafts: value.inputDrafts,
     });
     const corrected = createEncounterSnapshot(
-      definition,
+      form,
       custom('vitals', { readings: [{ id: 'r', pulse: 81 }] })
     );
     expect(corrected.errors.some((issue) => issue.sectionId === 'vitals')).toBe(
@@ -356,19 +356,19 @@ describe('encounter observations and note', () => {
   });
 
   it('distinguishes unrecorded allergies from explicit no known allergies', () => {
-    const blank = createEncounterSnapshot(definition, {});
+    const blank = createEncounterSnapshot(form, {});
     expect(
       blank.observations.some(
         (observation) => observation.sectionId === 'allergies'
       )
     ).toBe(false);
     const explicit = createEncounterSnapshot(
-      definition,
+      form,
       custom('allergies', { allergies: [], noKnownAllergies: true })
     );
     expect(explicit.note).toContain('No known allergies (explicitly recorded)');
     const contradictory = validateEncounterResponses(
-      definition,
+      form,
       custom('allergies', {
         allergies: [{ id: 'a', allergen: 'Penicillin' }],
         noKnownAllergies: true,
@@ -380,7 +380,7 @@ describe('encounter observations and note', () => {
   });
 
   it('exports existing medication, allergy and assessment records with their codes', () => {
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       ...custom('medications', {
         medications: [
           {
@@ -421,7 +421,7 @@ describe('encounter observations and note', () => {
 
   it('seeds only supplied anonymous facts and makes no clinical assumptions', () => {
     const snapshot = createEncounterSnapshot(
-      DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+      DEFAULT_ENCOUNTER_FORM,
       EXAMPLE_ENCOUNTER_VISIT_RESPONSES
     );
     expect(snapshot.errors).toEqual([]);
@@ -430,10 +430,7 @@ describe('encounter observations and note', () => {
       '45-year-old male with pre-diabetes, back pain and hypertension.'
     );
     expect(snapshot.note).not.toMatch(/normal|lisinopril|No known allergies/);
-    expect(
-      createEncounterFormDefinition(DEFAULT_ENCOUNTER_VISIT_DEFINITION).pages[0]
-        .fields
-    ).toHaveLength(11);
+    expect(DEFAULT_ENCOUNTER_FORM.pages[0].fields).toHaveLength(11);
   });
 });
 
@@ -454,14 +451,15 @@ describe('encounter validation', () => {
         { id: 'vitals', title: 'Vitals', kind: 'vitals', required: true },
       ],
     };
+    const requiredForm = encounterFormFromLegacy(required);
     expect(
-      validateEncounterResponses(required, {
+      validateEncounterResponses(requiredForm, {
         [getEncounterFieldId('exam')]: { answer: '   ' },
         ...custom('vitals', { readings: [] }),
       }).filter((issue) => issue.code === 'required')
     ).toHaveLength(2);
     expect(
-      validateEncounterResponses(required, {
+      validateEncounterResponses(requiredForm, {
         [getEncounterFieldId('exam')]: { answer: 'Narrative finding.' },
         ...custom('vitals', { readings: [{ id: 'r', pain: 0 }] }),
       })
@@ -472,7 +470,7 @@ describe('encounter validation', () => {
     'rejects numeric answer %s',
     (answer) => {
       expect(
-        validateEncounterResponses(definition, {
+        validateEncounterResponses(form, {
           [getEncounterFieldId('exam', 'pain')]: { answer },
         })
       ).toContainEqual(
@@ -485,7 +483,7 @@ describe('encounter validation', () => {
   );
 
   it('rejects unconfigured choices and wrong native response representations', () => {
-    const issues = validateEncounterResponses(definition, {
+    const issues = validateEncounterResponses(form, {
       [getEncounterFieldId('exam', 'gait')]: {
         selected: { id: 'Other', value: 'Other' },
       },
@@ -508,7 +506,7 @@ describe('encounter validation', () => {
       { id: 'wrong-id', value: 'Normal' },
       { id: 'Other', value: 'Other' },
     ]) {
-      const snapshot = createEncounterSnapshot(definition, {
+      const snapshot = createEncounterSnapshot(form, {
         [fieldId]: { selected },
       });
       expect(snapshot.errors).toContainEqual(
@@ -530,7 +528,7 @@ describe('encounter validation', () => {
     '{"readings":[null]}',
   ])('preserves malformed vitals answer %s and reports it', (answer) => {
     const fieldId = getEncounterFieldId('vitals', 'value');
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       [fieldId]: { answer },
     });
     expect(snapshot.errors.some((issue) => issue.fieldId === fieldId)).toBe(
@@ -623,7 +621,7 @@ describe('encounter validation', () => {
   it('rejects malformed list records and assessment links without crashing their decoders', () => {
     expect(
       validateEncounterResponses(
-        definition,
+        form,
         custom('medications', { medications: [null] })
       )
     ).toContainEqual(
@@ -634,7 +632,7 @@ describe('encounter validation', () => {
     );
     expect(
       validateEncounterResponses(
-        definition,
+        form,
         custom('allergies', {
           allergies: [{ id: 'a', allergen: 'Food', severity: 'extreme' }],
         })

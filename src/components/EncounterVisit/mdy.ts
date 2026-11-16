@@ -8,15 +8,19 @@ import {
   type ParsedMdyDocument,
 } from '../RichTextEsheet/documentMdy';
 import {
-  createEncounterFormDefinition,
   getEncounterFieldId,
+  getEncounterFormSections,
   getEncounterSectionFieldIds,
-  validateEncounterDefinition,
 } from './definition';
+import {
+  encounterFormFromLegacy,
+  validateEncounterDefinition,
+  type EncounterVisitDefinition,
+} from './legacy';
 import type {
   EncounterObservation,
   EncounterResponses,
-  EncounterVisitDefinition,
+  EncounterSectionView,
   EncounterVisitSnapshot,
 } from './types';
 
@@ -25,14 +29,18 @@ export const ENCOUNTER_DOCUMENT_FIELD_ID = '__encounter_document__';
 
 type MdySnapshot = Pick<
   EncounterVisitSnapshot,
-  'definition' | 'responses' | 'observations'
+  'form' | 'responses' | 'observations'
 >;
 
-/** The engine works on the native form; hosts derive it at the boundary. */
-type EncounterMdySnapshot = MdySnapshot & { form: FormDefinition };
+/** Validation already walked the form; reuse its views per snapshot. */
+const viewCache = new WeakMap<FormDefinition, EncounterSectionView[]>();
 
-function withForm(input: MdySnapshot): EncounterMdySnapshot {
-  return { ...input, form: createEncounterFormDefinition(input.definition) };
+function sectionsOf(form: FormDefinition): EncounterSectionView[] {
+  const cached = viewCache.get(form);
+  if (cached) return cached;
+  const views = getEncounterFormSections(form);
+  viewCache.set(form, views);
+  return views;
 }
 
 export type EncounterMdyField = MdyDocumentField;
@@ -88,10 +96,10 @@ function groupedDisplay(
 export function getEncounterMdyFields(
   snapshot: MdySnapshot
 ): EncounterMdyField[] {
-  return engine.fields(withForm(snapshot));
+  return engine.fields(snapshot);
 }
 
-/** Validate and extract the host definition the front matter still carries. */
+/** A legacy encounterDefinition is a one-time import, never written back (mieweb/ui#772). */
 function readMdyDefinition(
   parsed: ParsedMdyDocument
 ): EncounterVisitDefinition | undefined {
@@ -110,7 +118,7 @@ function readMdyDefinition(
   }
 }
 
-const engine = createMdyDocumentEngine<EncounterMdySnapshot>({
+const engine = createMdyDocumentEngine<MdySnapshot>({
   documentFieldId: ENCOUNTER_DOCUMENT_FIELD_ID,
   linkPrefix: 'visit',
   engineName: 'encounter-mdy-document',
@@ -129,9 +137,11 @@ const engine = createMdyDocumentEngine<EncounterMdySnapshot>({
     'encounterFindings',
     'encounterRequireCoding',
     'encounterDate',
+    'encounterKind',
+    'encounterSectionRequired',
   ],
   projectField: ({ field }, snapshot) => {
-    const section = snapshot.definition.sections.find((candidate) =>
+    const section = sectionsOf(snapshot.form).find((candidate) =>
       getEncounterSectionFieldIds(candidate).includes(field.id)
     );
     if (!section) return undefined;
@@ -169,21 +179,32 @@ const engine = createMdyDocumentEngine<EncounterMdySnapshot>({
       narrative: section.kind === 'narrative',
     };
   },
-  extraFrontMatter: (snapshot) => ({
-    encounterDefinition: snapshot.definition,
-  }),
+  // Saves stop writing the legacy schema; undefined deletes an imported key.
+  extraFrontMatter: () => ({ encounterDefinition: undefined }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached visit_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
-    const definition = readMdyDefinition(parsed);
-    if (!definition || !parsed.response) return null;
+    // Prefer the legacy import when present: #762 documents stamped complete
+    // section metadata there that their saved forms predate.
+    const legacy = readMdyDefinition(parsed);
+    const form = legacy ? encounterFormFromLegacy(legacy) : parsed.form;
+    if (!form || !parsed.response) return null;
     const { createEncounterSnapshot } = await import('./model');
-    const snapshot = createEncounterSnapshot(definition, {
-      ...parsed.response,
-      [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(parsed.source),
-    });
-    return { ...withForm(snapshot), mdy: snapshot.mdy };
+    try {
+      return createEncounterSnapshot(form, {
+        ...parsed.response,
+        [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(parsed.source),
+      });
+    } catch (error) {
+      parsed.diagnostics.push({
+        severity: 'error',
+        code: 'definition',
+        message:
+          error instanceof Error ? error.message : 'Invalid encounter form.',
+      });
+      return null;
+    }
   },
 });
 
@@ -230,7 +251,7 @@ export function createEncounterMdy(
   body?: string,
   source?: string
 ): string {
-  return engine.create(withForm(snapshot), body, source);
+  return engine.create(snapshot, body, source);
 }
 
 /**

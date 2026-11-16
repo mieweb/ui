@@ -16,7 +16,10 @@ import {
   parseEncounterMdy,
 } from './mdy';
 import { createEncounterSnapshot } from './model';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -86,6 +89,8 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const form = encounterFormFromLegacy(definition);
+
 const modeSwitch = () => screen.getByRole('combobox', { name: 'Visit mode' });
 const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
   fireEvent.click(modeSwitch());
@@ -93,21 +98,30 @@ const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
 };
 
 describe('EncounterVisit mode synchronization', () => {
-  it('requires a compatible explicit definition before opening a native eSheet MDY', () => {
-    const original = parseEncounterMdy(
-      createEncounterSnapshot(definition, {}).mdy
-    );
+  it('opens a native eSheet MDY from its own form and validates a supplied form', () => {
+    const original = parseEncounterMdy(createEncounterSnapshot(form, {}).mdy);
+    // Saves no longer write the legacy encounterDefinition (mieweb/ui#772).
+    expect(original.frontMatter?.encounterDefinition).toBeUndefined();
     const yaml = new Document(original.frontMatter);
-    yaml.delete('encounterDefinition');
     const source = `---\n${yaml.toString()}---\n${original.body}`;
-    expect(() => render(<EncounterVisit initialMdy={source} />)).toThrow(
-      'Supply an encounter definition'
-    );
+    expect(() => render(<EncounterVisit initialMdy={source} />)).not.toThrow();
+    const formless = new Document(original.frontMatter);
+    formless.delete('form');
+    expect(() =>
+      render(
+        <EncounterVisit
+          initialMdy={`---\n${formless.toString()}---\n${original.body}`}
+        />
+      )
+    ).toThrow('Unable to load encounter MDY');
     expect(() =>
       render(
         <EncounterVisit
           initialMdy={source}
-          definition={{ ...definition, sections: [definition.sections[0]] }}
+          form={encounterFormFromLegacy({
+            ...definition,
+            sections: [definition.sections[0]],
+          })}
         />
       )
     ).toThrow('The MDY fields do not match');
@@ -116,30 +130,27 @@ describe('EncounterVisit mode synchronization', () => {
       render(
         <EncounterVisit
           initialMdy={`---\n${yaml.toString()}---\n${original.body}`}
-          definition={definition}
+          form={form}
         />
       )
     ).toThrow('The MDY form id does not match');
   });
 
   it('rejects imported field schemas and choice options that reuse the same native IDs', () => {
-    const original = parseEncounterMdy(
-      createEncounterSnapshot(definition, {}).mdy
-    );
+    const original = parseEncounterMdy(createEncounterSnapshot(form, {}).mdy);
     const yaml = new Document(original.frontMatter);
-    yaml.delete('encounterDefinition');
     const source = `---\n${yaml.toString()}---\n${original.body}`;
     expect(() =>
       render(
         <EncounterVisit
           initialMdy={source}
-          definition={{
+          form={encounterFormFromLegacy({
             ...definition,
             sections: [
               definition.sections[0],
               { ...definition.sections[1], kind: 'medications' },
             ],
-          }}
+          })}
         />
       )
     ).toThrow('The MDY fields do not match');
@@ -163,16 +174,15 @@ describe('EncounterVisit mode synchronization', () => {
       ],
     };
     const choiceMdy = parseEncounterMdy(
-      createEncounterSnapshot(choices, {}).mdy
+      createEncounterSnapshot(encounterFormFromLegacy(choices), {}).mdy
     );
     const choiceYaml = new Document(choiceMdy.frontMatter);
-    choiceYaml.delete('encounterDefinition');
     const imported = `---\n${choiceYaml.toString()}---\n${choiceMdy.body}`;
     expect(() =>
       render(
         <EncounterVisit
           initialMdy={imported}
-          definition={{
+          form={encounterFormFromLegacy({
             ...choices,
             sections: [
               {
@@ -185,19 +195,24 @@ describe('EncounterVisit mode synchronization', () => {
                 ],
               },
             ],
-          }}
+          })}
         />
       )
     ).toThrow('The MDY fields do not match');
     expect(() =>
-      render(<EncounterVisit initialMdy={imported} definition={choices} />)
+      render(
+        <EncounterVisit
+          initialMdy={imported}
+          form={encounterFormFromLegacy(choices)}
+        />
+      )
     ).not.toThrow();
   });
 
   it('flushes rich prose and focuses the requested section after the eSheet is visible', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const { container } = render(
-      <EncounterVisit ref={ref} definition={definition} defaultMode="rich" />
+      <EncounterVisit ref={ref} form={form} defaultMode="rich" />
     );
     const editor = await screen.findByRole('textbox', {
       name: 'Encounter narrative',
@@ -227,9 +242,7 @@ describe('EncounterVisit mode synchronization', () => {
   it('flushes the last rich edit before switching and saving, with coded responses retained', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onSubmit = vi.fn();
-    render(
-      <EncounterVisit ref={ref} definition={definition} onSubmit={onSubmit} />
-    );
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Back pain' } });
     act(() => {
@@ -275,7 +288,7 @@ describe('EncounterVisit mode synchronization', () => {
 
   it('shows the raw portable document with a download button in Export', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(<EncounterVisit ref={ref} definition={definition} />);
+    render(<EncounterVisit ref={ref} form={form} />);
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Back pain' } });
     selectMode('Export');
@@ -295,7 +308,7 @@ describe('EncounterVisit mode synchronization', () => {
 
   it('opens related inputs in the same renderer and refreshes authored linked data after MCP changes', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(<EncounterVisit ref={ref} definition={definition} />);
+    render(<EncounterVisit ref={ref} form={form} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     act(() => {
       ref.current!.getTools().setNarrative('hpi', 'Back pain');
@@ -344,7 +357,7 @@ describe('EncounterVisit mode synchronization', () => {
     render(
       <EncounterVisit
         ref={ref}
-        definition={{
+        form={encounterFormFromLegacy({
           id: 'plan-test',
           title: 'Anonymous visit',
           sections: [
@@ -356,7 +369,7 @@ describe('EncounterVisit mode synchronization', () => {
               requireCoding: false,
             },
           ],
-        }}
+        })}
       />
     );
     await screen.findByRole('textbox', { name: 'HPI' });
@@ -406,7 +419,7 @@ describe('EncounterVisit mode synchronization', () => {
   });
 
   it('restores a portable document and allows read-only mode switching without changing answers', async () => {
-    const original = createEncounterSnapshot(definition, {
+    const original = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Back pain' },
       [ENCOUNTER_DOCUMENT_FIELD_ID]: {
         answer: '# Final visit\n\n### Follow-up\n\nFree report text.',

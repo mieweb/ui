@@ -2,13 +2,18 @@ import * as React from 'react';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { EncounterVisit } from './EncounterVisit';
-import type { EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
 
 const definition: EncounterVisitDefinition = {
   id: 'section-override-visit',
   title: 'Section override',
   sections: [{ id: 'hpi', title: 'HPI', kind: 'narrative' }],
 };
+
+const form = encounterFormFromLegacy(definition);
 
 /**
  * Must stay in its own test file: eSheet's one-time stock component
@@ -21,7 +26,7 @@ const definition: EncounterVisitDefinition = {
  */
 describe('EncounterVisit section override vs eSheet default registration', () => {
   it('renders encounter section chrome on the very first renderer mount', () => {
-    const { container } = render(<EncounterVisit definition={definition} />);
+    const { container } = render(<EncounterVisit form={form} />);
     // The encounter override renders a plain labelled div + h3; the stock
     // SectionField renders a <section> element instead.
     expect(

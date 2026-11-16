@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isMap, parseDocument } from 'yaml';
-import {
-  getEncounterFieldId,
-  createEncounterFormDefinition,
-} from './definition';
+import { getEncounterFieldId } from './definition';
 import {
   createEncounterMdy,
   encounterDocumentResponse,
@@ -16,7 +13,11 @@ import {
   updateEncounterDocumentBody,
 } from './mdy';
 import { createEncounterSnapshot } from './model';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
+import type { EncounterResponses } from './types';
 
 const definition: EncounterVisitDefinition = {
   id: 'visit',
@@ -48,13 +49,15 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const form = encounterFormFromLegacy(definition);
+
 const hpiId = getEncounterFieldId('hpi');
 const pulseId = getEncounterFieldId('exam', 'pulse');
 const choiceId = getEncounterFieldId('exam', 'tobacco');
 const vitalsId = getEncounterFieldId('vitals', 'value');
 
 function snapshot(responses: EncounterResponses = {}) {
-  return createEncounterSnapshot(definition, responses);
+  return createEncounterSnapshot(form, responses);
 }
 
 describe('Encounter MDY data and linked narrative', () => {
@@ -66,9 +69,9 @@ describe('Encounter MDY data and linked narrative', () => {
     };
     const source = createEncounterMdy(snapshot(responses));
     const parsed = parseEncounterMdy(source);
-    expect(parsed.form).toEqual(createEncounterFormDefinition(definition));
+    expect(parsed.form).toEqual(form);
     expect(parsed.response).toEqual(responses);
-    expect(parsed.definition).toEqual(definition);
+    expect(parsed.definition).toBeUndefined();
     expect(parsed.frontMatter?.mdy).toMatchObject({
       kind: 'document',
       schema: 'esheet',
@@ -93,7 +96,7 @@ describe('Encounter MDY data and linked narrative', () => {
       sections: [...definition.sections].reverse(),
     };
     const reorderedFields = getEncounterMdyFields(
-      createEncounterSnapshot(reordered, responses)
+      createEncounterSnapshot(encounterFormFromLegacy(reordered), responses)
     );
     expect(reorderedFields.find(({ fieldId }) => fieldId === hpiId)?.id).toBe(
       fields.find(({ fieldId }) => fieldId === hpiId)?.id
@@ -166,6 +169,7 @@ describe('Encounter MDY data and linked narrative', () => {
         { id: 'assessment', title: 'Assessment', kind: 'assessment' },
       ],
     };
+    const structuredForm = encounterFormFromLegacy(structuredDefinition);
     const medicationsId = getEncounterFieldId('medications', 'value');
     const allergiesId = getEncounterFieldId('allergies', 'value');
     const assessmentId = getEncounterFieldId('assessment', 'value');
@@ -179,9 +183,9 @@ describe('Encounter MDY data and linked narrative', () => {
         answer: JSON.stringify({ concerns: [], items: [], orders: [] }),
       },
     };
-    const blank = createEncounterSnapshot(structuredDefinition, blankResponses);
+    const blank = createEncounterSnapshot(structuredForm, blankResponses);
     expect(getEncounterMdyFields(blank).every(({ empty }) => empty)).toBe(true);
-    const metadata = createEncounterSnapshot(structuredDefinition, {
+    const metadata = createEncounterSnapshot(structuredForm, {
       ...blankResponses,
       [vitalsId]: {
         answer: JSON.stringify({
@@ -200,7 +204,7 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(getEncounterMdyFields(metadata).every(({ empty }) => empty)).toBe(
       true
     );
-    const entered = createEncounterSnapshot(structuredDefinition, {
+    const entered = createEncounterSnapshot(structuredForm, {
       ...blankResponses,
       [vitalsId]: {
         answer: JSON.stringify({
@@ -279,7 +283,7 @@ describe('Encounter MDY data and linked narrative', () => {
         ({ fieldId }) => fieldId === hpiId
       )!;
       const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-      document.delete('encounterDefinition');
+      document.delete('form');
       document.setIn(['response', hpiId], { answer: JSON.stringify(value) });
       document.setIn([field.id, 'display'], 'Cached placeholder');
       const rendered = await renderEncounterMdy(
@@ -305,7 +309,7 @@ describe('Encounter MDY data and linked narrative', () => {
       const original = snapshot();
       const parsed = parseEncounterMdy(original.mdy);
       const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-      document.delete('encounterDefinition');
+      document.delete('form');
       document.setIn(['response', choiceId], { selected });
       const rendered = await renderEncounterMdy(
         `---\n${document.toString()}---\n${parsed.body}`
@@ -530,7 +534,6 @@ describe('Encounter MDY data and linked narrative', () => {
     const source = createEncounterMdy(snapshot());
     const parsed = parseEncounterMdy(source);
     const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-    document.delete('encounterDefinition');
     const portable = parseEncounterMdy(
       `---\n${document.toString()}---\n${parsed.body}`
     );
@@ -538,6 +541,34 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(portable.response).toEqual({});
     expect(portable.definition).toBeUndefined();
     expect(portable.diagnostics).toEqual([]);
+  });
+
+  it('imports the legacy encounterDefinition once and saves only the native form', () => {
+    const source = createEncounterMdy(
+      snapshot({ [hpiId]: { answer: 'Back pain for two days.' } })
+    );
+    const parsed = parseEncounterMdy(source);
+    const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+    document.set('encounterDefinition', definition);
+    const legacySource = `---\n${document.toString()}---\n${parsed.body}`;
+    const legacy = parseEncounterMdy(legacySource);
+    expect(legacy.definition).toEqual(definition);
+    expect(legacy.diagnostics).toEqual([]);
+    const migrated = createEncounterMdy(
+      createEncounterSnapshot(
+        encounterFormFromLegacy(legacy.definition!),
+        legacy.response ?? {}
+      ),
+      undefined,
+      legacySource
+    );
+    const reparsed = parseEncounterMdy(migrated);
+    expect(reparsed.definition).toBeUndefined();
+    expect(migrated).not.toContain('encounterDefinition:');
+    expect(reparsed.form).toEqual(form);
+    expect(reparsed.response).toEqual({
+      [hpiId]: { answer: 'Back pain for two days.' },
+    });
   });
 
   it('renders real Templit markdown without evaluating authored template-looking text', async () => {
@@ -642,7 +673,10 @@ describe('Encounter MDY data and linked narrative', () => {
       sections: definition.sections.slice(0, 3),
     };
     const updated = createEncounterMdy(
-      createEncounterSnapshot(reduced, original.responses),
+      createEncounterSnapshot(
+        encounterFormFromLegacy(reduced),
+        original.responses
+      ),
       undefined,
       imported
     );
@@ -675,7 +709,10 @@ describe('Encounter MDY data and linked narrative', () => {
       [planId]: { answer: 'Latest retained answer' },
       [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(original.mdy),
     };
-    const updated = createEncounterSnapshot(reduced, responses);
+    const updated = createEncounterSnapshot(
+      encounterFormFromLegacy(reduced),
+      responses
+    );
     const parsed = parseEncounterMdy(updated.mdy);
     expect(parsed.frontMatter).not.toHaveProperty(retired.id);
     expect(parsed.response?.[planId]).toEqual({
@@ -727,13 +764,14 @@ describe('Encounter MDY data and linked narrative', () => {
     const original = snapshot({ [pulseId]: { answer: '72' } });
     const parsed = parseEncounterMdy(original.mdy);
     const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-    document.delete('encounterDefinition');
+    document.delete('form');
     document.setIn(['response', pulseId, 'answer'], '80');
     const rendered = await renderEncounterMdy(
       `---\n${document.toString()}---\n${parsed.body}`
     );
-    expect(rendered.raw).toContain('[80 /min]');
-    expect(rendered.raw).not.toContain('[72 /min]');
+    // Without any form the projection is generic: no unit is known.
+    expect(rendered.raw).toContain('[80](mdy:');
+    expect(rendered.raw).not.toContain('[72');
     expect(
       rendered.diagnostics.some(
         ({ code, fieldId }) => code === 'response' && fieldId === pulseId

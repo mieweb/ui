@@ -11,7 +11,11 @@ import {
   executeEncounterVisitToolCall,
   type EncounterVisitToolResult,
 } from './mcp';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
+import type { EncounterResponses } from './types';
 
 const definition: EncounterVisitDefinition = {
   id: 'anonymous-visit',
@@ -61,16 +65,18 @@ const definition: EncounterVisitDefinition = {
   ],
 };
 
+const form = encounterFormFromLegacy(definition);
+
 function fixture(initial: EncounterResponses = {}) {
   let responses = initial;
   let readOnly = false;
-  let currentDefinition = definition;
+  let currentForm = form;
   const navigate = vi.fn();
   const setResponses = vi.fn((next: EncounterResponses) => {
     responses = next;
   });
   const tools = createEncounterVisitTools({
-    getDefinition: () => currentDefinition,
+    getForm: () => currentForm,
     getResponses: () => responses,
     setResponses,
     isReadOnly: () => readOnly,
@@ -85,7 +91,7 @@ function fixture(initial: EncounterResponses = {}) {
       readOnly = value;
     },
     setDefinition: (value: EncounterVisitDefinition) => {
-      currentDefinition = value;
+      currentForm = encounterFormFromLegacy(value);
     },
   };
 }
@@ -125,7 +131,7 @@ describe('EncounterVisit in-process tools', () => {
     ctx.tools.setNarrative('hpi', 'Supplied history');
     const visit = ctx.tools.getVisit();
     if (!visit.success) throw new Error('Expected visit');
-    expect(visit.data.definition.title).toBe('Updated visit');
+    expect(visit.data.form.title).toBe('Updated visit');
     visit.data.responses[getEncounterFieldId('hpi')].answer =
       'Mutated snapshot';
     expect(ctx.responses()[getEncounterFieldId('hpi')].answer).toBe(
@@ -590,7 +596,7 @@ describe('EncounterVisit in-process tools', () => {
 
   it('returns a structured unavailable error when navigation is not provided', () => {
     const tools = createEncounterVisitTools({
-      getDefinition: () => definition,
+      getForm: () => form,
       getResponses: () => ({}),
       setResponses: vi.fn(),
     });
@@ -692,7 +698,7 @@ describe('EncounterVisit MCP tools/call adapter', () => {
 
   it('returns an MCP error when a host callback fails', () => {
     const tools = createEncounterVisitTools({
-      getDefinition: () => definition,
+      getForm: () => form,
       getResponses: () => ({}),
       setResponses: () => {
         throw new Error('Host rejected update');

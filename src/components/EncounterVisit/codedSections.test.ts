@@ -7,7 +7,11 @@ import {
 } from './mcp';
 import { parseEncounterMdy, renderEncounterMdy } from './mdy';
 import { getEncounterNarrativeFindings } from './narrativeFindings';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import {
+  encounterFormFromLegacy,
+  type EncounterVisitDefinition,
+} from './legacy';
+import type { EncounterResponses } from './types';
 
 const definition: EncounterVisitDefinition = {
   id: 'coded-visit',
@@ -73,6 +77,7 @@ const definition: EncounterVisitDefinition = {
     },
   ],
 };
+const form = encounterFormFromLegacy(definition);
 const condition = {
   concernId: 'condition-1',
   clinicalStatus: 'active',
@@ -123,7 +128,7 @@ function fixture(initial: EncounterResponses = {}) {
   let responses = initial;
   let readOnly = false;
   const tools = createEncounterVisitTools({
-    getDefinition: () => definition,
+    getForm: () => form,
     getResponses: () => responses,
     setResponses: (next) => {
       responses = next;
@@ -142,7 +147,7 @@ function fixture(initial: EncounterResponses = {}) {
 describe('coded clinical sections and explicit narrative findings', () => {
   it('roundtrips native clinical codes, external condition references and supplemental plan prose through MDY', async () => {
     const original = recorded();
-    const snapshot = createEncounterSnapshot(definition, original);
+    const snapshot = createEncounterSnapshot(form, original);
     expect(snapshot.errors).toEqual([]);
     for (const sectionId of [
       'conditions',
@@ -224,7 +229,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
         ...recorded(),
         [id(sectionId as string)]: response(value),
       };
-      const snapshot = createEncounterSnapshot(definition, initial);
+      const snapshot = createEncounterSnapshot(form, initial);
       expect(
         snapshot.errors.some(
           (issue) =>
@@ -252,9 +257,9 @@ describe('coded clinical sections and explicit narrative findings', () => {
   );
 
   it('codes only an explicitly recorded no-known-allergies flag', () => {
-    const absent = createEncounterSnapshot(definition, {});
+    const absent = createEncounterSnapshot(form, {});
     expect(absent.observations).toEqual([]);
-    const explicit = createEncounterSnapshot(definition, {
+    const explicit = createEncounterSnapshot(form, {
       [id('allergies')]: response({ allergies: [], noKnownAllergies: true }),
     });
     expect(explicit.errors).toEqual([]);
@@ -271,7 +276,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       [id('plan')]: response({ orders: [{ ...order, concernId: 'missing' }] }),
     };
     expect(
-      validateEncounterResponses(definition, invalid).some(
+      validateEncounterResponses(form, invalid).some(
         (issue) => issue.path === 'orders.0.concernId'
       )
     ).toBe(true);
@@ -305,7 +310,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
         },
       ],
     });
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     expect(snapshot.errors).toEqual([]);
     expect(
       snapshot.observations.find((item) => item.sectionId === 'conditions')
@@ -337,7 +342,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       }),
     };
     const f = fixture(responses);
-    expect(createEncounterSnapshot(definition, responses).errors).toEqual([]);
+    expect(createEncounterSnapshot(form, responses).errors).toEqual([]);
     expect(f.tools.updateSection('conditions', { concerns: [] }).success).toBe(
       false
     );
@@ -346,7 +351,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
 
   it('keeps clinical record IDs in native data while omitting them from readable reports', async () => {
     const responses = recorded();
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     const rendered = await renderEncounterMdy(snapshot.mdy);
     for (const internalId of [
       condition.concernId,
@@ -385,7 +390,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       [id('conditions')]: response({ concerns }),
     };
     const f = fixture(responses);
-    expect(createEncounterSnapshot(definition, responses).errors).toEqual([]);
+    expect(createEncounterSnapshot(form, responses).errors).toEqual([]);
     const replacement = concerns.map((concern) => ({
       ...concern,
       assertions: concern.assertions.map((assertion) =>
@@ -471,9 +476,8 @@ describe('coded clinical sections and explicit narrative findings', () => {
       )
     ).toEqual([]);
     expect(
-      parseEncounterMdy(
-        createEncounterSnapshot(definition, f.getResponses()).mdy
-      ).response
+      parseEncounterMdy(createEncounterSnapshot(form, f.getResponses()).mdy)
+        .response
     ).toEqual(f.getResponses());
   });
 
@@ -561,11 +565,12 @@ describe('default and explicit clinical coding policy', () => {
           sections: [{ id: kind, title: kind, kind, requireCoding }],
         };
         const responses = { [id(kind)]: response(value) };
-        expect(validateEncounterResponses(custom, responses).length > 0).toBe(
-          requireCoding !== false
-        );
+        const customForm = encounterFormFromLegacy(custom);
+        expect(
+          validateEncounterResponses(customForm, responses).length > 0
+        ).toBe(requireCoding !== false);
         const tools = createEncounterVisitTools({
-          getDefinition: () => custom,
+          getForm: () => customForm,
           getResponses: () => ({}),
           setResponses: () => {},
         });

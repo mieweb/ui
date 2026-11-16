@@ -1,14 +1,14 @@
 import { currentAssertion, type ConditionConcern } from '../ProblemList';
 import type { AssessmentItem } from '../Assessment';
-import type { FieldResponse } from '@esheet/core';
+import type { FieldResponse, FormDefinition } from '@esheet/core';
 import { DateTime } from 'luxon';
 import { isEncounterDate } from './date';
 import type { Medication } from '../MedicationList';
 import type { Allergy } from '../AllergyList';
 import {
   getEncounterFieldId,
+  getEncounterFormSections,
   getEncounterSectionFieldIds,
-  validateEncounterDefinition,
 } from './definition';
 import { createEncounterMdy } from './mdy';
 import type {
@@ -18,12 +18,11 @@ import type {
   EncounterCode,
   EncounterObservation,
   EncounterResponses,
-  EncounterSectionDefinition,
+  EncounterSectionView,
   EncounterValidationIssue,
   EncounterVitalInputDraft,
   EncounterVitalReading,
   EncounterVitalsValue,
-  EncounterVisitDefinition,
   EncounterVisitSnapshot,
 } from './types';
 
@@ -824,7 +823,7 @@ export function parseEncounterPlan(answer?: string): EncounterPlanValue {
 }
 
 function validateCoding(
-  section: EncounterSectionDefinition,
+  section: EncounterSectionView,
   parsed: Record<string, unknown>,
   fieldId: string,
   externalConcerns: readonly ConditionConcern[] = []
@@ -897,7 +896,7 @@ function validateCoding(
 }
 
 function validateCustom(
-  section: EncounterSectionDefinition,
+  section: EncounterSectionView,
   answer: string,
   fieldId: string,
   externalConcerns: readonly ConditionConcern[] = []
@@ -949,7 +948,7 @@ function responseHasContent(response: FieldResponse | undefined): boolean {
 }
 
 function customHasContent(
-  section: EncounterSectionDefinition,
+  section: EncounterSectionView,
   answer?: string
 ): boolean {
   const parsed = parseJson(answer);
@@ -974,11 +973,11 @@ function customHasContent(
 }
 
 export function getEncounterConcerns(
-  definition: EncounterVisitDefinition,
+  form: FormDefinition,
   responses: EncounterResponses
 ): ConditionConcern[] {
   const concerns = new Map<string, ConditionConcern>();
-  const sections = [...definition.sections].sort(
+  const sections = [...getEncounterFormSections(form)].sort(
     (a, b) => Number(b.kind === 'conditions') - Number(a.kind === 'conditions')
   );
   for (const section of sections) {
@@ -1001,11 +1000,11 @@ export function getEncounterConcerns(
 
 /** Report required omissions and malformed values without changing recorded data. */
 export function validateEncounterResponses(
-  definition: EncounterVisitDefinition,
+  form: FormDefinition,
   responses: EncounterResponses
 ): EncounterValidationIssue[] {
-  validateEncounterDefinition(definition);
-  const externalConcerns = getEncounterConcerns(definition, responses);
+  const sections = getEncounterFormSections(form);
+  const externalConcerns = getEncounterConcerns(form, responses);
   const issues: EncounterValidationIssue[] = [];
   const add = (
     sectionId: string,
@@ -1013,7 +1012,7 @@ export function validateEncounterResponses(
     code: EncounterValidationIssue['code'],
     message: string
   ) => issues.push({ sectionId, fieldId, code, message });
-  for (const section of definition.sections) {
+  for (const section of sections) {
     const ids = getEncounterSectionFieldIds(section);
     for (const fieldId of ids) {
       const response = responses[fieldId];
@@ -1137,7 +1136,7 @@ export function validateEncounterResponses(
   const concernIds = new Set(
     externalConcerns.map((concern) => concern.concernId)
   );
-  for (const section of definition.sections) {
+  for (const section of sections) {
     if (section.kind !== 'plan') continue;
     const fieldId = getEncounterFieldId(section.id, 'value');
     const parsed = parseJson(responses[fieldId]?.answer);
@@ -1162,7 +1161,7 @@ export function validateEncounterResponses(
 }
 
 function exportVitals(
-  section: EncounterSectionDefinition,
+  section: EncounterSectionView,
   answer?: string
 ): EncounterObservation[] {
   const fieldId = getEncounterFieldId(section.id, 'value');
@@ -1227,7 +1226,7 @@ function exportVitals(
 }
 
 function exportCustom(
-  section: EncounterSectionDefinition,
+  section: EncounterSectionView,
   answer?: string,
   externalConcerns: readonly ConditionConcern[] = []
 ): EncounterObservation[] {
@@ -1395,13 +1394,14 @@ function exportCustom(
 
 /** Export documented narrative and individual observations while retaining the full eSheet response. */
 export function createEncounterSnapshot(
-  definition: EncounterVisitDefinition,
+  form: FormDefinition,
   responses: EncounterResponses
 ): EncounterVisitSnapshot {
-  const errors = validateEncounterResponses(definition, responses);
-  const externalConcerns = getEncounterConcerns(definition, responses);
+  const sections = getEncounterFormSections(form);
+  const errors = validateEncounterResponses(form, responses);
+  const externalConcerns = getEncounterConcerns(form, responses);
   const observations: EncounterObservation[] = [];
-  for (const section of definition.sections) {
+  for (const section of sections) {
     if (section.kind === 'narrative' || section.narrative) {
       const fieldId = getEncounterFieldId(section.id);
       const answer = responses[fieldId]?.answer;
@@ -1456,8 +1456,8 @@ export function createEncounterSnapshot(
     }
   }
   const note = [
-    definition.title,
-    ...definition.sections.flatMap((section) => {
+    form.title ?? form.id,
+    ...sections.flatMap((section) => {
       const values = observations.filter(
         (observation) => observation.sectionId === section.id
       );
@@ -1489,7 +1489,7 @@ export function createEncounterSnapshot(
   ].join('\n\n');
   // Keep host snapshot transformations detached from the live eSheet store.
   const snapshot = {
-    definition,
+    form,
     responses,
     observations,
     note,
