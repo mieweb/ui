@@ -2,6 +2,7 @@
 name: MIE UI A11y Agent
 description: Accessibility auditor for apps built with @mieweb/ui — ARIA naming, keyboard navigation, focus management, color contrast, and live-region announcements. Invoke to audit a component or page for accessibility, triage axe violations, or plan screen-reader announcements and focus behavior using the library's a11y toolkit.
 tools: ['search', 'codebase', 'fetch']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent
