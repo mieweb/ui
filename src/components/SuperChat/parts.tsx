@@ -20,7 +20,12 @@ import { Avatar } from '../Avatar';
 import { Badge } from '../Badge';
 import { Dropdown, DropdownItem, DropdownSubmenu } from '../Dropdown';
 import { MCPToolCallDisplay } from '../AI/MCPToolCall';
-import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
+import {
+  MCPToolCallGroup,
+  type MCPToolCallGroupOptions,
+} from '../AI/MCPToolCallGroup';
+import { ChatBubble, AITypingIndicator, ThinkingBlock } from '../AI/AIMessage';
+import type { MCPToolCall } from '../AI/types';
 import { SparklesIcon } from '../AI/icons';
 import { MessageMedia } from './MessageMedia';
 import type {
@@ -676,6 +681,129 @@ function MessageOverflowMenu({
   );
 }
 
+// ============================================================================
+// Message content blocks (tool calls / thinking / text / code)
+// ============================================================================
+
+/**
+ * The bubble as it should be copied: reasoning (`thinking`) is not part of
+ * the answer, so a detached clone without it is read instead.
+ */
+function copyableBubble(el: HTMLElement | null): HTMLElement | null {
+  if (!el) return null;
+  if (!el.querySelector('[data-slot="ai-message-thinking"]')) return el;
+  const clone = el.cloneNode(true) as HTMLElement;
+  clone
+    .querySelectorAll('[data-slot="ai-message-thinking"]')
+    .forEach((node) => node.remove());
+  return clone;
+}
+
+const proseClass =
+  'prose prose-sm dark:prose-invert max-w-none **:wrap-break-word';
+
+interface MessageContentBlocksProps {
+  message: SuperChatMessage;
+  streaming: boolean;
+  role: 'user' | 'assistant';
+  renderText: AIRenderTextContent;
+  toolCallGroup?: MCPToolCallGroupOptions;
+}
+
+/**
+ * Renders a message's rich `content` blocks in order, reusing the AI module's
+ * pieces. With `toolCallGroup`, each run of consecutive `tool_use` blocks
+ * becomes one {@link MCPToolCallGroup} keyed by its first call (so it keeps
+ * its state as later calls join), as in `AIMessage`. `thinking` blocks render
+ * as the AI module's collapsible reasoning pill: open while the model is
+ * still thinking, collapsed once the answer (or any later block) arrives.
+ */
+function MessageContentBlocks({
+  message,
+  streaming,
+  role,
+  renderText,
+  toolCallGroup,
+}: MessageContentBlocksProps) {
+  const blocks = message.content ?? [];
+  const textContext = { messageId: message.id, streaming, role };
+  // The last block that renders anything: a thinking block is still "live"
+  // only while nothing renders after it.
+  let lastRendered = -1;
+  blocks.forEach((block, i) => {
+    if (
+      (block.type === 'tool_use' && block.toolCall) ||
+      ((block.type === 'text' ||
+        block.type === 'thinking' ||
+        block.type === 'code') &&
+        block.text)
+    ) {
+      lastRendered = i;
+    }
+  });
+  const answerStarted = !!message.text || (message.media?.length ?? 0) > 0;
+
+  const nodes: React.ReactNode[] = [];
+  let run: MCPToolCall[] = [];
+  const flushRun = () => {
+    if (run.length === 0) return;
+    nodes.push(
+      <MCPToolCallGroup
+        key={`tool-call-group-${run[0].id}`}
+        toolCalls={run}
+        className="my-1"
+        {...toolCallGroup}
+      />
+    );
+    run = [];
+  };
+
+  blocks.forEach((block, i) => {
+    if (toolCallGroup && block.type === 'tool_use' && block.toolCall) {
+      run.push(block.toolCall);
+      return;
+    }
+    flushRun();
+    if (block.type === 'tool_use' && block.toolCall) {
+      nodes.push(
+        <MCPToolCallDisplay
+          key={i}
+          toolCall={block.toolCall}
+          // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
+          defaultCollapsed={block.collapsed ?? (streaming ? undefined : true)}
+        />
+      );
+    } else if (block.type === 'thinking' && block.text) {
+      const thinking = streaming && i === lastRendered && !answerStarted;
+      nodes.push(
+        <div key={i} className="my-1">
+          <ThinkingBlock
+            text={block.text}
+            streaming={thinking}
+            defaultCollapsed={block.collapsed ?? !thinking}
+          />
+        </div>
+      );
+    } else if (block.type === 'text' && block.text) {
+      nodes.push(
+        <div key={i} className={proseClass}>
+          {renderText(block.text, textContext)}
+        </div>
+      );
+    } else if (block.type === 'code' && block.text) {
+      const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
+      nodes.push(
+        <div key={i} className={proseClass}>
+          {renderText(fenced, textContext)}
+        </div>
+      );
+    }
+  });
+  flushRun();
+
+  return <>{nodes}</>;
+}
+
 interface MessageRowProps {
   message: SuperChatMessage;
   participant?: Participant;
@@ -704,6 +832,12 @@ interface MessageRowProps {
   mediaRetryLabel?: string;
   /** Prefix of the scheduled indicator, before its time. */
   scheduledLabel?: string;
+  /**
+   * Group each run of consecutive `tool_use` blocks into one
+   * `MCPToolCallGroup` with these callbacks and labels (as `AIChat` does).
+   * Without it, each call renders as its own pill.
+   */
+  toolCallGroup?: MCPToolCallGroupOptions;
 }
 
 /**
@@ -731,6 +865,7 @@ export const MessageRow = React.memo(function MessageRow({
   mediaErrorLabel,
   mediaRetryLabel,
   scheduledLabel = 'Scheduled',
+  toolCallGroup,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
   const hasBody =
@@ -778,7 +913,8 @@ export const MessageRow = React.memo(function MessageRow({
     !message.content?.length;
 
   // The Markdown source for copying: prefer the raw `text`, otherwise assemble
-  // it from the message's text/code content blocks.
+  // it from the message's text/code content blocks. Reasoning (`thinking`)
+  // is not part of the answer, so it is never copied.
   const markdownSource =
     typeof message.text === 'string' && message.text
       ? message.text
@@ -787,10 +923,7 @@ export const MessageRow = React.memo(function MessageRow({
             if (block.type === 'code' && block.text) {
               return `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
             }
-            if (
-              (block.type === 'text' || block.type === 'thinking') &&
-              block.text
-            ) {
+            if (block.type === 'text' && block.text) {
               return block.text;
             }
             return '';
@@ -815,8 +948,8 @@ export const MessageRow = React.memo(function MessageRow({
 
   const copy = useMessageCopy({
     markdown: markdownSource,
-    getHtml: () => bubbleRef.current?.innerHTML ?? '',
-    getText: () => bubbleRef.current?.textContent ?? '',
+    getHtml: () => copyableBubble(bubbleRef.current)?.innerHTML ?? '',
+    getText: () => copyableBubble(bubbleRef.current)?.textContent ?? '',
     defaultFormat: defaultCopyFormat,
   });
 
@@ -869,6 +1002,7 @@ export const MessageRow = React.memo(function MessageRow({
   }
 
   const accent = participant?.color;
+  const role = participant?.kind === 'human' ? 'user' : 'assistant';
   const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
   const scheduled = message.scheduledFor
@@ -1140,68 +1274,21 @@ export const MessageRow = React.memo(function MessageRow({
             ) : (
               <>
                 {/* Rich content blocks (tool calls etc.) reused from the AI module. */}
-                {message.content?.map((block, i) => {
-                  if (block.type === 'tool_use' && block.toolCall) {
-                    return (
-                      <MCPToolCallDisplay
-                        key={i}
-                        toolCall={block.toolCall}
-                        // Once the answer is in, tool calls fold away; an explicit block.collapsed wins.
-                        defaultCollapsed={
-                          block.collapsed ?? (streaming ? undefined : true)
-                        }
-                      />
-                    );
-                  }
-                  if (
-                    (block.type === 'text' || block.type === 'thinking') &&
-                    block.text
-                  ) {
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(block.text, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  if (block.type === 'code' && block.text) {
-                    const fenced = `\`\`\`${block.language ?? ''}\n${block.text}\n\`\`\``;
-                    return (
-                      <div
-                        key={i}
-                        className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word"
-                      >
-                        {renderText(fenced, {
-                          messageId: message.id,
-                          streaming,
-                          role:
-                            participant?.kind === 'human'
-                              ? 'user'
-                              : 'assistant',
-                        })}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                <MessageContentBlocks
+                  message={message}
+                  streaming={streaming}
+                  role={role}
+                  renderText={renderText}
+                  toolCallGroup={toolCallGroup}
+                />
 
                 {/* Plain `text` body (the common case). */}
                 {message.text && (
-                  <div className="prose prose-sm dark:prose-invert max-w-none **:wrap-break-word">
+                  <div className={proseClass}>
                     {renderText(message.text, {
                       messageId: message.id,
                       streaming,
-                      role:
-                        participant?.kind === 'human' ? 'user' : 'assistant',
+                      role,
                     })}
                   </div>
                 )}

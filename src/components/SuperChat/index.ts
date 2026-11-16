@@ -77,4 +77,7 @@ export type {
   AIMessageContent,
   AIMessageStatus,
   MCPResourceLink,
+  MCPToolCall,
+  MCPToolCallGroupOptions,
+  MCPToolCallGroupLabelOverrides,
 } from './types';

@@ -14,7 +14,7 @@ import {
   attachmentMarkdown,
   attachmentCache,
 } from './plugins';
-import type { SuperChatConversation } from './index';
+import type { MCPToolCall, SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
@@ -602,6 +602,158 @@ export const HostComposer: Story = {
     },
   },
   render: () => <HostComposerInbox />,
+};
+
+// Tool approval + reasoning: `toolCallGroup` groups the agent's consecutive
+// tool calls with Allow once / Always allow / Deny wired to host state, and
+// `thinking` blocks render as the collapsible reasoning pill. "Run again"
+// replays the turn: the reasoning streams, then the calls wait for approval.
+const toolTurnParticipants: SuperChatConversation['participants'] = [
+  { id: 'u1', kind: 'human', name: 'Dr. Patel', role: 'Physician' },
+  {
+    id: 'ozwell',
+    kind: 'agent',
+    name: 'Ozwell',
+    role: 'Assistant',
+    color: '#7c3aed',
+  },
+];
+
+const initialToolCalls = (): MCPToolCall[] => [
+  {
+    id: 'call-labs',
+    toolName: 'get_lab_results',
+    displayName: 'Look up lab results',
+    serverName: 'EHR',
+    parameters: [{ name: 'patient', type: 'string', value: 'Jordan Lee' }],
+    status: 'awaiting-approval',
+    startedAt: new Date().toISOString(),
+  },
+  {
+    id: 'call-meds',
+    toolName: 'get_medications',
+    displayName: 'List active medications',
+    serverName: 'EHR',
+    parameters: [{ name: 'patient', type: 'string', value: 'Jordan Lee' }],
+    status: 'awaiting-approval',
+    startedAt: new Date().toISOString(),
+  },
+];
+
+function ToolApprovalInbox() {
+  const [phase, setPhase] = React.useState<'thinking' | 'tools'>('thinking');
+  const [calls, setCalls] = React.useState(initialToolCalls);
+  const [run, setRun] = React.useState(0);
+
+  React.useEffect(() => {
+    setPhase('thinking');
+    setCalls(initialToolCalls());
+    const timer = window.setTimeout(() => setPhase('tools'), 1800);
+    return () => window.clearTimeout(timer);
+  }, [run]);
+
+  const settle = (id: string, status: MCPToolCall['status']) =>
+    setCalls((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? {
+              ...c,
+              status,
+              duration: 600,
+              ...(status === 'success'
+                ? {
+                    result: {
+                      type: 'text' as const,
+                      data: 'OK',
+                      summary: 'Read from the chart',
+                    },
+                  }
+                : {}),
+            }
+          : c
+      )
+    );
+
+  const settled = calls.every((c) => c.status !== 'awaiting-approval');
+  const conversation: SuperChatConversation = {
+    id: 'tool-turn',
+    title: 'Jordan Lee — pre-visit review',
+    participants: toolTurnParticipants,
+    thread: [
+      {
+        id: 'q',
+        participantId: 'u1',
+        text: 'Summarize Jordan’s recent labs and current medications.',
+        time: '2026-06-07T09:00:00Z',
+      },
+      {
+        id: `a-${run}`,
+        participantId: 'ozwell',
+        time: '2026-06-07T09:00:05Z',
+        status: settled ? 'complete' : 'streaming',
+        content: [
+          {
+            type: 'thinking',
+            text: 'I need the latest lab panel and the active medication list before summarizing. Both live in the EHR, so I will request read access for each.',
+          },
+          ...(phase === 'tools'
+            ? calls.map((toolCall) => ({
+                type: 'tool_use' as const,
+                toolCall,
+              }))
+            : []),
+          ...(settled
+            ? [
+                {
+                  type: 'text' as const,
+                  text: calls.some((c) => c.status === 'success')
+                    ? 'Labs are within range; A1c is 6.1%. Active medications: metformin 500 mg BID and lisinopril 10 mg daily.'
+                    : 'I could not read the chart without approval.',
+                },
+              ]
+            : []),
+        ],
+      },
+    ],
+  };
+
+  return (
+    <div className="flex h-full w-full flex-col gap-2">
+      <ButtonGroup>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setRun((n) => n + 1)}
+        >
+          Run again
+        </Button>
+      </ButtonGroup>
+      <SuperChatInbox
+        className="min-h-0 w-full flex-1"
+        conversations={[conversation]}
+        currentParticipantId="u1"
+        toolCallGroup={{
+          onApprove: (call) => settle(call.id, 'success'),
+          onDeny: (call) => settle(call.id, 'denied'),
+        }}
+      />
+    </div>
+  );
+}
+
+export const ToolApprovalAndThinking: Story = {
+  name: 'Tool approval & thinking',
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          'Pass `toolCallGroup` to group an agent’s consecutive tool calls into one block with Allow once, Always allow and Deny wired to your callbacks (the same options `AIChat` takes). The group collapses to "Used N tools" once every call settles. `thinking` content blocks render as a collapsible reasoning pill that stays open while the model thinks and folds once the answer arrives.',
+      },
+    },
+  },
+  render: () => <ToolApprovalInbox />,
 };
 
 export const SourcesAndGuards: Story = {
