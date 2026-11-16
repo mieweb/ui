@@ -803,6 +803,71 @@ describe('SuperChat', () => {
     expect(screen.getByLabelText('Message')).toBeDisabled();
   });
 
+  describe('composer slot', () => {
+    it('renders the host composer instead of the built-in message box', () => {
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composer={<textarea aria-label="Host composer" />}
+        />
+      );
+      expect(screen.getByLabelText('Host composer')).toBeInTheDocument();
+      expect(screen.queryByLabelText('Message')).toBeNull();
+    });
+
+    it('renders no composer for null', () => {
+      const { container } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composer={null}
+        />
+      );
+      expect(screen.queryByLabelText('Message')).toBeNull();
+      expect(
+        container.querySelector('[data-slot="superchat-host-composer"]')
+      ).toBeNull();
+    });
+
+    it('keeps the built-in composer when the slot is omitted', () => {
+      render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      expect(screen.getByLabelText('Message')).toBeInTheDocument();
+    });
+
+    it('still disables inline editing when read-only', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="u1"
+            composer={<textarea aria-label="Host composer" />}
+            onMessageEdited={() => {}}
+            readOnly
+          />
+        </div>
+      );
+      const overflows = screen.queryAllByRole('button', {
+        name: 'Message actions',
+      });
+      if (overflows[0]) {
+        await user.click(overflows[0]);
+        await screen.findByRole('menuitem', { name: 'Copy as' });
+      }
+      expect(
+        screen.queryByRole('menuitem', { name: 'Edit message' })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('button', { name: 'Edit message' })
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('composerProps', () => {
     it('overrides the placeholder and renders a leadingSlot button', () => {
       render(
@@ -1610,6 +1675,34 @@ describe('SuperChat', () => {
       expect(thread.scrollTop).not.toBe(thread.scrollHeight);
     });
 
+    it('opens an anchored turn for an own message a host composer appended', async () => {
+      const { fireEvent } = await import('@testing-library/react');
+      const hostComposer = <textarea aria-label="Host composer" />;
+      const { container, rerender } = render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composer={hostComposer}
+        />
+      );
+      const thread = getThread(container);
+      mockMetrics(thread);
+      thread.scrollTop = 100;
+      fireEvent.scroll(thread);
+
+      rerender(
+        <SuperChat
+          conversation={appended('u1')}
+          currentParticipantId="u1"
+          composer={hostComposer}
+        />
+      );
+
+      expect(
+        container.querySelector('[data-slot="superchat-turn"]')
+      ).not.toBeNull();
+    });
+
     it('does not anchor a turn for own messages arriving with a conversation switch', async () => {
       const { fireEvent } = await import('@testing-library/react');
       const { container, rerender } = render(
@@ -2195,6 +2288,21 @@ describe('SuperChatInbox', () => {
         ) as HTMLElement
       ).classList.contains('hidden')
     ).toBe(false);
+  });
+
+  it('forwards the host composer to the active panel', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          composer={<textarea aria-label="Host composer" />}
+        />
+      </div>
+    );
+    expect(screen.getByLabelText('Host composer')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Message')).toBeNull();
   });
 
   describe('resizable sidebar', () => {
