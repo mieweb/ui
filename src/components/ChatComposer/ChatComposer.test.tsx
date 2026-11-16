@@ -107,6 +107,29 @@ describe('ChatComposer', () => {
     });
   });
 
+  describe('layout', () => {
+    // The `+` cell carries the md+ single-row classes only in the responsive
+    // layout; stacked keeps the input on its own row at every width.
+    function addCell() {
+      return screen
+        .getByRole('button', { name: /add to message/i })
+        .closest('[class*="col-start-1"]') as HTMLElement;
+    }
+
+    it('collapses to one row at md+ by default', () => {
+      renderWithTheme(<ChatComposer onSend={vi.fn()} allowAttachments />);
+      expect(addCell().className).toContain('md:row-start-1');
+    });
+
+    it('keeps the controls under the input when stacked', () => {
+      renderWithTheme(
+        <ChatComposer onSend={vi.fn()} allowAttachments layout="stacked" />
+      );
+      expect(addCell().className).toContain('row-start-2');
+      expect(addCell().className).not.toContain('md:');
+    });
+  });
+
   it('honors autoFocus on fine-pointer devices', () => {
     // eslint-disable-next-line jsx-a11y/no-autofocus
     renderWithTheme(<ChatComposer autoFocus />);
@@ -187,6 +210,99 @@ describe('ChatComposer', () => {
 
     fireEvent.change(getInput(), { target: { value: 'Hi' } });
     expect(sendButton).toBeEnabled();
+  });
+
+  describe('sendOptions', () => {
+    const sendOptions = [
+      { id: 'later', label: 'Send later…' },
+      { id: 'quiet', label: 'Send without notifying' },
+    ];
+
+    it('renders no options trigger without sendOptions', () => {
+      renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+      expect(
+        screen.queryByRole('button', { name: 'More send options' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('sends the draft with the chosen option id', () => {
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer onSend={onSend} sendOptions={sendOptions} />
+      );
+      fireEvent.change(getInput(), { target: { value: 'See you Monday' } });
+      fireEvent.click(
+        screen.getByRole('button', { name: 'More send options' })
+      );
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Send without notifying' })
+      );
+
+      expect(onSend).toHaveBeenCalledWith(
+        { content: 'See you Monday', attachments: [] },
+        { sendOption: 'quiet' }
+      );
+      expect(getInput()).toHaveValue('');
+    });
+
+    it('keeps a plain send free of meta', () => {
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer onSend={onSend} sendOptions={sendOptions} />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Now' } });
+      fireEvent.keyDown(getInput(), { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledWith({ content: 'Now', attachments: [] });
+    });
+
+    it('disables the options trigger with nothing to send', () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={sendOptions}
+          sendOptionsLabel="Más opciones de envío"
+        />
+      );
+      expect(
+        screen.getByRole('button', { name: 'Más opciones de envío' })
+      ).toBeDisabled();
+    });
+
+    it('moves through the options from the keyboard and returns focus on Escape', async () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={[
+            ...sendOptions,
+            { id: 'off', label: 'Off', disabled: true },
+          ]}
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Later' } });
+      const trigger = screen.getByRole('button', { name: 'More send options' });
+      fireEvent.click(trigger);
+
+      const later = screen.getByRole('menuitem', { name: 'Send later…' });
+      const quiet = screen.getByRole('menuitem', {
+        name: 'Send without notifying',
+      });
+      // The first option takes focus once the menu opens.
+      await vi.waitFor(() => expect(later).toHaveFocus());
+
+      fireEvent.keyDown(later, { key: 'ArrowDown' });
+      expect(quiet).toHaveFocus();
+      // Skips the disabled option and wraps around.
+      fireEvent.keyDown(quiet, { key: 'ArrowDown' });
+      expect(later).toHaveFocus();
+      fireEvent.keyDown(later, { key: 'End' });
+      expect(quiet).toHaveFocus();
+      fireEvent.keyDown(quiet, { key: 'Home' });
+      expect(later).toHaveFocus();
+
+      fireEvent.keyDown(later, { key: 'Escape' });
+      expect(trigger).toHaveFocus();
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
   });
 
   it('supports controlled value', () => {

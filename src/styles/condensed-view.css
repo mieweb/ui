@@ -6199,8 +6199,19 @@ body.condensed [data-slot='chat-composer-stop-button'] svg {
   height: 0.75rem !important;
 }
 
-/* Host slots – match the shorter control row */
-body.condensed [data-slot='chat-composer-leading-slot'],
+/* Host slots – match the shorter control row. The leading slot may wrap
+   onto more rows, so it gets a compact minimum rather than a fixed height,
+   and a host's icon-only buttons shrink like the composer's own. */
+body.condensed [data-slot='chat-composer-leading-slot'] {
+  height: auto !important;
+  min-height: 1.5rem !important;
+}
+body.condensed
+  [data-slot='chat-composer-leading-slot']
+  > button:has(> svg:only-child) {
+  height: 1.5rem !important;
+  width: 1.5rem !important;
+}
 body.condensed [data-slot='chat-composer-mic-slot'] {
   height: 1.5rem !important;
 }

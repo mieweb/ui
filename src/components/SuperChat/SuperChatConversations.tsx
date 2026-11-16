@@ -28,6 +28,11 @@ export interface SuperChatConversationsProps {
   defaultActiveConversationId?: string;
   /** Additional class name. */
   className?: string;
+  /**
+   * Content rendered after the last conversation, inside the scrolling list.
+   * Hosts use it for "load older" controls or an end-of-list marker.
+   */
+  listFooter?: React.ReactNode;
 
   // --- callbacks ---
   onConversationOpened?: (conversation: SuperChatConversation) => void;
@@ -42,6 +47,7 @@ export function SuperChatConversations({
   activeConversationId,
   defaultActiveConversationId,
   className,
+  listFooter,
   onConversationOpened,
   onNewConversation,
 }: SuperChatConversationsProps) {
@@ -137,6 +143,11 @@ export function SuperChatConversations({
             </div>
           );
         })}
+        {listFooter && (
+          <div role="listitem" data-slot="superchat-conversation-list-footer">
+            {listFooter}
+          </div>
+        )}
       </div>
     </aside>
   );
