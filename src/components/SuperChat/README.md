@@ -372,7 +372,9 @@ there, and none apply when `composer` replaces the message box.
 | `minSidebarWidth`             | `number`                                      | `200`               | Narrowest the divider can make the list.                                                                                                                                          |
 | `maxSidebarWidth`             | `number`                                      | `480`               | Widest the divider can make the list; a narrow inbox lowers it so the panel keeps 240px.                                                                                          |
 | `onSidebarWidthChange`        | `(width) => void`                             | —                   | Fired with the clamped width when a drag ends, or at once for a key press or double-click; persist it here.                                                                       |
-| `sidebarResizeLabel`          | `string`                                      | —                   | Accessible name of the divider; defaults to "Resize conversation list".                                                                                                           |
+| `sidebarResizeLabel`          | `string`                                      | —                   | Accessible name of the divider; defaults to "Resize conversation list". Wins over `labels.sidebarResize`.                                                                         |
+| `labels`                      | `Partial<SuperChatLabels>`                    | English             | Every user-visible string in the inbox, list and panel; forwarded to both. The narrower label props win where they overlap. See [Localization](#localization).                    |
+| `locale`                      | `string`                                      | runtime locale      | BCP 47 locale for message, edited and scheduled times (e.g. `'ar'`), forwarded to the panel.                                                                                      |
 | `linkBuilder`                 | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                                                               |
 | `className`                   | `string`                                      | —                   | Extra classes on the root.                                                                                                                                                        |
 | `onMessageSent`               | `(text, { conversation, mentions }) => void`  | —                   | Fired on send; `mentions` are the addressed participant ids.                                                                                                                      |
@@ -420,6 +422,8 @@ Renders exactly one conversation.
 | `onMessageEdited`          | `(messageId, text, { conversation }) => void`                              | —                   | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                                                                                                               |
 | `onConversationClosed`     | `(conversation) => void`                                                   | —                   | Shows a close button when provided.                                                                                                                                                                                                                               |
 | `onReferenceClick`         | `(ref) => void`                                                            | —                   | Fired when a reference chip is activated.                                                                                                                                                                                                                         |
+| `labels`                   | `Partial<SuperChatLabels>`                                                 | English             | Every user-visible string in the panel. `mediaLabels`, `messageLabels`, `placeholder`, `agentSelectorLabel`, `stopLabel` and `composerProps` win where they overlap. See [Localization](#localization).                                                           |
+| `locale`                   | `string`                                                                   | runtime locale      | BCP 47 locale for message, edited and scheduled times (e.g. `'ar'`, `'fr-CA'`).                                                                                                                                                                                   |
 
 #### Composer agent & model selectors
 
@@ -436,15 +440,68 @@ Not a fit for human-only conversations — use `@`-mentions to address participa
 
 The conversation switcher. Supports controlled or uncontrolled selection.
 
-| Prop                          | Type                      | Default            | Description                                                     |
-| ----------------------------- | ------------------------- | ------------------ | --------------------------------------------------------------- |
-| `conversations`               | `SuperChatConversation[]` | —                  | **Required.** All conversations (host-owned).                   |
-| `activeConversationId`        | `string`                  | —                  | Controlled active conversation id.                              |
-| `defaultActiveConversationId` | `string`                  | first conversation | Uncontrolled initial active id.                                 |
-| `className`                   | `string`                  | —                  | Extra classes on the root.                                      |
-| `onConversationOpened`        | `(conversation) => void`  | —                  | Fired when a conversation is selected.                          |
-| `onNewConversation`           | `() => void`              | —                  | Shows a "+" button when provided.                               |
-| `listFooter`                  | `ReactNode`               | —                  | Content after the last conversation, inside the scrolling list. |
+| Prop                          | Type                       | Default            | Description                                                                                                                                                                  |
+| ----------------------------- | -------------------------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversations`               | `SuperChatConversation[]`  | —                  | **Required.** All conversations (host-owned).                                                                                                                                |
+| `activeConversationId`        | `string`                   | —                  | Controlled active conversation id.                                                                                                                                           |
+| `defaultActiveConversationId` | `string`                   | first conversation | Uncontrolled initial active id.                                                                                                                                              |
+| `className`                   | `string`                   | —                  | Extra classes on the root.                                                                                                                                                   |
+| `onConversationOpened`        | `(conversation) => void`   | —                  | Fired when a conversation is selected.                                                                                                                                       |
+| `onNewConversation`           | `() => void`               | —                  | Shows a "+" button when provided.                                                                                                                                            |
+| `listFooter`                  | `ReactNode`                | —                  | Content after the last conversation, inside the scrolling list.                                                                                                              |
+| `labels`                      | `Partial<SuperChatLabels>` | English            | The list's strings (`conversations`, `newConversation`, `unreadCount`, search labels). `listTitle` and the `search` labels win over them. See [Localization](#localization). |
+
+---
+
+## Localization
+
+Every user-visible string — text, `aria-label`, `title`, placeholder and
+screen-reader text — comes from `labels?: Partial<SuperChatLabels>` on
+`SuperChatInbox` (forwarded to the list and the panel), `SuperChat` and
+`SuperChatConversations`. Unset keys fall back to a `MessagesProvider`
+translation of the English default (the English string is the catalog key),
+then to English. `locale` (BCP 47, on `SuperChatInbox` and `SuperChat`)
+formats message, edited and scheduled times; it defaults to the runtime's
+locale.
+
+```tsx
+import type { SuperChatLabels } from '@mieweb/ui/components/SuperChat';
+
+const arabicLabels: Partial<SuperChatLabels> = {
+  conversations: 'المحادثات',
+  unreadCount: (count) => `رسائل غير مقروءة: ${count}`,
+  inboxLabel: (title) => `الدردشة: ${title}`,
+  // …
+};
+
+<div dir="rtl">
+  <SuperChatInbox
+    conversations={conversations}
+    labels={arabicLabels}
+    locale="ar"
+  />
+</div>;
+```
+
+**Precedence.** The older, narrower props win over `labels` for the keys they
+share: `listTitle`, `search.label` / `search.placeholder` /
+`search.noResultsLabel`, `sidebarResizeLabel`, `mediaLabels`, `messageLabels`,
+`placeholder`, `agentSelectorLabel`, `stopLabel` and `composerProps`. Keep
+function labels stable (a module constant or `useMemo`); an inline object of
+strings is fine — rows only re-render when a value changes.
+
+| Area     | Keys                                                                                                                                                                                                                                                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Inbox    | `inboxLabel(title)`, `emptyInboxLabel`, `noConversationSelected`, `sidebarResize`                                                                                                                                                                                                                                                    |
+| List     | `conversations`, `newConversation`, `unreadCount(count)`, `searchConversations`, `searchPlaceholder`, `noMatchingConversations`                                                                                                                                                                                                      |
+| Panel    | `backToConversations`, `participants`, `closeConversation`, `messages`, `scrollToBottom`, `newMessages`, `newMessagesScrollToBottom`                                                                                                                                                                                                 |
+| Media    | `backToConversation`, `openMedia`, `playMedia`                                                                                                                                                                                                                                                                                       |
+| Composer | `messageInput`, `composerPlaceholder`, `readOnlyPlaceholder`, `addToMessage`, `attachFiles`, `sendMessage`, `sendingMessage`, `sendFailed`, `moreSendOptions`, `stopGenerating`, `selectAgent`, `mentionList`, `dropFiles`                                                                                                           |
+| Messages | `messageLabel(author, time, scheduled?)`, `unknownAuthor`, `scheduled`, `edited`, `editedAt(time)`, `messageActions`, `copyMessage`, `copyMessageTitle`, `copyAs`, `copyAsRichText`, `copyAsRichTextDescription`, `copyAsMarkdown`, `copyAsPlainText`, `editMessage`, `save`, `cancel`, `thinking`, `thought`, `thoughtFor(seconds)` |
+
+The Markdown renderer's plugin labels (code copy, image viewer, diagrams, GenUI
+widgets) are not part of `SuperChatLabels` yet (see #722). The **Arabic (RTL)**
+Inbox story shows every key in Arabic with `dir="rtl"` and `locale="ar"`.
 
 ---
 
@@ -782,7 +839,8 @@ SuperChat ships with assistive-tech support built in:
   title, and the participant face-pile is a labelled `group`.
 - **Live message log** — the thread is `role="log"` with `aria-live="polite"`, so
   screen readers announce new messages. It is keyboard-focusable for scrolling.
-- **Per-message context** — each message is an `article` named `"{author}, {time}"`.
+- **Per-message context** — each message is an `article` named `"{author}, {time}"`
+  (`labels.messageLabel`).
 - **Mention combobox** — the composer is an `aria-autocomplete="list"` combobox
   wired to a `listbox` via `aria-controls` / `aria-activedescendant`. Keyboard:
   `↑`/`↓` move, `Enter`/`Tab` accept, `Esc` dismisses; `Enter` (no `Shift`) sends.

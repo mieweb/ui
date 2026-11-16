@@ -20,6 +20,7 @@ import type {
   AIRenderTextContent,
   Participant,
   SuperChatCopyFormat,
+  SuperChatLabels,
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
@@ -49,13 +50,13 @@ export interface VirtualThreadProps {
     attachmentId: string,
     play?: boolean
   ) => void;
-  openMediaLabel?: string;
-  playMediaLabel?: string;
+  /** Resolved labels, forwarded to each row. */
+  labels: SuperChatLabels;
+  /** Locale for message times, forwarded to each row. */
+  locale?: string;
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
-  /** Prefix of a scheduled message's indicator, forwarded to each row. */
-  scheduledLabel?: string;
   /** Tool-call grouping options, forwarded to each row. */
   toolCallGroup?: MCPToolCallGroupOptions;
   /**
@@ -82,11 +83,10 @@ export function VirtualThread({
   onMessageEdited,
   defaultCopyFormat,
   onOpenMedia,
-  openMediaLabel,
-  playMediaLabel,
+  labels,
+  locale,
   mediaErrorLabel,
   mediaRetryLabel,
-  scheduledLabel,
   toolCallGroup,
   scrollRef,
   contentRef,
@@ -146,11 +146,10 @@ export function VirtualThread({
                   onMessageEdited={onMessageEdited}
                   defaultCopyFormat={defaultCopyFormat}
                   onOpenMedia={onOpenMedia}
-                  openMediaLabel={openMediaLabel}
-                  playMediaLabel={playMediaLabel}
+                  labels={labels}
+                  locale={locale}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
-                  scheduledLabel={scheduledLabel}
                   toolCallGroup={toolCallGroup}
                 />
               </div>

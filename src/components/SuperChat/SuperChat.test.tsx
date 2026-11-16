@@ -27,6 +27,8 @@ import { SuperChat } from './SuperChat';
 import { SuperChatConversations } from './SuperChatConversations';
 import { SuperChatInbox } from './SuperChatInbox';
 import { MotionProvider } from '../../motion/MotionProvider';
+import { MessagesProvider } from '../../utils/messages';
+import { arabicConversations, arabicLabels } from './storyData';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
@@ -3612,5 +3614,422 @@ describe('SuperChatInbox panel props', () => {
         )
       ).toHaveLength(1);
     });
+  });
+});
+
+describe('SuperChat labels and locale', () => {
+  const UI_ATTRIBUTES = [
+    'aria-label',
+    'aria-description',
+    'aria-valuetext',
+    'title',
+    'placeholder',
+    'alt',
+  ];
+
+  /**
+   * Latin text anywhere in the rendered UI (text nodes, including portalled
+   * menus, and accessible-name attributes). The fixture's authored content is
+   * all Arabic, so any hit is a hard-coded English string.
+   */
+  function englishLeaks(root: HTMLElement = document.body): string[] {
+    const leaks: string[] = [];
+    const walker = document.createTreeWalker(root, window.NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (node.parentElement?.closest('style, script')) continue;
+      const text = node.textContent ?? '';
+      if (/[A-Za-z]/.test(text)) leaks.push(text.trim());
+    }
+    root.querySelectorAll('*').forEach((el) => {
+      for (const name of UI_ATTRIBUTES) {
+        const value = el.getAttribute(name);
+        if (value && /[A-Za-z]/.test(value)) {
+          leaks.push(`${el.tagName.toLowerCase()}[${name}]=${value}`);
+        }
+      }
+    });
+    return leaks;
+  }
+
+  const [arabicIntake] = arabicConversations;
+
+  it('leaves no English in the inbox, list, panel or message actions', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    render(
+      <div dir="rtl">
+        <SuperChatInbox
+          conversations={arabicConversations}
+          labels={arabicLabels}
+          locale="ar"
+          currentParticipantId="u1"
+          resizableSidebar
+          search={{ value: '', onChange: () => {} }}
+          onNewConversation={() => {}}
+          onConversationClosed={() => {}}
+          onMessageEdited={() => {}}
+          agents={[{ id: 'a1', label: 'وكيل الفرز' }]}
+        />
+      </div>
+    );
+
+    expect(
+      screen.getByRole('group', { name: `الدردشة: ${arabicIntake.title}` })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('complementary', { name: 'المحادثات' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('separator', { name: 'تغيير حجم قائمة المحادثات' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('رسائل غير مقروءة: 3')).toHaveClass('sr-only');
+    expect(screen.getByRole('log', { name: 'الرسائل' })).toBeInTheDocument();
+    expect(screen.getByLabelText('الرسالة')).toHaveAttribute(
+      'placeholder',
+      arabicLabels.composerPlaceholder
+    );
+    expect(screen.getByText('(معدّلة)')).toBeInTheDocument();
+    expect(screen.getByText('غير معروف')).toBeInTheDocument();
+    expect(screen.getByText(/^مجدولة · /)).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole('button', { name: /^فكّر/ })
+        .closest('[data-slot="ai-message-thinking"]')
+    ).not.toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'فتح في معرض الوسائط' })
+    ).toBeInTheDocument();
+    // A lone Copy action shows its own button, with the localized tooltip.
+    const [footerCopy] = screen.getAllByRole('button', { name: 'نسخ الرسالة' });
+    expect(footerCopy).toHaveAttribute('title', arabicLabels.copyMessageTitle);
+    expect(englishLeaks()).toEqual([]);
+
+    // The own message's ⋯ menu: Copy as (with its submenu) and Edit.
+    const [ownActions] = screen.getAllByRole('button', {
+      name: 'إجراءات الرسالة',
+    });
+    await user.click(ownActions);
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'نسخ بتنسيق' })
+    );
+    expect(
+      await screen.findByRole('menuitem', { name: /^نسخ كنص منسّق/ })
+    ).toHaveTextContent('نص منسّق + ماركداون');
+    expect(
+      screen.getByRole('menuitem', { name: 'نسخ بتنسيق ماركداون' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'نسخ كنص عادي' })
+    ).toBeInTheDocument();
+    expect(englishLeaks()).toEqual([]);
+
+    await user.click(screen.getByRole('menuitem', { name: 'تعديل الرسالة' }));
+    expect(
+      screen.getByRole('textbox', { name: 'تعديل الرسالة' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'حفظ' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'إلغاء' })).toBeInTheDocument();
+    expect(englishLeaks()).toEqual([]);
+  });
+
+  it('localizes the empty inbox and the read-only composer', () => {
+    const { unmount } = render(
+      <SuperChatInbox
+        conversations={arabicConversations}
+        activeConversationId="not-loaded"
+        labels={arabicLabels}
+      />
+    );
+    expect(screen.getByRole('group', { name: 'الدردشة' })).toHaveTextContent(
+      'لم يتم اختيار محادثة'
+    );
+    expect(englishLeaks()).toEqual([]);
+    unmount();
+
+    render(
+      <SuperChat
+        conversation={arabicIntake}
+        labels={arabicLabels}
+        locale="ar"
+        readOnly
+      />
+    );
+    expect(screen.getByLabelText('الرسالة')).toHaveAttribute(
+      'placeholder',
+      'محادثة للقراءة فقط'
+    );
+    expect(englishLeaks()).toEqual([]);
+  });
+
+  it('localizes the reasoning pill while the model is thinking', () => {
+    render(
+      <SuperChat
+        conversation={{
+          ...arabicIntake,
+          thread: [
+            {
+              id: 'think',
+              participantId: 'a1',
+              status: 'streaming',
+              content: [{ type: 'thinking', text: 'أراجع الملف.' }],
+              time: '2026-06-07T09:00:00Z',
+            },
+          ],
+        }}
+        labels={arabicLabels}
+      />
+    );
+    expect(screen.getByRole('button', { name: /^يفكّر/ })).toBeInTheDocument();
+  });
+
+  it('formats message, edit and scheduled times in `locale`', () => {
+    const [own] = arabicIntake.thread;
+    const scheduled = arabicIntake.thread.find((m) => m.scheduledFor)!;
+    const time = (value: string | Date, locale: string) =>
+      new Date(value).toLocaleTimeString(locale, {
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+    // Guards the test: the locales must format differently.
+    expect(time(own.time, 'de-DE')).not.toBe(time(own.time, 'en-US'));
+
+    render(<SuperChat conversation={arabicIntake} locale="de-DE" />);
+    const [ownRow] = screen.getAllByRole('article');
+    expect(
+      within(ownRow).getByText(time(own.time, 'de-DE'))
+    ).toBeInTheDocument();
+    expect(
+      ownRow.querySelector('[data-slot="superchat-edited-indicator"]')
+    ).toHaveAttribute('title', `Edited ${time(own.editedAt!, 'de-DE')}`);
+    expect(
+      document.querySelector('[data-slot="superchat-scheduled-indicator"]')
+    ).toHaveTextContent(
+      `Scheduled · ${new Date(scheduled.scheduledFor!).toLocaleString('de-DE', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      })}`
+    );
+  });
+
+  it('lets the narrower label props win over `labels`', () => {
+    render(
+      <SuperChatInbox
+        conversations={arabicConversations}
+        currentParticipantId="u1"
+        labels={{
+          conversations: 'labels list',
+          searchPlaceholder: 'labels search',
+          sidebarResize: 'labels resize',
+          openMedia: 'labels open',
+          scheduled: 'labels scheduled',
+          composerPlaceholder: 'labels placeholder',
+          sendMessage: 'labels send',
+          messages: 'labels log',
+        }}
+        listTitle="Title prop"
+        search={{ value: '', onChange: () => {}, placeholder: 'Search prop' }}
+        resizableSidebar
+        sidebarResizeLabel="Resize prop"
+        mediaLabels={{ openMedia: 'Open prop' }}
+        messageLabels={{ scheduled: 'Scheduled prop' }}
+        placeholder="Placeholder prop"
+        composerProps={{ sendLabel: 'Send prop' }}
+      />
+    );
+    const list = screen.getByRole('complementary', { name: 'labels list' });
+    expect(within(list).getByText('Title prop')).toBeInTheDocument();
+    expect(within(list).getByRole('searchbox')).toHaveAttribute(
+      'placeholder',
+      'Search prop'
+    );
+    expect(
+      screen.getByRole('separator', { name: 'Resize prop' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('log', { name: 'labels log' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Open prop' })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/^Scheduled prop · /)).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveAttribute(
+      'placeholder',
+      'Placeholder prop'
+    );
+    expect(
+      screen.getByRole('button', { name: 'Send prop' })
+    ).toBeInTheDocument();
+  });
+
+  it('prefers `stopLabel`/`agentSelectorLabel` over `labels`', () => {
+    render(
+      <SuperChat
+        conversation={arabicIntake}
+        labels={{ stopGenerating: 'labels stop', selectAgent: 'labels agent' }}
+        isStreaming
+        onStop={() => {}}
+        stopLabel="Stop prop"
+        agents={[{ id: 'a1', label: 'Triage' }]}
+        selectedAgent="a1"
+        agentSelectorLabel="Agent prop"
+      />
+    );
+    expect(screen.getByRole('button', { name: 'Stop prop' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Agent prop: Triage' })
+    ).toBeTruthy();
+  });
+
+  it('falls back to a MessagesProvider translation for unset labels', () => {
+    render(
+      <MessagesProvider
+        messages={{
+          labels: {
+            'Message actions': 'Provider actions',
+            Messages: 'Provider log',
+            '{count} unread messages': '{count} non lus',
+          },
+        }}
+      >
+        <SuperChatInbox
+          conversations={arabicConversations}
+          currentParticipantId="u1"
+          labels={{ messages: 'Labels log' }}
+        />
+      </MessagesProvider>
+    );
+    // `labels` wins over the provider…
+    expect(screen.getByRole('log', { name: 'Labels log' })).toBeInTheDocument();
+    // …which still translates the keys `labels` leaves unset.
+    expect(
+      screen.getAllByRole('button', { name: 'Provider actions' }).length
+    ).toBeGreaterThan(0);
+    expect(screen.getByText('3 non lus')).toHaveClass('sr-only');
+  });
+
+  it('localizes SuperChatConversations on its own', () => {
+    const { rerender } = render(
+      <SuperChatConversations
+        conversations={arabicConversations}
+        labels={arabicLabels}
+        onNewConversation={() => {}}
+        search={{ value: '', onChange: () => {} }}
+      />
+    );
+    const badge = document.querySelector(
+      '[data-slot="superchat-unread-badge"]'
+    ) as HTMLElement;
+    // The count shows; screen readers get the whole localized phrase.
+    expect(badge.querySelector('[aria-hidden="true"]')).toHaveTextContent('3');
+    expect(within(badge).getByText('رسائل غير مقروءة: 3')).toHaveClass(
+      'sr-only'
+    );
+    expect(
+      screen.getByRole('button', { name: 'محادثة جديدة' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('searchbox', { name: 'البحث في المحادثات' })
+    ).toHaveAttribute('placeholder', 'بحث…');
+    expect(englishLeaks()).toEqual([]);
+
+    // The host's filter matched nothing.
+    rerender(
+      <SuperChatConversations
+        conversations={[]}
+        labels={arabicLabels}
+        search={{ value: 'zzz', onChange: () => {} }}
+      />
+    );
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'لا توجد محادثات مطابقة'
+    );
+  });
+
+  it('keeps the English defaults when `labels` is omitted', () => {
+    render(
+      <SuperChatConversations
+        conversations={arabicConversations}
+        onNewConversation={() => {}}
+      />
+    );
+    expect(
+      screen.getByRole('complementary', { name: 'Conversations' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'New conversation' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('3 unread messages')).toHaveClass('sr-only');
+  });
+
+  it('keeps the English panel and inbox defaults when `labels` is omitted', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <SuperChatInbox
+        conversations={arabicConversations}
+        currentParticipantId="u1"
+        onConversationClosed={() => {}}
+        onMessageEdited={() => {}}
+      />
+    );
+    expect(
+      screen.getByRole('group', { name: `Chat: ${arabicIntake.title}` })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: 'Participants' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Close conversation' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('log', { name: 'Messages' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveAttribute(
+      'placeholder',
+      'Type a message… use @ to address an agent'
+    );
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByText('(edited)')).toBeInTheDocument();
+    // No `locale`: the runtime's default locale, as before.
+    const [own] = arabicIntake.thread;
+    const [ownRow] = screen.getAllByRole('article');
+    expect(ownRow).toHaveAttribute(
+      'aria-label',
+      `د. ليلى حداد, ${new Date(own.time).toLocaleTimeString(undefined, {
+        hour: 'numeric',
+        minute: '2-digit',
+      })}`
+    );
+
+    const [ownActions] = screen.getAllByRole('button', {
+      name: 'Message actions',
+    });
+    await user.click(ownActions);
+    await user.click(await screen.findByRole('menuitem', { name: 'Copy as' }));
+    expect(
+      await screen.findByRole('menuitem', { name: /^Copy as rich text/ })
+    ).toHaveTextContent('Rich text + Markdown');
+    expect(
+      screen.getByRole('menuitem', { name: 'Copy as plain text' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: 'Edit message' })
+    ).toBeInTheDocument();
+
+    rerender(
+      <SuperChatInbox
+        conversations={arabicConversations}
+        activeConversationId="missing"
+      />
+    );
+    expect(screen.getByRole('group', { name: 'Chat' })).toBeInTheDocument();
+    expect(screen.getByText('No conversation selected')).toBeInTheDocument();
+  });
+
+  it('keeps the English read-only placeholder when `labels` is omitted', () => {
+    render(<SuperChat conversation={arabicIntake} readOnly />);
+    expect(screen.getByLabelText('Message')).toHaveAttribute(
+      'placeholder',
+      'Read-only conversation'
+    );
   });
 });

@@ -13,12 +13,12 @@
 
 import * as React from 'react';
 import { cn } from '../../utils/cn';
-import { useMessages } from '../../utils/messages';
 import { Animated, AnimatedPresence } from '../../motion';
 import { SearchIcon } from '../Icons';
 import { Input } from '../Input';
 import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
-import type { SuperChatConversation } from './types';
+import { useSuperChatLabels } from './labels';
+import type { SuperChatConversation, SuperChatLabels } from './types';
 
 // ============================================================================
 // SuperChatConversations (conversation list)
@@ -60,6 +60,12 @@ export interface SuperChatConversationsProps {
   /** Additional class name. */
   className?: string;
   /**
+   * The list's user-visible strings, for localization (only the list keys
+   * apply here). `listTitle` and the `search` labels win over them. See
+   * {@link SuperChatLabels}.
+   */
+  labels?: Partial<SuperChatLabels>;
+  /**
    * Content rendered after the last conversation, inside the scrolling list.
    * Hosts use it for "load older" controls or an end-of-list marker.
    */
@@ -81,11 +87,12 @@ export function SuperChatConversations({
   listHeader,
   search,
   className,
+  labels: labelOverrides,
   listFooter,
   onConversationOpened,
   onNewConversation,
 }: SuperChatConversationsProps) {
-  const m = useMessages();
+  const labels = useSuperChatLabels(labelOverrides);
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
@@ -118,7 +125,7 @@ export function SuperChatConversations({
   return (
     <aside
       data-slot="superchat-conversations"
-      aria-label={m('Conversations')}
+      aria-label={labels.conversations}
       className={cn(
         'flex w-64 shrink-0 flex-col border-e border-neutral-200 dark:border-neutral-700',
         className
@@ -131,14 +138,14 @@ export function SuperChatConversations({
         >
           {listTitle !== null && (
             <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-200">
-              {listTitle ?? m('Conversations')}
+              {listTitle ?? labels.conversations}
             </span>
           )}
           {onNewConversation && (
             <button
               type="button"
               onClick={onNewConversation}
-              aria-label={m('New conversation')}
+              aria-label={labels.newConversation}
               className="ms-auto rounded-md px-2 py-1 text-lg leading-none text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               +
@@ -166,11 +173,11 @@ export function SuperChatConversations({
               <Input
                 type="search"
                 size="sm"
-                label={search.label ?? m('Search conversations')}
+                label={search.label ?? labels.searchConversations}
                 hideLabel
                 value={search.value}
                 onChange={(e) => search.onChange(e.target.value)}
-                placeholder={search.placeholder ?? m('Search…')}
+                placeholder={search.placeholder ?? labels.searchPlaceholder}
                 className="ps-8"
               />
             </div>
@@ -189,7 +196,7 @@ export function SuperChatConversations({
           )}
         >
           {search.value.trim() && conversations.length === 0
-            ? (search.noResultsLabel ?? m('No matching conversations'))
+            ? (search.noResultsLabel ?? labels.noMatchingConversations)
             : ''}
         </p>
       )}
@@ -227,8 +234,12 @@ export function SuperChatConversations({
                       data-slot="superchat-unread-badge"
                       className="bg-primary-600 ms-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-semibold text-white"
                     >
-                      {c.unread}
-                      <span className="sr-only"> unread messages</span>
+                      {/* The count is shown; screen readers get the whole
+                          (localized) phrase instead. */}
+                      <span aria-hidden="true">{c.unread}</span>
+                      <span className="sr-only">
+                        {labels.unreadCount(c.unread)}
+                      </span>
                     </Animated>
                   )}
                 </AnimatedPresence>
