@@ -20,6 +20,7 @@ import type { SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
+import { ChatComposer } from '../ChatComposer';
 import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { createMediaConversations } from './mediaStoryData';
@@ -608,6 +609,72 @@ export const CustomComposer: Story = {
       }}
     />
   ),
+};
+
+// App-owned message box: `composer` replaces the panel's ChatComposer, so the
+// host keeps its own draft, mention source and send path. The host appends
+// the sent message itself; SuperChat still anchors the turn because the new
+// message comes from `currentParticipantId`.
+function HostComposerInbox() {
+  const [conversations, setConversations] = React.useState<
+    SuperChatConversation[]
+  >([richConversation, secondConversation]);
+  const [activeId, setActiveId] = React.useState(richConversation.id);
+  const [draft, setDraft] = React.useState('');
+
+  return (
+    <SuperChatInbox
+      className="w-full"
+      conversations={conversations}
+      activeConversationId={activeId}
+      onConversationOpened={(c) => setActiveId(c.id)}
+      currentParticipantId="u1"
+      composer={
+        <ChatComposer
+          value={draft}
+          onValueChange={setDraft}
+          inputLabel="Message"
+          placeholder="Write with the app's own composer…"
+          onSend={(message) => {
+            const now = new Date().toISOString();
+            setConversations((prev) =>
+              prev.map((c) =>
+                c.id === activeId
+                  ? {
+                      ...c,
+                      lastActivity: now,
+                      thread: [
+                        ...c.thread,
+                        {
+                          id: `m-${Date.now()}`,
+                          participantId: 'u1',
+                          text: message.content,
+                          time: now,
+                        },
+                      ],
+                    }
+                  : c
+              )
+            );
+          }}
+        />
+      }
+    />
+  );
+}
+
+export const HostComposer: Story = {
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          'Pass your own composer through `composer` to replace the built-in message box. The host owns the draft and the send path and appends the sent message to the conversation.',
+      },
+    },
+  },
+  render: () => <HostComposerInbox />,
 };
 
 export const SourcesAndGuards: Story = {

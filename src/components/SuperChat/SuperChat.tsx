@@ -141,6 +141,17 @@ export interface SuperChatProps {
    */
   composerProps?: SuperChatComposerProps;
   /**
+   * Replace the built-in message box with the host's own composer. When set,
+   * SuperChat renders this element in the composer position instead of its
+   * `ChatComposer`, and the host owns the draft and the send path:
+   * `onMessageSent`, `composerProps` and the composer-only props (`placeholder`,
+   * `allowAttachments`, `maxFileSize`, `onComposerError`, selectors,
+   * `isStreaming`/`onStop`, `dictation`) are not used. `null` renders no
+   * composer. Messages the host appends from `currentParticipantId` still open
+   * an anchored turn.
+   */
+  composer?: React.ReactNode;
+  /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
@@ -388,6 +399,7 @@ export function SuperChat({
   trustedContent,
   readOnly,
   composerProps,
+  composer,
   acceptedFileTypes,
   attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
@@ -1487,55 +1499,65 @@ export function SuperChat({
         </div>
       )}
 
-      <ChatComposer
-        ref={composerRef}
-        onError={onComposerError}
-        placeholder={
-          readOnly
-            ? 'Read-only conversation'
-            : (placeholder ?? 'Type a message… use @ to address an agent')
-        }
-        mentionOptions={mentionOptions}
-        allowAttachments={!readOnly && (allowAttachments ?? true)}
-        acceptedFileTypes={composerAccept}
-        maxFileSize={maxFileSize}
-        maxLength={100000}
-        inputLabel="Message"
-        showAgentSelector={!!agents?.length}
-        agents={agents}
-        selectedAgent={selectedAgent}
-        onAgentChange={onAgentChange}
-        agentSelectorLabel={agentSelectorLabel}
-        showModelSelector={!!modelSelectorProps}
-        modelSelectorProps={modelSelectorProps}
-        selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
-        isStreaming={isStreaming}
-        onStop={onStop}
-        stopLabel={stopLabel}
-        micSlot={
-          dictation && !readOnly ? (
-            // Keyed by conversation so switching drops any in-flight take.
-            <DictationButton
-              key={conversation.id}
-              showStatus
-              // Pulse rings overflow the composer row; the caption shows it's live.
-              showPulse={false}
-              {...dictationProps}
-              onText={appendDictation}
-            />
-          ) : undefined
-        }
-        {...composerProps}
-        // A host may disable a writable composer, never enable a read-only one.
-        disabled={readOnly || composerProps?.disabled}
-        // Matches the thread's p-4 gutter so the composer card lines up with
-        // the messages instead of running flush against the panel edges.
-        className={cn('px-4 pb-4', composerProps?.className)}
-        value={draft}
-        isSending={sendingIn.has(conversation.id)}
-        onValueChange={handleDraftChange}
-        onSend={handleComposerSend}
-      />
+      {composer !== undefined ? (
+        composer !== null && (
+          // Same p-4 gutter as the built-in composer so a host composer lines
+          // up with the messages.
+          <div data-slot="superchat-host-composer" className="px-4 pb-4">
+            {composer}
+          </div>
+        )
+      ) : (
+        <ChatComposer
+          ref={composerRef}
+          onError={onComposerError}
+          placeholder={
+            readOnly
+              ? 'Read-only conversation'
+              : (placeholder ?? 'Type a message… use @ to address an agent')
+          }
+          mentionOptions={mentionOptions}
+          allowAttachments={!readOnly && (allowAttachments ?? true)}
+          acceptedFileTypes={composerAccept}
+          maxFileSize={maxFileSize}
+          maxLength={100000}
+          inputLabel="Message"
+          showAgentSelector={!!agents?.length}
+          agents={agents}
+          selectedAgent={selectedAgent}
+          onAgentChange={onAgentChange}
+          agentSelectorLabel={agentSelectorLabel}
+          showModelSelector={!!modelSelectorProps}
+          modelSelectorProps={modelSelectorProps}
+          selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
+          isStreaming={isStreaming}
+          onStop={onStop}
+          stopLabel={stopLabel}
+          micSlot={
+            dictation && !readOnly ? (
+              // Keyed by conversation so switching drops any in-flight take.
+              <DictationButton
+                key={conversation.id}
+                showStatus
+                // Pulse rings overflow the composer row; the caption shows it's live.
+                showPulse={false}
+                {...dictationProps}
+                onText={appendDictation}
+              />
+            ) : undefined
+          }
+          {...composerProps}
+          // A host may disable a writable composer, never enable a read-only one.
+          disabled={readOnly || composerProps?.disabled}
+          // Matches the thread's p-4 gutter so the composer card lines up with
+          // the messages instead of running flush against the panel edges.
+          className={cn('px-4 pb-4', composerProps?.className)}
+          value={draft}
+          isSending={sendingIn.has(conversation.id)}
+          onValueChange={handleDraftChange}
+          onSend={handleComposerSend}
+        />
+      )}
     </section>
   );
 }
