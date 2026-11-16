@@ -20,6 +20,12 @@ interface JumpToBottomButtonProps {
    * (e.g. `superchat-jump-to-bottom`, `ai-chat-jump-to-bottom`).
    */
   dataSlot: string;
+  /** Accessible name. @default 'Scroll to bottom' */
+  label?: string;
+  /** Visible hint while `hasNewMessages`. @default 'New messages' */
+  newMessagesLabel?: string;
+  /** Accessible name while `hasNewMessages`. @default 'New messages — scroll to bottom' */
+  newMessagesAriaLabel?: string;
 }
 
 /**
@@ -33,15 +39,16 @@ export function JumpToBottomButton({
   hasNewMessages,
   onClick,
   dataSlot,
+  label = 'Scroll to bottom',
+  newMessagesLabel = 'New messages',
+  newMessagesAriaLabel = 'New messages — scroll to bottom',
 }: JumpToBottomButtonProps) {
   return (
     <button
       type="button"
       data-slot={dataSlot}
       onClick={onClick}
-      aria-label={
-        hasNewMessages ? 'New messages — scroll to bottom' : 'Scroll to bottom'
-      }
+      aria-label={hasNewMessages ? newMessagesAriaLabel : label}
       className={cn(
         'absolute bottom-3 left-1/2 z-20 -translate-x-1/2',
         'flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white p-2 text-xs font-medium text-neutral-600 shadow-lg',
@@ -51,7 +58,7 @@ export function JumpToBottomButton({
         hasNewMessages && 'ps-3'
       )}
     >
-      {hasNewMessages && <span>New messages</span>}
+      {hasNewMessages && <span>{newMessagesLabel}</span>}
       <ArrowDownIcon size={16} aria-hidden="true" />
     </button>
   );

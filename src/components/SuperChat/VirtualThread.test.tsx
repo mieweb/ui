@@ -2,6 +2,7 @@ import * as React from 'react';
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
 import { VirtualThread, type VirtualThreadLayout } from './VirtualThread';
+import { useSuperChatLabels } from './labels';
 import type { SuperChatMessage } from './types';
 
 const items: SuperChatMessage[] = ['m1', 'm2'].map((id, index) => ({
@@ -38,11 +39,13 @@ function Thread({
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const contentRef = React.useRef<HTMLDivElement>(null);
   const layoutRef = React.useRef<VirtualThreadLayout | undefined>(layout);
+  const labels = useSuperChatLabels(undefined);
   return (
     <VirtualThread
       items={items}
       participantById={new Map()}
       renderText={(text) => text}
+      labels={labels}
       scrollRef={scrollRef}
       contentRef={contentRef}
       layoutRef={layoutRef}

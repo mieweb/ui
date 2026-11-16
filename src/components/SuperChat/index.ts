@@ -45,6 +45,8 @@ export type {
   Participant,
   ParticipantKind,
   ParticipantStatus,
+  // localization
+  SuperChatLabels,
   // conversation / thread
   SuperChatConversation,
   SuperChatMessage,

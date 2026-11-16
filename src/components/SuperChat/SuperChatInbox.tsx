@@ -22,11 +22,13 @@ import {
   type SuperChatConversationsProps,
 } from './SuperChatConversations';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
+import { useSuperChatLabels } from './labels';
 import type {
   AIRenderTextContent,
   AttachmentKind,
   SuperChatConversation,
   SuperChatCopyFormat,
+  SuperChatLabels,
   SuperChatLinkBuilder,
   SuperChatRef,
   SuperChatRenderPlugin,
@@ -183,8 +185,19 @@ export interface SuperChatInboxProps extends SuperChatPanelPassthroughProps {
    * `sidebarWidth` or `defaultSidebarWidth`.
    */
   onSidebarWidthChange?: (width: number) => void;
-  /** Accessible name of the resize divider. Defaults to `'Resize conversation list'`. */
+  /** Accessible name of the resize divider. Wins over `labels.sidebarResize`. @default 'Resize conversation list' */
   sidebarResizeLabel?: string;
+  /**
+   * Every user-visible string in the inbox, list and panel, for localization;
+   * forwarded to both. Unset keys use the English defaults (through
+   * `MessagesProvider` when present). The narrower `listTitle`, `search`
+   * labels, `sidebarResizeLabel`, `mediaLabels`, `messageLabels`,
+   * `placeholder`, `agentSelectorLabel`, `stopLabel` and `composerProps` win
+   * where they overlap. See {@link SuperChatLabels}.
+   */
+  labels?: Partial<SuperChatLabels>;
+  /** BCP 47 locale for message times, forwarded to the panel. Defaults to the runtime's locale. */
+  locale?: string;
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
@@ -252,7 +265,9 @@ export function SuperChatInbox({
   minSidebarWidth = 200,
   maxSidebarWidth = 480,
   onSidebarWidthChange,
-  sidebarResizeLabel = 'Resize conversation list',
+  sidebarResizeLabel,
+  labels: labelOverrides,
+  locale,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -277,6 +292,7 @@ export function SuperChatInbox({
   onNewConversation,
   onReferenceClick,
 }: SuperChatInboxProps) {
+  const labels = useSuperChatLabels(labelOverrides);
   const [internalActive, setInternalActive] = React.useState(
     defaultActiveConversationId ?? conversations[0]?.id
   );
@@ -369,7 +385,9 @@ export function SuperChatInbox({
       ref={rootRef}
       data-slot="superchat-inbox"
       role="group"
-      aria-label={active ? `Chat: ${active.title}` : 'Chat'}
+      aria-label={
+        active ? labels.inboxLabel(active.title) : labels.emptyInboxLabel
+      }
       className={cn(
         'flex h-full overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900',
         className
@@ -390,6 +408,7 @@ export function SuperChatInbox({
           listHeader={listHeader}
           search={search}
           listFooter={listFooter}
+          labels={labelOverrides}
           className={cn(
             'w-full sm:w-[var(--superchat-sidebar-width)]',
             mobileView === 'chat' && 'hidden sm:flex'
@@ -403,7 +422,7 @@ export function SuperChatInbox({
           maxWidth={widestSidebar}
           onResize={resizeSidebar}
           onReset={() => resizeSidebar(defaultSidebarWidth, true, true)}
-          label={sidebarResizeLabel}
+          label={sidebarResizeLabel ?? labels.sidebarResize}
           // One pane at a time below `sm`: nothing to divide.
           className="hidden sm:block"
         />
@@ -420,6 +439,8 @@ export function SuperChatInbox({
           mediaMaxSize={mediaMaxSize}
           mediaLabels={mediaLabels}
           messageLabels={messageLabels}
+          labels={labelOverrides}
+          locale={locale}
           currentParticipantId={currentParticipantId}
           renderPlugins={renderPlugins}
           renderTextContent={renderTextContent}
@@ -467,7 +488,7 @@ export function SuperChatInbox({
             showSidebar && mobileView === 'list' ? 'hidden sm:flex' : 'flex'
           )}
         >
-          No conversation selected
+          {labels.noConversationSelected}
         </section>
       )}
     </div>

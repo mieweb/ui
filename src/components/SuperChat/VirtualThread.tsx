@@ -20,6 +20,7 @@ import type {
   AIRenderTextContent,
   Participant,
   SuperChatCopyFormat,
+  SuperChatLabels,
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
@@ -64,14 +65,14 @@ export interface VirtualThreadProps {
     attachmentId: string,
     play?: boolean
   ) => void;
-  openMediaLabel?: string;
-  playMediaLabel?: string;
+  /** Resolved labels, forwarded to each row. */
+  labels: SuperChatLabels;
+  /** Locale for message times, forwarded to each row. */
+  locale?: string;
   attachmentLabels?: SuperChatAttachmentLabels;
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
-  /** Prefix of a scheduled message's indicator, forwarded to each row. */
-  scheduledLabel?: string;
   /** The host's card for an attachment, forwarded to each row. */
   renderMessageMedia?: SuperChatRenderMessageMedia;
   /** The attachment cards' box, a CSS length, forwarded to each row. */
@@ -114,12 +115,11 @@ export function VirtualThread({
   onMessageEdited,
   defaultCopyFormat,
   onOpenMedia,
-  openMediaLabel,
-  playMediaLabel,
+  labels,
+  locale,
   attachmentLabels,
   mediaErrorLabel,
   mediaRetryLabel,
-  scheduledLabel,
   renderMessageMedia,
   mediaMaxSize,
   toolCallGroup,
@@ -199,12 +199,11 @@ export function VirtualThread({
                   onMessageEdited={onMessageEdited}
                   defaultCopyFormat={defaultCopyFormat}
                   onOpenMedia={onOpenMedia}
-                  openMediaLabel={openMediaLabel}
-                  playMediaLabel={playMediaLabel}
+                  labels={labels}
+                  locale={locale}
                   attachmentLabels={attachmentLabels}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
-                  scheduledLabel={scheduledLabel}
                   renderMessageMedia={renderMessageMedia}
                   mediaMaxSize={mediaMaxSize}
                   toolCallGroup={toolCallGroup}
