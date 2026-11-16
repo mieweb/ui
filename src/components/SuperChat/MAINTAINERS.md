@@ -166,6 +166,17 @@ with the AI module's own pieces so an agent turn matches `AIChat`:
 ref-backed wrappers, rebuilt only when a callback appears/disappears or `labels`
 changes, so a host's inline options object doesn't defeat `MessageRow`'s memo.
 
+## Message footer
+
+`renderMessageFooter` reaches the rows through `MessageFooterContext`
+([parts.tsx](parts.tsx)), not as a `MessageRow` prop. The context value
+(`{ render, conversation }`) changes on every host render with an inline
+renderer or a streamed update; only each row's small `MessageFooter` consumer
+re-renders, so the memoized row — bubble, Markdown pipeline, actions — is
+skipped while footers still show the host's latest state. A stable row prop
+would have kept rows memoized but left footers stale until their message
+changed. The provider wraps both thread paths (plain and `VirtualThread`).
+
 ## Motion
 
 Opt-in via `@mieweb/ui/motion` — see [../../motion/MAINTAINERS.md](../../motion/MAINTAINERS.md).

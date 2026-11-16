@@ -40,6 +40,7 @@ import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
   ParticipantAvatar,
   MessageRow,
+  MessageFooterContext,
   byTime,
   detectMentions,
   matchMentionTokens,
@@ -62,6 +63,7 @@ import type {
   SuperChatMessageLabels,
   SuperChatView,
   SuperChatRef,
+  SuperChatRenderMessageFooter,
   SuperChatRenderPlugin,
 } from './types';
 
@@ -185,6 +187,17 @@ export interface SuperChatProps {
    * inline object does not re-render every message.
    */
   toolCallGroup?: MCPToolCallGroupOptions;
+  /**
+   * Render host controls under each message bubble, from humans and agents
+   * alike (e.g. edit with branching, version arrows, feedback, a model badge,
+   * "Continue"). SuperChat's counterpart of `AIChat`'s `renderMessageFooter`,
+   * with `{ conversation, participant, isSelf, streaming }` as a second
+   * argument. The built-in Copy/Edit actions are unaffected. Called on every
+   * SuperChat render for each mounted message, without re-rendering the
+   * (memoized) message bodies, so keep it cheap; system notices and reference
+   * chips get no footer.
+   */
+  renderMessageFooter?: SuperChatRenderMessageFooter;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -273,6 +286,7 @@ export function SuperChat({
   stopLabel,
   dictation,
   toolCallGroup,
+  renderMessageFooter,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -807,6 +821,16 @@ export function SuperChat({
     [hasToolCallGroup, hasApprove, hasDeny, toolCallGroupLabels]
   );
 
+  // Footer renderer for the rows, through context so memoized rows stay put
+  // (see MessageFooterContext).
+  const messageFooterSource = React.useMemo(
+    () =>
+      renderMessageFooter
+        ? { render: renderMessageFooter, conversation }
+        : null,
+    [renderMessageFooter, conversation]
+  );
+
   // Agents/humans addressable via `@` (exclude the system participant).
   const mentionOptions = React.useMemo(
     () =>
@@ -1027,65 +1051,67 @@ export function SuperChat({
           data-slot="superchat-thread-viewport"
           className="relative flex min-h-0 flex-1 flex-col"
         >
-          {virtualized ? (
-            <VirtualThread
-              items={orderedThread}
-              participantById={participantById}
-              currentParticipantId={currentParticipantId}
-              renderText={renderText}
-              linkBuilder={linkBuilder}
-              onReferenceClick={onReferenceClick}
-              editable={editable}
-              onMessageEdited={handleMessageEdited}
-              defaultCopyFormat={defaultCopyFormat}
-              onOpenMedia={handleOpenMedia}
-              openMediaLabel={labels.openMedia}
-              playMediaLabel={labels.playMedia}
-              mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
-              mediaRetryLabel={mediaFeedProps?.labels?.retry}
-              scheduledLabel={scheduledLabel}
-              toolCallGroup={stableToolCallGroup}
-              scrollRef={threadRef}
-              contentRef={threadContentRef}
-              containerProps={{
-                'data-slot': 'superchat-thread',
-                role: 'log',
-                'aria-label': 'Messages',
-                'aria-live': 'polite',
+          <MessageFooterContext.Provider value={messageFooterSource}>
+            {virtualized ? (
+              <VirtualThread
+                items={orderedThread}
+                participantById={participantById}
+                currentParticipantId={currentParticipantId}
+                renderText={renderText}
+                linkBuilder={linkBuilder}
+                onReferenceClick={onReferenceClick}
+                editable={editable}
+                onMessageEdited={handleMessageEdited}
+                defaultCopyFormat={defaultCopyFormat}
+                onOpenMedia={handleOpenMedia}
+                openMediaLabel={labels.openMedia}
+                playMediaLabel={labels.playMedia}
+                mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
+                mediaRetryLabel={mediaFeedProps?.labels?.retry}
+                scheduledLabel={scheduledLabel}
+                toolCallGroup={stableToolCallGroup}
+                scrollRef={threadRef}
+                contentRef={threadContentRef}
+                containerProps={{
+                  'data-slot': 'superchat-thread',
+                  role: 'log',
+                  'aria-label': 'Messages',
+                  'aria-live': 'polite',
+                  // Focusable so keyboard-only users can scroll the message history.
+                  tabIndex: 0,
+                  className: 'flex-1 overflow-y-auto p-4',
+                }}
+              />
+            ) : (
+              <div
+                data-slot="superchat-thread"
+                ref={threadRef}
+                role="log"
+                aria-label="Messages"
+                aria-live="polite"
                 // Focusable so keyboard-only users can scroll the message history.
-                tabIndex: 0,
-                className: 'flex-1 overflow-y-auto p-4',
-              }}
-            />
-          ) : (
-            <div
-              data-slot="superchat-thread"
-              ref={threadRef}
-              role="log"
-              aria-label="Messages"
-              aria-live="polite"
-              // Focusable so keyboard-only users can scroll the message history.
-              // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
-              tabIndex={0}
-              className="flex-1 overflow-y-auto p-4"
-            >
-              <div ref={threadContentRef} className="space-y-4">
-                {(turnIndex === -1
-                  ? orderedThread
-                  : orderedThread.slice(0, turnIndex)
-                ).map(renderMessageRow)}
-                {turnIndex !== -1 && (
-                  <div
-                    data-slot="superchat-turn"
-                    className="space-y-4"
-                    style={{ minHeight: turnMinHeight }}
-                  >
-                    {orderedThread.slice(turnIndex).map(renderMessageRow)}
-                  </div>
-                )}
+                // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+                tabIndex={0}
+                className="flex-1 overflow-y-auto p-4"
+              >
+                <div ref={threadContentRef} className="space-y-4">
+                  {(turnIndex === -1
+                    ? orderedThread
+                    : orderedThread.slice(0, turnIndex)
+                  ).map(renderMessageRow)}
+                  {turnIndex !== -1 && (
+                    <div
+                      data-slot="superchat-turn"
+                      className="space-y-4"
+                      style={{ minHeight: turnMinHeight }}
+                    >
+                      {orderedThread.slice(turnIndex).map(renderMessageRow)}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </MessageFooterContext.Provider>
           {/* The wrapper is a zero-height strip pinned to the viewport bottom:
             the button keeps its own absolute placement (now relative to the
             strip, which lands it in the same spot) and the strip carries the
