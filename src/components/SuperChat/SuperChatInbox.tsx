@@ -17,7 +17,10 @@ import {
   type SuperChatComposerProps,
   type SuperChatProps,
 } from './SuperChat';
-import { SuperChatConversations } from './SuperChatConversations';
+import {
+  SuperChatConversations,
+  type SuperChatConversationsProps,
+} from './SuperChatConversations';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import type {
   AIRenderTextContent,
@@ -117,6 +120,22 @@ export interface SuperChatInboxProps {
   onSidebarWidthChange?: (width: number) => void;
   /** Accessible name of the resize divider. Defaults to `'Resize conversation list'`. */
   sidebarResizeLabel?: string;
+  /** Heading above the conversation list; `null` hides it. See {@link SuperChatConversationsProps.listTitle}. */
+  listTitle?: SuperChatConversationsProps['listTitle'];
+  /** Host content in the list header, e.g. filters. See {@link SuperChatConversationsProps.listHeader}. */
+  listHeader?: SuperChatConversationsProps['listHeader'];
+  /**
+   * Search box in the list header. The host filters and passes the matches as
+   * `listConversations`. See {@link SuperChatConversationsProps.search}.
+   */
+  search?: SuperChatConversationsProps['search'];
+  /**
+   * The conversations the list shows, e.g. search or filter results. Defaults
+   * to `conversations`. The panel still opens from `conversations`, so
+   * narrowing the list never closes the open conversation or drops its
+   * unsent draft.
+   */
+  listConversations?: SuperChatConversation[];
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
@@ -177,6 +196,10 @@ export function SuperChatInbox({
   maxSidebarWidth = 480,
   onSidebarWidthChange,
   sidebarResizeLabel = 'Resize conversation list',
+  listTitle,
+  listHeader,
+  search,
+  listConversations,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -285,11 +308,14 @@ export function SuperChatInbox({
     >
       {showSidebar && (
         <SuperChatConversations
-          conversations={conversations}
+          conversations={listConversations ?? conversations}
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
           listFooter={listFooter}
+          listTitle={listTitle}
+          listHeader={listHeader}
+          search={search}
           className={cn(
             'w-full sm:w-[var(--superchat-sidebar-width)]',
             mobileView === 'chat' && 'hidden sm:flex'
