@@ -2,6 +2,7 @@
 name: MIE UI Styling Agent
 description: Styling & theming specialist for the @mieweb/ui design system — design tokens, Tailwind classes, CSS variables, brands and brand switching, dark mode, and motion/animation. Invoke to audit components for branding compliance, fix hardcoded colors/radius, apply or create a brand, debug dark mode, or wire up motion.
 tools: ['search', 'codebase', 'fetch', 'editFiles']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

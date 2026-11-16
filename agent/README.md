@@ -22,8 +22,8 @@ governing spec: later tickets cite it instead of re-deciding.
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [mieweb-ui.instructions.md](mieweb-ui.instructions.md) | The rules template. Copied verbatim to the consumer's `.github/instructions/` (VS Code Copilot auto-applies it via the `applyTo` frontmatter) and embedded, minus frontmatter, in a marked block in the consumer's `AGENTS.md` (the cross-tool convention).                                                       |
 | [init-agent.mjs](init-agent.mjs)                       | The `mieweb-ui` bin. Idempotent — rerun after upgrading `@mieweb/ui` to refresh all targets. `--experimental-agents` additionally installs the agent team below.                                                                                                                                                  |
-| [agents/](agents/)                                     | Agent templates: `mieweb-ui-design` (orchestrator) + `mieweb-ui-styling` + `mieweb-ui-install` + `mieweb-ui-a11y` + `mieweb-ui-i18n` + `mieweb-ui-migration` + `mieweb-ui-richtext` + `mieweb-ui-grids` + `mieweb-ui-datavis` + `mieweb-ui-views`. Installed to the consumer's `.github/agents/` behind `--experimental-agents`.                               |
-| [skills/](skills/)                                     | Skill templates: `mieweb-ui-catalog`, `mieweb-ui-tokens`, `mieweb-ui-icons` (generated — `pnpm agent:skills`, never hand-edit) + `mieweb-ui-brands`, `mieweb-ui-tailwind4`, `mieweb-ui-a11y-checklist`, `mieweb-ui-i18n-checklist`, `mieweb-ui-kerebron`, `mieweb-ui-datavis-api`, `mieweb-ui-charts`, `mieweb-ui-views` (hand-written). Installed to `.github/skills/` behind `--experimental-agents`. |
+| [agents/](agents/)                                     | Agent templates: `mieweb-ui-design` (orchestrator) + `mieweb-ui-styling` + `mieweb-ui-install` + `mieweb-ui-a11y` + `mieweb-ui-i18n` + `mieweb-ui-migration` + `mieweb-ui-richtext` + `mieweb-ui-grids` + `mieweb-ui-datavis` + `mieweb-ui-views` + `mieweb-ui-superchat`. Installed to the consumer's `.github/agents/` behind `--experimental-agents`.                               |
+| [skills/](skills/)                                     | Skill templates: `mieweb-ui-catalog`, `mieweb-ui-tokens`, `mieweb-ui-icons` (generated — `pnpm agent:skills`, never hand-edit) + `mieweb-ui-brands`, `mieweb-ui-tailwind4`, `mieweb-ui-a11y-checklist`, `mieweb-ui-i18n-checklist`, `mieweb-ui-kerebron`, `mieweb-ui-datavis-api`, `mieweb-ui-charts`, `mieweb-ui-views`, `mieweb-ui-superchat` (hand-written). Installed to `.github/skills/` behind `--experimental-agents`. |
 | `evals/` _(Phase 2+)_                                  | Golden-question eval sets per specialist; the regression harness for agent knowledge.                                                                                                                                                                                                                             |
 
 Rule content is sourced from [lessons/component-policy.md](../lessons/component-policy.md);
@@ -63,6 +63,11 @@ execution decisions). Summarized here as the citable spec.
    stays byte-identical to today's behavior (instructions file + `AGENTS.md`
    block). The default flips on in P5.2
    ([#607](https://github.com/mieweb/ui/issues/607)) — the official launch.
+10. **Single front door.** Only the orchestrator is user-invocable; every
+    specialist ships `user-invocable: false` and is reached via subagent
+    delegation from the Design Agent. The orchestrator's only handoff is
+    **Build it** (approved spec → default agent, which can edit files).
+    Decided in [#764](https://github.com/mieweb/ui/issues/764).
 
 ## Naming & layout
 
@@ -121,6 +126,7 @@ tools: [<minimal set for the persona>]
 # auditors:        ['search', 'codebase', 'fetch'] — no edit/terminal tools
 # fixers:          add 'editFiles'
 # diagnosticians:  add 'runInTerminal' only if the workflow runs commands
+user-invocable: false # specialists only — the orchestrator omits this (rule 10)
 handoffs: # where useful — auditors always include an "Apply Fixes" handoff
   - label: Apply Fixes
     agent: agent
@@ -187,7 +193,3 @@ Everything else is delegated per this table (final domain boundaries):
   attribute which specialist produced which part.
 - _No fit / unsure:_ say so and point at the catalog/Storybook — never
   improvise an answer outside the roster.
-
-Until a specialist ships (phases land incrementally), its row is absent from
-the installed roster and the orchestrator answers from the catalog skill or
-defers to docs.
