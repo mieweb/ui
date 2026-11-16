@@ -5,12 +5,14 @@ import { isMap, isSeq, parseDocument } from 'yaml';
 
 /**
  * The shared MDY document engine behind RichTextEsheet and EncounterVisit
- * (mieweb/ui#758): a portable document whose YAML front matter carries the
- * native eSheet form, response map and host definition, and whose Markdown
- * body holds authored prose with inline `[display](mdy:<id>)` projections of
- * native answers. Each host configures the engine with its definition key,
- * field projections and initial body; the parsing, link refresh, metadata
- * preservation and rendering below stay identical across hosts.
+ * (mieweb/ui#758, mieweb/ui#772): a portable document whose YAML front matter
+ * carries the native eSheet form and response map, and whose Markdown body
+ * holds authored prose with inline `[display](mdy:<id>)` projections of
+ * native answers. The engine derives field projections and the initial body
+ * from the native form itself; hosts optionally refine individual projections
+ * (labels, displays, section mapping) through a single `projectField` hook
+ * and add extra front-matter entries. Parsing, link refresh, metadata
+ * preservation and rendering stay identical across hosts.
  */
 
 export interface MdyDocumentField {
@@ -23,6 +25,8 @@ export interface MdyDocumentField {
   display: string;
   /** Derived capture state for report pruning; never stored in the MDY envelope. */
   empty?: boolean;
+  /** Render as a prose block instead of a labeled row in the initial body; derived, never stored. */
+  narrative?: boolean;
 }
 
 export interface MdyDocumentDiagnostic {
@@ -39,58 +43,73 @@ export interface MdyDocumentDiagnostic {
   fieldId?: string;
 }
 
-export interface ParsedMdyDocument<TDefinition> {
+export interface ParsedMdyDocument {
   source: string;
   frontMatterSource: string;
   body: string;
   frontMatter: Record<string, unknown> | null;
   form?: FormDefinition;
   response?: Record<string, FieldResponse>;
-  definition?: TDefinition;
   diagnostics: MdyDocumentDiagnostic[];
 }
 
-/** Markdown helpers handed to a host's initial-body builder. */
-export interface MdyDocumentMarkdown {
-  /** Escape text for safe literal use in Markdown prose. */
-  markdownText(value: string): string;
-  /** An inline projection link for a native field. */
-  fieldLink(field: MdyDocumentField): string;
+/** The native form and response map every MDY snapshot carries. */
+export interface MdyDocumentSnapshot {
+  form: FormDefinition;
+  responses: Record<string, FieldResponse>;
 }
 
-export interface MdyDocumentConfig<
-  TDefinition extends { id: string; title: string },
-  TSnapshot extends {
-    definition: TDefinition;
-    responses: Record<string, FieldResponse>;
-  },
-> {
+/** Minimal structural view of a native leaf field the engine projects. */
+export interface MdyNativeField {
+  id: string;
+  fieldType: string;
+  question?: string;
+  unit?: string;
+  _sourceData?: unknown;
+}
+
+/** The nearest enclosing native section (or the page) of a projected field. */
+export interface MdyNativeSection {
+  id: string;
+  title?: string;
+}
+
+export interface MdyDocumentFieldContext {
+  field: MdyNativeField;
+  section: MdyNativeSection;
+}
+
+/** Host overrides for one field's projection; omitted values use engine defaults. */
+export interface MdyFieldProjection {
+  /** Host-facing section identity; defaults to the native section field id. */
+  sectionId?: string;
+  label?: string;
+  display?: string;
+  empty?: boolean;
+  /** Render as a prose block instead of a labeled row in the initial body. */
+  narrative?: boolean;
+}
+
+export interface MdyDocumentConfig<TSnapshot extends MdyDocumentSnapshot> {
   /** Reserved in-memory response id carrying the authored body. */
   documentFieldId: string;
   /** Prefix bridging native colon-bearing ids to MDY's id grammar, e.g. `visit`. */
   linkPrefix: string;
-  /** Front-matter key carrying the host's document definition. */
-  definitionKey: string;
   /** Templit engine name used when rendering the flattened document. */
   engineName: string;
   /** Diagnostic for a source without YAML front matter. */
   missingFrontMatterMessage: string;
-  /** Diagnostic for an invalid host definition in front matter. */
-  invalidDefinitionMessage: string;
   /** `_sourceData` keys owned by the host's form generator. */
   sourceDataProperties: readonly string[];
-  /** Throw on an invalid host definition (same contract as the component). */
-  validateDefinition(definition: TDefinition): void;
-  /** Regenerate the native eSheet form for the snapshot's definition. */
-  createFormDefinition(snapshot: TSnapshot): FormDefinition;
-  /** One link projection per native field, including empty memory aids. */
-  getFields(snapshot: TSnapshot): MdyDocumentField[];
-  /** The starting authored body when a document has none yet. */
-  createInitialBody(
-    snapshot: TSnapshot,
-    fields: MdyDocumentField[],
-    markdown: MdyDocumentMarkdown
-  ): string;
+  /**
+   * Refine one native field's projection. Return `null` to omit the field
+   * entirely; return `undefined` (or omit properties) to accept the engine's
+   * defaults, which come from the native form and response map alone.
+   */
+  projectField?(
+    context: MdyDocumentFieldContext,
+    snapshot: TSnapshot
+  ): MdyFieldProjection | null | undefined;
   /**
    * Additional host front-matter entries (e.g. parties). An `undefined`
    * value removes the key from a previously saved document.
@@ -102,21 +121,17 @@ export interface MdyDocumentConfig<
    * projections. Loaded lazily because snapshot creation calls `create`.
    */
   rebuildSnapshot?(
-    parsed: ParsedMdyDocument<TDefinition>
+    parsed: ParsedMdyDocument
   ): Promise<(TSnapshot & { mdy: string }) | null>;
 }
 
-export interface MdyDocumentEngine<
-  TDefinition extends { id: string; title: string },
-  TSnapshot extends {
-    definition: TDefinition;
-    responses: Record<string, FieldResponse>;
-  },
-> {
+export interface MdyDocumentEngine<TSnapshot extends MdyDocumentSnapshot> {
   /** Encode a native id as an MDY-safe projection id. */
   linkId(fieldId: string): string;
-  parse(source: string): ParsedMdyDocument<TDefinition>;
+  parse(source: string): ParsedMdyDocument;
   create(snapshot: TSnapshot, body?: string, source?: string): string;
+  /** One link projection per native field, including empty memory aids. */
+  fields(snapshot: TSnapshot): MdyDocumentField[];
   render(source: string): Promise<{
     raw: string;
     html?: string;
@@ -589,16 +604,87 @@ function setPreserving(
   return true;
 }
 
+interface MdyDocumentSectionGroup {
+  section: MdyNativeSection;
+  fields: MdyDocumentFieldContext[];
+}
+
+/** Container field types whose children are traversed rather than projected. */
+const STRUCTURAL_FIELD_TYPES = new Set(['section', 'pages']);
+
+/** Flatten native pages into top-level section groups of projectable leaf fields. */
+function traverseForm(form: FormDefinition): MdyDocumentSectionGroup[] {
+  const groups: MdyDocumentSectionGroup[] = [];
+  const collect = (
+    fields: unknown,
+    section: MdyNativeSection,
+    into: MdyDocumentFieldContext[]
+  ): void => {
+    if (!Array.isArray(fields)) return;
+    for (const field of fields) {
+      if (
+        !record(field) ||
+        typeof field.id !== 'string' ||
+        typeof field.fieldType !== 'string'
+      )
+        continue;
+      if (STRUCTURAL_FIELD_TYPES.has(field.fieldType)) {
+        collect(
+          field.fields,
+          {
+            id: field.id,
+            title: typeof field.title === 'string' ? field.title : undefined,
+          },
+          into
+        );
+      } else if (field.fieldType !== 'display') {
+        into.push({
+          field: {
+            id: field.id,
+            fieldType: field.fieldType,
+            question:
+              typeof field.question === 'string' ? field.question : undefined,
+            unit: typeof field.unit === 'string' ? field.unit : undefined,
+            _sourceData: field._sourceData,
+          },
+          section,
+        });
+      }
+    }
+  };
+  for (const page of form.pages) {
+    if (!Array.isArray(page.fields)) continue;
+    let loose: MdyDocumentSectionGroup | null = null;
+    for (const field of page.fields) {
+      if (
+        record(field) &&
+        field.fieldType === 'section' &&
+        typeof field.id === 'string'
+      ) {
+        const section = {
+          id: field.id,
+          title: typeof field.title === 'string' ? field.title : undefined,
+        };
+        const group: MdyDocumentSectionGroup = { section, fields: [] };
+        collect(field.fields, section, group.fields);
+        groups.push(group);
+        loose = null;
+      } else {
+        if (!loose) {
+          loose = { section: { id: page.id, title: page.title }, fields: [] };
+          groups.push(loose);
+        }
+        collect([field], loose.section, loose.fields);
+      }
+    }
+  }
+  return groups;
+}
+
 /** Configure the shared engine for one document host. */
-export function createMdyDocumentEngine<
-  TDefinition extends { id: string; title: string },
-  TSnapshot extends {
-    definition: TDefinition;
-    responses: Record<string, FieldResponse>;
-  },
->(
-  config: MdyDocumentConfig<TDefinition, TSnapshot>
-): MdyDocumentEngine<TDefinition, TSnapshot> {
+export function createMdyDocumentEngine<TSnapshot extends MdyDocumentSnapshot>(
+  config: MdyDocumentConfig<TSnapshot>
+): MdyDocumentEngine<TSnapshot> {
   /** Encode native ids without assuming their punctuation is valid in MDY. */
   const linkId = (fieldId: string): string =>
     `${config.linkPrefix}_${Array.from(
@@ -670,14 +756,70 @@ export function createMdyDocumentEngine<
   };
 
   /**
+   * One link projection per native field, derived from the form and response
+   * map with optional host refinements, including empty memory aids.
+   */
+  function projectFields(snapshot: TSnapshot): MdyDocumentField[] {
+    return traverseForm(snapshot.form).flatMap((group) =>
+      group.fields.flatMap((context) => {
+        const projection = config.projectField?.(context, snapshot);
+        if (projection === null) return [];
+        const response = snapshot.responses[context.field.id];
+        const display =
+          projection?.display ??
+          (response
+            ? fieldDisplay({ ...response, unit: context.field.unit })
+            : '');
+        return [
+          {
+            id: linkId(context.field.id),
+            fieldId: context.field.id,
+            sectionId: projection?.sectionId ?? context.section.id,
+            label:
+              projection?.label ??
+              context.field.question ??
+              context.section.title ??
+              context.field.id,
+            display: display.trim() ? display : '—',
+            empty: projection?.empty ?? !hasNativeDocumentValue(response),
+            narrative: projection?.narrative ?? false,
+          },
+        ];
+      })
+    );
+  }
+
+  /** The starting authored body when a document has none yet. */
+  function createInitialBody(
+    snapshot: TSnapshot,
+    fields: MdyDocumentField[]
+  ): string {
+    const byFieldId = new Map(fields.map((field) => [field.fieldId, field]));
+    return [
+      `# ${markdownText(snapshot.form.title ?? snapshot.form.id)}`,
+      ...traverseForm(snapshot.form).map((group) =>
+        [
+          `## ${markdownText(group.section.title ?? group.section.id)}`,
+          group.fields
+            .flatMap((context) => byFieldId.get(context.field.id) ?? [])
+            .map((field) =>
+              field.narrative
+                ? fieldLink(field)
+                : `- **${markdownText(field.label)}:** ${fieldLink(field)}`
+            )
+            .join('\n'),
+        ].join('\n\n')
+      ),
+    ].join('\n\n');
+  }
+
+  /**
    * Projections imported with the document whose fields were since removed.
    * Lets live editors normalize retired links the same way `create` does,
    * without round-tripping the authored body through serialization.
    */
   function retiredFields(snapshot: TSnapshot): MdyDocumentField[] {
-    const activeIds = new Set(
-      config.getFields(snapshot).map((field) => field.id)
-    );
+    const activeIds = new Set(projectFields(snapshot).map((field) => field.id));
     const reserved = snapshot.responses[config.documentFieldId];
     const retired = new Map<string, MdyDocumentField>();
     const source = reserved?.attributes?.mdyFrontMatterSource;
@@ -702,9 +844,9 @@ export function createMdyDocumentEngine<
   }
 
   /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
-  function parse(source: string): ParsedMdyDocument<TDefinition> {
+  function parse(source: string): ParsedMdyDocument {
     const split = splitSource(source);
-    const result: ParsedMdyDocument<TDefinition> = {
+    const result: ParsedMdyDocument = {
       source,
       frontMatterSource: split?.frontMatterSource ?? '',
       body: split?.body ?? source,
@@ -740,14 +882,6 @@ export function createMdyDocumentEngine<
     if (validNativeResponses(data.response)) result.response = data.response;
     else
       error('response', 'Front matter requires a native eSheet response map.');
-    if (data[config.definitionKey] !== undefined) {
-      try {
-        config.validateDefinition(data[config.definitionKey] as TDefinition);
-        result.definition = data[config.definitionKey] as TDefinition;
-      } catch {
-        error('definition', config.invalidDefinitionMessage);
-      }
-    }
     const fields = fieldsFromFrontMatter(data);
     const byId = new Map(fields.map((field) => [field.id, field]));
     const linked = new Set<string>();
@@ -827,12 +961,12 @@ export function createMdyDocumentEngine<
     const previousSource =
       source ?? reserved?.attributes?.mdyFrontMatterSource ?? '';
     const split = splitSource(previousSource);
-    const fields = config.getFields(snapshot);
+    const fields = projectFields(snapshot);
     const authoredBody =
       body ??
       reserved?.answer ??
       split?.body ??
-      config.createInitialBody(snapshot, fields, { markdownText, fieldLink });
+      createInitialBody(snapshot, fields);
     let refreshedBody = refreshLinks(authoredBody, fields);
     const responses = Object.fromEntries(
       Object.entries(snapshot.responses).filter(
@@ -873,7 +1007,7 @@ export function createMdyDocumentEngine<
       kind: 'document',
       schema: 'esheet',
       template: oldMdy.template ?? {
-        name: snapshot.definition.title,
+        name: snapshot.form.title ?? snapshot.form.id,
         version: '1.0.0',
       },
     };
@@ -881,11 +1015,10 @@ export function createMdyDocumentEngine<
       mdy: metadata,
       form: mergeNativeFormMetadata(
         record(existing) ? existing.form : undefined,
-        config.createFormDefinition(snapshot),
+        snapshot.form,
         new Set(config.sourceDataProperties)
       ),
       response: responses,
-      [config.definitionKey]: snapshot.definition,
     })) {
       changed = setPreserving(document, [key], value) || changed;
     }
@@ -939,7 +1072,7 @@ export function createMdyDocumentEngine<
     let parsed = parse(source);
     let fields = fieldsFromFrontMatter(parsed.frontMatter ?? {});
     const rebuilt =
-      parsed.definition && parsed.response && config.rebuildSnapshot
+      parsed.response && config.rebuildSnapshot
         ? await config.rebuildSnapshot(parsed)
         : null;
     if (rebuilt) {
@@ -947,7 +1080,7 @@ export function createMdyDocumentEngine<
       // canonical response wins over cached projections and display strings.
       parsed = parse(rebuilt.mdy);
       const canonical = new Map(
-        config.getFields(rebuilt).map((field) => [field.fieldId, field])
+        projectFields(rebuilt).map((field) => [field.fieldId, field])
       );
       fields = fieldsFromFrontMatter(parsed.frontMatter ?? {}).map((field) => ({
         ...field,
@@ -1015,6 +1148,7 @@ export function createMdyDocumentEngine<
     linkId,
     parse,
     create,
+    fields: projectFields,
     render: renderMdy,
     getDocumentBody,
     updateDocumentBody,

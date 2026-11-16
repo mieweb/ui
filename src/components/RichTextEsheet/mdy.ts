@@ -1,10 +1,8 @@
-import type { FieldResponse } from '@esheet/core';
+import type { FieldResponse, FormDefinition } from '@esheet/core';
 import {
   createMdyDocumentEngine,
-  hasNativeDocumentValue,
   type MdyDocumentDiagnostic,
   type MdyDocumentField,
-  type MdyDocumentMarkdown,
   type ParsedMdyDocument,
 } from './documentMdy';
 import {
@@ -31,51 +29,34 @@ export type RichTextEsheetMdyField = MdyDocumentField;
 
 export type RichTextEsheetMdyDiagnostic = MdyDocumentDiagnostic;
 
-export type ParsedRichTextEsheetMdy =
-  ParsedMdyDocument<RichTextEsheetDefinition>;
+export type ParsedRichTextEsheetMdy = ParsedMdyDocument & {
+  definition?: RichTextEsheetDefinition;
+};
+
+/** The engine works on the native form; hosts derive it at the boundary. */
+type RichTextEsheetMdySnapshot = RichTextEsheetMdyInput & {
+  form: FormDefinition;
+};
+
+function withForm(input: RichTextEsheetMdyInput): RichTextEsheetMdySnapshot {
+  return {
+    ...input,
+    form: createRichTextEsheetFormDefinition(input.definition, input.parties),
+  };
+}
 
 /** One link projection per document section, including empty memory aids. */
 export function getRichTextEsheetMdyFields(
   snapshot: RichTextEsheetMdyInput
 ): RichTextEsheetMdyField[] {
-  return snapshot.definition.sections.map((section) => {
-    const fieldId = getRichTextEsheetFieldId(section.id);
-    const text = getRichTextEsheetSectionText(snapshot.responses, section.id);
-    return {
-      id: engine.linkId(fieldId),
-      fieldId,
-      sectionId: section.id,
-      label: section.title,
-      display: text.trim() ? text : '—',
-      empty: !hasNativeDocumentValue(snapshot.responses[fieldId]),
-    };
-  });
+  return engine.fields(withForm(snapshot));
 }
 
 /** Links imported with the document whose sections were since removed. */
 export function getRichTextEsheetRetiredMdyFields(
   snapshot: RichTextEsheetMdyInput
 ): RichTextEsheetMdyField[] {
-  return engine.retiredFields(snapshot);
-}
-
-function initialBody(
-  snapshot: RichTextEsheetMdyInput,
-  fields: RichTextEsheetMdyField[],
-  { markdownText, fieldLink }: MdyDocumentMarkdown
-): string {
-  return [
-    `# ${markdownText(snapshot.definition.title)}`,
-    ...snapshot.definition.sections.map((section) =>
-      [
-        `## ${markdownText(section.title)}`,
-        fields
-          .filter((field) => field.sectionId === section.id)
-          .map(fieldLink)
-          .join('\n'),
-      ].join('\n\n')
-    ),
-  ].join('\n\n');
+  return engine.retiredFields(withForm(snapshot));
 }
 
 function validParty(value: unknown): value is RichTextEsheetParty {
@@ -100,42 +81,67 @@ export function getRichTextEsheetMdyParties(
   }));
 }
 
-const engine = createMdyDocumentEngine<
-  RichTextEsheetDefinition,
-  RichTextEsheetMdyInput
->({
+/** Validate and extract the host definition the front matter still carries. */
+function readMdyDefinition(
+  parsed: ParsedMdyDocument
+): RichTextEsheetDefinition | undefined {
+  const raw = parsed.frontMatter?.richTextEsheet;
+  if (raw === undefined) return undefined;
+  try {
+    validateRichTextEsheetDefinition(raw as RichTextEsheetDefinition);
+    return raw as RichTextEsheetDefinition;
+  } catch {
+    parsed.diagnostics.push({
+      severity: 'error',
+      code: 'definition',
+      message: 'Front matter contains an invalid richTextEsheet definition.',
+    });
+    return undefined;
+  }
+}
+
+const engine = createMdyDocumentEngine<RichTextEsheetMdySnapshot>({
   documentFieldId: RICHTEXT_ESHEET_DOCUMENT_FIELD_ID,
   linkPrefix: 'doc',
-  definitionKey: 'richTextEsheet',
   engineName: 'richtext-esheet-mdy-document',
   missingFrontMatterMessage:
     'A RichTextEsheet MDY document requires YAML front matter.',
-  invalidDefinitionMessage:
-    'Front matter contains an invalid richTextEsheet definition.',
   sourceDataProperties: ['narrativeHideLabel', 'narrativeFindings'],
-  validateDefinition: validateRichTextEsheetDefinition,
-  createFormDefinition: (snapshot) =>
-    createRichTextEsheetFormDefinition(snapshot.definition, snapshot.parties),
-  getFields: getRichTextEsheetMdyFields,
-  createInitialBody: initialBody,
+  projectField: ({ field }, snapshot) => {
+    const section = snapshot.definition.sections.find(
+      (candidate) => getRichTextEsheetFieldId(candidate.id) === field.id
+    );
+    if (!section) return undefined;
+    return {
+      sectionId: section.id,
+      label: section.title,
+      display: getRichTextEsheetSectionText(snapshot.responses, section.id),
+      narrative: true,
+    };
+  },
   extraFrontMatter: (snapshot) => ({
+    richTextEsheet: snapshot.definition,
     parties: snapshot.parties?.length ? snapshot.parties : undefined,
   }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached doc_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
+    const definition = readMdyDefinition(parsed);
+    if (!definition || !parsed.response) return null;
+    const parties = getRichTextEsheetMdyParties(parsed.frontMatter);
     const { createRichTextEsheetSnapshot } = await import('./model');
-    return createRichTextEsheetSnapshot(
-      parsed.definition!,
+    const snapshot = createRichTextEsheetSnapshot(
+      definition,
       {
-        ...parsed.response!,
+        ...parsed.response,
         [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: richTextEsheetDocumentResponse(
           parsed.source
         ),
       },
-      getRichTextEsheetMdyParties(parsed.frontMatter)
+      parties
     );
+    return { ...withForm({ ...snapshot, parties }), mdy: snapshot.mdy };
   },
 });
 
@@ -143,7 +149,8 @@ const engine = createMdyDocumentEngine<
 export function parseRichTextEsheetMdy(
   source: string
 ): ParsedRichTextEsheetMdy {
-  return engine.parse(source);
+  const parsed = engine.parse(source);
+  return { ...parsed, definition: readMdyDefinition(parsed) };
 }
 
 /** Update existing projections only: unlinked prose and removed links stay authored. */
@@ -183,7 +190,7 @@ export function createRichTextEsheetMdy(
   body?: string,
   source?: string
 ): string {
-  return engine.create(snapshot, body, source);
+  return engine.create(withForm(snapshot), body, source);
 }
 
 /**

@@ -1,11 +1,10 @@
-import type { FieldResponse } from '@esheet/core';
+import type { FieldResponse, FormDefinition } from '@esheet/core';
 import { fieldDisplay } from '@mieweb/templit';
 import {
   createMdyDocumentEngine,
   hasNativeDocumentValue,
   type MdyDocumentDiagnostic,
   type MdyDocumentField,
-  type MdyDocumentMarkdown,
   type ParsedMdyDocument,
 } from '../RichTextEsheet/documentMdy';
 import {
@@ -29,11 +28,20 @@ type MdySnapshot = Pick<
   'definition' | 'responses' | 'observations'
 >;
 
+/** The engine works on the native form; hosts derive it at the boundary. */
+type EncounterMdySnapshot = MdySnapshot & { form: FormDefinition };
+
+function withForm(input: MdySnapshot): EncounterMdySnapshot {
+  return { ...input, form: createEncounterFormDefinition(input.definition) };
+}
+
 export type EncounterMdyField = MdyDocumentField;
 
 export type EncounterMdyDiagnostic = MdyDocumentDiagnostic;
 
-export type ParsedEncounterMdy = ParsedMdyDocument<EncounterVisitDefinition>;
+export type ParsedEncounterMdy = ParsedMdyDocument & {
+  definition?: EncounterVisitDefinition;
+};
 
 function unitDisplay(unit?: string): string | undefined {
   return unit === 'Cel'
@@ -80,77 +88,34 @@ function groupedDisplay(
 export function getEncounterMdyFields(
   snapshot: MdySnapshot
 ): EncounterMdyField[] {
-  return snapshot.definition.sections.flatMap((section) =>
-    getEncounterSectionFieldIds(section).map((fieldId) => {
-      const observations = snapshot.observations.filter(
-        (observation) => observation.fieldId === fieldId
-      );
-      const observationDefinition = section.observations?.find(
-        (observation) =>
-          getEncounterFieldId(section.id, observation.id) === fieldId
-      );
-      const narrative = fieldId === getEncounterFieldId(section.id);
-      const label = narrative
-        ? section.kind === 'narrative'
-          ? section.title
-          : `${section.title} narrative`
-        : (observationDefinition?.label ?? section.title);
-      const structured = !narrative && section.kind !== 'observations';
-      let display: string;
-      if (structured) {
-        display = groupedDisplay(observations, section.kind === 'vitals');
-      } else if (observations.length) {
-        display = observations.map(observationDisplay).join('; ');
-      } else {
-        // Do not invent a normal finding, numeric zero, or negative choice.
-        display = fieldDisplay({ ...snapshot.responses[fieldId] });
-      }
-      return {
-        id: engine.linkId(fieldId),
-        fieldId,
-        sectionId: section.id,
-        label,
-        display: display.trim() ? display : '—',
-        empty: structured
-          ? observations.length === 0 || !display.trim()
-          : !hasNativeDocumentValue(snapshot.responses[fieldId]),
-      };
-    })
-  );
+  return engine.fields(withForm(snapshot));
 }
 
-function initialBody(
-  snapshot: MdySnapshot,
-  fields: EncounterMdyField[],
-  { markdownText, fieldLink }: MdyDocumentMarkdown
-): string {
-  return [
-    `# ${markdownText(snapshot.definition.title)}`,
-    ...snapshot.definition.sections.map((section) =>
-      [
-        `## ${markdownText(section.title)}`,
-        fields
-          .filter((field) => field.sectionId === section.id)
-          .map((field) =>
-            section.kind === 'narrative'
-              ? fieldLink(field)
-              : `- **${markdownText(field.label)}:** ${fieldLink(field)}`
-          )
-          .join('\n'),
-      ].join('\n\n')
-    ),
-  ].join('\n\n');
+/** Validate and extract the host definition the front matter still carries. */
+function readMdyDefinition(
+  parsed: ParsedMdyDocument
+): EncounterVisitDefinition | undefined {
+  const raw = parsed.frontMatter?.encounterDefinition;
+  if (raw === undefined) return undefined;
+  try {
+    validateEncounterDefinition(raw as EncounterVisitDefinition);
+    return raw as EncounterVisitDefinition;
+  } catch {
+    parsed.diagnostics.push({
+      severity: 'error',
+      code: 'definition',
+      message: 'Front matter contains an invalid encounterDefinition.',
+    });
+    return undefined;
+  }
 }
 
-const engine = createMdyDocumentEngine<EncounterVisitDefinition, MdySnapshot>({
+const engine = createMdyDocumentEngine<EncounterMdySnapshot>({
   documentFieldId: ENCOUNTER_DOCUMENT_FIELD_ID,
   linkPrefix: 'visit',
-  definitionKey: 'encounterDefinition',
   engineName: 'encounter-mdy-document',
   missingFrontMatterMessage:
     'An encounter MDY document requires YAML front matter.',
-  invalidDefinitionMessage:
-    'Front matter contains an invalid encounterDefinition.',
   sourceDataProperties: [
     'id',
     'label',
@@ -165,26 +130,67 @@ const engine = createMdyDocumentEngine<EncounterVisitDefinition, MdySnapshot>({
     'encounterRequireCoding',
     'encounterDate',
   ],
-  validateDefinition: validateEncounterDefinition,
-  createFormDefinition: (snapshot) =>
-    createEncounterFormDefinition(snapshot.definition),
-  getFields: getEncounterMdyFields,
-  createInitialBody: initialBody,
+  projectField: ({ field }, snapshot) => {
+    const section = snapshot.definition.sections.find((candidate) =>
+      getEncounterSectionFieldIds(candidate).includes(field.id)
+    );
+    if (!section) return undefined;
+    const fieldId = field.id;
+    const observations = snapshot.observations.filter(
+      (observation) => observation.fieldId === fieldId
+    );
+    const observationDefinition = section.observations?.find(
+      (observation) =>
+        getEncounterFieldId(section.id, observation.id) === fieldId
+    );
+    const narrative = fieldId === getEncounterFieldId(section.id);
+    const label = narrative
+      ? section.kind === 'narrative'
+        ? section.title
+        : `${section.title} narrative`
+      : (observationDefinition?.label ?? section.title);
+    const structured = !narrative && section.kind !== 'observations';
+    let display: string;
+    if (structured) {
+      display = groupedDisplay(observations, section.kind === 'vitals');
+    } else if (observations.length) {
+      display = observations.map(observationDisplay).join('; ');
+    } else {
+      // Do not invent a normal finding, numeric zero, or negative choice.
+      display = fieldDisplay({ ...snapshot.responses[fieldId] });
+    }
+    return {
+      sectionId: section.id,
+      label,
+      display,
+      empty: structured
+        ? observations.length === 0 || !display.trim()
+        : !hasNativeDocumentValue(snapshot.responses[fieldId]),
+      narrative: section.kind === 'narrative',
+    };
+  },
+  extraFrontMatter: (snapshot) => ({
+    encounterDefinition: snapshot.definition,
+  }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached visit_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
+    const definition = readMdyDefinition(parsed);
+    if (!definition || !parsed.response) return null;
     const { createEncounterSnapshot } = await import('./model');
-    return createEncounterSnapshot(parsed.definition!, {
-      ...parsed.response!,
+    const snapshot = createEncounterSnapshot(definition, {
+      ...parsed.response,
       [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(parsed.source),
     });
+    return { ...withForm(snapshot), mdy: snapshot.mdy };
   },
 });
 
 /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
 export function parseEncounterMdy(source: string): ParsedEncounterMdy {
-  return engine.parse(source);
+  const parsed = engine.parse(source);
+  return { ...parsed, definition: readMdyDefinition(parsed) };
 }
 
 /** Update existing projections only: unlinked prose and removed links stay authored. */
@@ -224,7 +230,7 @@ export function createEncounterMdy(
   body?: string,
   source?: string
 ): string {
-  return engine.create(snapshot, body, source);
+  return engine.create(withForm(snapshot), body, source);
 }
 
 /**
