@@ -1834,6 +1834,194 @@ describe('SuperChat', () => {
     expect(document.activeElement).toBe(toggle);
   });
 
+  describe('renderMessageFooter', () => {
+    const footerSlots = () =>
+      document.querySelectorAll('[data-slot="superchat-message-footer"]');
+
+    it('renders host controls under human and agent messages with context', () => {
+      const renderMessageFooter = vi.fn(
+        (
+          message: SuperChatConversation['thread'][number],
+          ctx: { isSelf: boolean; streaming: boolean }
+        ) => (
+          <button type="button">
+            {`Feedback ${message.id}${ctx.isSelf ? ' (mine)' : ''}`}
+          </button>
+        )
+      );
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          renderMessageFooter={renderMessageFooter}
+        />
+      );
+      const [human, agent] = screen.getAllByRole('article');
+      expect(
+        within(human).getByRole('button', { name: 'Feedback m1 (mine)' })
+      ).toBeInTheDocument();
+      expect(
+        within(agent).getByRole('button', { name: 'Feedback m2' })
+      ).toBeInTheDocument();
+      expect(renderMessageFooter).toHaveBeenCalledWith(conversation.thread[1], {
+        conversation,
+        participant: conversation.participants[1],
+        isSelf: false,
+        streaming: false,
+      });
+      // Outside the bubble, so it isn't copied with the message.
+      expect(
+        within(agent)
+          .getByRole('button', { name: 'Feedback m2' })
+          .closest('[data-slot="superchat-bubble"]')
+      ).toBeNull();
+    });
+
+    it('passes streaming and skips footers for null and false', () => {
+      const streamingConvo: SuperChatConversation = {
+        ...conversation,
+        thread: [
+          conversation.thread[0],
+          { ...conversation.thread[1], status: 'streaming' },
+        ],
+      };
+      render(
+        <SuperChat
+          conversation={streamingConvo}
+          currentParticipantId="u1"
+          renderMessageFooter={(message, { streaming }) =>
+            message.id === 'm1' ? null : streaming ? 'Generating' : false
+          }
+        />
+      );
+      expect(footerSlots()).toHaveLength(1);
+      expect(footerSlots()[0]).toHaveTextContent('Generating');
+    });
+
+    it('gives system notices and reference chips no footer', () => {
+      const renderMessageFooter = vi.fn(() => 'footer');
+      render(
+        <SuperChat
+          conversation={{
+            ...conversation,
+            thread: [
+              {
+                id: 's1',
+                type: 'system',
+                participantId: 'a1',
+                text: 'Agent joined',
+                time: '2026-06-07T08:59:00Z',
+              },
+              {
+                id: 'r1',
+                type: 'ref',
+                participantId: 'a1',
+                time: '2026-06-07T08:59:30Z',
+                ref: { refType: 'doc', refId: 'd1', title: 'Lab report' },
+              },
+            ],
+          }}
+          currentParticipantId="u1"
+          renderMessageFooter={renderMessageFooter}
+        />
+      );
+      expect(screen.getByText('Agent joined')).toBeInTheDocument();
+      expect(footerSlots()).toHaveLength(0);
+      expect(renderMessageFooter).not.toHaveBeenCalled();
+    });
+
+    it('leaves the built-in actions in place', () => {
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="u1"
+            renderMessageFooter={() => 'host'}
+          />
+        </div>
+      );
+      expect(
+        screen.getAllByRole('button', { name: 'Copy message' })
+      ).toHaveLength(2);
+    });
+
+    it('renders no footer when omitted', () => {
+      render(
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      );
+      expect(footerSlots()).toHaveLength(0);
+    });
+
+    it('renders the footer in the virtualized thread', () => {
+      const height = vi
+        .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+        .mockReturnValue(600);
+      const width = vi
+        .spyOn(HTMLElement.prototype, 'offsetWidth', 'get')
+        .mockReturnValue(600);
+      try {
+        render(
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="u1"
+            renderMessageFooter={(message) => `Footer ${message.id}`}
+            virtualized
+          />
+        );
+        expect(footerSlots()).toHaveLength(2);
+        expect(screen.getByText('Footer m2')).toBeInTheDocument();
+      } finally {
+        height.mockRestore();
+        width.mockRestore();
+      }
+    });
+
+    it('refreshes footers without re-rendering unchanged message bodies', () => {
+      const renderTextContent = vi.fn((text: string) => <p>{text}</p>);
+      const withReply = (text: string): SuperChatConversation => ({
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'm3',
+            participantId: 'a1',
+            text,
+            time: '2026-06-07T09:01:00Z',
+            status: 'streaming',
+          },
+        ],
+      });
+      const { rerender } = render(
+        <SuperChat
+          conversation={withReply('Thin')}
+          currentParticipantId="u1"
+          renderTextContent={renderTextContent}
+          renderMessageFooter={(message) => `v1 ${message.id}`}
+        />
+      );
+      renderTextContent.mockClear();
+
+      // A streamed token for m3, with a fresh inline footer renderer.
+      rerender(
+        <SuperChat
+          conversation={withReply('Thinking')}
+          currentParticipantId="u1"
+          renderTextContent={renderTextContent}
+          renderMessageFooter={(message) => `v2 ${message.id}`}
+        />
+      );
+
+      // Only the streaming message's body re-rendered…
+      expect(renderTextContent.mock.calls.map(([text]) => text)).toEqual([
+        'Thinking',
+      ]);
+      // …while every footer shows the latest renderer's output.
+      expect(screen.getByText('v2 m1')).toBeInTheDocument();
+      expect(screen.getByText('v2 m2')).toBeInTheDocument();
+      expect(screen.getByText('v2 m3')).toBeInTheDocument();
+    });
+  });
+
   describe('tool-call groups and thinking', () => {
     const call = (
       id: string,
@@ -2847,6 +3035,20 @@ describe('SuperChatInbox', () => {
         ) as HTMLElement
       ).classList.contains('hidden')
     ).toBe(false);
+  });
+
+  it('forwards renderMessageFooter to the active panel', () => {
+    render(
+      <SuperChatInbox
+        conversations={conversations}
+        currentParticipantId="u1"
+        defaultActiveConversationId="c1"
+        renderMessageFooter={(message, { conversation }) =>
+          `${conversation.title}: ${message.id}`
+        }
+      />
+    );
+    expect(screen.getByText('Intake: m1')).toBeInTheDocument();
   });
 
   it('forwards toolCallGroup to the active panel', async () => {
