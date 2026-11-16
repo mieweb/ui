@@ -1,5 +1,10 @@
 import * as React from 'react';
 import { DateTime } from 'luxon';
+import {
+  Link as LinkIcon,
+  Pencil as PencilIcon,
+  Trash2 as TrashIcon,
+} from 'lucide-react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SuperChatInbox, createMarkdownRenderer } from './index';
 import { fullHeightChat } from '../../../.storybook/full-height';
@@ -860,6 +865,146 @@ export const MessageFooter: Story = {
     },
   },
   render: () => <MessageFooterInbox />,
+};
+
+// Conversation actions in the panel header via `headerActions`, plus panel
+// props the inbox now forwards (placeholder, agent selector, streaming stop).
+function HeaderActionsInbox() {
+  const [conversations, setConversations] = React.useState<
+    SuperChatConversation[]
+  >([richConversation, secondConversation]);
+  const [activeId, setActiveId] = React.useState(richConversation.id);
+  const [agent, setAgent] = React.useState<string | null>('a1');
+  const [streaming, setStreaming] = React.useState(false);
+  const [notice, setNotice] = React.useState('');
+  const active = conversations.find((c) => c.id === activeId);
+
+  const rename = () => {
+    const title = window.prompt('Rename conversation', active?.title);
+    if (!title) return;
+    setConversations((prev) =>
+      prev.map((c) => (c.id === activeId ? { ...c, title } : c))
+    );
+  };
+
+  const iconButton =
+    'rounded-md p-1 text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800';
+
+  return (
+    <div className="flex h-full w-full flex-col gap-2">
+      <p role="status" className="min-h-5 text-xs text-neutral-500">
+        {notice}
+      </p>
+      <SuperChatInbox
+        className="min-h-0 w-full flex-1"
+        conversations={conversations}
+        activeConversationId={activeId}
+        onConversationOpened={(c) => setActiveId(c.id)}
+        currentParticipantId="u1"
+        headerActions={
+          <>
+            <button
+              type="button"
+              className={iconButton}
+              aria-label="Rename conversation"
+              onClick={rename}
+            >
+              <PencilIcon size={16} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={iconButton}
+              aria-label="Copy link"
+              onClick={() => setNotice(`Copied a link to “${active?.title}”`)}
+            >
+              <LinkIcon size={16} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className={iconButton}
+              aria-label="Delete conversation"
+              onClick={() => setNotice(`Deleted “${active?.title}” (demo)`)}
+            >
+              <TrashIcon size={16} aria-hidden="true" />
+            </button>
+          </>
+        }
+        placeholder="Message the care team…"
+        agents={[
+          { id: 'a1', label: 'Triage Agent' },
+          { id: 'a2', label: 'Coding Agent' },
+        ]}
+        selectedAgent={agent}
+        onAgentChange={setAgent}
+        isStreaming={streaming}
+        onStop={() => setStreaming(false)}
+        onMessageSent={() => setStreaming(true)}
+        onConversationClosed={() => setNotice('Closed (demo)')}
+      />
+    </div>
+  );
+}
+
+export const HeaderActions: Story = {
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          '`headerActions` puts your conversation actions (rename, copy link, delete…) at the end of the panel header, before Close; on small screens they share the header with Back. The inbox also forwards the panel’s composer shorthands — here `placeholder`, the agent selector and `isStreaming`/`onStop` (send a message to see Stop).',
+      },
+    },
+  },
+  render: () => <HeaderActionsInbox />,
+};
+
+// A controlled `activeConversationId` the host hasn't loaded yet (e.g. a deep
+// link to an older conversation) shows the empty panel — never another
+// conversation's thread — until it arrives.
+function DeepLinkInbox() {
+  const deepLinked: SuperChatConversation = {
+    ...secondConversation,
+    id: 'deep-linked',
+    title: 'Archived: lab follow-up',
+  };
+  const [loaded, setLoaded] = React.useState(false);
+  return (
+    <div className="flex h-full w-full flex-col gap-2">
+      <ButtonGroup>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setLoaded((v) => !v)}
+        >
+          {loaded ? 'Unload the deep-linked conversation' : 'Load it'}
+        </Button>
+      </ButtonGroup>
+      <SuperChatInbox
+        className="min-h-0 w-full flex-1"
+        conversations={
+          loaded ? [richConversation, deepLinked] : [richConversation]
+        }
+        activeConversationId="deep-linked"
+        currentParticipantId="u1"
+      />
+    </div>
+  );
+}
+
+export const DeepLinkNotLoaded: Story = {
+  name: 'Deep link not loaded',
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          'With a controlled `activeConversationId` that is not in `conversations`, the inbox shows the empty panel and highlights no row, instead of opening the first conversation. Load it and the panel opens it.',
+      },
+    },
+  },
+  render: () => <DeepLinkInbox />,
 };
 
 export const SourcesAndGuards: Story = {
