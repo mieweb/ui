@@ -199,7 +199,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('ignores Escape in the resolver while a capture confirmation is open', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    const { container } = render(<RichTextEsheet definition={definition} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -208,10 +208,11 @@ describe('RichTextEsheet mode synchronization', () => {
     await screen.findByRole('dialog', { name: 'Details' });
     // AlertDialog ignores Escape by design, so the key falls through to the
     // resolver's document listener. Closing the resolver underneath would
-    // desync Modal's scroll lock and leave the page unscrollable.
+    // desync Modal's scroll lock and leave the page unscrollable. The
+    // confirmation renders inline inside the component root.
     const modal = document.createElement('div');
     modal.setAttribute('role', 'alertdialog');
-    document.body.appendChild(modal);
+    container.firstElementChild!.appendChild(modal);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
     modal.remove();
@@ -224,23 +225,24 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('ignores Escape and keeps focus while an annotation dialog is open', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    const { container } = render(<RichTextEsheet definition={definition} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
       await screen.findByRole('button', { name: 'Edit linked section' })
     );
     await screen.findByRole('dialog', { name: 'Details' });
-    // The annotate-image Modal is a plain role="dialog" rendered outside the
-    // trap that refuses dismissal while its upload is saving — Escape falls
-    // through to the resolver's document listener, and the trap's focusin
-    // listener sees focus outside the resolver.
+    // The annotate-image Modal is a plain role="dialog" rendered inline
+    // inside the component root but outside the trap, refusing dismissal
+    // while its upload is saving — Escape falls through to the resolver's
+    // document listener, and the trap's focusin listener sees focus outside
+    // the resolver.
     const modal = document.createElement('div');
     modal.setAttribute('role', 'dialog');
     const save = document.createElement('button');
     save.textContent = 'Save annotation';
     modal.appendChild(save);
-    document.body.appendChild(modal);
+    container.firstElementChild!.appendChild(modal);
     act(() => save.focus());
     expect(document.activeElement).toBe(save);
     fireEvent.keyDown(document, { key: 'Escape' });
@@ -276,6 +278,29 @@ describe('RichTextEsheet mode synchronization', () => {
         screen.queryByRole('dialog', { name: 'Details' })
       ).not.toBeInTheDocument()
     );
+  });
+
+  it('closes the resolver with Escape despite an unrelated page dialog', async () => {
+    render(<RichTextEsheet definition={definition} />);
+    await screen.findByRole('textbox', { name: /Summary/ });
+    selectMode('RichEdit');
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Edit linked section' })
+    );
+    await screen.findByRole('dialog', { name: 'Details' });
+    // A non-modal page-level dialog (e.g. a cookie-consent banner) is not
+    // nested in this component and must not swallow the resolver's Escape.
+    const banner = document.createElement('div');
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'Cookie consent');
+    document.body.appendChild(banner);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Details' })
+      ).not.toBeInTheDocument()
+    );
+    banner.remove();
   });
 
   it('closes the resolver with Escape inside an enclosing host dialog', async () => {

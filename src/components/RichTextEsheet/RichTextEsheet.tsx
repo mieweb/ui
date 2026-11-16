@@ -451,14 +451,18 @@ const RichTextEsheetSession = React.forwardRef<
   // a capture annotated inside the resolver is a descendant of the trap.
   // While one is open it owns Escape and focus; acting on the resolver
   // underneath would desync Modal's scroll lock and strand the nested dialog
-  // over a hidden editor. A dialog that contains the trap is not nested —
-  // it's the resolver itself or an enclosing host modal.
+  // over a hidden editor. Scope the scan to this component's root: every
+  // dialog it can nest (annotation editor, capture confirmation, media
+  // dialog) renders inline inside it, while unrelated page dialogs (e.g. a
+  // cookie-consent banner) and enclosing host modals live outside and must
+  // not swallow Escape. A dialog that contains the trap is not nested —
+  // it's the resolver itself.
   const nestedDialog = React.useCallback(
     () =>
       Array.from(
-        document.querySelectorAll<HTMLElement>(
+        root.current?.querySelectorAll<HTMLElement>(
           '[role="dialog"], [role="alertdialog"]'
-        )
+        ) ?? []
       ).find(
         (dialog) =>
           !resolverTrap.current || !dialog.contains(resolverTrap.current)
