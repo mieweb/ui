@@ -39,7 +39,32 @@ import type {
 /** Narrowest the conversation panel may be squeezed to by a wide list, in px. */
 const MIN_PANEL_WIDTH = 240;
 
-export interface SuperChatInboxProps {
+/**
+ * Panel props the inbox passes straight to the active {@link SuperChat}, with
+ * the same meaning and defaults there. Composer-only ones (`placeholder`,
+ * `allowAttachments`, the selectors, `isStreaming`/`onStop`, `dictation`) are
+ * convenience shorthands: a key also set in `composerProps` wins, as on
+ * `SuperChat`.
+ */
+type SuperChatPanelPassthroughProps = Pick<
+  SuperChatProps,
+  | 'showHeader'
+  | 'headerActions'
+  | 'placeholder'
+  | 'allowAttachments'
+  | 'agents'
+  | 'selectedAgent'
+  | 'onAgentChange'
+  | 'agentSelectorLabel'
+  | 'modelSelectorProps'
+  | 'composerSelectorsEndSlot'
+  | 'isStreaming'
+  | 'onStop'
+  | 'stopLabel'
+  | 'dictation'
+>;
+
+export interface SuperChatInboxProps extends SuperChatPanelPassthroughProps {
   /** All conversations (host-owned state). */
   conversations: SuperChatConversation[];
   /** Controlled thread/media view, forwarded to the active conversation panel. */
@@ -231,6 +256,20 @@ export function SuperChatInbox({
   linkBuilder,
   defaultCopyFormat,
   className,
+  showHeader,
+  headerActions,
+  placeholder,
+  allowAttachments,
+  agents,
+  selectedAgent,
+  onAgentChange,
+  agentSelectorLabel,
+  modelSelectorProps,
+  composerSelectorsEndSlot,
+  isStreaming,
+  onStop,
+  stopLabel,
+  dictation,
   onMessageSent,
   onMessageEdited,
   onConversationOpened,
@@ -242,11 +281,17 @@ export function SuperChatInbox({
     defaultActiveConversationId ?? conversations[0]?.id
   );
   const requestedId = activeConversationId ?? internalActive;
+  // A controlled id the host hasn't loaded (a deep link outside the current
+  // page, or still loading) shows the empty panel rather than another
+  // conversation; uncontrolled selection still falls back to the first.
   const active =
-    conversations.find((c) => c.id === requestedId) ?? conversations[0];
+    conversations.find((c) => c.id === requestedId) ??
+    (activeConversationId === undefined ? conversations[0] : undefined);
   // Resolve the active id from the conversation actually shown so the sidebar
-  // highlight never disagrees with the panel when `conversations` changes.
-  const activeId = active?.id;
+  // highlight never disagrees with the panel when `conversations` changes. A
+  // controlled id that isn't loaded is still passed down (matching no row), so
+  // the list doesn't fall back to highlighting its first conversation.
+  const activeId = active?.id ?? activeConversationId;
 
   // On small screens the list and panel can't fit side by side, so we show one
   // at a time (master-detail). `mobileView` tracks which is visible; on `sm`+
@@ -391,6 +436,20 @@ export function SuperChatInbox({
           virtualized={virtualized}
           linkBuilder={linkBuilder}
           defaultCopyFormat={defaultCopyFormat}
+          showHeader={showHeader}
+          headerActions={headerActions}
+          placeholder={placeholder}
+          allowAttachments={allowAttachments}
+          agents={agents}
+          selectedAgent={selectedAgent}
+          onAgentChange={onAgentChange}
+          agentSelectorLabel={agentSelectorLabel}
+          modelSelectorProps={modelSelectorProps}
+          composerSelectorsEndSlot={composerSelectorsEndSlot}
+          isStreaming={isStreaming}
+          onStop={onStop}
+          stopLabel={stopLabel}
+          dictation={dictation}
           onMessageSent={onMessageSent}
           onMessageEdited={onMessageEdited}
           onConversationClosed={onConversationClosed}
