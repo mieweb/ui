@@ -38,6 +38,7 @@ import type {
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
+  SuperChatRenderMessageFooter,
 } from './types';
 
 // ============================================================================
@@ -682,6 +683,51 @@ function MessageOverflowMenu({
 }
 
 // ============================================================================
+// Message footer (host render-prop)
+// ============================================================================
+
+interface MessageFooterSource {
+  render: SuperChatRenderMessageFooter;
+  conversation: SuperChatConversation;
+}
+
+/**
+ * Carries the host's `renderMessageFooter` (and the conversation it reads) to
+ * every row. A context, not a row prop: a fresh inline renderer or a streamed
+ * update re-renders only each row's small {@link MessageFooter} consumer, never
+ * the memoized {@link MessageRow} (and its Markdown) around it.
+ */
+export const MessageFooterContext =
+  React.createContext<MessageFooterSource | null>(null);
+
+function MessageFooter({
+  message,
+  participant,
+  isSelf,
+  streaming,
+}: {
+  message: SuperChatMessage;
+  participant?: Participant;
+  isSelf: boolean;
+  streaming: boolean;
+}) {
+  const source = React.useContext(MessageFooterContext);
+  if (!source) return null;
+  const footer = source.render(message, {
+    conversation: source.conversation,
+    participant,
+    isSelf,
+    streaming,
+  });
+  if (footer == null || footer === false) return null;
+  return (
+    <div data-slot="superchat-message-footer" className="w-fit max-w-[85%]">
+      {footer}
+    </div>
+  );
+}
+
+// ============================================================================
 // Message content blocks (tool calls / thinking / text / code)
 // ============================================================================
 
@@ -1321,6 +1367,13 @@ export const MessageRow = React.memo(function MessageRow({
             )}
           </ChatBubble>
         </div>
+
+        <MessageFooter
+          message={message}
+          participant={participant}
+          isSelf={isSelf}
+          streaming={streaming}
+        />
       </div>
     </div>
   );

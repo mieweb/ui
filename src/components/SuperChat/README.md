@@ -290,6 +290,7 @@ styling (`[data-slot="…"]`), querying in tests, or discussing the UI.
 | **Bubble**          | `superchat-bubble`          | `div`                                  | The styled container holding rendered Markdown / rich blocks.                                     |
 | **Tool-call group** | `ai-tool-call-group`        | `div`                                  | A run of consecutive tool calls (with `toolCallGroup`), with approve/deny controls.               |
 | **Thinking**        | `ai-message-thinking`       | `div` → `button` (disclosure)          | Collapsible reasoning from a `thinking` block, outside the answer body.                           |
+| **Message footer**  | `superchat-message-footer`  | `div`                                  | Host controls from `renderMessageFooter`, under the bubble.                                       |
 | **Message actions** | `superchat-message-actions` | `div`                                  | Hover-revealed icon stack at the end of the gutter; buttons expose `superchat-action-{id}` slots. |
 | **Overflow (⋯)**    | `superchat-overflow-button` | `button` (`Message actions`)           | Sticky control that follows long messages, then hands off to the actions bar once it scrolls in.  |
 | **System message**  | `superchat-system-message`  | `div` · `status`                       | Centered system notice (joins, etc.).                                                             |
@@ -341,6 +342,7 @@ uncontrolled).
 | `composerProps`               | `SuperChatComposerProps`                      | —                  | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
 | `composer`                    | `ReactNode`                                   | —                  | The host's own composer for the active panel, replacing the built-in message box. The host owns the draft and send path. `null` renders none.                      |
 | `toolCallGroup`               | `MCPToolCallGroupOptions`                     | —                  | Group consecutive tool calls with approve/deny controls in the active panel. See [Tool calls & thinking](#tool-calls--thinking).                                   |
+| `renderMessageFooter`         | `SuperChatRenderMessageFooter`                | —                  | Host controls under each message in the active panel. See [Message footer](#message-footer).                                                                       |
 | `order`                       | `'asc' \| 'desc'`                             | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
 | `virtualized`                 | `boolean`                                     | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                          |
 | `showSidebar`                 | `boolean`                                     | `true`             | Show the conversation list.                                                                                                                                        |
@@ -366,36 +368,37 @@ uncontrolled).
 
 Renders exactly one conversation.
 
-| Prop                   | Type                                          | Default             | Description                                                                                                                                                                                                   |
-| ---------------------- | --------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `conversation`         | `SuperChatConversation`                       | —                   | **Required.** The conversation to display.                                                                                                                                                                    |
-| `currentParticipantId` | `string`                                      | —                   | The local user's id (drives alignment + compose identity).                                                                                                                                                    |
-| `renderPlugins`        | `SuperChatRenderPlugin[]`                     | —                   | Opt-in rich Markdown plugins.                                                                                                                                                                                 |
-| `renderTextContent`    | `AIRenderTextContent`                         | Markdown core       | Replace the entire text renderer (advanced).                                                                                                                                                                  |
-| `trustedContent`       | `boolean`                                     | `false`             | Skip sanitization — **only** for host-authored content.                                                                                                                                                       |
-| `readOnly`             | `boolean`                                     | `false`             | Disable the composer.                                                                                                                                                                                         |
-| `composerProps`        | `SuperChatComposerProps`                      | —                   | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`.                                            |
-| `composer`             | `ReactNode`                                   | —                   | Replaces the built-in message box with the host's own composer. The host owns the draft and send path, so `onMessageSent`, `composerProps` and the composer-only props are unused. `null` renders none.       |
-| `toolCallGroup`        | `MCPToolCallGroupOptions`                     | —                   | Opt in to grouped tool calls, as in `AIChat`: consecutive `tool_use` blocks render as one `MCPToolCallGroup` with your `onApprove`/`onDeny` and `labels`. See [Tool calls & thinking](#tool-calls--thinking). |
-| `order`                | `'asc' \| 'desc'`                             | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                                                                |
-| `virtualized`          | `boolean`                                     | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                                                                     |
-| `linkBuilder`          | `SuperChatLinkBuilder`                        | —                   | Build hrefs for `ref` thread items.                                                                                                                                                                           |
-| `className`            | `string`                                      | —                   | Extra classes on the root.                                                                                                                                                                                    |
-| `showHeader`           | `boolean`                                     | `true`              | Show the title/participants header. When `false`, the title stays as a visually hidden heading so the panel keeps its accessible name.                                                                        |
-| `placeholder`          | `string`                                      | —                   | Composer placeholder (ignored when `readOnly`).                                                                                                                                                               |
-| `allowAttachments`     | `boolean`                                     | `true`              | Enable composer attachments without making the panel read-only.                                                                                                                                               |
-| `agents`               | `ChatComposerAgentOption[]`                   | —                   | Agents for the composer agent selector; the selector renders when non-empty.                                                                                                                                  |
-| `selectedAgent`        | `string \| null`                              | —                   | Controlled selected agent id. The host owns agent state.                                                                                                                                                      |
-| `onAgentChange`        | `(agentId) => void`                           | —                   | Fired when the user picks an agent.                                                                                                                                                                           |
-| `modelSelectorProps`   | `ComposerModelSelectorProps`                  | —                   | Renders the composer model selector (controlled `models`/`value`/`onChange`). Omit to hide it, e.g. when only one model is allowed.                                                                           |
-| `isStreaming`          | `boolean`                                     | `false`             | While true the send button becomes a stop button (requires `onStop`).                                                                                                                                         |
-| `agentSelectorLabel`   | `string`                                      | `'Select agent'`    | Localized accessible label / empty-state text for the agent selector.                                                                                                                                         |
-| `stopLabel`            | `string`                                      | `'Stop generating'` | Localized accessible label for the icon-only stop button.                                                                                                                                                     |
-| `onStop`               | `() => void`                                  | —                   | Called when the user stops a streaming reply.                                                                                                                                                                 |
-| `onMessageSent`        | `(text, { conversation, mentions }) => void`  | —                   | Fired on send; `mentions` are the addressed participant ids.                                                                                                                                                  |
-| `onMessageEdited`      | `(messageId, text, { conversation }) => void` | —                   | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                                                           |
-| `onConversationClosed` | `(conversation) => void`                      | —                   | Shows a close button when provided.                                                                                                                                                                           |
-| `onReferenceClick`     | `(ref) => void`                               | —                   | Fired when a reference chip is activated.                                                                                                                                                                     |
+| Prop                   | Type                                                                       | Default             | Description                                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `conversation`         | `SuperChatConversation`                                                    | —                   | **Required.** The conversation to display.                                                                                                                                                                    |
+| `currentParticipantId` | `string`                                                                   | —                   | The local user's id (drives alignment + compose identity).                                                                                                                                                    |
+| `renderPlugins`        | `SuperChatRenderPlugin[]`                                                  | —                   | Opt-in rich Markdown plugins.                                                                                                                                                                                 |
+| `renderTextContent`    | `AIRenderTextContent`                                                      | Markdown core       | Replace the entire text renderer (advanced).                                                                                                                                                                  |
+| `trustedContent`       | `boolean`                                                                  | `false`             | Skip sanitization — **only** for host-authored content.                                                                                                                                                       |
+| `readOnly`             | `boolean`                                                                  | `false`             | Disable the composer.                                                                                                                                                                                         |
+| `composerProps`        | `SuperChatComposerProps`                                                   | —                   | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`.                                            |
+| `composer`             | `ReactNode`                                                                | —                   | Replaces the built-in message box with the host's own composer. The host owns the draft and send path, so `onMessageSent`, `composerProps` and the composer-only props are unused. `null` renders none.       |
+| `toolCallGroup`        | `MCPToolCallGroupOptions`                                                  | —                   | Opt in to grouped tool calls, as in `AIChat`: consecutive `tool_use` blocks render as one `MCPToolCallGroup` with your `onApprove`/`onDeny` and `labels`. See [Tool calls & thinking](#tool-calls--thinking). |
+| `renderMessageFooter`  | `(message, { conversation, participant, isSelf, streaming }) => ReactNode` | —                   | Host controls under each message bubble (humans and agents), like `AIChat`'s `renderMessageFooter`. Built-in Copy/Edit are unchanged. See [Message footer](#message-footer).                                  |
+| `order`                | `'asc' \| 'desc'`                                                          | `'asc'`             | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                                                                |
+| `virtualized`          | `boolean`                                                                  | `false`             | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                                                                     |
+| `linkBuilder`          | `SuperChatLinkBuilder`                                                     | —                   | Build hrefs for `ref` thread items.                                                                                                                                                                           |
+| `className`            | `string`                                                                   | —                   | Extra classes on the root.                                                                                                                                                                                    |
+| `showHeader`           | `boolean`                                                                  | `true`              | Show the title/participants header. When `false`, the title stays as a visually hidden heading so the panel keeps its accessible name.                                                                        |
+| `placeholder`          | `string`                                                                   | —                   | Composer placeholder (ignored when `readOnly`).                                                                                                                                                               |
+| `allowAttachments`     | `boolean`                                                                  | `true`              | Enable composer attachments without making the panel read-only.                                                                                                                                               |
+| `agents`               | `ChatComposerAgentOption[]`                                                | —                   | Agents for the composer agent selector; the selector renders when non-empty.                                                                                                                                  |
+| `selectedAgent`        | `string \| null`                                                           | —                   | Controlled selected agent id. The host owns agent state.                                                                                                                                                      |
+| `onAgentChange`        | `(agentId) => void`                                                        | —                   | Fired when the user picks an agent.                                                                                                                                                                           |
+| `modelSelectorProps`   | `ComposerModelSelectorProps`                                               | —                   | Renders the composer model selector (controlled `models`/`value`/`onChange`). Omit to hide it, e.g. when only one model is allowed.                                                                           |
+| `isStreaming`          | `boolean`                                                                  | `false`             | While true the send button becomes a stop button (requires `onStop`).                                                                                                                                         |
+| `agentSelectorLabel`   | `string`                                                                   | `'Select agent'`    | Localized accessible label / empty-state text for the agent selector.                                                                                                                                         |
+| `stopLabel`            | `string`                                                                   | `'Stop generating'` | Localized accessible label for the icon-only stop button.                                                                                                                                                     |
+| `onStop`               | `() => void`                                                               | —                   | Called when the user stops a streaming reply.                                                                                                                                                                 |
+| `onMessageSent`        | `(text, { conversation, mentions }) => void`                               | —                   | Fired on send; `mentions` are the addressed participant ids.                                                                                                                                                  |
+| `onMessageEdited`      | `(messageId, text, { conversation }) => void`                              | —                   | Enables the inline "Edit" affordance on the local user's own messages; fired when an edit is saved.                                                                                                           |
+| `onConversationClosed` | `(conversation) => void`                                                   | —                   | Shows a close button when provided.                                                                                                                                                                           |
+| `onReferenceClick`     | `(ref) => void`                                                            | —                   | Fired when a reference chip is activated.                                                                                                                                                                     |
 
 #### Composer agent & model selectors
 
@@ -488,6 +491,49 @@ always available.
 
 Reasoning (`thinking` blocks) is not part of the answer, so every copy format
 leaves it out.
+
+---
+
+## Message footer
+
+`renderMessageFooter` renders your own controls under each message bubble, for
+people and agents alike — feedback, version arrows, a model badge, edit with
+branching, "Continue". It is SuperChat's counterpart of `AIChat`'s
+`renderMessageFooter` (`AIRenderMessageFooter`), with the multi-participant
+context as a second argument:
+
+```ts
+type SuperChatRenderMessageFooter = (
+  message: SuperChatMessage,
+  context: {
+    conversation: SuperChatConversation;
+    participant?: Participant; // the author, if in `participants`
+    isSelf: boolean; // written by `currentParticipantId`
+    streaming: boolean; // `message.status === 'streaming'`
+  }
+) => React.ReactNode;
+```
+
+```tsx
+<SuperChatInbox
+  conversations={conversations}
+  currentParticipantId="u1"
+  renderMessageFooter={(message, { participant, streaming }) =>
+    participant?.kind === 'agent' && !streaming ? (
+      <FeedbackButtons messageId={message.id} />
+    ) : null
+  }
+/>
+```
+
+- Return `null` or `false` for no footer. System notices and reference chips get
+  none.
+- The footer sits under the bubble (aligned with it), outside the copied content.
+  The built-in Copy/Edit actions stay in the avatar gutter either way.
+- Works in plain and `virtualized` threads.
+- An inline renderer is fine: footers re-render with every SuperChat render (so
+  they always reflect your state), but the memoized message bodies — and their
+  Markdown — do not. Keep the footer itself cheap.
 
 ---
 

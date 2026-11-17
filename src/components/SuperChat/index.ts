@@ -58,6 +58,8 @@ export type {
   SuperChatCopyFormat,
   SuperChatRef,
   SuperChatLinkBuilder,
+  SuperChatMessageFooterContext,
+  SuperChatRenderMessageFooter,
   ComposerAttachment,
   AttachmentKind,
   // render pipeline

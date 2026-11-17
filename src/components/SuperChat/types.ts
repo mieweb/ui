@@ -242,6 +242,29 @@ export interface SuperChatConversation {
 /** Builds an href for a reference item (e.g. doc/rx/appt deep link). */
 export type SuperChatLinkBuilder = (ref: SuperChatRef) => string | undefined;
 
+/** What {@link SuperChatRenderMessageFooter} knows about the message it renders under. */
+export interface SuperChatMessageFooterContext {
+  /** The conversation the message belongs to (latest host state). */
+  conversation: SuperChatConversation;
+  /** The message's author, if they are in `conversation.participants`. */
+  participant?: Participant;
+  /** Whether the local user (`currentParticipantId`) wrote the message. */
+  isSelf: boolean;
+  /** Whether the message is still streaming (`status === 'streaming'`). */
+  streaming: boolean;
+}
+
+/**
+ * Render-prop for host controls under a message bubble — SuperChat's
+ * counterpart of the AI module's `AIRenderMessageFooter`, with the
+ * multi-participant context as a second argument. Return `null`/`false` to
+ * render nothing for a message.
+ */
+export type SuperChatRenderMessageFooter = (
+  message: SuperChatMessage,
+  context: SuperChatMessageFooterContext
+) => React.ReactNode;
+
 // ============================================================================
 // Render pipeline (Decision 3)
 // ============================================================================
