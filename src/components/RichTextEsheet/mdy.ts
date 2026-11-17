@@ -38,14 +38,23 @@ export type ParsedRichTextEsheetMdy = ParsedMdyDocument & {
   definition?: RichTextEsheetDefinition;
 };
 
-/** Validation already walked the form; reuse its views per snapshot. */
-const viewCache = new WeakMap<FormDefinition, RichTextEsheetSectionView[]>();
+/**
+ * Reuse views across the per-field projection calls of one engine operation.
+ * Keyed by the per-operation snapshot input (not the form) so in-place form
+ * edits never serve stale views to a later snapshot.
+ */
+const viewCache = new WeakMap<
+  RichTextEsheetMdyInput,
+  RichTextEsheetSectionView[]
+>();
 
-function sectionsOf(form: FormDefinition): RichTextEsheetSectionView[] {
-  const cached = viewCache.get(form);
+function sectionsOf(
+  snapshot: RichTextEsheetMdyInput
+): RichTextEsheetSectionView[] {
+  const cached = viewCache.get(snapshot);
   if (cached) return cached;
-  const views = getRichTextEsheetFormSections(form);
-  viewCache.set(form, views);
+  const views = getRichTextEsheetFormSections(snapshot.form);
+  viewCache.set(snapshot, views);
   return views;
 }
 
@@ -112,7 +121,7 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
     'A RichTextEsheet MDY document requires YAML front matter.',
   sourceDataProperties: ['narrativeHideLabel', 'narrativeFindings'],
   projectField: ({ field }, snapshot) => {
-    const section = sectionsOf(snapshot.form).find(
+    const section = sectionsOf(snapshot).find(
       (candidate) => getRichTextEsheetFieldId(candidate.id) === field.id
     );
     if (!section) return undefined;

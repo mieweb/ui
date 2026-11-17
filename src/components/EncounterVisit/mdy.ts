@@ -1,4 +1,4 @@
-import type { FieldResponse, FormDefinition } from '@esheet/core';
+import type { FieldResponse } from '@esheet/core';
 import { fieldDisplay } from '@mieweb/templit';
 import {
   createMdyDocumentEngine,
@@ -32,14 +32,18 @@ type MdySnapshot = Pick<
   'form' | 'responses' | 'observations'
 >;
 
-/** Validation already walked the form; reuse its views per snapshot. */
-const viewCache = new WeakMap<FormDefinition, EncounterSectionView[]>();
+/**
+ * Reuse views across the per-field projection calls of one engine operation.
+ * Keyed by the per-operation snapshot (not the form) so in-place form edits
+ * never serve stale views to a later snapshot.
+ */
+const viewCache = new WeakMap<MdySnapshot, EncounterSectionView[]>();
 
-function sectionsOf(form: FormDefinition): EncounterSectionView[] {
-  const cached = viewCache.get(form);
+function sectionsOf(snapshot: MdySnapshot): EncounterSectionView[] {
+  const cached = viewCache.get(snapshot);
   if (cached) return cached;
-  const views = getEncounterFormSections(form);
-  viewCache.set(form, views);
+  const views = getEncounterFormSections(snapshot.form);
+  viewCache.set(snapshot, views);
   return views;
 }
 
@@ -141,7 +145,7 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
     'encounterSectionRequired',
   ],
   projectField: ({ field }, snapshot) => {
-    const section = sectionsOf(snapshot.form).find((candidate) =>
+    const section = sectionsOf(snapshot).find((candidate) =>
       getEncounterSectionFieldIds(candidate).includes(field.id)
     );
     if (!section) return undefined;

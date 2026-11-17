@@ -1,5 +1,8 @@
 import type { FieldResponse, FormDefinition } from '@esheet/core';
-import type { NarrativeFinding } from '../../esheet-fields/narrativeFindings';
+import {
+  validNarrativeFindings,
+  type NarrativeFinding,
+} from '../../esheet-fields/narrativeFindings';
 
 /** A person or system the document references, e.g. a patient and a provider. */
 export interface RichTextEsheetParty {
@@ -168,16 +171,17 @@ export function partyFindings(
 
 /**
  * Dock each party's macro beside every guided narrative section. Macros are
- * derived presentation state injected at the rendering boundary; the form
- * keeps only the authored findings, deduplicated for forms that stamped
- * macros before mieweb/ui#772.
+ * derived presentation state injected at the rendering boundary: previously
+ * generated `party:` findings (forms that stamped macros before mieweb/ui#772)
+ * are replaced by the live parties — including removal when the live list is
+ * empty — while authored findings are kept, sanitized through the same
+ * whitelist the narrative field applies.
  */
 export function withRichTextEsheetParties(
   form: FormDefinition,
   parties?: RichTextEsheetParty[]
 ): FormDefinition {
   const macros = partyFindings(parties);
-  if (macros.length === 0) return form;
   return {
     ...form,
     pages: form.pages.map((page) => ({
@@ -188,16 +192,17 @@ export function withRichTextEsheetParties(
           fields: fieldNodes(section.fields).map((field) => {
             if (field.fieldType !== 'esheetNarrative') return field;
             const source = (field._sourceData ?? {}) as Record<string, unknown>;
-            const findings = Array.isArray(source.narrativeFindings)
-              ? (source.narrativeFindings as NarrativeFinding[])
-              : [];
-            const known = new Set(findings.map((finding) => finding.id));
+            // The `party:` id prefix is reserved for generated macros.
+            const authored = validNarrativeFindings(
+              source.narrativeFindings
+            ).filter((finding) => !finding.id.startsWith('party:'));
+            const known = new Set(authored.map((finding) => finding.id));
             return {
               ...field,
               _sourceData: {
                 ...source,
                 narrativeFindings: [
-                  ...findings,
+                  ...authored,
                   ...macros.filter((macro) => !known.has(macro.id)),
                 ],
               },

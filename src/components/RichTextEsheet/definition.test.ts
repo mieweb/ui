@@ -141,6 +141,46 @@ describe('withRichTextEsheetParties', () => {
     // The configured form stays clean — macros are rendering state only.
     expect(findingLabels(form, 'closing')).toEqual(['Thanks']);
   });
+
+  it('replaces stamped party macros with the live parties', () => {
+    const docked = withRichTextEsheetParties(form, parties);
+    // A replacement patient swaps the macros instead of accumulating them.
+    expect(
+      findingLabels(
+        withRichTextEsheetParties(docked, [
+          { role: 'Patient', name: 'Avery Lane' },
+        ]),
+        'closing'
+      )
+    ).toEqual(['Thanks', 'Patient: Avery Lane']);
+    // An empty live list removes the macros but keeps authored findings.
+    expect(
+      findingLabels(withRichTextEsheetParties(docked, []), 'closing')
+    ).toEqual(['Thanks']);
+    expect(findingLabels(withRichTextEsheetParties(docked), 'closing')).toEqual(
+      ['Thanks']
+    );
+  });
+
+  it('drops malformed authored findings instead of crashing', () => {
+    const corrupted = globalThis.structuredClone(form);
+    const field = (corrupted.pages[0].fields ?? [])
+      .flatMap((section) => ('fields' in section ? section.fields! : []))
+      .find(
+        (child) => child.id === getRichTextEsheetFieldId('closing')
+      ) as unknown as NarrativeField;
+    field._sourceData!.narrativeFindings = [
+      null,
+      { id: 'thanks', label: 'Thanks', text: 'Thank you.' },
+    ] as unknown as { label: string }[];
+    expect(
+      findingLabels(withRichTextEsheetParties(corrupted, parties), 'closing')
+    ).toEqual([
+      'Thanks',
+      'Patient: Jordan Rivera',
+      'Provider: Dr. Casey Morgan',
+    ]);
+  });
 });
 
 describe('getRichTextEsheetFormSections (mieweb/ui#772)', () => {

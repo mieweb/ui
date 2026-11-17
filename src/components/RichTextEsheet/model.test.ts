@@ -35,6 +35,17 @@ const parties = [
 const reasonId = getRichTextEsheetFieldId('reason');
 
 describe('createRichTextEsheetSnapshot', () => {
+  it('serializes in-place form edits in subsequent snapshots', () => {
+    const draft = globalThis.structuredClone(form);
+    expect(createRichTextEsheetMdy({ form: draft, responses: {} })).toContain(
+      '## Reason'
+    );
+    (draft.pages[0].fields![0] as { title?: string }).title = 'Chief complaint';
+    expect(createRichTextEsheetMdy({ form: draft, responses: {} })).toContain(
+      '## Chief complaint'
+    );
+  });
+
   it('derives progress, required errors and portable MDY with parties', () => {
     const empty = createRichTextEsheetSnapshot(form, {}, parties);
     expect(empty.documentedSections).toEqual([]);
