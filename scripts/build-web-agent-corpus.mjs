@@ -41,7 +41,15 @@ const outDir = resolve(
   root,
   outArg !== -1 ? process.argv[outArg + 1] : 'storybook-static'
 );
-const BASE = 'https://ui.mieweb.org';
+// Cloudflare Pages preview builds (non-main branches) self-reference the
+// preview URL so the whole corpus is crawlable before merge; production,
+// CI, and local builds all emit the canonical host.
+const BASE =
+  process.env.CF_PAGES_BRANCH &&
+  process.env.CF_PAGES_BRANCH !== 'main' &&
+  process.env.CF_PAGES_URL
+    ? process.env.CF_PAGES_URL
+    : 'https://ui.mieweb.org';
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
@@ -67,7 +75,9 @@ function firstSentence(text) {
 
 const emitted = new Map(); // url path (e.g. 'skills/x.md') -> content
 function emit(relPath, content) {
-  emitted.set(relPath, content);
+  // Source docs hardcode the canonical host; rewrite so preview deploys
+  // self-reference (no-op when BASE is the canonical host).
+  emitted.set(relPath, content.replaceAll('https://ui.mieweb.org', BASE));
 }
 
 // --- skills ----------------------------------------------------------------
@@ -238,10 +248,12 @@ emit('llms.txt', llms);
 // --- self-check + write -------------------------------------------------------
 
 const problems = [];
+const corpusLink = new RegExp(
+  `${BASE.replace(/[.\\/]/g, '\\$&')}/([\\w./-]+\\.(?:md|txt))`,
+  'g'
+);
 for (const [path, content] of emitted) {
-  for (const [, url] of content.matchAll(
-    /https:\/\/ui\.mieweb\.org\/([\w./-]+\.(?:md|txt))/g
-  )) {
+  for (const [, url] of content.matchAll(corpusLink)) {
     if (!emitted.has(url)) problems.push(`${path}: dead corpus link → ${url}`);
   }
   // Only agent.md is template-expanded; source docs legitimately contain {{ }}
