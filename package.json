@@ -264,6 +264,16 @@
     "./components/Markdown/styles.css": {
       "style": "./dist/components/Markdown/styles.css",
       "default": "./dist/components/Markdown/styles.css"
+    },
+    "./artipod": {
+      "import": {
+        "types": "./dist/artipod.d.ts",
+        "default": "./dist/artipod.js"
+      },
+      "require": {
+        "types": "./dist/artipod.d.cts",
+        "default": "./dist/artipod.cjs"
+      }
     }
   },
   "files": [
@@ -323,10 +333,14 @@
     "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
+    "@artipod/core": "*",
     "@esheet/builder": ">=0.0.6-17",
     "@esheet/core": ">=0.0.6-17",
     "@esheet/fields": ">=0.0.6-17",
     "@esheet/renderer": ">=0.0.6-17",
+    "@kerebron/document-mime": "*",
+    "@kerebron/document-yjs": "*",
+    "@kerebron/documents": "*",
     "@kerebron/editor": ">=0.8.12",
     "@kerebron/editor-kits": ">=0.8.12",
     "@kerebron/extension-basic-editor": ">=0.8.12",
@@ -444,6 +458,18 @@
       "optional": false
     },
     "wavesurfer.js": {
+      "optional": true
+    },
+    "@artipod/core": {
+      "optional": true
+    },
+    "@kerebron/documents": {
+      "optional": true
+    },
+    "@kerebron/document-mime": {
+      "optional": true
+    },
+    "@kerebron/document-yjs": {
       "optional": true
     }
   },
