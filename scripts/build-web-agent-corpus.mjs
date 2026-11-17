@@ -42,14 +42,23 @@ const outDir = resolve(
   outArg !== -1 ? process.argv[outArg + 1] : 'storybook-static'
 );
 // Cloudflare Pages preview builds (non-main branches) self-reference the
-// preview URL so the whole corpus is crawlable before merge; production,
-// CI, and local builds all emit the canonical host.
-const BASE =
-  process.env.CF_PAGES_BRANCH &&
-  process.env.CF_PAGES_BRANCH !== 'main' &&
-  process.env.CF_PAGES_URL
-    ? process.env.CF_PAGES_URL
-    : 'https://ui.mieweb.org';
+// preview so the whole corpus is crawlable before merge; production, CI,
+// and local builds all emit the canonical host. Use the stable branch-alias
+// host, not CF_PAGES_URL's per-commit hash host: agents are handed the alias
+// URL, and cross-origin hops to random-hash subdomains get refused by
+// fetch-tool safety rules.
+function previewBase() {
+  const { CF_PAGES_BRANCH: branch, CF_PAGES_URL: url } = process.env;
+  if (!branch || branch === 'main' || !url) return null;
+  const projectHost = new URL(url).hostname.split('.').slice(1).join('.');
+  const alias = branch
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')
+    .slice(0, 28)
+    .replace(/-+$/, '');
+  return `https://${alias}.${projectHost}`;
+}
+const BASE = previewBase() ?? 'https://ui.mieweb.org';
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 
