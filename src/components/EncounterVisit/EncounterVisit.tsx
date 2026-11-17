@@ -169,7 +169,10 @@ export const EncounterVisit = React.forwardRef<
   if (parsed?.form && parsed.form.id !== visitForm.id) {
     throw new Error('The MDY form id does not match the encounter form.');
   }
-  if (parsed?.form && parsed.form !== visitForm) {
+  // Only a host-supplied form can disagree with the document; compare it
+  // against the migrated importedForm so pre-#772 stamped forms (e.g. choice
+  // units kept in _sourceData) do not reject their own valid documents.
+  if (form && importedForm && importedForm !== form) {
     const fieldShapes = (candidate: FormDefinition) => {
       const shapes: { id: string; shape: unknown }[] = [];
       const visitFields = (
@@ -206,7 +209,7 @@ export const EncounterVisit = React.forwardRef<
       candidate.pages.forEach((page) => visitFields(page.fields));
       return JSON.stringify(shapes.sort((a, b) => a.id.localeCompare(b.id)));
     };
-    if (fieldShapes(parsed.form) !== fieldShapes(visitForm)) {
+    if (fieldShapes(importedForm) !== fieldShapes(form)) {
       throw new Error(
         'The MDY fields do not match the supplied encounter form.'
       );

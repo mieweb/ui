@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import type { FieldDefinition } from '@esheet/core';
 import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
 import {
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
   getEncounterFieldId,
+  getEncounterFormSections,
   getEncounterSectionFieldIds,
   getEncounterSectionFieldId,
 } from './definition';
@@ -840,4 +842,49 @@ describe('calendar-valid explicit clinical dates', () => {
       expect(validateEncounterAssessment(value)).toEqual([]);
     }
   );
+});
+
+describe('required companion narratives (mieweb/ui#774)', () => {
+  const sectioned = encounterFormFromLegacy({
+    id: 'visit',
+    title: 'Visit',
+    sections: [
+      {
+        id: 'exam',
+        title: 'Exam',
+        kind: 'observations',
+        narrative: true,
+        observations: [{ id: 'back', label: 'Back' }],
+      },
+    ],
+  });
+  const section = sectioned.pages[0].fields?.[0];
+  if (section?.fieldType !== 'section') throw new Error('Expected a section');
+  section.fields = section.fields?.map((field) =>
+    field.id === getEncounterFieldId('exam')
+      ? ({ ...field, required: true } as FieldDefinition)
+      : field
+  );
+  const narrativeId = getEncounterFieldId('exam');
+
+  it('exposes the native narrative requirement in the section view', () => {
+    expect(getEncounterFormSections(sectioned)[0]).toMatchObject({
+      narrative: true,
+      narrativeRequired: true,
+    });
+  });
+
+  it('reports an empty required companion narrative and accepts a written one', () => {
+    expect(validateEncounterResponses(sectioned, {})).toContainEqual({
+      sectionId: 'exam',
+      fieldId: narrativeId,
+      code: 'required',
+      message: 'Exam narrative is required.',
+    });
+    expect(
+      validateEncounterResponses(sectioned, {
+        [narrativeId]: { answer: 'No acute distress.' },
+      })
+    ).toEqual([]);
+  });
 });

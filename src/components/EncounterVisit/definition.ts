@@ -142,6 +142,10 @@ function observationView(
     invalid(
       `observation field ids use encounter:<section>:observation:<id> in ${sectionId}`
     );
+  if (field.id !== getEncounterFieldId(sectionId, id))
+    invalid(
+      `observation field ids use the canonical encoded id of their section in ${sectionId}.${id}`
+    );
   if (nonempty(source.id) && source.id !== id)
     invalid(`_sourceData.id conflicts with the field id in ${sectionId}.${id}`);
   const label = nonempty(field.question) ? field.question : undefined;
@@ -302,6 +306,7 @@ function sectionView(
       : {};
   const findings = validateFindings(narrativeSource.encounterFindings, id);
   const narrative = kind !== 'narrative' && narrativeField !== undefined;
+  const narrativeRequired = narrative && narrativeField?.required === true;
   const required =
     kind === 'narrative'
       ? narrativeField?.required === true
@@ -320,6 +325,7 @@ function sectionView(
       ? { requireCoding: customSource.encounterRequireCoding }
       : {}),
     ...(narrative ? { narrative } : {}),
+    ...(narrativeRequired ? { narrativeRequired } : {}),
     ...(required ? { required } : {}),
   };
 }

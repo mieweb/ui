@@ -58,6 +58,8 @@ export interface EncounterSectionView {
   requireCoding?: boolean;
   /** A free narrative exists alongside a structured section's fields. */
   narrative?: boolean;
+  /** Require the companion narrative itself, beyond the section's one-answer rule. */
+  narrativeRequired?: boolean;
   /** Require at least one answer in this section. */
   required?: boolean;
 }

@@ -386,6 +386,17 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
     ]);
   });
 
+  it.each([
+    ['another section', 'encounter:history:observation:pulse'],
+    ['a noncanonical encoding', 'encounter:exam:observation:%70ulse'],
+  ])('rejects an observation field id borrowed from %s', (_case, fieldId) => {
+    expect(() =>
+      validateEncounterForm(
+        observationsForm((field) => ({ ...field, id: fieldId }))
+      )
+    ).toThrow('observation field ids use the canonical encoded id');
+  });
+
   it('rejects dropdown options that break the encoded option-id convention', () => {
     expect(() =>
       validateEncounterForm(

@@ -1040,6 +1040,13 @@ export function validateEncounterResponses(
           'invalid-response',
           'Narrative fields store text in answer.'
         );
+      if (section.narrativeRequired && !responseHasContent(response))
+        add(
+          section.id,
+          fieldId,
+          'required',
+          `${section.title} narrative is required.`
+        );
     }
     if (section.kind === 'observations') {
       for (const observation of section.observations ?? []) {

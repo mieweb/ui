@@ -136,6 +136,45 @@ describe('EncounterVisit mode synchronization', () => {
     ).toThrow('The MDY form id does not match');
   });
 
+  it('opens a legacy MDY whose stamped form predates native choice units', () => {
+    const legacy: EncounterVisitDefinition = {
+      id: 'mode-test',
+      title: 'Anonymous visit',
+      sections: [
+        {
+          id: 'exam',
+          title: 'Exam',
+          kind: 'observations',
+          observations: [
+            {
+              id: 'bp-position',
+              label: 'BP position',
+              type: 'choice',
+              options: ['Sitting', 'Standing'],
+              unit: 'mmHg',
+            },
+          ],
+        },
+      ],
+    };
+    const current = parseEncounterMdy(
+      createEncounterSnapshot(encounterFormFromLegacy(legacy), {}).mdy
+    );
+    const yaml = new Document(current.frontMatter);
+    yaml.set('encounterDefinition', legacy);
+    // #762 stamped forms kept a choice observation's unit in _sourceData.
+    const fieldPath = ['form', 'pages', 0, 'fields', 0, 'fields', 0];
+    yaml.deleteIn([...fieldPath, 'unit']);
+    yaml.setIn([...fieldPath, '_sourceData'], { unit: 'mmHg' });
+    expect(() =>
+      render(
+        <EncounterVisit
+          initialMdy={`---\n${yaml.toString()}---\n${current.body}`}
+        />
+      )
+    ).not.toThrow();
+  });
+
   it('rejects imported field schemas and choice options that reuse the same native IDs', () => {
     const original = parseEncounterMdy(createEncounterSnapshot(form, {}).mdy);
     const yaml = new Document(original.frontMatter);
