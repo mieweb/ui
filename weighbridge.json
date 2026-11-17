@@ -1,0 +1,116 @@
+{
+  "esbuild": {
+    "version": "0.25.0",
+    "platform": "browser",
+    "external": [
+      "@esheet/builder",
+      "@esheet/builder/*",
+      "@esheet/core",
+      "@esheet/core/*",
+      "@esheet/fields",
+      "@esheet/fields/*",
+      "@esheet/renderer",
+      "@esheet/renderer/*",
+      "@kerebron/editor",
+      "@kerebron/editor/*",
+      "@kerebron/editor-kits",
+      "@kerebron/editor-kits/*",
+      "@kerebron/extension-basic-editor",
+      "@kerebron/extension-basic-editor/*",
+      "@kerebron/extension-menu",
+      "@kerebron/extension-menu/*",
+      "@kerebron/extension-yjs",
+      "@kerebron/extension-yjs/*",
+      "@kerebron/wasm",
+      "@kerebron/wasm/*",
+      "@mieweb/q",
+      "@mieweb/q/*",
+      "@xyflow/react",
+      "@xyflow/react/*",
+      "ag-grid-community",
+      "ag-grid-community/*",
+      "ag-grid-react",
+      "ag-grid-react/*",
+      "elkjs",
+      "elkjs/*",
+      "js-yaml",
+      "js-yaml/*",
+      "katex",
+      "katex/*",
+      "leaflet",
+      "leaflet/*",
+      "mermaid",
+      "mermaid/*",
+      "motion",
+      "motion/*",
+      "papaparse",
+      "papaparse/*",
+      "react",
+      "react/*",
+      "react-dom",
+      "react-dom/*",
+      "react-globe.gl",
+      "react-globe.gl/*",
+      "react-markdown",
+      "react-markdown/*",
+      "rehype-highlight",
+      "rehype-highlight/*",
+      "rehype-katex",
+      "rehype-katex/*",
+      "rehype-sanitize",
+      "rehype-sanitize/*",
+      "remark-gfm",
+      "remark-gfm/*",
+      "remark-math",
+      "remark-math/*",
+      "three",
+      "three/*",
+      "wavesurfer.js",
+      "wavesurfer.js/*",
+      "y-protocols",
+      "y-protocols/*",
+      "yjs",
+      "yjs/*"
+    ]
+  },
+  "pack": {
+    "maxTarballBytes": 10200000,
+    "maxUnpackedBytes": 48000000,
+    "sections": {
+      "dist": {
+        "prefix": "dist/",
+        "maxBytes": 47500000
+      },
+      "agent": {
+        "prefix": "agent/",
+        "maxBytes": 450000
+      }
+    }
+  },
+  "entries": [
+    {
+      "name": ".",
+      "path": "dist/index.js",
+      "maxGzipBytes": 880000
+    },
+    {
+      "name": "./hooks",
+      "path": "dist/hooks/index.js",
+      "maxGzipBytes": 13000,
+      "maxImportMs": 2000
+    },
+    {
+      "name": "./utils",
+      "path": "dist/utils/index.js",
+      "maxGzipBytes": 34000,
+      "maxImportMs": 2000
+    },
+    {
+      "name": "./tailwind-preset",
+      "path": "dist/tailwind-preset.js",
+      "platform": "node",
+      "maxGzipBytes": 11500,
+      "maxImportMs": 2000
+    }
+  ]
+}
