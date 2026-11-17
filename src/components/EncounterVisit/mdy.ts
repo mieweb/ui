@@ -128,45 +128,52 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
     'encounterKind',
     'encounterSectionRequired',
   ],
-  projectField: ({ field }, snapshot) => {
-    // Views are recomputed from the live form: callers may mutate a form
-    // in place between operations, so nothing is cached across calls.
-    const section = getEncounterFormSections(snapshot.form).find((candidate) =>
-      getEncounterSectionFieldIds(candidate).includes(field.id)
+  projectField: (snapshot) => {
+    // Views are rebuilt once per operation from the live form; the field-id
+    // lookup keeps each per-field refinement constant time.
+    const sections = new Map(
+      getEncounterFormSections(snapshot.form).flatMap((section) =>
+        getEncounterSectionFieldIds(section).map(
+          (fieldId) => [fieldId, section] as const
+        )
+      )
     );
-    if (!section) return undefined;
-    const fieldId = field.id;
-    const observations = snapshot.observations.filter(
-      (observation) => observation.fieldId === fieldId
-    );
-    const observationDefinition = section.observations?.find(
-      (observation) =>
-        getEncounterFieldId(section.id, observation.id) === fieldId
-    );
-    const narrative = fieldId === getEncounterFieldId(section.id);
-    const label = narrative
-      ? section.kind === 'narrative'
-        ? section.title
-        : `${section.title} narrative`
-      : (observationDefinition?.label ?? section.title);
-    const structured = !narrative && section.kind !== 'observations';
-    let display: string;
-    if (structured) {
-      display = groupedDisplay(observations, section.kind === 'vitals');
-    } else if (observations.length) {
-      display = observations.map(observationDisplay).join('; ');
-    } else {
-      // Do not invent a normal finding, numeric zero, or negative choice.
-      display = fieldDisplay({ ...snapshot.responses[fieldId] });
-    }
-    return {
-      sectionId: section.id,
-      label,
-      display,
-      empty: structured
-        ? observations.length === 0 || !display.trim()
-        : !hasNativeDocumentValue(snapshot.responses[fieldId]),
-      narrative: section.kind === 'narrative',
+    return ({ field }) => {
+      const section = sections.get(field.id);
+      if (!section) return undefined;
+      const fieldId = field.id;
+      const observations = snapshot.observations.filter(
+        (observation) => observation.fieldId === fieldId
+      );
+      const observationDefinition = section.observations?.find(
+        (observation) =>
+          getEncounterFieldId(section.id, observation.id) === fieldId
+      );
+      const narrative = fieldId === getEncounterFieldId(section.id);
+      const label = narrative
+        ? section.kind === 'narrative'
+          ? section.title
+          : `${section.title} narrative`
+        : (observationDefinition?.label ?? section.title);
+      const structured = !narrative && section.kind !== 'observations';
+      let display: string;
+      if (structured) {
+        display = groupedDisplay(observations, section.kind === 'vitals');
+      } else if (observations.length) {
+        display = observations.map(observationDisplay).join('; ');
+      } else {
+        // Do not invent a normal finding, numeric zero, or negative choice.
+        display = fieldDisplay({ ...snapshot.responses[fieldId] });
+      }
+      return {
+        sectionId: section.id,
+        label,
+        display,
+        empty: structured
+          ? observations.length === 0 || !display.trim()
+          : !hasNativeDocumentValue(snapshot.responses[fieldId]),
+        narrative: section.kind === 'narrative',
+      };
     };
   },
   // Saves stop writing the legacy schema; undefined deletes an imported key.

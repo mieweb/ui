@@ -102,14 +102,18 @@ export interface MdyDocumentConfig<TSnapshot extends MdyDocumentSnapshot> {
   /** `_sourceData` keys owned by the host's form generator. */
   sourceDataProperties: readonly string[];
   /**
-   * Refine one native field's projection. Return `null` to omit the field
-   * entirely; return `undefined` (or omit properties) to accept the engine's
-   * defaults, which come from the native form and response map alone.
+   * Build the per-field projection refiner for one projection operation.
+   * Invoked once per operation and discarded afterwards, so hosts can
+   * precompute section views from the live form without caching them
+   * across operations. The refiner returns `null` to omit a field
+   * entirely, or `undefined` (or omitted properties) to accept the
+   * engine's defaults, which come from the native form and response map.
    */
   projectField?(
-    context: MdyDocumentFieldContext,
     snapshot: TSnapshot
-  ): MdyFieldProjection | null | undefined;
+  ): (
+    context: MdyDocumentFieldContext
+  ) => MdyFieldProjection | null | undefined;
   /**
    * Additional host front-matter entries (e.g. parties). An `undefined`
    * value removes the key from a previously saved document.
@@ -790,9 +794,12 @@ export function createMdyDocumentEngine<TSnapshot extends MdyDocumentSnapshot>(
    * map with optional host refinements, including empty memory aids.
    */
   function projectFields(snapshot: TSnapshot): MdyDocumentField[] {
+    // Built once per operation and discarded: later operations observe
+    // in-place form edits while per-field work stays linear.
+    const refine = config.projectField?.(snapshot);
     return traverseForm(snapshot.form).flatMap((group) =>
       group.fields.flatMap((context) => {
-        const projection = config.projectField?.(context, snapshot);
+        const projection = refine?.(context);
         if (projection === null) return [];
         const response = snapshot.responses[context.field.id];
         const display =

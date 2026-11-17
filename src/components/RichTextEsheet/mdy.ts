@@ -100,18 +100,24 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
   missingFrontMatterMessage:
     'A RichTextEsheet MDY document requires YAML front matter.',
   sourceDataProperties: ['narrativeHideLabel', 'narrativeFindings'],
-  projectField: ({ field }, snapshot) => {
-    // Views are recomputed from the live form: callers may mutate a form
-    // in place between operations, so nothing is cached across calls.
-    const section = getRichTextEsheetFormSections(snapshot.form).find(
-      (candidate) => getRichTextEsheetFieldId(candidate.id) === field.id
+  projectField: (snapshot) => {
+    // Views are rebuilt once per operation from the live form; the field-id
+    // lookup keeps each per-field refinement constant time.
+    const sections = new Map(
+      getRichTextEsheetFormSections(snapshot.form).map((section) => [
+        getRichTextEsheetFieldId(section.id),
+        section,
+      ])
     );
-    if (!section) return undefined;
-    return {
-      sectionId: section.id,
-      label: section.title,
-      display: getRichTextEsheetSectionText(snapshot.responses, section.id),
-      narrative: true,
+    return ({ field }) => {
+      const section = sections.get(field.id);
+      if (!section) return undefined;
+      return {
+        sectionId: section.id,
+        label: section.title,
+        display: getRichTextEsheetSectionText(snapshot.responses, section.id),
+        narrative: true,
+      };
     };
   },
   // Saves stop writing the legacy schema; undefined deletes an imported key.
