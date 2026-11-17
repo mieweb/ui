@@ -45,10 +45,12 @@ export {
 } from './esheet-fields/AllergyListField';
 export {
   EsheetNarrativeField,
+  EsheetNarrativeMediaContext,
   narrativeText,
   registerEsheetNarrativeFieldType,
   sanitizeNarrativeHtml,
   type EsheetNarrativeFieldProps,
+  type EsheetNarrativeMedia,
   type NarrativeSanitizeOptions,
 } from './esheet-fields/EsheetNarrativeField';
 export {

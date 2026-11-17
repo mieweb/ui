@@ -30,16 +30,63 @@ insertable lines, and are recorded in the MDY front matter. They are not form
 fields; changing parties must not reset a draft (content identity is the
 serialized definition + parties).
 
-The portable output is MDY via `createRichTextEsheetSnapshot`: YAML front
-matter (`richTextEsheet` id/title plus `parties`) and a Markdown body with one
-`##` heading per documented section. Undocumented sections are omitted from
-the body. Authored text stays literal when the body is rendered — Markdown
-punctuation and HTML are escaped and editor line breaks become paragraphs —
-and completion/body honor both `answer` and `selected` native response shapes
-(same rule as encounter MDY). Narrative answers stay plain text in
-`FieldResponse.answer`; rich markup handling lives in the shared
-`EsheetNarrativeField`, not here. MDY is export-only: reopening a draft
-requires the snapshot's native `responses`.
+The portable output is MDY via `createRichTextEsheetSnapshot`. The YAML front
+matter is the canonical store: `mdy` metadata, the generated native `form`,
+the full `response` map (minus the reserved document response), the complete
+definition under `richTextEsheet`, `parties`, and one flat projection per
+section field bridging the native colon-bearing ids to the MDY link grammar.
+The generated Markdown body carries one `##` heading and link per section —
+empty sections included (their links display an em dash); only View prunes
+undocumented sections, as render-only cleanup. Linked display text stays
+literal — Markdown punctuation and HTML are escaped and multi-line answers
+join with `<br>` — and completion/body honor both `answer` and `selected`
+native response shapes (same rule as encounter MDY). Narrative answers stay
+plain text in `FieldResponse.answer`; rich markup handling lives in the shared
+`EsheetNarrativeField`, not here. MDY round-trips: `initialMdy` reopens a
+saved document, takes precedence over `initialResponses`, and can supply the
+definition and parties from its front matter (a mismatched explicit
+`definition.id` throws rather than silently rebinding answers).
+
+## Shared MDY document engine (mieweb/ui#758)
+
+`documentMdy.ts` is the generic engine factory: parse/create/render/
+refresh-links plus body read/write over a reserved document response, with
+diagnostics. `mdy.ts` configures it for this component (`richTextEsheet`
+front-matter key, `__document__` reserved response, `doc` link prefix);
+EncounterVisit configures the same factory in its own `mdy.ts`. The dependency
+direction is one-way — EncounterVisit imports from RichTextEsheet, never the
+reverse — and clinical wording (PHI notices, visit labels) stays on the
+encounter side. The document surfaces `DocumentMdyEditor`, `DocumentMdyView`,
+`DocumentExportView` and `report.ts` live here; the EncounterVisit modules of
+the same lineage are thin wrappers that only supply visit wording. The shared
+chrome stylesheet is `src/styles/encounter-visit.css`, scoped
+`:is(.encounter-visit, .richtext-esheet)` — keep both hosts in any selector
+change.
+
+## Modes
+
+eSheet, RichEdit, View and Export share the one FormStore draft; the switcher
+is a Select labelled "Document mode" riding a zero-height sticky overlay on
+the narrative toolbar row. The rich chrome stays mounted across modes (the
+toolbar is the document's constant chrome) but only authors the document while
+RichEdit is active; mode switches and Save flush the editor handle first, and
+a body commit that lands during serialization wins over the flushed copy.
+Activating a protected link opens the owning section in a focus-trapped
+resolver dialog instead of letting display-text edits overwrite answers. The
+imperative handle exposes `getSnapshot`, `focusSection` and `setMode`.
+
+## Media capture (mieweb/ui#758, generalized from #736)
+
+`mediaCapture` opts every narrative section into the capture ribbon in eSheet
+mode through `EsheetNarrativeMediaContext` (registered fields take no props
+from the host). Explicit per-field props win over the context, so
+EncounterVisit's own wiring is unaffected. Capture is an occasional
+attachment, not every section's primary input: each field's bar starts hidden
+(`defaultCaptureBarVisible: false`) behind the block (+) menu's "Show capture
+bar". `useDocumentMediaCapture` (`mediaCapture.tsx`) owns the mandatory
+`uploadHandler` contract and the generic screen-capture confirmation;
+EncounterVisit's `useEncounterMediaCapture` delegates to it with clinical PHI
+copy. RichEdit deliberately has no capture ribbon in this component.
 
 Required sections block save with a focusable error summary rather than
 discarding the draft. Save failures keep the draft editable. All user-facing

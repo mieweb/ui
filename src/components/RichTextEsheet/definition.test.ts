@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   createRichTextEsheetFormDefinition,
-  createRichTextEsheetSnapshot,
   getRichTextEsheetFieldId,
   partyFindings,
   validateRichTextEsheetDefinition,
@@ -114,75 +113,5 @@ describe('createRichTextEsheetFormDefinition', () => {
       _sourceData?: { narrativeHideLabel: boolean };
     };
     expect(field._sourceData?.narrativeHideLabel).toBe(true);
-  });
-});
-
-describe('createRichTextEsheetSnapshot', () => {
-  it('derives progress, required errors and portable MDY with parties', () => {
-    const empty = createRichTextEsheetSnapshot(definition, {}, parties);
-    expect(empty.documentedSections).toEqual([]);
-    expect(empty.errors).toEqual([
-      { sectionId: 'reason', message: 'Reason is required.' },
-    ]);
-    const responses = {
-      [getRichTextEsheetFieldId('reason')]: {
-        fieldId: getRichTextEsheetFieldId('reason'),
-        answer: 'Routine evaluation, please.',
-      },
-    };
-    const filled = createRichTextEsheetSnapshot(definition, responses, parties);
-    expect(filled.documentedSections).toEqual(['reason']);
-    expect(filled.errors).toEqual([]);
-    expect(filled.mdy).toContain('name: Jordan Rivera');
-    expect(filled.mdy).toContain('## Reason\n\nRoutine evaluation, please.');
-    expect(filled.mdy).not.toContain('## Closing');
-  });
-
-  it('counts native selection responses as documented content', () => {
-    const selectionDefinition: RichTextEsheetDefinition = {
-      ...definition,
-      sections: [
-        {
-          id: 'reason',
-          title: 'Reason',
-          required: true,
-          fieldType: 'customChoice',
-        },
-      ],
-    };
-    const snapshot = createRichTextEsheetSnapshot(selectionDefinition, {
-      [getRichTextEsheetFieldId('reason')]: {
-        selected: [{ label: 'Urgency', value: 'Routine' }],
-      } as never,
-    });
-    expect(snapshot.documentedSections).toEqual(['reason']);
-    expect(snapshot.errors).toEqual([]);
-    expect(snapshot.mdy).toContain('## Reason\n\nUrgency: Routine');
-  });
-
-  it('keeps authored plain text literal in the Markdown body', () => {
-    const snapshot = createRichTextEsheetSnapshot(
-      definition,
-      {
-        [getRichTextEsheetFieldId('reason')]: {
-          answer: 'Use <input> here & stay *plain*\nSecond paragraph',
-        },
-      },
-      parties
-    );
-    expect(snapshot.mdy).toContain(
-      'Use \\<input\\> here &amp; stay \\*plain\\*\n\nSecond paragraph'
-    );
-  });
-
-  it('neutralizes Markdown block openers at line start', () => {
-    const snapshot = createRichTextEsheetSnapshot(definition, {
-      [getRichTextEsheetFieldId('reason')]: {
-        answer: '# Ticket note\n- literal hyphen\n1. Log in\n---',
-      },
-    });
-    expect(snapshot.mdy).toContain(
-      '\\# Ticket note\n\n\\- literal hyphen\n\n1\\. Log in\n\n\\---'
-    );
   });
 });

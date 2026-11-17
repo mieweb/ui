@@ -281,9 +281,6 @@ const EncounterVisitSession = React.forwardRef<
   const [snapshot, setSnapshot] = React.useState(() =>
     createEncounterSnapshot(stableDefinition, initialSeed)
   );
-  const [richBodySeed] = React.useState(
-    () => parseEncounterMdy(snapshot.mdy).body
-  );
   const [activeSection, setActiveSection] = React.useState(
     stableDefinition.sections[0].id
   );
@@ -326,6 +323,22 @@ const EncounterVisitSession = React.forwardRef<
     () => ({ definition: form, responses: responses.current }),
     [form]
   );
+  // Until the user authors the document, RichEdit shows a generated skeleton.
+  // Key it to the configuration, not the live snapshot: the always-mounted
+  // editor reloads the whole document whenever `body` changes, which must not
+  // happen for every keystroke in an eSheet field — answer-only updates reach
+  // the editor through its `fields` projection refresh instead. A config
+  // change still regenerates, so a mount-time seed never commits a stale body
+  // missing newly added links on the first flush.
+  const generatedBody = React.useMemo(
+    () =>
+      parseEncounterMdy(
+        createEncounterSnapshot(stableDefinition, responses.current).mdy
+      ).body,
+    [stableDefinition]
+  );
+  const richBody =
+    getEncounterDocumentBody(snapshot.responses) ?? generatedBody;
 
   const writeBody = React.useCallback((body: string) => {
     if (latest.current.readOnly || latest.current.saving) return;
@@ -494,7 +507,9 @@ const EncounterVisitSession = React.forwardRef<
     },
     [flushEditor]
   );
-  useEscapeKey(closeResolver, resolverField !== null);
+  // Exclusive: an enclosing Modal host must not also close on the keypress
+  // that dismisses the resolver (one overlay layer per Escape).
+  useEscapeKey(closeResolver, resolverField !== null, resolverTrap);
 
   React.useEffect(() => {
     const container = resolverTrap.current;
@@ -540,6 +555,9 @@ const EncounterVisitSession = React.forwardRef<
     // the trap's focus scope for keyboard users.
     const inScope = (target: Element): boolean => {
       if (container.contains(target)) return true;
+      // The screen-capture confirmation is a modal alertdialog portaled to
+      // document.body; it owns focus while open — never yank it back.
+      if (target.closest('[role="alertdialog"]')) return true;
       const portal = target.closest<HTMLElement>(
         '[data-slot="dropdown-menu"], [data-slot="dropdown-submenu"]'
       );
@@ -804,9 +822,7 @@ const EncounterVisitSession = React.forwardRef<
               >
                 <EncounterMdyEditor
                   ref={richEditor}
-                  body={
-                    getEncounterDocumentBody(snapshot.responses) ?? richBodySeed
-                  }
+                  body={richBody}
                   fieldIds={mdyFields.map((field) => field.id)}
                   fields={mdyFields.map((field) => ({
                     id: field.id,
