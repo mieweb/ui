@@ -71,6 +71,11 @@ export interface SuperChatInboxProps {
   /** Props for the active panel's message box (see {@link SuperChatProps.composerProps}). */
   composerProps?: SuperChatComposerProps;
   /**
+   * The host's own composer for the active panel, replacing the built-in
+   * message box (see {@link SuperChatProps.composer}). `null` renders none.
+   */
+  composer?: React.ReactNode;
+  /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
@@ -183,6 +188,7 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   composerProps,
+  composer,
   acceptedFileTypes,
   order,
   virtualized,
@@ -350,6 +356,7 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           composerProps={composerProps}
+          composer={composer}
           acceptedFileTypes={acceptedFileTypes}
           order={order}
           virtualized={virtualized}
