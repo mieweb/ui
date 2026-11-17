@@ -20,7 +20,13 @@ import {
   attachmentCache,
 } from './plugins';
 import type { MCPToolCall, SuperChatConversation } from './index';
-import { richConversation, secondConversation, registry } from './storyData';
+import {
+  richConversation,
+  secondConversation,
+  registry,
+  arabicConversations,
+  arabicLabels,
+} from './storyData';
 import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
@@ -1167,4 +1173,77 @@ export const MediaConversation: Story = {
     },
   },
   render: () => <MediaConversationDemo />,
+};
+
+// Arabic, right to left: every label from `arabicLabels`, times in `ar`.
+function ArabicInbox() {
+  const [conversations, setConversations] =
+    React.useState<SuperChatConversation[]>(arabicConversations);
+  const [query, setQuery] = React.useState('');
+  const visible = conversations.filter((c) =>
+    c.title.toLowerCase().includes(query.trim().toLowerCase())
+  );
+  return (
+    <div dir="rtl" lang="ar" className="flex h-full w-full">
+      <SuperChatInbox
+        className="w-full"
+        conversations={visible}
+        labels={arabicLabels}
+        locale="ar"
+        currentParticipantId="u1"
+        resizableSidebar
+        search={{ value: query, onChange: setQuery }}
+        agents={[{ id: 'a1', label: 'وكيل الفرز' }]}
+        onNewConversation={() => {}}
+        onConversationClosed={() => {}}
+        onMessageSent={(text, { conversation }) =>
+          setConversations((all) =>
+            all.map((c) =>
+              c.id === conversation.id
+                ? {
+                    ...c,
+                    thread: [
+                      ...c.thread,
+                      {
+                        id: `ar-${Date.now()}`,
+                        participantId: 'u1',
+                        text,
+                        time: new Date().toISOString(),
+                      },
+                    ],
+                  }
+                : c
+            )
+          )
+        }
+        onMessageEdited={(messageId, text) =>
+          setConversations((all) =>
+            all.map((c) => ({
+              ...c,
+              thread: c.thread.map((m) =>
+                m.id === messageId
+                  ? { ...m, text, editedAt: new Date().toISOString() }
+                  : m
+              ),
+            }))
+          )
+        }
+      />
+    </div>
+  );
+}
+
+export const ArabicRTL: Story = {
+  name: 'Arabic (RTL)',
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          'The inbox inside a `dir="rtl"` container with every `labels` key in Arabic and `locale="ar"`, so message, edited and scheduled times use Arabic formatting. The list sits on the right, messages align from the right, and the resize handle and keyboard arrows follow the reading direction. Open a message’s ⋯ menu to see the localized Copy as / Edit actions.',
+      },
+    },
+  },
+  render: () => <ArabicInbox />,
 };

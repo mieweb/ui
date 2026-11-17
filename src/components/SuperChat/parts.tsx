@@ -35,6 +35,7 @@ import type {
   Participant,
   SuperChatConversation,
   SuperChatCopyFormat,
+  SuperChatLabels,
   SuperChatLinkBuilder,
   SuperChatMessage,
   SuperChatRef,
@@ -45,16 +46,17 @@ import type {
 // Helpers
 // ============================================================================
 
-export function formatTime(time: Date | string): string {
-  return new Date(time).toLocaleTimeString(undefined, {
+/** "9:00 AM" in `locale` (the runtime's default locale when omitted). */
+export function formatTime(time: Date | string, locale?: string): string {
+  return new Date(time).toLocaleTimeString(locale, {
     hour: 'numeric',
     minute: '2-digit',
   });
 }
 
-/** "Thu, Oct 1, 9:00 AM" in the user's locale — for times that may not be today. */
-export function formatDateTime(time: Date | string): string {
-  return new Date(time).toLocaleString(undefined, {
+/** "Thu, Oct 1, 9:00 AM" in `locale` — for times that may not be today. */
+export function formatDateTime(time: Date | string, locale?: string): string {
+  return new Date(time).toLocaleString(locale, {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -601,6 +603,8 @@ interface MessageOverflowMenuProps {
   /** Aligns the popover to the outer margin (right for self, left otherwise). */
   isSelf: boolean;
   actions: MessageAction[];
+  /** Accessible name of the ⋯ trigger. */
+  label: string;
   /**
    * Whether the footer action bar is currently in view. While it is, the
    * overflow trigger hides (the footer already offers the actions); it
@@ -617,6 +621,7 @@ interface MessageOverflowMenuProps {
 function MessageOverflowMenu({
   isSelf,
   actions,
+  label,
   footerVisible,
 }: MessageOverflowMenuProps) {
   const [open, setOpen] = React.useState(false);
@@ -652,7 +657,7 @@ function MessageOverflowMenu({
           <button
             type="button"
             data-slot="superchat-overflow-button"
-            aria-label="Message actions"
+            aria-label={label}
             className={cn(actionButtonClass, actionRevealClass)}
           >
             <EllipsisIcon size={14} aria-hidden="true" />
@@ -754,6 +759,7 @@ interface MessageContentBlocksProps {
   role: 'user' | 'assistant';
   renderText: AIRenderTextContent;
   toolCallGroup?: MCPToolCallGroupOptions;
+  labels: SuperChatLabels;
 }
 
 /**
@@ -770,9 +776,15 @@ function MessageContentBlocks({
   role,
   renderText,
   toolCallGroup,
+  labels,
 }: MessageContentBlocksProps) {
   const blocks = message.content ?? [];
   const textContext = { messageId: message.id, streaming, role };
+  const thinkingLabels = {
+    thinking: labels.thinking,
+    thought: labels.thought,
+    thoughtFor: labels.thoughtFor,
+  };
   // The last block that renders anything: a thinking block is still "live"
   // only while nothing renders after it.
   let lastRendered = -1;
@@ -827,6 +839,7 @@ function MessageContentBlocks({
             text={block.text}
             streaming={thinking}
             defaultCollapsed={block.collapsed ?? !thinking}
+            labels={thinkingLabels}
           />
         </div>
       );
@@ -870,14 +883,14 @@ interface MessageRowProps {
     attachmentId: string,
     play?: boolean
   ) => void;
-  openMediaLabel?: string;
-  playMediaLabel?: string;
+  /** Resolved labels (keep the object stable — rows are memoized). */
+  labels: SuperChatLabels;
+  /** Locale for message times; the runtime default when omitted. */
+  locale?: string;
   /** Localized preview load-error text (falls back to the player default). */
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
-  /** Prefix of the scheduled indicator, before its time. */
-  scheduledLabel?: string;
   /**
    * Group each run of consecutive `tool_use` blocks into one
    * `MCPToolCallGroup` with these callbacks and labels (as `AIChat` does).
@@ -906,11 +919,10 @@ export const MessageRow = React.memo(function MessageRow({
   onMessageEdited,
   defaultCopyFormat = 'rich',
   onOpenMedia,
-  openMediaLabel = 'Open in media feed',
-  playMediaLabel = 'Play',
+  labels,
+  locale,
   mediaErrorLabel,
   mediaRetryLabel,
-  scheduledLabel = 'Scheduled',
   toolCallGroup,
 }: MessageRowProps) {
   const streaming = message.status === 'streaming';
@@ -1050,9 +1062,10 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const role = participant?.kind === 'human' ? 'user' : 'assistant';
   const accentTextColor = accessibleAccentTextColor(accent);
-  const authorName = participant?.name ?? 'Unknown';
+  const authorName = participant?.name ?? labels.unknownAuthor;
+  const time = formatTime(message.time, locale);
   const scheduled = message.scheduledFor
-    ? `${scheduledLabel} · ${formatDateTime(message.scheduledFor)}`
+    ? `${labels.scheduled} · ${formatDateTime(message.scheduledFor, locale)}`
     : null;
 
   const startEdit = () => {
@@ -1129,8 +1142,8 @@ export const MessageRow = React.memo(function MessageRow({
       ? [
           {
             id: 'copy',
-            label: 'Copy message',
-            title: 'Copy message (\u2318/Ctrl-click: default format)',
+            label: labels.copyMessage,
+            title: labels.copyMessageTitle,
             icon: copy.copied ? (
               <CheckIcon size={14} aria-hidden="true" />
             ) : (
@@ -1138,22 +1151,22 @@ export const MessageRow = React.memo(function MessageRow({
             ),
             onSelect: copy.copyDefault,
             submenu: {
-              label: 'Copy as',
+              label: labels.copyAs,
               items: [
                 {
                   id: 'copy-rich',
-                  label: 'Copy as rich text',
-                  description: 'Rich text + Markdown',
+                  label: labels.copyAsRichText,
+                  description: labels.copyAsRichTextDescription,
                   onSelect: copy.copyRich,
                 },
                 {
                   id: 'copy-markdown',
-                  label: 'Copy as Markdown',
+                  label: labels.copyAsMarkdown,
                   onSelect: copy.copyMarkdown,
                 },
                 {
                   id: 'copy-plain',
-                  label: 'Copy as plain text',
+                  label: labels.copyAsPlainText,
                   onSelect: copy.copyPlain,
                 },
               ],
@@ -1165,7 +1178,7 @@ export const MessageRow = React.memo(function MessageRow({
       ? [
           {
             id: 'edit',
-            label: 'Edit message',
+            label: labels.editMessage,
             icon: <PencilIcon size={14} aria-hidden="true" />,
             onSelect: startEdit,
           } satisfies MessageAction,
@@ -1177,7 +1190,7 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}${scheduled ? `, ${scheduled}` : ''}`}
+      aria-label={labels.messageLabel(authorName, time, scheduled ?? undefined)}
       className={cn(
         'group flex gap-2',
         isSelf ? 'flex-row-reverse' : 'flex-row'
@@ -1196,6 +1209,7 @@ export const MessageRow = React.memo(function MessageRow({
             <MessageOverflowMenu
               isSelf={isSelf}
               actions={actions}
+              label={labels.messageActions}
               footerVisible={collapseToMenu ? false : footerVisible}
             />
             {!collapseToMenu && (
@@ -1233,15 +1247,15 @@ export const MessageRow = React.memo(function MessageRow({
             </span>
           )}
           <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
-            {formatTime(message.time)}
+            {time}
           </span>
           {message.editedAt && (
             <span
               data-slot="superchat-edited-indicator"
               className="text-[10px] text-neutral-500 dark:text-neutral-400"
-              title={`Edited ${formatTime(message.editedAt)}`}
+              title={labels.editedAt(formatTime(message.editedAt, locale))}
             >
-              (edited)
+              {labels.edited}
             </span>
           )}
           {scheduled && (
@@ -1296,7 +1310,7 @@ export const MessageRow = React.memo(function MessageRow({
                       cancelEdit();
                     }
                   }}
-                  aria-label="Edit message"
+                  aria-label={labels.editMessage}
                   className="focus:ring-primary-500 max-h-60 min-h-16 w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
@@ -1305,7 +1319,7 @@ export const MessageRow = React.memo(function MessageRow({
                     onClick={cancelEdit}
                     className="rounded-md px-2.5 py-1 text-xs font-medium text-neutral-200 hover:bg-white/10"
                   >
-                    Cancel
+                    {labels.cancel}
                   </button>
                   <button
                     type="button"
@@ -1313,7 +1327,7 @@ export const MessageRow = React.memo(function MessageRow({
                     disabled={!draft.trim() || draft.trim() === message.text}
                     className="rounded-md bg-white px-2.5 py-1 text-xs font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-40"
                   >
-                    Save
+                    {labels.save}
                   </button>
                 </div>
               </div>
@@ -1326,6 +1340,7 @@ export const MessageRow = React.memo(function MessageRow({
                   role={role}
                   renderText={renderText}
                   toolCallGroup={toolCallGroup}
+                  labels={labels}
                 />
 
                 {/* Plain `text` body (the common case). */}
@@ -1343,8 +1358,8 @@ export const MessageRow = React.memo(function MessageRow({
                   <MessageMedia
                     key={attachment.id}
                     attachment={attachment}
-                    openLabel={openMediaLabel}
-                    playLabel={playMediaLabel}
+                    openLabel={labels.openMedia}
+                    playLabel={labels.playMedia}
                     errorLabel={mediaErrorLabel}
                     retryLabel={mediaRetryLabel}
                     launchId={JSON.stringify([message.id, attachment.id])}

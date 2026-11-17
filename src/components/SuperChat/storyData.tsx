@@ -3,6 +3,7 @@ import type {
   GenUIRegistry,
   GenUIWidgetProps,
   SuperChatConversation,
+  SuperChatLabels,
 } from './index';
 
 // ============================================================================
@@ -314,3 +315,167 @@ export const registry: GenUIRegistry = {
     prefetch: 'eager',
   },
 };
+
+// ============================================================================
+// Arabic (RTL) localization sample
+// ============================================================================
+
+/** Every SuperChat label in Arabic, for the RTL story and the i18n tests. */
+export const arabicLabels: SuperChatLabels = {
+  inboxLabel: (title) => `الدردشة: ${title}`,
+  emptyInboxLabel: 'الدردشة',
+  noConversationSelected: 'لم يتم اختيار محادثة',
+  sidebarResize: 'تغيير حجم قائمة المحادثات',
+
+  conversations: 'المحادثات',
+  newConversation: 'محادثة جديدة',
+  unreadCount: (count) => `رسائل غير مقروءة: ${count}`,
+  searchConversations: 'البحث في المحادثات',
+  searchPlaceholder: 'بحث…',
+  noMatchingConversations: 'لا توجد محادثات مطابقة',
+
+  backToConversations: 'العودة إلى المحادثات',
+  participants: 'المشاركون',
+  closeConversation: 'إغلاق المحادثة',
+  messages: 'الرسائل',
+  scrollToBottom: 'الانتقال إلى الأسفل',
+  newMessages: 'رسائل جديدة',
+  newMessagesScrollToBottom: 'رسائل جديدة — الانتقال إلى الأسفل',
+
+  backToConversation: 'العودة إلى المحادثة',
+  openMedia: 'فتح في معرض الوسائط',
+  playMedia: 'تشغيل',
+
+  messageInput: 'الرسالة',
+  composerPlaceholder: 'اكتب رسالة… استخدم @ لمخاطبة وكيل',
+  readOnlyPlaceholder: 'محادثة للقراءة فقط',
+  addToMessage: 'إضافة إلى الرسالة',
+  attachFiles: 'إرفاق ملفات',
+  sendMessage: 'إرسال الرسالة',
+  sendingMessage: 'جارٍ إرسال الرسالة…',
+  sendFailed: 'تعذّر إرسال الرسالة',
+  moreSendOptions: 'خيارات إرسال إضافية',
+  stopGenerating: 'إيقاف التوليد',
+  selectAgent: 'اختر وكيلًا',
+  mentionList: 'الإشارة',
+  dropFiles: 'أفلت الملفات هنا',
+
+  messageLabel: (author, time, scheduled) =>
+    [author, time, scheduled].filter(Boolean).join('، '),
+  unknownAuthor: 'غير معروف',
+  scheduled: 'مجدولة',
+  edited: '(معدّلة)',
+  editedAt: (time) => `عُدّلت ${time}`,
+  messageActions: 'إجراءات الرسالة',
+  copyMessage: 'نسخ الرسالة',
+  copyMessageTitle: 'نسخ الرسالة (النقر مع ⌘ أو كنترول: التنسيق الافتراضي)',
+  copyAs: 'نسخ بتنسيق',
+  copyAsRichText: 'نسخ كنص منسّق',
+  copyAsRichTextDescription: 'نص منسّق + ماركداون',
+  copyAsMarkdown: 'نسخ بتنسيق ماركداون',
+  copyAsPlainText: 'نسخ كنص عادي',
+  editMessage: 'تعديل الرسالة',
+  save: 'حفظ',
+  cancel: 'إلغاء',
+  thinking: 'يفكّر',
+  thought: 'فكّر',
+  thoughtFor: (seconds) => `فكّر لمدة ${seconds} ث`,
+};
+
+const arabicParticipants = {
+  me: {
+    id: 'u1',
+    kind: 'human' as const,
+    name: 'د. ليلى حداد',
+    role: 'طبيبة',
+    color: '#0e7490',
+  },
+  nurse: {
+    id: 'u2',
+    kind: 'human' as const,
+    name: 'سامي كرم',
+    role: 'ممرض',
+    color: '#9333ea',
+  },
+  triage: {
+    id: 'a1',
+    kind: 'agent' as const,
+    name: 'وكيل الفرز',
+    color: '#2563eb',
+  },
+};
+
+/** An all-Arabic intake conversation: thinking, edits, scheduling and media. */
+export const arabicConversation: SuperChatConversation = {
+  id: 'ar-1',
+  title: 'المريض ٤٨٢١ — مراجعة الاستقبال',
+  unread: 0,
+  participants: Object.values(arabicParticipants),
+  thread: [
+    {
+      id: 'ar-m1',
+      participantId: 'u1',
+      text: '@وكيل لخّص الشكوى الرئيسية من فضلك.',
+      mentions: ['a1'],
+      time: '2026-06-07T09:01:00Z',
+      editedAt: '2026-06-07T09:02:00Z',
+    },
+    {
+      id: 'ar-m2',
+      participantId: 'a1',
+      content: [
+        {
+          type: 'thinking',
+          text: 'أراجع ملاحظات الاستقبال والعلامات الحيوية.',
+        },
+      ],
+      text: 'الشكوى الرئيسية: ضيق في الصدر عند المجهود منذ ثلاثة أيام.',
+      time: '2026-06-07T09:01:30Z',
+    },
+    {
+      id: 'ar-m3',
+      participantId: 'u2',
+      text: 'صورة تخطيط القلب مرفقة.',
+      time: '2026-06-07T09:03:00Z',
+      media: [
+        {
+          id: 'ecg',
+          kind: 'image',
+          src: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22120%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f1f5f9%22/%3E%3Cpolyline points=%220,60 60,60 80,20 100,100 120,60 320,60%22 fill=%22none%22 stroke=%22%230e7490%22 stroke-width=%223%22/%3E%3C/svg%3E',
+          title: 'تخطيط القلب',
+        },
+      ],
+    },
+    {
+      id: 'ar-m4',
+      participantId: 'gone',
+      text: 'رسالة من مشارك غادر المحادثة.',
+      time: '2026-06-07T09:04:00Z',
+    },
+    {
+      id: 'ar-m5',
+      participantId: 'u1',
+      text: 'تذكير بمتابعة نتائج المختبر.',
+      time: '2026-06-07T09:05:00Z',
+      scheduledFor: '2026-06-08T08:00:00Z',
+    },
+  ],
+};
+
+export const arabicConversations: SuperChatConversation[] = [
+  arabicConversation,
+  {
+    id: 'ar-2',
+    title: 'متابعة المختبر',
+    unread: 3,
+    participants: [arabicParticipants.me, arabicParticipants.nurse],
+    thread: [
+      {
+        id: 'ar-m6',
+        participantId: 'u2',
+        text: 'وصلت نتائج تحليل الدم.',
+        time: '2026-06-07T10:00:00Z',
+      },
+    ],
+  },
+];
