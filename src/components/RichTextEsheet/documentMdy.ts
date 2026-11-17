@@ -606,20 +606,45 @@ function setPreserving(
 
 interface MdyDocumentSectionGroup {
   section: MdyNativeSection;
+  /** Markdown heading depth for this group's section heading. */
+  depth: number;
   fields: MdyDocumentFieldContext[];
 }
 
 /** Container field types whose children are traversed rather than projected. */
 const STRUCTURAL_FIELD_TYPES = new Set(['section', 'pages']);
 
-/** Flatten native pages into top-level section groups of projectable leaf fields. */
+/**
+ * Flatten native pages into section groups of projectable leaf fields in
+ * source order. Nested sections open their own, deeper groups so generated
+ * bodies keep their headings; a section interrupted by nested content reopens
+ * with its heading repeated so the fields that follow stay attributed to it.
+ */
 function traverseForm(form: FormDefinition): MdyDocumentSectionGroup[] {
   const groups: MdyDocumentSectionGroup[] = [];
+  const leaf = (
+    field: Record<string, unknown>,
+    id: string,
+    fieldType: string,
+    section: MdyNativeSection
+  ): MdyDocumentFieldContext => ({
+    field: {
+      id,
+      fieldType,
+      question: typeof field.question === 'string' ? field.question : undefined,
+      unit: typeof field.unit === 'string' ? field.unit : undefined,
+      _sourceData: field._sourceData,
+    },
+    section,
+  });
   const collect = (
     fields: unknown,
     section: MdyNativeSection,
-    into: MdyDocumentFieldContext[]
+    depth: number
   ): void => {
+    let group: MdyDocumentSectionGroup = { section, depth, fields: [] };
+    groups.push(group);
+    let open = true;
     if (!Array.isArray(fields)) return;
     for (const field of fields) {
       if (
@@ -635,20 +660,16 @@ function traverseForm(form: FormDefinition): MdyDocumentSectionGroup[] {
             id: field.id,
             title: typeof field.title === 'string' ? field.title : undefined,
           },
-          into
+          Math.min(depth + 1, 6)
         );
+        open = false;
       } else if (field.fieldType !== 'display') {
-        into.push({
-          field: {
-            id: field.id,
-            fieldType: field.fieldType,
-            question:
-              typeof field.question === 'string' ? field.question : undefined,
-            unit: typeof field.unit === 'string' ? field.unit : undefined,
-            _sourceData: field._sourceData,
-          },
-          section,
-        });
+        if (!open) {
+          group = { section, depth, fields: [] };
+          groups.push(group);
+          open = true;
+        }
+        group.fields.push(leaf(field, field.id, field.fieldType, section));
       }
     }
   };
@@ -657,24 +678,33 @@ function traverseForm(form: FormDefinition): MdyDocumentSectionGroup[] {
     let loose: MdyDocumentSectionGroup | null = null;
     for (const field of page.fields) {
       if (
-        record(field) &&
-        field.fieldType === 'section' &&
-        typeof field.id === 'string'
-      ) {
-        const section = {
-          id: field.id,
-          title: typeof field.title === 'string' ? field.title : undefined,
-        };
-        const group: MdyDocumentSectionGroup = { section, fields: [] };
-        collect(field.fields, section, group.fields);
-        groups.push(group);
+        !record(field) ||
+        typeof field.id !== 'string' ||
+        typeof field.fieldType !== 'string'
+      )
+        continue;
+      if (STRUCTURAL_FIELD_TYPES.has(field.fieldType)) {
+        collect(
+          field.fields,
+          {
+            id: field.id,
+            title: typeof field.title === 'string' ? field.title : undefined,
+          },
+          2
+        );
         loose = null;
-      } else {
+      } else if (field.fieldType !== 'display') {
         if (!loose) {
-          loose = { section: { id: page.id, title: page.title }, fields: [] };
+          loose = {
+            section: { id: page.id, title: page.title },
+            depth: 2,
+            fields: [],
+          };
           groups.push(loose);
         }
-        collect([field], loose.section, loose.fields);
+        loose.fields.push(
+          leaf(field, field.id, field.fieldType, loose.section)
+        );
       }
     }
   }
@@ -797,19 +827,20 @@ export function createMdyDocumentEngine<TSnapshot extends MdyDocumentSnapshot>(
     const byFieldId = new Map(fields.map((field) => [field.fieldId, field]));
     return [
       `# ${markdownText(snapshot.form.title ?? snapshot.form.id)}`,
-      ...traverseForm(snapshot.form).map((group) =>
-        [
-          `## ${markdownText(group.section.title ?? group.section.id)}`,
-          group.fields
-            .flatMap((context) => byFieldId.get(context.field.id) ?? [])
-            .map((field) =>
-              field.narrative
-                ? fieldLink(field)
-                : `- **${markdownText(field.label)}:** ${fieldLink(field)}`
-            )
-            .join('\n'),
-        ].join('\n\n')
-      ),
+      ...traverseForm(snapshot.form).flatMap((group) => {
+        const heading = `${'#'.repeat(group.depth)} ${markdownText(
+          group.section.title ?? group.section.id
+        )}`;
+        const lines = group.fields
+          .flatMap((context) => byFieldId.get(context.field.id) ?? [])
+          .map((field) =>
+            field.narrative
+              ? fieldLink(field)
+              : `- **${markdownText(field.label)}:** ${fieldLink(field)}`
+          )
+          .join('\n');
+        return lines ? [`${heading}\n\n${lines}`] : [heading];
+      }),
     ].join('\n\n');
   }
 
