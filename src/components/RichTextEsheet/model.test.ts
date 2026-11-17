@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { parseDocument } from 'yaml';
+import { getRichTextEsheetFieldId } from './definition';
 import {
-  getRichTextEsheetFieldId,
+  richTextEsheetFormFromLegacy,
   type RichTextEsheetDefinition,
-} from './definition';
+} from './legacy';
 import {
   createRichTextEsheetMdy,
   getRichTextEsheetMdyParties,
@@ -23,6 +25,8 @@ const definition: RichTextEsheetDefinition = {
   ],
 };
 
+const form = richTextEsheetFormFromLegacy(definition);
+
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
   { role: 'Provider', name: 'Dr. Casey Morgan' },
@@ -32,13 +36,13 @@ const reasonId = getRichTextEsheetFieldId('reason');
 
 describe('createRichTextEsheetSnapshot', () => {
   it('derives progress, required errors and portable MDY with parties', () => {
-    const empty = createRichTextEsheetSnapshot(definition, {}, parties);
+    const empty = createRichTextEsheetSnapshot(form, {}, parties);
     expect(empty.documentedSections).toEqual([]);
     expect(empty.errors).toEqual([
       { sectionId: 'reason', message: 'Reason is required.' },
     ]);
     const filled = createRichTextEsheetSnapshot(
-      definition,
+      form,
       { [reasonId]: { answer: 'Routine evaluation, please.' } },
       parties
     );
@@ -53,7 +57,7 @@ describe('createRichTextEsheetSnapshot', () => {
   });
 
   it('counts native selection responses as documented content', () => {
-    const selectionDefinition: RichTextEsheetDefinition = {
+    const selectionForm = richTextEsheetFormFromLegacy({
       ...definition,
       sections: [
         {
@@ -63,8 +67,8 @@ describe('createRichTextEsheetSnapshot', () => {
           fieldType: 'customChoice',
         },
       ],
-    };
-    const snapshot = createRichTextEsheetSnapshot(selectionDefinition, {
+    });
+    const snapshot = createRichTextEsheetSnapshot(selectionForm, {
       [reasonId]: {
         selected: [{ label: 'Urgency', value: 'Routine' }],
       } as never,
@@ -76,7 +80,7 @@ describe('createRichTextEsheetSnapshot', () => {
 
   it('keeps authored plain text literal in the projected display', () => {
     const snapshot = createRichTextEsheetSnapshot(
-      definition,
+      form,
       {
         [reasonId]: {
           answer: 'Use <input> here & stay *plain*\nSecond paragraph',
@@ -92,23 +96,53 @@ describe('createRichTextEsheetSnapshot', () => {
 
 describe('RichTextEsheet MDY round trip', () => {
   const input = {
-    definition,
+    form,
     responses: {
       [reasonId]: { answer: 'Routine evaluation, please.' },
     },
     parties,
   };
 
-  it('recovers the definition, responses and parties from the document', () => {
+  it('recovers the form, responses and parties from the document', () => {
     const parsed = parseRichTextEsheetMdy(createRichTextEsheetMdy(input));
     expect(
       parsed.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')
     ).toEqual([]);
-    expect(parsed.definition).toEqual(definition);
+    // Saves no longer write the legacy richTextEsheet key (mieweb/ui#772).
+    expect(parsed.definition).toBeUndefined();
+    expect(parsed.form).toEqual(form);
     expect(parsed.response?.[reasonId]?.answer).toBe(
       'Routine evaluation, please.'
     );
     expect(getRichTextEsheetMdyParties(parsed.frontMatter)).toEqual(parties);
+  });
+
+  it('imports the legacy richTextEsheet key once and saves only the native form', () => {
+    const source = createRichTextEsheetMdy(input);
+    const parsed = parseRichTextEsheetMdy(source);
+    const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
+    // Pre-#772 saves stamped the native form alongside the legacy key.
+    document.set('richTextEsheet', definition);
+    const legacySource = `---\n${document.toString()}---\n${parsed.body}`;
+    const legacy = parseRichTextEsheetMdy(legacySource);
+    expect(legacy.definition).toEqual(definition);
+    expect(legacy.diagnostics).toEqual([]);
+    const migrated = createRichTextEsheetMdy(
+      {
+        form: richTextEsheetFormFromLegacy(legacy.definition!),
+        responses: legacy.response ?? {},
+        parties,
+      },
+      undefined,
+      legacySource
+    );
+    const reparsed = parseRichTextEsheetMdy(migrated);
+    expect(reparsed.definition).toBeUndefined();
+    expect(migrated).not.toContain('richTextEsheet:');
+    expect(reparsed.form).toEqual(form);
+    expect(reparsed.response?.[reasonId]?.answer).toBe(
+      'Routine evaluation, please.'
+    );
   });
 
   it('preserves authored prose and refreshes projections on data change', () => {
@@ -137,7 +171,7 @@ describe('RichTextEsheet MDY round trip', () => {
   it('carries an imported document through the reserved response', () => {
     const imported = createRichTextEsheetMdy(input);
     const snapshot = createRichTextEsheetSnapshot(
-      definition,
+      form,
       {
         ...input.responses,
         [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]:
@@ -157,18 +191,16 @@ describe('RichTextEsheet MDY round trip', () => {
         richTextEsheetDocumentResponse(imported),
     };
     // Every imported link still has its section: nothing is retired.
-    expect(
-      getRichTextEsheetRetiredMdyFields({ definition, responses })
-    ).toEqual([]);
+    expect(getRichTextEsheetRetiredMdyFields({ form, responses })).toEqual([]);
     // A same-id definition that drops a section leaves its imported link
     // behind; editors use this projection to normalize and protect it.
     const retired = getRichTextEsheetRetiredMdyFields({
-      definition: {
+      form: richTextEsheetFormFromLegacy({
         ...definition,
         sections: definition.sections.filter(
           (section) => section.id !== 'reason'
         ),
-      },
+      }),
       responses,
     });
     expect(retired).toHaveLength(1);
@@ -183,17 +215,17 @@ describe('RichTextEsheet MDY round trip', () => {
     // Authoring in RichEdit stores only the body — no imported front matter
     // to index retired links from; they are found in the prose itself.
     const body = parseRichTextEsheetMdy(createRichTextEsheetMdy(input)).body;
-    const narrowed = {
+    const narrowed = richTextEsheetFormFromLegacy({
       ...definition,
       sections: definition.sections.filter(
         (section) => section.id !== 'reason'
       ),
-    };
+    });
     const responses = {
       [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: { answer: body },
     };
     const retired = getRichTextEsheetRetiredMdyFields({
-      definition: narrowed,
+      form: narrowed,
       responses,
     });
     expect(retired).toHaveLength(1);

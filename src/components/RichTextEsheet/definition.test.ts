@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import {
-  createRichTextEsheetFormDefinition,
   getRichTextEsheetFieldId,
+  getRichTextEsheetFormSections,
   partyFindings,
+  withRichTextEsheetParties,
+} from './definition';
+import {
+  richTextEsheetFormFromLegacy,
   validateRichTextEsheetDefinition,
   type RichTextEsheetDefinition,
-} from './definition';
+} from './legacy';
 
 const definition: RichTextEsheetDefinition = {
   id: 'letter',
@@ -20,10 +25,29 @@ const definition: RichTextEsheetDefinition = {
   ],
 };
 
+const form = richTextEsheetFormFromLegacy(definition);
+
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
   { role: 'Provider', name: 'Dr. Casey Morgan' },
 ];
+
+type NarrativeField = {
+  id?: string;
+  fieldType: string;
+  _sourceData?: { narrativeFindings?: { label: string }[] };
+};
+
+function findingLabels(candidate: FormDefinition, sectionId: string): string[] {
+  const field = (candidate.pages[0].fields ?? [])
+    .flatMap((section) => ('fields' in section ? section.fields! : []))
+    .find(
+      (child) => child.id === getRichTextEsheetFieldId(sectionId)
+    ) as unknown as NarrativeField;
+  return (field._sourceData?.narrativeFindings ?? []).map(
+    (finding) => finding.label
+  );
+}
 
 describe('validateRichTextEsheetDefinition', () => {
   it('rejects duplicate section ids and malformed findings', () => {
@@ -77,41 +101,98 @@ describe('partyFindings', () => {
   });
 });
 
-describe('createRichTextEsheetFormDefinition', () => {
-  it('docks section findings and party macros on every narrative field', () => {
-    const form = createRichTextEsheetFormDefinition(definition, parties);
-    const sections = form.pages[0].fields ?? [];
-    const closing = sections
+describe('richTextEsheetFormFromLegacy', () => {
+  it('converts sections to native narrative fields with their own findings', () => {
+    expect(findingLabels(form, 'closing')).toEqual(['Thanks']);
+    const closing = (form.pages[0].fields ?? [])
       .flatMap((section) => ('fields' in section ? section.fields! : []))
       .find(
-        (field) => field.id === getRichTextEsheetFieldId('closing')
-      ) as unknown as {
-      fieldType: string;
-      _sourceData: { narrativeFindings: { label: string }[] };
-    };
+        (child) => child.id === getRichTextEsheetFieldId('closing')
+      ) as unknown as NarrativeField;
     expect(closing.fieldType).toBe('esheetNarrative');
-    expect(
-      closing._sourceData.narrativeFindings.map((finding) => finding.label)
-    ).toEqual([
-      'Thanks',
-      'Patient: Jordan Rivera',
-      'Provider: Dr. Casey Morgan',
-    ]);
   });
 
   it('keeps findings when the narrative type is requested explicitly', () => {
-    const form = createRichTextEsheetFormDefinition(
-      {
-        ...definition,
-        sections: [{ ...definition.sections[1], fieldType: 'esheetNarrative' }],
-      },
-      parties
-    );
-    const field = (form.pages[0].fields ?? []).flatMap((section) =>
+    const explicit = richTextEsheetFormFromLegacy({
+      ...definition,
+      sections: [{ ...definition.sections[1], fieldType: 'esheetNarrative' }],
+    });
+    const field = (explicit.pages[0].fields ?? []).flatMap((section) =>
       'fields' in section ? section.fields! : []
     )[0] as unknown as {
       _sourceData?: { narrativeHideLabel: boolean };
     };
     expect(field._sourceData?.narrativeHideLabel).toBe(true);
+  });
+});
+
+describe('withRichTextEsheetParties', () => {
+  it('docks party macros beside every narrative section without duplicates', () => {
+    const docked = withRichTextEsheetParties(form, parties);
+    expect(findingLabels(docked, 'closing')).toEqual([
+      'Thanks',
+      'Patient: Jordan Rivera',
+      'Provider: Dr. Casey Morgan',
+    ]);
+    // Pre-#772 forms already stamped macros; docking again adds nothing.
+    expect(
+      findingLabels(withRichTextEsheetParties(docked, parties), 'closing')
+    ).toEqual(findingLabels(docked, 'closing'));
+    // The configured form stays clean — macros are rendering state only.
+    expect(findingLabels(form, 'closing')).toEqual(['Thanks']);
+  });
+});
+
+describe('getRichTextEsheetFormSections (mieweb/ui#772)', () => {
+  it('rebuilds section views from the native form', () => {
+    expect(getRichTextEsheetFormSections(form)).toEqual([
+      { id: 'reason', title: 'Reason', required: true },
+      { id: 'closing', title: 'Closing' },
+    ]);
+  });
+
+  const mutated = (
+    change: (fields: { id: string; fields?: { id: string }[] }[]) => void
+  ): FormDefinition => {
+    const clone = JSON.parse(JSON.stringify(form)) as FormDefinition;
+    change(clone.pages[0].fields as never);
+    return clone;
+  };
+
+  it('rejects a noncanonical section field id', () => {
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          fields[0].id = 'richtext:%72eason:section';
+        })
+      )
+    ).toThrow('canonical encoded section id');
+  });
+
+  it('rejects a value field borrowed from another section', () => {
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          fields[0].fields![0].id = getRichTextEsheetFieldId('closing');
+        })
+      )
+    ).toThrow('unexpected field');
+  });
+
+  it('rejects a section without its value field and duplicate sections', () => {
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          fields[0].fields = [];
+        })
+      )
+    ).toThrow('requires its richtext value field');
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          fields.push(fields[0]);
+        })
+      )
+    ).toThrow('duplicate section id');
   });
 });

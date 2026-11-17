@@ -3,9 +3,12 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichTextEsheet } from './RichTextEsheet';
 import {
   getRichTextEsheetFieldId,
-  type RichTextEsheetDefinition,
   type RichTextEsheetParty,
 } from './definition';
+import {
+  richTextEsheetFormFromLegacy,
+  type RichTextEsheetDefinition,
+} from './legacy';
 import { createRichTextEsheetSnapshot } from './model';
 import { MotionProvider } from '../../motion/MotionProvider';
 
@@ -136,6 +139,12 @@ const TICKET_PARTIES: RichTextEsheetParty[] = [
   { role: 'System', name: 'Orders portal', detail: 'v2.14.0' },
 ];
 
+// Fixtures stay in the compact legacy authoring shape and migrate at module
+// scope through the same one-time import path stored documents use
+// (mieweb/ui#772); the component itself only reads the native form.
+const LETTER_FORM = richTextEsheetFormFromLegacy(LETTER_DEFINITION);
+const TICKET_FORM = richTextEsheetFormFromLegacy(TICKET_DEFINITION);
+
 const meta: Meta<typeof RichTextEsheet> = {
   id: 'editors-richtextesheet',
   title: 'Modules/Editors/RichTextEsheet',
@@ -177,12 +186,41 @@ Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install ma
 import { RichTextEsheet } from '@mieweb/ui/esheet';
 
 <RichTextEsheet
-  definition={{
+  // The native eSheet FormDefinition is the only document schema
+  // (mieweb/ui#772): one page of section fields with canonical ids, each
+  // wrapping one rich text value field.
+  form={{
     id: 'referral-letter',
     title: 'Referral letter',
-    sections: [
-      { id: 'reason', title: 'Reason for referral', required: true },
-      { id: 'closing', title: 'Closing' },
+    pages: [
+      {
+        id: 'referral-letter:document',
+        title: 'Referral letter',
+        fields: [
+          {
+            // getRichTextEsheetSectionFieldId('reason')
+            id: 'richtext:reason:section',
+            fieldType: 'section',
+            title: 'Reason for referral',
+            fields: [
+              {
+                // getRichTextEsheetFieldId('reason')
+                id: 'richtext:reason:value',
+                fieldType: 'esheetNarrative',
+                question: 'Reason for referral',
+                required: true,
+                _sourceData: {
+                  narrativeHideLabel: true,
+                  // Memory-aid phrases docked as macros with dot-phrases.
+                  narrativeFindings: [
+                    { id: 'thanks', label: 'Thank you', text: 'Thank you.' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+      },
     ],
   }}
   parties={[
@@ -196,7 +234,7 @@ import { RichTextEsheet } from '@mieweb/ui/esheet';
 
 ### Modes
 
-The **eSheet**, **RichEdit**, **View** and **Export** modes all share the same native draft: eSheet is the guided section form, RichEdit is a whole-document Kerebron editor whose protected links resolve back into the owning sections, View renders the document, and Export shows the raw MDY with a download button. \`defaultMode\` picks the opening surface and the imperative handle exposes \`setMode\` and \`focusSection\`. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\` and can carry the definition and parties in its front matter, so a definition prop becomes optional. Manual edits to linked display text in RichEdit cannot overwrite section answers — activating a link opens the owning section in a resolver dialog instead.
+The **eSheet**, **RichEdit**, **View** and **Export** modes all share the same native draft: eSheet is the guided section form, RichEdit is a whole-document Kerebron editor whose protected links resolve back into the owning sections, View renders the document, and Export shows the raw MDY with a download button. \`defaultMode\` picks the opening surface and the imperative handle exposes \`setMode\` and \`focusSection\`. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\` and carries the native form and parties in its front matter, so a form prop becomes optional. Documents saved with the removed \`richTextEsheet\` front-matter key (pre mieweb/ui#772) migrate automatically when opened through \`initialMdy\`; re-author stored legacy templates as native forms. Manual edits to linked display text in RichEdit cannot overwrite section answers — activating a link opens the owning section in a resolver dialog instead.
 
 ### Limitations
 
@@ -221,7 +259,7 @@ The **eSheet**, **RichEdit**, **View** and **Export** modes all share the same n
         {
           type: 'composes with',
           target: 'composite-forms-esheet-renderer',
-          why: 'One eSheet renderer owns every section response; the definition compiles to a native FormDefinition. Use Renderer directly for arbitrary native forms.',
+          why: 'One eSheet renderer owns every section response; the native FormDefinition is the only document schema (mieweb/ui#772). Use Renderer directly for arbitrary native forms.',
         },
         {
           type: 'uses',
@@ -238,7 +276,7 @@ type Story = StoryObj<typeof RichTextEsheet>;
 
 export const ReferralLetter: Story = {
   args: {
-    definition: LETTER_DEFINITION,
+    form: LETTER_FORM,
     parties: LETTER_PARTIES,
     onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
   },
@@ -246,7 +284,7 @@ export const ReferralLetter: Story = {
 
 export const SupportTicket: Story = {
   args: {
-    definition: TICKET_DEFINITION,
+    form: TICKET_FORM,
     parties: TICKET_PARTIES,
     onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
   },
@@ -255,7 +293,7 @@ export const SupportTicket: Story = {
 /** The whole-document editor: protected links open their section in a resolver. */
 export const RichEdit: Story = {
   args: {
-    definition: LETTER_DEFINITION,
+    form: LETTER_FORM,
     parties: LETTER_PARTIES,
     defaultMode: 'rich',
     onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
@@ -264,7 +302,7 @@ export const RichEdit: Story = {
 
 export const FinalView: Story = {
   args: {
-    definition: LETTER_DEFINITION,
+    form: LETTER_FORM,
     parties: LETTER_PARTIES,
     defaultMode: 'view',
     onSubmit: () => new Promise((resolve) => setTimeout(resolve, 600)),
@@ -272,7 +310,7 @@ export const FinalView: Story = {
 };
 
 const SAVED_LETTER_MDY = createRichTextEsheetSnapshot(
-  LETTER_DEFINITION,
+  LETTER_FORM,
   {
     [getRichTextEsheetFieldId('reason')]: {
       answer: 'I am referring this patient for routine specialist evaluation.',
@@ -287,7 +325,7 @@ const SAVED_LETTER_MDY = createRichTextEsheetSnapshot(
 
 /**
  * A saved document restored from its portable MDY alone: the front matter
- * carries the definition, parties and native responses, so no props beyond
+ * carries the native form, parties and responses, so no props beyond
  * `initialMdy` are required. Read-only still allows mode switching for review.
  */
 export const RestoredReadOnly: Story = {
@@ -317,7 +355,7 @@ export const RestoredReadOnly: Story = {
  */
 export const WithMediaCapture: Story = {
   args: {
-    definition: TICKET_DEFINITION,
+    form: TICKET_FORM,
     parties: TICKET_PARTIES,
     mediaCapture: {
       // Demo only: same-origin object URLs pass the sanitizer but are
@@ -334,7 +372,7 @@ export const DocumentPreview: Story = {
     return (
       <div className="grid gap-4 p-2 lg:grid-cols-2">
         <RichTextEsheet
-          definition={LETTER_DEFINITION}
+          form={LETTER_FORM}
           parties={LETTER_PARTIES}
           onChange={(document) => setMdy(document.mdy)}
         />

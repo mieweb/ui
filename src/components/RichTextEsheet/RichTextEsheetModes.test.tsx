@@ -13,8 +13,11 @@ import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
 import {
   getRichTextEsheetFieldId,
   getRichTextEsheetSectionFieldId,
-  type RichTextEsheetDefinition,
 } from './definition';
+import {
+  richTextEsheetFormFromLegacy,
+  type RichTextEsheetDefinition,
+} from './legacy';
 import {
   parseRichTextEsheetMdy,
   RICHTEXT_ESHEET_DOCUMENT_FIELD_ID,
@@ -96,6 +99,8 @@ const definition: RichTextEsheetDefinition = {
   ],
 };
 
+const form = richTextEsheetFormFromLegacy(definition);
+
 const modeSwitch = () =>
   screen.getByRole('combobox', { name: 'Document mode' });
 const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
@@ -104,53 +109,69 @@ const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
 };
 
 describe('RichTextEsheet mode synchronization', () => {
-  it('requires a definition and a matching document id before opening an MDY', () => {
+  it('opens a native eSheet MDY from its own form and validates a supplied form', () => {
     const original = parseRichTextEsheetMdy(
-      createRichTextEsheetSnapshot(definition, {}).mdy
+      createRichTextEsheetSnapshot(form, {}).mdy
     );
+    // Saves no longer write the legacy richTextEsheet key (mieweb/ui#772).
+    expect(original.frontMatter?.richTextEsheet).toBeUndefined();
     const yaml = new Document(original.frontMatter);
-    yaml.delete('richTextEsheet');
     const source = `---\n${yaml.toString()}---\n${original.body}`;
-    expect(() => render(<RichTextEsheet initialMdy={source} />)).toThrow(
-      'Supply a definition'
-    );
+    expect(() => render(<RichTextEsheet initialMdy={source} />)).not.toThrow();
+    const formless = new Document(original.frontMatter);
+    formless.delete('form');
     expect(() =>
       render(
         <RichTextEsheet
-          initialMdy={createRichTextEsheetSnapshot(definition, {}).mdy}
-          definition={{ ...definition, id: 'another-doc' }}
+          initialMdy={`---\n${formless.toString()}---\n${original.body}`}
         />
       )
-    ).toThrow('The MDY document id does not match');
-    // A native eSheet MDY without richTextEsheet front matter still names its
-    // form; foreign responses must not seed another definition's session.
+    ).toThrow('Unable to load document MDY');
+    // A native eSheet MDY names its form; foreign responses must not seed a
+    // session under another document's form.
     expect(() =>
       render(
         <RichTextEsheet
           initialMdy={source}
-          definition={{ ...definition, id: 'another-doc' }}
+          form={richTextEsheetFormFromLegacy({
+            ...definition,
+            id: 'another-doc',
+          })}
         />
       )
     ).toThrow('The MDY form id does not match');
+    // A legacy MDY still validates its one-time import against the host form.
+    // Pre-#772 saves stamped the native form alongside the legacy key.
+    const legacy = new Document(original.frontMatter);
+    legacy.set('richTextEsheet', definition);
+    expect(() =>
+      render(
+        <RichTextEsheet
+          initialMdy={`---\n${legacy.toString()}---\n${original.body}`}
+          form={richTextEsheetFormFromLegacy({
+            ...definition,
+            id: 'another-doc',
+          })}
+        />
+      )
+    ).toThrow('The MDY document id does not match');
   });
 
   it('regenerates the RichEdit fallback body after a configuration change', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
-    const { rerender } = render(
-      <RichTextEsheet ref={ref} definition={definition} />
-    );
+    const { rerender } = render(<RichTextEsheet ref={ref} form={form} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
     rerender(
       <RichTextEsheet
         ref={ref}
-        definition={{
+        form={richTextEsheetFormFromLegacy({
           ...definition,
           sections: [
             ...definition.sections,
             { id: 'addendum', title: 'Addendum' },
           ],
-        }}
+        })}
       />
     );
     await screen.findByRole('textbox', { name: /Addendum/ });
@@ -173,7 +194,7 @@ describe('RichTextEsheet mode synchronization', () => {
   it('forwards the host upload pipeline to the rich editor', async () => {
     render(
       <RichTextEsheet
-        definition={definition}
+        form={form}
         mediaCapture={{ uploadHandler: async () => 'https://cdn/img.png' }}
       />
     );
@@ -190,7 +211,7 @@ describe('RichTextEsheet mode synchronization', () => {
 
   it('keeps the draft editable after a rejected save', async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('Storage offline'));
-    render(<RichTextEsheet definition={definition} onSubmit={onSubmit} />);
+    render(<RichTextEsheet form={form} onSubmit={onSubmit} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save document' }));
@@ -202,7 +223,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('keeps a portaled capture confirmation focusable inside the resolver trap', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    render(<RichTextEsheet form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -224,7 +245,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('ignores Escape in the resolver while a capture confirmation is open', async () => {
-    const { container } = render(<RichTextEsheet definition={definition} />);
+    const { container } = render(<RichTextEsheet form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -250,7 +271,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('ignores Escape and keeps focus while an annotation dialog is open', async () => {
-    const { container } = render(<RichTextEsheet definition={definition} />);
+    const { container } = render(<RichTextEsheet form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -282,7 +303,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('ignores Escape from an annotation dialog nested inside the resolver', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    render(<RichTextEsheet form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -306,7 +327,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('closes the resolver with Escape despite an unrelated page dialog', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    render(<RichTextEsheet form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -333,7 +354,7 @@ describe('RichTextEsheet mode synchronization', () => {
     // dialog is not a nested one and must not swallow the resolver's Escape.
     render(
       <div role="dialog" aria-label="Host modal">
-        <RichTextEsheet definition={definition} />
+        <RichTextEsheet form={form} />
       </div>
     );
     await screen.findByRole('textbox', { name: /Summary/ });
@@ -357,7 +378,7 @@ describe('RichTextEsheet mode synchronization', () => {
     const onOpenChange = vi.fn();
     render(
       <Modal open onOpenChange={onOpenChange} aria-label="Host modal">
-        <RichTextEsheet definition={definition} />
+        <RichTextEsheet form={form} />
       </Modal>
     );
     await screen.findByRole('textbox', { name: /Summary/ });
@@ -378,7 +399,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('does not reload the rich editor for answer-only eSheet edits', async () => {
-    render(<RichTextEsheet definition={definition} />);
+    render(<RichTextEsheet form={form} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
     selectMode('RichEdit');
@@ -403,16 +424,16 @@ describe('RichTextEsheet mode synchronization', () => {
   it('keeps retired links protected instead of opening their resolver', async () => {
     // Author under the full definition, then reopen after `details` was
     // removed from a same-id configuration: the imported link is retired.
-    const authored = createRichTextEsheetSnapshot(definition, {
+    const authored = createRichTextEsheetSnapshot(form, {
       [getRichTextEsheetFieldId('details')]: { answer: 'Old details answer' },
     }).mdy;
     render(
       <RichTextEsheet
         initialMdy={authored}
-        definition={{
+        form={richTextEsheetFormFromLegacy({
           ...definition,
           sections: [{ id: 'summary', title: 'Summary' }],
-        }}
+        })}
       />
     );
     await screen.findByRole('textbox', { name: /Summary/ });
@@ -429,9 +450,7 @@ describe('RichTextEsheet mode synchronization', () => {
   it('flushes the last rich edit before switching and saving, with section answers retained', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
     const onSubmit = vi.fn();
-    render(
-      <RichTextEsheet ref={ref} definition={definition} onSubmit={onSubmit} />
-    );
+    render(<RichTextEsheet ref={ref} form={form} onSubmit={onSubmit} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
     selectMode('RichEdit');
@@ -465,7 +484,7 @@ describe('RichTextEsheet mode synchronization', () => {
 
   it('shows the raw portable document with a download button in Export', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
-    render(<RichTextEsheet ref={ref} definition={definition} />);
+    render(<RichTextEsheet ref={ref} form={form} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
     selectMode('Export');
@@ -488,7 +507,7 @@ describe('RichTextEsheet mode synchronization', () => {
   it('flushes rich prose and focuses the requested section after the eSheet is visible', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
     const { container } = render(
-      <RichTextEsheet ref={ref} definition={definition} defaultMode="rich" />
+      <RichTextEsheet ref={ref} form={form} defaultMode="rich" />
     );
     const editor = await screen.findByRole('textbox', {
       name: 'Document narrative',
@@ -517,7 +536,7 @@ describe('RichTextEsheet mode synchronization', () => {
 
   it('opens linked sections from the rich editor in a resolver dialog', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
-    render(<RichTextEsheet ref={ref} definition={definition} />);
+    render(<RichTextEsheet ref={ref} form={form} />);
     await screen.findByRole('textbox', { name: /Summary/ });
     selectMode('RichEdit');
     fireEvent.click(
@@ -538,7 +557,7 @@ describe('RichTextEsheet mode synchronization', () => {
   });
 
   it('restores a portable document and allows read-only mode switching without changing answers', async () => {
-    const original = createRichTextEsheetSnapshot(definition, {
+    const original = createRichTextEsheetSnapshot(form, {
       [getRichTextEsheetFieldId('summary')]: { answer: 'Login fails' },
       [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: {
         answer: '# Final ticket\n\n### Follow-up\n\nFree report text.',

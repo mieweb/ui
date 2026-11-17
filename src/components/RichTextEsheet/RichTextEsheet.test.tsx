@@ -2,7 +2,10 @@ import * as React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
-import type { RichTextEsheetDefinition } from './definition';
+import {
+  richTextEsheetFormFromLegacy,
+  type RichTextEsheetDefinition,
+} from './legacy';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -30,6 +33,8 @@ const definition: RichTextEsheetDefinition = {
   ],
 };
 
+const form = richTextEsheetFormFromLegacy(definition);
+
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
   { role: 'Provider', name: 'Dr. Casey Morgan', detail: 'NPI 1234567890' },
@@ -38,9 +43,7 @@ const parties = [
 describe('RichTextEsheet with the real eSheet renderer', () => {
   it('shows parties in the header and inserts them as macros', async () => {
     const ref = React.createRef<RichTextEsheetHandle>();
-    render(
-      <RichTextEsheet ref={ref} definition={definition} parties={parties} />
-    );
+    render(<RichTextEsheet ref={ref} form={form} parties={parties} />);
     expect(screen.getByText('Jordan Rivera')).toBeInTheDocument();
     expect(screen.getByText('Dr. Casey Morgan')).toBeInTheDocument();
     const reason = await screen.findByRole('textbox', {
@@ -62,11 +65,7 @@ describe('RichTextEsheet with the real eSheet renderer', () => {
   it('blocks submit on missing required sections, then saves the document', async () => {
     const onSubmit = vi.fn();
     render(
-      <RichTextEsheet
-        definition={definition}
-        parties={parties}
-        onSubmit={onSubmit}
-      />
+      <RichTextEsheet form={form} parties={parties} onSubmit={onSubmit} />
     );
     const save = screen.getByRole('button', { name: 'Save document' });
     fireEvent.click(save);
@@ -93,7 +92,7 @@ describe('RichTextEsheet with the real eSheet renderer', () => {
   it('translates shell labels without resetting the draft', async () => {
     const { rerender } = render(
       <RichTextEsheet
-        definition={definition}
+        form={form}
         messages={{
           labels: {
             '{count} of {total} sections documented':
@@ -109,7 +108,7 @@ describe('RichTextEsheet with the real eSheet renderer', () => {
     expect(
       screen.getByText('1 sur 2 sections documentées')
     ).toBeInTheDocument();
-    rerender(<RichTextEsheet definition={definition} />);
+    rerender(<RichTextEsheet form={form} />);
     expect(
       screen.getByRole('textbox', { name: /Reason for referral/ })
     ).toHaveTextContent('Draft retained');

@@ -1,27 +1,27 @@
 import {
+  getRichTextEsheetFormSections,
   getRichTextEsheetSectionText,
-  validateRichTextEsheetDefinition,
-  type RichTextEsheetDefinition,
   type RichTextEsheetParty,
   type RichTextEsheetResponses,
   type RichTextEsheetSnapshot,
 } from './definition';
+import type { FormDefinition } from '@esheet/core';
 import { createRichTextEsheetMdy } from './mdy';
 
 /** Derive the full document state — progress, validation and portable MDY — from native responses. */
 export function createRichTextEsheetSnapshot(
-  definition: RichTextEsheetDefinition,
+  form: FormDefinition,
   responses: RichTextEsheetResponses,
   parties?: RichTextEsheetParty[]
 ): RichTextEsheetSnapshot {
-  validateRichTextEsheetDefinition(definition);
-  const documentedSections = definition.sections
+  const sections = getRichTextEsheetFormSections(form);
+  const documentedSections = sections
     .filter(
       (section) =>
         getRichTextEsheetSectionText(responses, section.id).length > 0
     )
     .map((section) => section.id);
-  const errors = definition.sections
+  const errors = sections
     .filter(
       (section) => section.required && !documentedSections.includes(section.id)
     )
@@ -29,7 +29,7 @@ export function createRichTextEsheetSnapshot(
       sectionId: section.id,
       message: `${section.title} is required.`,
     }));
-  const input = { definition, responses, parties };
+  const input = { form, responses, parties };
   return {
     ...input,
     documentedSections,

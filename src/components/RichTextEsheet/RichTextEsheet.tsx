@@ -23,15 +23,17 @@ import {
 } from '../../esheet-fields/EsheetSectionField';
 import { DocumentExportView } from './DocumentExportView';
 import { DocumentMdyView } from './DocumentMdyView';
+import type { FormDefinition } from '@esheet/core';
 import {
-  createRichTextEsheetFormDefinition,
+  getRichTextEsheetFormSections,
   getRichTextEsheetSectionFieldId,
-  type RichTextEsheetDefinition,
+  withRichTextEsheetParties,
   type RichTextEsheetMode,
   type RichTextEsheetParty,
   type RichTextEsheetResponses,
   type RichTextEsheetSnapshot,
 } from './definition';
+import { richTextEsheetFormFromLegacy } from './legacy';
 import {
   getRichTextEsheetDocumentBody,
   getRichTextEsheetMdyFields,
@@ -74,8 +76,9 @@ export interface RichTextEsheetProps extends Omit<
   React.HTMLAttributes<HTMLDivElement>,
   'onChange' | 'onSubmit' | 'title'
 > {
-  /** Document sections and their memory aids. Optional when initialMdy carries one. */
-  definition?: RichTextEsheetDefinition;
+  /** The native eSheet form describing the document's sections and memory
+   * aids (mieweb/ui#772). Optional when initialMdy carries one. */
+  form?: FormDefinition;
   /**
    * People or systems the document references — for example a patient and a
    * provider on a letter, or a reporter and a system on a support ticket.
@@ -85,7 +88,7 @@ export interface RichTextEsheetProps extends Omit<
   parties?: RichTextEsheetParty[];
   /** Translate built-in labels and messages. */
   messages?: ComponentMessages;
-  /** Loaded once per definition.id. Change the id to open another document. */
+  /** Loaded once per form.id. Change the id to open another document. */
   initialResponses?: RichTextEsheetResponses;
   /** Portable MDY draft, loaded once per document id. Takes precedence over initialResponses. */
   initialMdy?: string;
@@ -124,7 +127,7 @@ export const RichTextEsheet = React.forwardRef<
   RichTextEsheetHandle,
   RichTextEsheetProps
 >(function RichTextEsheet(
-  { definition, parties, initialMdy, messages, ...props },
+  { form, parties, initialMdy, messages, ...props },
   ref
 ) {
   const parsed = React.useMemo(
@@ -142,29 +145,31 @@ export const RichTextEsheet = React.forwardRef<
       `Unable to load document MDY: ${loadErrors.map((diagnostic) => diagnostic.message).join(' ')}`
     );
   }
-  const documentDefinition = definition ?? parsed?.definition;
-  if (!documentDefinition) {
-    throw new Error('Supply a definition to open this document.');
+  // A legacy richTextEsheet definition is a one-time import (mieweb/ui#772).
+  const importedForm = parsed?.definition
+    ? richTextEsheetFormFromLegacy(parsed.definition)
+    : parsed?.form;
+  const documentForm = form ?? importedForm;
+  if (!documentForm) {
+    throw new Error('Supply a form to open this document.');
   }
-  if (parsed?.definition && parsed.definition.id !== documentDefinition.id) {
-    throw new Error(
-      'The MDY document id does not match the supplied definition.'
-    );
+  if (parsed?.definition && parsed.definition.id !== documentForm.id) {
+    throw new Error('The MDY document id does not match the supplied form.');
   }
-  // A native eSheet MDY without richTextEsheet front matter still names its
-  // form; foreign responses must not seed a session under another definition.
-  if (parsed?.form && parsed.form.id !== documentDefinition.id) {
-    throw new Error('The MDY form id does not match the supplied definition.');
+  // A native eSheet MDY names its form; foreign responses must not seed a
+  // session under another document's form.
+  if (parsed?.form && parsed.form.id !== documentForm.id) {
+    throw new Error('The MDY form id does not match the supplied form.');
   }
   const documentParties =
     parties ?? getRichTextEsheetMdyParties(parsed?.frontMatter ?? null);
   return (
     <MessagesProvider messages={messages}>
       <RichTextEsheetSession
-        key={documentDefinition.id}
+        key={documentForm.id}
         {...props}
         initialMdy={initialMdy}
-        definition={documentDefinition}
+        form={documentForm}
         parties={documentParties}
         ref={ref}
       />
@@ -182,11 +187,11 @@ let esheetDefaultsSettled = false;
 const RichTextEsheetSession = React.forwardRef<
   RichTextEsheetHandle,
   Omit<RichTextEsheetProps, 'messages'> & {
-    definition: RichTextEsheetDefinition;
+    form: FormDefinition;
   }
 >(function RichTextEsheetSession(
   {
-    definition,
+    form: configForm,
     parties,
     initialResponses,
     initialMdy,
@@ -226,17 +231,23 @@ const RichTextEsheetSession = React.forwardRef<
     [media.value]
   );
   // Content identity prevents a host's inline config object from resetting answers.
-  const configJson = JSON.stringify({ definition, parties });
+  const configJson = JSON.stringify({ form: configForm, parties });
   const stable = React.useMemo(
     () =>
       JSON.parse(configJson) as {
-        definition: RichTextEsheetDefinition;
+        form: FormDefinition;
         parties?: RichTextEsheetParty[];
       },
     [configJson]
   );
+  // Sections validate the form once per configuration; party macros are
+  // injected for rendering only and never stamped into the saved form.
+  const sections = React.useMemo(
+    () => getRichTextEsheetFormSections(stable.form),
+    [stable]
+  );
   const form = React.useMemo(
-    () => createRichTextEsheetFormDefinition(stable.definition, stable.parties),
+    () => withRichTextEsheetParties(stable.form, stable.parties),
     [stable]
   );
   const [initialSeed] = React.useState(() => {
@@ -249,7 +260,7 @@ const RichTextEsheetSession = React.forwardRef<
     };
   });
   const [snapshot, setSnapshot] = React.useState(() =>
-    createRichTextEsheetSnapshot(stable.definition, initialSeed, stable.parties)
+    createRichTextEsheetSnapshot(stable.form, initialSeed, stable.parties)
   );
   const [mode, setModeState] = React.useState<RichTextEsheetMode>(defaultMode);
   const [modePending, setModePending] = React.useState(false);
@@ -269,6 +280,7 @@ const RichTextEsheetSession = React.forwardRef<
   const responses = React.useRef(initialSeed);
   const latest = React.useRef({
     stable,
+    sections,
     onChange,
     onSubmit,
     readOnly,
@@ -276,7 +288,16 @@ const RichTextEsheetSession = React.forwardRef<
     mode,
     m,
   });
-  latest.current = { stable, onChange, onSubmit, readOnly, saving, mode, m };
+  latest.current = {
+    stable,
+    sections,
+    onChange,
+    onSubmit,
+    readOnly,
+    saving,
+    mode,
+    m,
+  };
   // Preserve answers when section configuration changes within this document.
   const rendererInput = React.useMemo(
     () => ({ definition: form, responses: responses.current }),
@@ -293,7 +314,7 @@ const RichTextEsheetSession = React.forwardRef<
     () =>
       parseRichTextEsheetMdy(
         createRichTextEsheetSnapshot(
-          stable.definition,
+          stable.form,
           responses.current,
           stable.parties
         ).mdy
@@ -306,7 +327,7 @@ const RichTextEsheetSession = React.forwardRef<
   const currentSnapshot = React.useCallback(() => {
     const { stable } = latest.current;
     return createRichTextEsheetSnapshot(
-      stable.definition,
+      stable.form,
       renderer.current?.getRawResponse() ?? responses.current,
       stable.parties
     );
@@ -377,11 +398,7 @@ const RichTextEsheetSession = React.forwardRef<
 
   const focusSection = React.useCallback(
     (sectionId: string) => {
-      if (
-        !latest.current.stable.definition.sections.some(
-          (section) => section.id === sectionId
-        )
-      )
+      if (!latest.current.sections.some((section) => section.id === sectionId))
         return;
       void setMode('esheet', sectionId);
     },
@@ -705,7 +722,7 @@ const RichTextEsheetSession = React.forwardRef<
       >
         <div className="min-w-0">
           <h2 className="text-lg font-semibold">
-            {m(stable.definition.title)}
+            {m(stable.form.title ?? stable.form.id)}
           </h2>
           {stable.parties && stable.parties.length > 0 && (
             <dl className="mt-1 space-y-0.5 text-sm">
@@ -730,7 +747,7 @@ const RichTextEsheetSession = React.forwardRef<
           <bdi>
             {m('{count} of {total} sections documented', {
               count: snapshot.documentedSections.length,
-              total: stable.definition.sections.length,
+              total: sections.length,
             })}
           </bdi>
         </p>
@@ -832,7 +849,7 @@ const RichTextEsheetSession = React.forwardRef<
                     {/* Stable template key; the host-authored title is a substitution. */}
                     {m('{section} is required.', {
                       section:
-                        stable.definition.sections.find(
+                        sections.find(
                           (section) => section.id === issue.sectionId
                         )?.title ?? issue.sectionId,
                     })}
@@ -899,7 +916,7 @@ const RichTextEsheetSession = React.forwardRef<
         {mode === 'export' && (
           <DocumentExportView
             source={snapshot.mdy}
-            fileName={`${stable.definition.id}.md`}
+            fileName={`${stable.form.id}.md`}
           />
         )}
       </div>
