@@ -125,7 +125,11 @@ function validateFindings(
 
 const OBSERVATION_FIELD_ID = /^encounter:[^:]+:observation:([^:]+)$/;
 
-/** Rebuild one observation definition from its native field + `_sourceData`. */
+/**
+ * Rebuild one observation definition from its native field. Native properties
+ * are authoritative (mieweb/ui#772); `_sourceData` carries only metadata the
+ * native schema cannot express (clinical code, common findings).
+ */
 function observationView(
   sectionId: string,
   field: Record<string, unknown>
@@ -133,79 +137,63 @@ function observationView(
   const source = record(field._sourceData) ? field._sourceData : {};
   const encoded =
     typeof field.id === 'string' ? OBSERVATION_FIELD_ID.exec(field.id) : null;
-  const id = nonempty(source.id)
-    ? source.id
-    : encoded
-      ? safeDecode(encoded[1])
-      : undefined;
+  const id = encoded ? safeDecode(encoded[1]) : undefined;
   if (!nonempty(id))
     invalid(
       `observation field ids use encounter:<section>:observation:<id> in ${sectionId}`
     );
-  const label = nonempty(source.label)
-    ? source.label
-    : nonempty(field.question)
-      ? field.question
-      : undefined;
+  if (nonempty(source.id) && source.id !== id)
+    invalid(`_sourceData.id conflicts with the field id in ${sectionId}.${id}`);
+  const label = nonempty(field.question) ? field.question : undefined;
   if (!nonempty(label))
     invalid(`observations in ${sectionId} require an id and label`);
   const type =
-    source.type ??
-    (field.fieldType === 'dropdown'
-      ? 'choice'
+    field.fieldType === 'dropdown'
+      ? ('choice' as const)
       : field.inputType === 'number'
-        ? 'number'
-        : undefined);
-  if (
-    type !== undefined &&
-    !['text', 'number', 'choice'].includes(type as string)
-  )
-    invalid(`unknown observation type in ${sectionId}.${id}`);
-  const options = Array.isArray(source.options)
-    ? (source.options as string[])
-    : Array.isArray(field.options)
-      ? (field.options as { value?: unknown }[]).flatMap((option) =>
-          record(option) && typeof option.value === 'string'
-            ? [option.value]
-            : []
-        )
-      : undefined;
-  if (
-    options !== undefined &&
-    (options.some((option) => !nonempty(option)) ||
-      new Set(options).size !== options.length)
-  )
-    invalid(`options must be distinct nonempty strings in ${sectionId}.${id}`);
-  if (type === 'choice' && !options?.length)
-    invalid(`choice observation ${sectionId}.${id} requires options`);
-  const unit = nonempty(source.unit)
-    ? source.unit
-    : nonempty(field.unit)
-      ? field.unit
-      : undefined;
+        ? ('number' as const)
+        : undefined;
+  let options: string[] | undefined;
+  if (type === 'choice') {
+    if (!Array.isArray(field.options) || field.options.length === 0)
+      invalid(`choice observation ${sectionId}.${id} requires options`);
+    options = (field.options as unknown[]).map((option) => {
+      // model.ts validation and MCP writes rely on this option-id convention.
+      if (
+        !record(option) ||
+        !nonempty(option.value) ||
+        option.id !== encodeURIComponent(option.value)
+      )
+        invalid(
+          `dropdown options use { id: encodeURIComponent(value), value } in ${sectionId}.${id}`
+        );
+      return option.value;
+    });
+    if (new Set(options).size !== options.length)
+      invalid(
+        `options must be distinct nonempty strings in ${sectionId}.${id}`
+      );
+  }
+  const unit = nonempty(field.unit) ? field.unit : undefined;
   if (source.code !== undefined && !validCode(source.code))
     invalid(`invalid code in ${sectionId}.${id}`);
   const findings = validateFindings(
-    source.encounterFindings ?? source.findings,
+    source.encounterFindings,
     `${sectionId}.${id}`
   );
-  if (findings?.length && type && type !== 'text')
+  if (findings?.length && type !== undefined)
     invalid(`findings require a text observation in ${sectionId}.${id}`);
   return {
     id,
     label,
-    ...(type === undefined
-      ? {}
-      : { type: type as 'text' | 'number' | 'choice' }),
+    ...(type === undefined ? {} : { type }),
     ...(unit === undefined ? {} : { unit }),
     ...(source.code === undefined
       ? {}
       : { code: source.code as EncounterCode }),
     ...(options === undefined ? {} : { options }),
     ...(findings === undefined ? {} : { findings }),
-    ...(source.required === true || field.required === true
-      ? { required: true }
-      : {}),
+    ...(field.required === true ? { required: true } : {}),
   };
 }
 
@@ -251,6 +239,10 @@ function sectionView(
     if (kind !== undefined) {
       if (customField !== undefined)
         invalid(`multiple structured clinical fields in ${id}`);
+      if (child.id !== getEncounterFieldId(id, 'value'))
+        invalid(
+          `structured clinical fields use encounter:<section>:observation:value (${id})`
+        );
       customField = child;
       customKind = kind;
       continue;

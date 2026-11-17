@@ -238,12 +238,26 @@ function observationField(
   sectionId: string,
   observation: EncounterObservationDefinition
 ): FieldDefinition {
+  // Native properties carry the structure (mieweb/ui#772); _sourceData keeps
+  // only metadata the native schema cannot express.
   const base = {
     id: getEncounterFieldId(sectionId, observation.id),
     question: observation.label,
     required: observation.required,
+    unit: observation.unit,
     width: 'full' as const,
-    _sourceData: { ...observation, encounterFindings: observation.findings },
+    ...(observation.code !== undefined || observation.findings !== undefined
+      ? {
+          _sourceData: {
+            ...(observation.code === undefined
+              ? {}
+              : { code: observation.code }),
+            ...(observation.findings === undefined
+              ? {}
+              : { encounterFindings: observation.findings }),
+          },
+        }
+      : {}),
   };
   if (observation.type === 'choice') {
     return {
@@ -261,7 +275,6 @@ function observationField(
       ...base,
       fieldType: 'text',
       inputType: 'number',
-      unit: observation.unit,
       validators: [
         { type: 'number', message: 'Enter a finite nonnegative number.' },
       ],
@@ -270,7 +283,6 @@ function observationField(
   return {
     ...base,
     fieldType: 'encounterNarrative',
-    unit: observation.unit,
   } as unknown as FieldDefinition;
 }
 

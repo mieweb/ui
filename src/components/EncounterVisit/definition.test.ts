@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
   getEncounterFieldId,
+  getEncounterFormSections,
   getEncounterSectionFieldIds,
   validateEncounterForm,
 } from './definition';
@@ -334,5 +335,84 @@ describe('structured encounter section definitions', () => {
         } as unknown as EncounterSectionDefinition)
       )
     ).toThrow('requireCoding must be boolean');
+  });
+});
+
+describe('native form identity and option guards (mieweb/ui#774)', () => {
+  const observationsForm = (
+    mutate: (field: Record<string, unknown>) => Record<string, unknown>
+  ) => {
+    const form = encounterFormFromLegacy(
+      definition({
+        id: 'exam',
+        title: 'Exam',
+        kind: 'observations',
+        observations: [
+          {
+            id: 'pulse',
+            label: 'Pulse',
+            type: 'choice',
+            options: ['60', '80'],
+          },
+        ],
+      })
+    );
+    const section = form.pages[0].fields?.[0] as { fields?: unknown[] };
+    section.fields = [mutate(section.fields?.[0] as Record<string, unknown>)];
+    return form;
+  };
+
+  it('rejects a stale _sourceData.id that conflicts with the native field id', () => {
+    expect(() =>
+      validateEncounterForm(
+        observationsForm((field) => ({
+          ...field,
+          _sourceData: { id: 'old-pulse' },
+        }))
+      )
+    ).toThrow('_sourceData.id conflicts with the field id in exam.pulse');
+  });
+
+  it('derives choices from the native options so host edits are honored', () => {
+    const form = observationsForm((field) => ({
+      ...field,
+      options: [
+        { id: encodeURIComponent('60'), value: '60', text: '60' },
+        { id: encodeURIComponent('90'), value: '90', text: '90' },
+      ],
+    }));
+    expect(getEncounterFormSections(form)[0].observations).toEqual([
+      { id: 'pulse', label: 'Pulse', type: 'choice', options: ['60', '90'] },
+    ]);
+  });
+
+  it('rejects dropdown options that break the encoded option-id convention', () => {
+    expect(() =>
+      validateEncounterForm(
+        observationsForm((field) => ({
+          ...field,
+          options: [{ id: 'yes-option', value: 'Yes', text: 'Yes' }],
+        }))
+      )
+    ).toThrow(
+      'dropdown options use { id: encodeURIComponent(value), value } in exam.pulse'
+    );
+  });
+
+  it('rejects structured clinical fields that do not use the canonical value id', () => {
+    const form = encounterFormFromLegacy(
+      definition({ id: 'vitals', title: 'Vitals', kind: 'vitals' })
+    );
+    const section = form.pages[0].fields?.[0] as {
+      fields?: { id?: string }[];
+    };
+    section.fields = section.fields?.map((field) =>
+      field.id === getEncounterFieldId('vitals', 'value')
+        ? { ...field, id: 'pulse-readings' }
+        : field
+    );
+    expect(() => validateEncounterForm(form)).toThrow(
+      'structured clinical fields use encounter:<section>:observation:value (vitals)'
+    );
   });
 });

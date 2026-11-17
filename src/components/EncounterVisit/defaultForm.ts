@@ -91,20 +91,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Medical history',
               width: 'full',
               _sourceData: {
-                id: 'medical',
-                label: 'Medical history',
-                findings: [
-                  {
-                    id: 'reviewed',
-                    label: 'History reviewed',
-                    text: 'Medical history reviewed.',
-                  },
-                  {
-                    id: 'no-additional-history',
-                    label: 'No additional history',
-                    text: 'No additional medical history reported.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'reviewed',
@@ -125,20 +111,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Surgical history',
               width: 'full',
               _sourceData: {
-                id: 'surgical',
-                label: 'Surgical history',
-                findings: [
-                  {
-                    id: 'no-surgeries',
-                    label: 'No prior surgery',
-                    text: 'No previous surgery reported.',
-                  },
-                  {
-                    id: 'reviewed',
-                    label: 'History reviewed',
-                    text: 'Surgical history reviewed.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-surgeries',
@@ -159,20 +131,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Family history',
               width: 'full',
               _sourceData: {
-                id: 'family',
-                label: 'Family history',
-                findings: [
-                  {
-                    id: 'unknown',
-                    label: 'History unknown',
-                    text: 'Family history unknown.',
-                  },
-                  {
-                    id: 'noncontributory',
-                    label: 'No pertinent history',
-                    text: 'No pertinent family history reported.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'unknown',
@@ -193,25 +151,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Social history',
               width: 'full',
               _sourceData: {
-                id: 'social',
-                label: 'Social history',
-                findings: [
-                  {
-                    id: 'never-smoked',
-                    label: 'Never smoked',
-                    text: 'Never smoked.',
-                  },
-                  {
-                    id: 'no-alcohol',
-                    label: 'No alcohol use',
-                    text: 'Denies alcohol use.',
-                  },
-                  {
-                    id: 'no-recreational-drugs',
-                    label: 'No recreational drug use',
-                    text: 'Denies recreational drug use.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'never-smoked',
@@ -270,15 +209,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Constitutional',
               width: 'full',
               _sourceData: {
-                id: 'constitutional',
-                label: 'Constitutional',
-                findings: [
-                  {
-                    id: 'no-fever-chills',
-                    label: 'No fever or chills',
-                    text: 'Denies fever or chills.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-fever-chills',
@@ -294,15 +224,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Cardiovascular',
               width: 'full',
               _sourceData: {
-                id: 'cardiovascular',
-                label: 'Cardiovascular',
-                findings: [
-                  {
-                    id: 'no-chest-pain',
-                    label: 'No chest pain',
-                    text: 'Denies chest pain.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-chest-pain',
@@ -318,20 +239,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Respiratory',
               width: 'full',
               _sourceData: {
-                id: 'respiratory',
-                label: 'Respiratory',
-                findings: [
-                  {
-                    id: 'no-dyspnea',
-                    label: 'No dyspnea',
-                    text: 'Denies shortness of breath.',
-                  },
-                  {
-                    id: 'no-cough',
-                    label: 'No cough',
-                    text: 'Denies cough.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-dyspnea',
@@ -352,20 +259,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Musculoskeletal',
               width: 'full',
               _sourceData: {
-                id: 'musculoskeletal',
-                label: 'Musculoskeletal',
-                findings: [
-                  {
-                    id: 'back-pain',
-                    label: 'Back pain',
-                    text: 'Reports back pain.',
-                  },
-                  {
-                    id: 'no-joint-swelling',
-                    label: 'No joint swelling',
-                    text: 'Denies joint swelling.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'back-pain',
@@ -386,25 +279,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Neurological',
               width: 'full',
               _sourceData: {
-                id: 'neurological',
-                label: 'Neurological',
-                findings: [
-                  {
-                    id: 'no-weakness',
-                    label: 'No weakness',
-                    text: 'Denies weakness.',
-                  },
-                  {
-                    id: 'no-numbness-tingling',
-                    label: 'No numbness / tingling',
-                    text: 'Denies numbness or tingling.',
-                  },
-                  {
-                    id: 'no-bowel-bladder-changes',
-                    label: 'No bowel / bladder changes',
-                    text: 'Denies bowel or bladder changes.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-weakness',
@@ -482,20 +356,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'General appearance',
               width: 'full',
               _sourceData: {
-                id: 'general',
-                label: 'General appearance',
-                findings: [
-                  {
-                    id: 'no-distress',
-                    label: 'No acute distress',
-                    text: 'No acute distress.',
-                  },
-                  {
-                    id: 'alert',
-                    label: 'Alert',
-                    text: 'Alert and conversant.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-distress',
@@ -516,20 +376,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Head and neck',
               width: 'full',
               _sourceData: {
-                id: 'head-neck',
-                label: 'Head and neck',
-                findings: [
-                  {
-                    id: 'no-cervical-nodes',
-                    label: 'No cervical lymphadenopathy',
-                    text: 'No palpable cervical lymphadenopathy.',
-                  },
-                  {
-                    id: 'no-oral-lesions',
-                    label: 'No oral lesions',
-                    text: 'No visible oral lesions.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-cervical-nodes',
@@ -550,15 +396,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Cardiovascular',
               width: 'full',
               _sourceData: {
-                id: 'cardiovascular',
-                label: 'Cardiovascular',
-                findings: [
-                  {
-                    id: 'regular',
-                    label: 'Regular rhythm',
-                    text: 'Regular rate and rhythm.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'regular',
@@ -574,20 +411,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Respiratory',
               width: 'full',
               _sourceData: {
-                id: 'respiratory',
-                label: 'Respiratory',
-                findings: [
-                  {
-                    id: 'clear',
-                    label: 'Clear lungs',
-                    text: 'Lungs clear to auscultation bilaterally.',
-                  },
-                  {
-                    id: 'nonlabored',
-                    label: 'Nonlabored',
-                    text: 'Breathing is nonlabored.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'clear',
@@ -608,15 +431,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Abdomen',
               width: 'full',
               _sourceData: {
-                id: 'abdomen',
-                label: 'Abdomen',
-                findings: [
-                  {
-                    id: 'soft',
-                    label: 'Soft / nontender',
-                    text: 'Abdomen soft and nontender.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'soft',
@@ -632,25 +446,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Musculoskeletal / back',
               width: 'full',
               _sourceData: {
-                id: 'musculoskeletal',
-                label: 'Musculoskeletal / back',
-                findings: [
-                  {
-                    id: 'no-midline-tenderness',
-                    label: 'No midline tenderness',
-                    text: 'No midline spinal tenderness.',
-                  },
-                  {
-                    id: 'paraspinal-tenderness',
-                    label: 'Paraspinal tenderness',
-                    text: 'Paraspinal tenderness is present.',
-                  },
-                  {
-                    id: 'range-of-motion',
-                    label: 'Preserved range of motion',
-                    text: 'Spinal range of motion is preserved.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'no-midline-tenderness',
@@ -676,25 +471,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Neurological',
               width: 'full',
               _sourceData: {
-                id: 'neurological',
-                label: 'Neurological',
-                findings: [
-                  {
-                    id: 'symmetric-strength',
-                    label: 'Symmetric leg strength',
-                    text: 'Strength symmetric in both lower extremities.',
-                  },
-                  {
-                    id: 'light-touch',
-                    label: 'Intact light touch',
-                    text: 'Sensation intact to light touch in both lower extremities.',
-                  },
-                  {
-                    id: 'steady-gait',
-                    label: 'Steady gait',
-                    text: 'Gait is steady.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'symmetric-strength',
@@ -720,15 +496,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Skin',
               width: 'full',
               _sourceData: {
-                id: 'skin',
-                label: 'Skin',
-                findings: [
-                  {
-                    id: 'warm-dry',
-                    label: 'Warm / dry',
-                    text: 'Skin warm and dry.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'warm-dry',
@@ -903,25 +670,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Return interval',
               width: 'full',
               _sourceData: {
-                id: 'interval',
-                label: 'Return interval',
-                findings: [
-                  {
-                    id: 'one-week',
-                    label: '1 week',
-                    text: '1 week',
-                  },
-                  {
-                    id: 'one-month',
-                    label: '1 month',
-                    text: '1 month',
-                  },
-                  {
-                    id: 'three-months',
-                    label: '3 months',
-                    text: '3 months',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'one-week',
@@ -947,25 +695,6 @@ export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
               question: 'Appointment details',
               width: 'full',
               _sourceData: {
-                id: 'appointment',
-                label: 'Appointment details',
-                findings: [
-                  {
-                    id: 'scheduled',
-                    label: 'Appointment scheduled',
-                    text: 'Appointment scheduled.',
-                  },
-                  {
-                    id: 'patient-to-schedule',
-                    label: 'Patient to schedule',
-                    text: 'Patient to schedule appointment.',
-                  },
-                  {
-                    id: 'scheduling-pending',
-                    label: 'Scheduling pending',
-                    text: 'Appointment scheduling pending.',
-                  },
-                ],
                 encounterFindings: [
                   {
                     id: 'scheduled',
