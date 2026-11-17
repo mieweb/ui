@@ -15,6 +15,7 @@
 import * as React from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MessageRow } from './parts';
+import type { MCPToolCallGroupOptions } from '../AI/MCPToolCallGroup';
 import type {
   AIRenderTextContent,
   Participant,
@@ -55,6 +56,8 @@ export interface VirtualThreadProps {
   mediaRetryLabel?: string;
   /** Prefix of a scheduled message's indicator, forwarded to each row. */
   scheduledLabel?: string;
+  /** Tool-call grouping options, forwarded to each row. */
+  toolCallGroup?: MCPToolCallGroupOptions;
   /**
    * Host-owned ref for the scroll container. {@link SuperChat} owns all
    * scroll anchoring (bottom-pinning, jump-to-bottom) through this ref.
@@ -84,6 +87,7 @@ export function VirtualThread({
   mediaErrorLabel,
   mediaRetryLabel,
   scheduledLabel,
+  toolCallGroup,
   scrollRef,
   contentRef,
   containerProps,
@@ -147,6 +151,7 @@ export function VirtualThread({
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
                   scheduledLabel={scheduledLabel}
+                  toolCallGroup={toolCallGroup}
                 />
               </div>
             </div>

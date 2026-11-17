@@ -17,7 +17,12 @@ import type {
   AIRenderTextContent,
   AITextRenderContext,
   MCPResourceLink,
+  MCPToolCall,
 } from '../AI/types';
+import type {
+  MCPToolCallGroupLabelOverrides,
+  MCPToolCallGroupOptions,
+} from '../AI/MCPToolCallGroup';
 
 export type { AIRenderTextContent, AITextRenderContext };
 
@@ -346,4 +351,11 @@ export interface GenUIBlockPayload {
 // Re-exports for convenience
 // ============================================================================
 
-export type { AIMessageContent, AIMessageStatus, MCPResourceLink };
+export type {
+  AIMessageContent,
+  AIMessageStatus,
+  MCPResourceLink,
+  MCPToolCall,
+  MCPToolCallGroupOptions,
+  MCPToolCallGroupLabelOverrides,
+};
