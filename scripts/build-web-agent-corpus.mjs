@@ -248,12 +248,14 @@ emit('llms.txt', llms);
 // --- self-check + write -------------------------------------------------------
 
 const problems = [];
-const corpusLink = new RegExp(
-  `${BASE.replace(/[.\\/]/g, '\\$&')}/([\\w./-]+\\.(?:md|txt))`,
-  'g'
-);
+// Match any absolute .md/.txt URL, then compare the origin by plain string
+// prefix (no dynamic RegExp — hostname checks via regex trip CodeQL and are
+// easy to get subtly wrong).
+const docLink = /https:\/\/[\w.-]+\/[\w./-]+\.(?:md|txt)/g;
 for (const [path, content] of emitted) {
-  for (const [, url] of content.matchAll(corpusLink)) {
+  for (const [full] of content.matchAll(docLink)) {
+    if (!full.startsWith(`${BASE}/`)) continue;
+    const url = full.slice(BASE.length + 1);
     if (!emitted.has(url)) problems.push(`${path}: dead corpus link → ${url}`);
   }
   // Only agent.md is template-expanded; source docs legitimately contain {{ }}
