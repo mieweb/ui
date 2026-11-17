@@ -204,7 +204,11 @@ function ychartGitInfoPlugin(): Plugin {
 const ychartDependencyNames = readDependencyNames('ychart');
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../packages/datavis/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
   // Deprecated/retired entries are hidden from both the sidebar tree and
   // search (one filtered dataset drives both — there is no search-only mode).
   // Their docs pages stay built and reachable by direct URL; the Deprecated

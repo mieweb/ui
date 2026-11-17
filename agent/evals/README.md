@@ -16,7 +16,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | ------------------------------ | ------------------------------------ | ---------------------- |
 | [selection.md](./selection.md) | Component selection / catalog        | MIE UI Design Agent    |
 | [styling.md](./styling.md)     | Styling, tokens, brands, dark mode   | MIE UI Styling Agent   |
-| [install.md](./install.md)     | Install, CSS foundation, wiring      | MIE UI Install Agent   |
+| [install.md](./install.md)     | Install, CSS foundation              | MIE UI Install Agent   |
 | [a11y.md](./a11y.md)           | Accessibility                        | MIE UI A11y Agent      |
 | [i18n.md](./i18n.md)           | Internationalization / RTL           | MIE UI i18n Agent      |
 | [migration.md](./migration.md) | Migration / compliance (incl. icons) | MIE UI Migration Agent |
@@ -24,6 +24,7 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | [grids.md](./grids.md)         | DataVis NITRO + eSheet grids         | MIE UI Grids Agent     |
 | [datavis.md](./datavis.md)     | Charts / maps / decks / org charts   | MIE UI DataVis Agent   |
 | [views.md](./views.md)         | Views / dashboards / panels / shell  | MIE UI Views Agent     |
+| [superchat.md](./superchat.md) | Chat / AI messages / media convo     | MIE UI SuperChat Agent |
 
 ## Entry format
 
@@ -46,7 +47,10 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 - **Agent** — the specialist that should end up answering. When the question
   is posed to the MIE UI Design Agent, correct routing to this agent (or a
   correct direct answer where the orchestrator owns the domain, e.g.
-  selection) is part of the pass criteria.
+  selection) is part of the pass criteria. Some questions legitimately
+  straddle domains (a file's primary agent vs. the shipped routing table);
+  the key names the routing-table owner, and a parenthetical explains the
+  split — grade routing against the key, not the file it lives in.
 - **Source** — where the known-good answer lives, so graders can re-verify
   and corpus fixes have a target.
 
@@ -55,8 +59,11 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 1. Install the team into a sandbox app:
    `node <ui-repo>/agent/init-agent.mjs init-agent --experimental-agents`
    (run from the sandbox root; verify `pwd` first).
-2. Open the installed agent for the domain under test (or start from the
-   MIE UI Design Agent to also score routing).
+2. Open the **MIE UI Design Agent** — the only picker entry — and ask the
+   questions there; routing is always in scope. Specialists ship
+   `user-invocable: false`, so to drill one directly (skipping routing),
+   temporarily set `user-invocable: true` in its installed
+   `.github/agents/` copy.
 3. Ask a sample of questions from the file — a stratified sample of 3–5 per
    domain is a meaningful smoke; the full set is for release-gating runs.
 4. Score each answer PASS / PARTIAL / FAIL against **Expect**:

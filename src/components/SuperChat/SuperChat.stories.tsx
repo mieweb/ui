@@ -92,6 +92,7 @@ const meta: Meta<typeof SuperChat> = {
 - You want the list and the panel together with selection handled — \`SuperChatInbox\`.
 - One user talks to one assistant and you do not need Markdown, participants or a conversation model — \`AIChat\` is lighter (no \`react-markdown\` peers).
 - Plain human-to-human messaging with delivery states and read receipts — the Messaging module; SuperChat has no \`status\` icons or read receipts.
+- The messages are rows in a DataVis view (an exported thread, an audit log) that users only read — [DataVisNitroChat](?path=/docs/grids-datavis-chat--docs) maps sender / message / time columns onto this panel in read-only mode, alongside the NITRO grid over the same view.
 - The host cannot install the Markdown-core peers (\`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\`) — they are required for the default renderer.
 
 ### Example

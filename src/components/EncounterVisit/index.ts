@@ -13,6 +13,7 @@ export type {
   EncounterMessageTranslator,
   EncounterMessageValues,
 } from './messages';
+export type { EncounterMediaCaptureOptions } from './mediaCapture';
 export { EncounterVitalsField } from './EncounterVitalsField';
 export { EncounterAssessmentField } from './EncounterAssessmentField';
 export { EncounterNarrativeField } from './EncounterNarrativeField';

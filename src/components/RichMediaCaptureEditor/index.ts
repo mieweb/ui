@@ -8,6 +8,10 @@ export {
   type MediaCaptureOptions,
 } from './CaptureDock';
 export { CaptureRibbon, type CaptureRibbonProps } from './CaptureRibbon';
+export {
+  AnnotateImageDialog,
+  type AnnotateImageDialogProps,
+} from './AnnotateImageDialog';
 export { useFileCaptures, type FileCapturesOptions } from './useFileCaptures';
 export { useMediaRecording } from './useMediaRecording';
 export {

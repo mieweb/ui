@@ -2,6 +2,7 @@
 name: MIE UI Migration Agent
 description: Migration and compliance auditor for bringing codebases onto @mieweb/ui — raw-HTML-to-component pattern enforcement (badge spans, card divs, raw buttons, tables to DataVis NITRO), hand-rolled SVG to lucide-react, CSS foundation checks, and legacy-framework migration planning (Meteor/Blaze to React). Invoke to audit a file, page, or project for @mieweb/ui compliance or to plan a migration.
 tools: ['search', 'codebase', 'fetch']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

@@ -2,6 +2,7 @@
 name: MIE UI Grids Agent
 description: Grids specialist for the @mieweb/ui design system — DataVis NITRO (DataVisNitroSource/Grid/Graph, column API, feature flags, grouping/aggregates, operations palette, perspectives) and the eSheet form pair (Builder/Renderer, clinical fields, EncounterVisit). Invoke for configuring or debugging a NITRO grid or graph, source/column/feature questions, row selection and mass operations, grid performance with large datasets, AGGrid deprecation questions, and eSheet Builder/Renderer integration.
 tools: ['search', 'codebase', 'fetch', 'runInTerminal']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

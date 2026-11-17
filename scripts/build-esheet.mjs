@@ -37,7 +37,9 @@ if (
     (existsSync(stampFile) &&
       readFileSync(stampFile, 'utf8').trim() === revision))
 ) {
-  console.log('[build:esheet] up to date, skipping');
+  // stderr: `npm pack --json` runs `prepare` and parses stdout as JSON,
+  // so diagnostics must not pollute stdout.
+  console.error('[build:esheet] up to date, skipping');
   process.exit(0);
 }
 execFileSync('pnpm', ['install', '--frozen-lockfile'], {
