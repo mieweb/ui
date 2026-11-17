@@ -20,7 +20,6 @@ import {
 import type {
   EncounterObservation,
   EncounterResponses,
-  EncounterSectionView,
   EncounterVisitSnapshot,
 } from './types';
 
@@ -31,21 +30,6 @@ type MdySnapshot = Pick<
   EncounterVisitSnapshot,
   'form' | 'responses' | 'observations'
 >;
-
-/**
- * Reuse views across the per-field projection calls of one engine operation.
- * Keyed by the per-operation snapshot (not the form) so in-place form edits
- * never serve stale views to a later snapshot.
- */
-const viewCache = new WeakMap<MdySnapshot, EncounterSectionView[]>();
-
-function sectionsOf(snapshot: MdySnapshot): EncounterSectionView[] {
-  const cached = viewCache.get(snapshot);
-  if (cached) return cached;
-  const views = getEncounterFormSections(snapshot.form);
-  viewCache.set(snapshot, views);
-  return views;
-}
 
 export type EncounterMdyField = MdyDocumentField;
 
@@ -145,7 +129,9 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
     'encounterSectionRequired',
   ],
   projectField: ({ field }, snapshot) => {
-    const section = sectionsOf(snapshot).find((candidate) =>
+    // Views are recomputed from the live form: callers may mutate a form
+    // in place between operations, so nothing is cached across calls.
+    const section = getEncounterFormSections(snapshot.form).find((candidate) =>
       getEncounterSectionFieldIds(candidate).includes(field.id)
     );
     if (!section) return undefined;

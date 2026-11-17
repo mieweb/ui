@@ -9,9 +9,9 @@ import {
   getRichTextEsheetFieldId,
   getRichTextEsheetFormSections,
   getRichTextEsheetSectionText,
+  withRichTextEsheetParties,
   type RichTextEsheetParty,
   type RichTextEsheetResponses,
-  type RichTextEsheetSectionView,
 } from './definition';
 import {
   richTextEsheetFormFromLegacy,
@@ -37,26 +37,6 @@ export type RichTextEsheetMdyDiagnostic = MdyDocumentDiagnostic;
 export type ParsedRichTextEsheetMdy = ParsedMdyDocument & {
   definition?: RichTextEsheetDefinition;
 };
-
-/**
- * Reuse views across the per-field projection calls of one engine operation.
- * Keyed by the per-operation snapshot input (not the form) so in-place form
- * edits never serve stale views to a later snapshot.
- */
-const viewCache = new WeakMap<
-  RichTextEsheetMdyInput,
-  RichTextEsheetSectionView[]
->();
-
-function sectionsOf(
-  snapshot: RichTextEsheetMdyInput
-): RichTextEsheetSectionView[] {
-  const cached = viewCache.get(snapshot);
-  if (cached) return cached;
-  const views = getRichTextEsheetFormSections(snapshot.form);
-  viewCache.set(snapshot, views);
-  return views;
-}
 
 /** One link projection per document section, including empty memory aids. */
 export function getRichTextEsheetMdyFields(
@@ -121,7 +101,9 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
     'A RichTextEsheet MDY document requires YAML front matter.',
   sourceDataProperties: ['narrativeHideLabel', 'narrativeFindings'],
   projectField: ({ field }, snapshot) => {
-    const section = sectionsOf(snapshot).find(
+    // Views are recomputed from the live form: callers may mutate a form
+    // in place between operations, so nothing is cached across calls.
+    const section = getRichTextEsheetFormSections(snapshot.form).find(
       (candidate) => getRichTextEsheetFieldId(candidate.id) === field.id
     );
     if (!section) return undefined;
@@ -216,7 +198,13 @@ export function createRichTextEsheetMdy(
   body?: string,
   source?: string
 ): string {
-  return engine.create(snapshot, body, source);
+  // Party macros are rendering state: the persisted form keeps only authored
+  // findings, even when the snapshot's form was imported with stamped macros.
+  return engine.create(
+    { ...snapshot, form: withRichTextEsheetParties(snapshot.form) },
+    body,
+    source
+  );
 }
 
 /**

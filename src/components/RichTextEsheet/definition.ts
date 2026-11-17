@@ -99,8 +99,13 @@ function sectionView(field: FieldNode): RichTextEsheetSectionView {
   const valueId = getRichTextEsheetFieldId(id);
   const descriptionId = `${field.id}:description`;
   let value: FieldNode | undefined;
+  let description = false;
   for (const child of fieldNodes(field.fields)) {
-    if (child.id === descriptionId && child.fieldType === 'display') continue;
+    if (child.id === descriptionId && child.fieldType === 'display') {
+      if (description) invalid(`duplicate section description field in ${id}`);
+      description = true;
+      continue;
+    }
     if (child.id === valueId && child.fieldType !== 'display') {
       if (value) invalid(`duplicate section value field in ${id}`);
       value = child;

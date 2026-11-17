@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { parseDocument } from 'yaml';
-import { getRichTextEsheetFieldId } from './definition';
+import {
+  getRichTextEsheetFieldId,
+  withRichTextEsheetParties,
+} from './definition';
 import {
   richTextEsheetFormFromLegacy,
   type RichTextEsheetDefinition,
 } from './legacy';
 import {
   createRichTextEsheetMdy,
+  getRichTextEsheetMdyFields,
   getRichTextEsheetMdyParties,
   getRichTextEsheetRetiredMdyFields,
   parseRichTextEsheetMdy,
@@ -37,13 +41,31 @@ const reasonId = getRichTextEsheetFieldId('reason');
 describe('createRichTextEsheetSnapshot', () => {
   it('serializes in-place form edits in subsequent snapshots', () => {
     const draft = globalThis.structuredClone(form);
-    expect(createRichTextEsheetMdy({ form: draft, responses: {} })).toContain(
-      '## Reason'
-    );
+    // The same input object is reused across calls: nothing may cache views.
+    const input = { form: draft, responses: {} };
+    expect(createRichTextEsheetMdy(input)).toContain('## Reason');
     (draft.pages[0].fields![0] as { title?: string }).title = 'Chief complaint';
-    expect(createRichTextEsheetMdy({ form: draft, responses: {} })).toContain(
-      '## Chief complaint'
+    expect(createRichTextEsheetMdy(input)).toContain('## Chief complaint');
+    // Projection labels come from the live section views, never a cache.
+    const labels = getRichTextEsheetMdyFields(input).map(
+      (field) => field.label
     );
+    expect(labels).toContain('Chief complaint');
+    expect(labels).not.toContain('Reason');
+  });
+
+  it('strips stamped party macros from the persisted form', () => {
+    // Pre-#772 native-only saves stamped party macros into the form itself.
+    const stamped = withRichTextEsheetParties(form, parties);
+    const cleared = createRichTextEsheetSnapshot(stamped, {}, []);
+    expect(cleared.mdy).not.toContain('Jordan Rivera');
+    const replaced = createRichTextEsheetSnapshot(stamped, {}, [
+      { role: 'Patient', name: 'Avery Lane' },
+    ]);
+    // The replacement lives in the parties front matter, never in the form.
+    expect(replaced.mdy).not.toContain('Jordan Rivera');
+    expect(replaced.mdy).toContain('name: Avery Lane');
+    expect(replaced.mdy.split('Avery Lane')).toHaveLength(2);
   });
 
   it('derives progress, required errors and portable MDY with parties', () => {

@@ -235,4 +235,20 @@ describe('getRichTextEsheetFormSections (mieweb/ui#772)', () => {
       )
     ).toThrow('duplicate section id');
   });
+
+  it('rejects duplicate section description fields', () => {
+    // documentMdy's validNativeForm rejects duplicate field ids on reopen, so
+    // the section view guard must refuse them before a document is saved.
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          const description = {
+            id: `${fields[0].id}:description`,
+            fieldType: 'display',
+          };
+          fields[0].fields!.push(description as never, description as never);
+        })
+      )
+    ).toThrow('duplicate section description field');
+  });
 });
