@@ -126,7 +126,8 @@ const WEB_READING_NOTE = `> **Reading this from the web?** This guide was writte
 > subagent team. Where it says "delegate to the MIE UI *X* Agent", fetch that
 > domain's guide at \`${BASE}/guides/<domain>.md\` (index in
 > [agent.md](${BASE}/agent.md)); where it says "load the \`mieweb-ui-<name>\`
-> skill", fetch \`${BASE}/skills/<name>.md\`. Handoffs and tools do not apply.`;
+> skill", fetch \`${BASE}/skills/mieweb-ui-<name>.md\`. Handoffs and tools do
+> not apply.`;
 
 const guides = []; // { slug, name, description, url }
 for (const agent of parsedAgents) {

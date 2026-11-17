@@ -65,6 +65,13 @@ instead ({{SKILL_URL:mieweb-ui-tailwind4}}) — Tailwind 4 needs `@source`,
 Tailwind 3 needs the preset + safelist, and getting it wrong tree-shakes the
 library's styles away.
 
+The `@kerebron/*` peers above only make the rich-text editors installable —
+using any of them (`RichEditor`, the rich `Textarea`, `EmailEditor`) needs
+extra setup: `import '@mieweb/ui/kerebron.css'`, serving `@kerebron/wasm`'s
+assets at `/kerebron-wasm`, and host-side `@kerebron` patches (toolbar
+dropdowns and markdown round-trip break without them). Read
+{{SKILL_URL:mieweb-ui-kerebron}} before using any rich-text editor.
+
 Every other peer dependency is **optional** and only needed when you import
 the entry that uses it (charts, maps, globes, collab, motion). The entry-point
 table in {{SKILL_URL:mieweb-ui-catalog}} says which.
@@ -91,10 +98,11 @@ environment.
 
 ### C. You have shell access in a real repository
 
-Run `npx @mieweb/ui init-agent --experimental-agents` once. It installs this
-entire knowledge corpus locally as instructions, skills, and a specialist
-agent team — strictly better than fetching these URLs. Then follow the
-installed `mieweb-ui.instructions.md`.
+Run `npx @mieweb/ui@next init-agent --experimental-agents` once (the
+specialist-agent team ships on the `next` channel until the next stable
+release). It installs this entire knowledge corpus locally as instructions,
+skills, and a specialist agent team — strictly better than fetching these
+URLs. Then follow the installed `mieweb-ui.instructions.md`.
 
 ## Choosing components
 
@@ -113,7 +121,8 @@ Start with the component inventory and selection guidance:
 These guides were written for an installed specialist-agent team. Reading
 them from the web: where a guide says "delegate to the MIE UI _X_ Agent",
 fetch that domain's guide below instead; where it says "load the
-`mieweb-ui-<name>` skill", fetch `https://ui.mieweb.org/skills/<name>.md`.
+`mieweb-ui-<name>` skill", fetch
+`https://ui.mieweb.org/skills/mieweb-ui-<name>.md`.
 
 | Your task involves…                                  | Read                   |
 {{ROUTING_TABLE}}
