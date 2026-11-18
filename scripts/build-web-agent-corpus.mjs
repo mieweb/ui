@@ -322,19 +322,28 @@ if (existsSync(indexHtml)) {
       'web-agent corpus: WARNING — discovery pointers not found in index.html (manager-head.html changed?)'
     );
   }
-  // Embed the llms.txt index verbatim in the shell so a SINGLE fetch of the
-  // root URL hands any agent the full component/skill index. Several web
-  // fetchers (verified: Claude's) refuse to follow even same-origin
-  // discovered links on low-trust hosts, and the Storybook shell is
-  // otherwise empty to a non-JS fetcher. Hide it from humans via a
-  // stylesheet rule only: readability-style extractors strip elements
-  // carrying hidden/aria-hidden/inline display:none (verified empirically —
-  // Claude reported "no component content" with those present), but they do
-  // not apply <style> sheets, while browsers do. display:none also hides it
-  // from screen readers. Refreshed on every run: any prior embed is replaced,
-  // never duplicated, so reruns pick up corpus changes (escaped content
-  // cannot contain a literal "</pre>").
-  const escaped = llms
+  // Embed the llms.txt index AND the full rules document verbatim in the
+  // shell so a SINGLE fetch of the root URL hands any agent the complete
+  // component/skill index plus the non-negotiable project rules. Several web
+  // fetchers (verified: Claude's, ChatGPT's) refuse to follow even
+  // same-origin discovered links on low-trust hosts, and the Storybook shell
+  // is otherwise empty to a non-JS fetcher — the embed is the guaranteed
+  // floor that keeps such agents grounded instead of inventing APIs. Hide it
+  // from humans via a stylesheet rule only: readability-style extractors
+  // strip elements carrying hidden/aria-hidden/inline display:none (verified
+  // empirically — Claude reported "no component content" with those
+  // present), but they do not apply <style> sheets, while browsers do.
+  // display:none also hides it from screen readers. Refreshed on every run:
+  // any prior embed is replaced, never duplicated, so reruns pick up corpus
+  // changes (escaped content cannot contain a literal "</pre>").
+  const embedText = [
+    llms,
+    '',
+    '---',
+    '',
+    emitted.get('instructions.md'),
+  ].join('\n');
+  const escaped = embedText
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;');
