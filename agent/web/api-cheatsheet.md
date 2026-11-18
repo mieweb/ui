@@ -89,7 +89,9 @@ Extends native `<input>` props (minus `size`):
 ```
 
 - `onOpenChange: (open: boolean) => void` — there is **no** `onClose`.
-- Content unmounts immediately when `open` goes false.
+- Content unmounts when `open` goes false — immediately on the default CSS
+  path, after the exit animation under a `MotionProvider` — so don't rely on
+  unmount cleanup timing.
 - Also: `closeOnOverlayClick`, `closeOnEscape`, `size`.
 
 ## Button / Badge — use real variants, not CSS
