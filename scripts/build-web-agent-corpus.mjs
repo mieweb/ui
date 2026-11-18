@@ -254,6 +254,29 @@ const llms = [
 ].join('\n');
 emit('llms.txt', llms);
 
+// Real robots.txt (otherwise the SPA fallback serves the Storybook HTML
+// shell for it, which strict agent fetchers may treat as a parse failure).
+emit(
+  'robots.txt',
+  [
+    'User-agent: *',
+    'Allow: /',
+    '',
+    '# AI agents: machine-readable docs for this design system:',
+    `# ${BASE}/llms.txt`,
+    `# ${BASE}/agent.md`,
+    '',
+  ].join('\n')
+);
+
+// Preview-only: Cloudflare injects `X-Robots-Tag: noindex` on *.pages.dev,
+// which polite AI fetchers treat as do-not-fetch for discovered URLs. Try
+// overriding it via the Pages `_headers` file so web agents can dry-run the
+// corpus pre-merge. Never emitted for production builds.
+if (BASE !== 'https://ui.mieweb.org') {
+  emit('_headers', ['/*', '  X-Robots-Tag: all', ''].join('\n'));
+}
+
 // --- self-check + write -------------------------------------------------------
 
 const problems = [];
