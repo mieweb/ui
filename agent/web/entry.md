@@ -146,6 +146,10 @@ All domain guides (workflow + troubleshooting):
 1. **Never invent APIs.** Only cite components, props, and entry points you
    can verify in these documents. If you cannot verify, say so and link the
    Storybook (https://ui.mieweb.org).
-2. **Multi-domain tasks:** fetch each relevant guide/skill, then synthesize.
-3. Components marked _experimental_ in the catalog may change between
+2. **If your browsing tool refuses to fetch a link from this corpus**, don't
+   stall or ask for file uploads — ask the user to paste the specific URLs
+   into the chat. Pasted URLs fetch successfully even when discovered links
+   are refused.
+3. **Multi-domain tasks:** fetch each relevant guide/skill, then synthesize.
+4. Components marked _experimental_ in the catalog may change between
    versions — fine to use, but say so.
