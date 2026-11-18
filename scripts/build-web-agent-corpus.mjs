@@ -308,6 +308,27 @@ for (const [path, content] of emitted) {
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, content);
 }
+
+// Patch the built Storybook shell's discovery pointers to absolute URLs on
+// this deploy's host. The source pointers in .storybook/manager-head.html are
+// origin-relative (correct for any host), but Claude-style web fetchers only
+// open URLs that literally appeared in a prior fetch result — a relative
+// "/llms.txt" resolves fine yet fails that whitelist (verified empirically,
+// mieweb/ui#784).
+const indexHtml = join(outDir, 'index.html');
+if (existsSync(indexHtml)) {
+  const html = readFileSync(indexHtml, 'utf8');
+  const patched = html
+    .replaceAll('content="/llms.txt"', `content="${BASE}/llms.txt"`)
+    .replaceAll('href="/agent.md"', `href="${BASE}/agent.md"`);
+  if (patched === html) {
+    console.error(
+      'web-agent corpus: WARNING — discovery pointers not found in index.html (manager-head.html changed?)'
+    );
+  } else {
+    writeFileSync(indexHtml, patched);
+  }
+}
 console.log(
   `web-agent corpus: ${emitted.size} files → ${outDir} (${[...emitted.keys()].filter((k) => !k.includes('/')).join(', ')} + skills/ + guides/)`
 );
