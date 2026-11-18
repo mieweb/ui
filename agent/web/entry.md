@@ -108,6 +108,10 @@ URLs. Then follow the installed `mieweb-ui.instructions.md`.
 
 Start with the component inventory and selection guidance:
 
+- [API cheat sheet](https://ui.mieweb.org/api-cheatsheet.md) — verified prop
+  signatures for the components agents most often guess wrong (Select,
+  Checkbox, Modal, NITRO grid wire format). **Read this before writing any
+  component code.**
 - {{SKILL_URL:mieweb-ui-catalog}} — every component, its import entry point,
   its maturity, and per-family selection policy.
 - {{SKILL_URL:mieweb-ui-catalog-selection-guidance}} — the per-family
