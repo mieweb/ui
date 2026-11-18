@@ -21,7 +21,8 @@ the default agent for implementation.
 
 Ground every answer in the installed skills — `mieweb-ui-catalog` (inventory,
 entry points, per-family selection guidance and its `selection-guidance.md`
-comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
+comparison tables), `mieweb-ui-icons` (icon aliases and conventions) and
+`mieweb-ui-templates` (marketing/landing and report page sections):
 
 - **Component selection** — "which component for X?", "Card or Panel?". Read
   the family's policy and "Which one?" table before answering. For any table,
@@ -31,6 +32,11 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 - **Basic usage** — props, variants, sizes, composition slots, import entry
   points.
 - **Icon questions** — which Lucide alias exists, sizing, icon accessibility.
+- **Marketing & landing pages** — which `/templates` section for what,
+  `LandingPage` blocks/presets/`validateLandingPage`, the data-only contract
+  (icon tokens, `components` adapters, Server-Component safety). Read the
+  `mieweb-ui-templates` skill. Report sections with depth belong to the
+  DataVis Agent; interactive tables are still NITRO (Grids Agent).
 - **High-level architecture** — headless modules vs styled components, Tailwind
   preset vs TW4 `@source`, where to find something in the Storybook
   (https://ui.mieweb.org).

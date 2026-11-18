@@ -1,7 +1,8 @@
 # Evals — Component selection / catalog
 
 Primary agent: **MIE UI Design Agent** (owns selection via the
-`mieweb-ui-catalog` skill and its selection guidance). See
+`mieweb-ui-catalog` skill and its selection guidance, and marketing/landing
+pages via the `mieweb-ui-templates` skill). See
 [README.md](./README.md) for format and scoring.
 
 ### SEL-1 — Table or NITRO
@@ -212,3 +213,54 @@ Primary agent: **MIE UI Design Agent** (owns selection via the
   Storybook but is not in the public API, so don't recommend or import it.
 - **Agent:** MIE UI Design Agent
 - **Source:** agent/skills/mieweb-ui-catalog/SKILL.md — inventory ("not exported yet" annotations)
+
+### SEL-23 — Marketing landing page
+
+- **Ask:** "We're building a marketing landing page for a new service line —
+  what should I build it from?"
+- **Expect:** `@mieweb/ui/templates` sections rendered by `LandingPage` from a
+  plain-data `blocks` array; pick a `landingPresets` archetype (here
+  `service-detail`) and check the page with `validateLandingPage` in a build
+  step or test. Sections are experimental-maturity but shipped in production.
+  Not hand-rolled divs, and not app-shell components.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md; src/catalog/Pages.mdx
+
+### SEL-24 — Templates data-only trap
+
+- **Ask:** "How do I pass my own icon component and an `onClick` handler to
+  `FeatureGridSection`?"
+- **Expect:** You don't — template sections take plain-data props only. Icons
+  are string tokens resolved against a `TemplateIconRegistry` (the `icons`
+  prop on `LandingPage` or the section); there are no event handlers — links
+  are real anchors and `trackingId` renders as `data-track` for analytics. A
+  genuinely interactive section is site-owned: build it with `SectionShell`
+  and register it in `LandingPage`'s `custom` map.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md — the contract;
+  src/templates/MAINTAINERS.md
+
+### SEL-25 — Templates in Server Components
+
+- **Ask:** "Can I render `HeroSection` and `LandingPage` inside a Next.js
+  Server Component, and how do I get `next/image`?"
+- **Expect:** Yes — the whole `/templates` entry is Server Component safe
+  (no client hooks, CI-verified under `react-server`), with no extra peer
+  deps. Pass `next/image`/`next/link` adapters via the `components` prop on
+  `LandingPage` (or a section) — adapters are site code, never block data.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md;
+  scripts/check-templates-rsc.mjs
+
+### SEL-26 — Report section vs grid
+
+- **Ask:** "I'm using `BenchmarkTableSection` but users now want to sort and
+  filter the columns."
+- **Expect:** Report template sections are static and server-safe by design —
+  no sorting/filtering/export. That requirement makes it a grid:
+  `DataVisNitroGrid` (Grids domain). Keep the report sections for the static
+  narrative around it.
+- **Agent:** MIE UI Grids Agent (via the Design Agent's redirect; report
+  sections themselves are DataVis-domain)
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md — troubleshooting;
+  agent/skills/mieweb-ui-charts/SKILL.md
