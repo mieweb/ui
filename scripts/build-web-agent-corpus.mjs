@@ -14,6 +14,7 @@
  *   agent.md                      fetch-first entry (agent/web/entry.md template
  *                                 + routing table parsed from the design agent)
  *   instructions.md               agent/mieweb-ui.instructions.md, verbatim
+ *   api-cheatsheet.md             agent/web/api-cheatsheet.md, verbatim
  *   skills/<name>.md              each agent/skills/<name>/SKILL.md
  *   skills/<name>-<extra>.md      extra skill files (e.g. selection-guidance)
  *   guides/<slug>.md              each specialist .agent.md, frontmatter folded
@@ -221,6 +222,18 @@ emit(
   readFileSync(join(root, 'agent/mieweb-ui.instructions.md'), 'utf8')
 );
 
+// --- api-cheatsheet.md (verbatim) ---------------------------------------------
+
+// Verified prop signatures for the components whose APIs deviate from
+// Radix/shadcn conventions. Web agents that skip the full skill docs code
+// from convention and crash at runtime (verified: Select options array,
+// Modal onOpenChange, Checkbox native onChange, NITRO wire format) — this
+// sheet is small enough to ride the root-page embed as the guaranteed floor.
+emit(
+  'api-cheatsheet.md',
+  readFileSync(join(root, 'agent/web/api-cheatsheet.md'), 'utf8')
+);
+
 // --- llms.txt -----------------------------------------------------------------
 
 const llms = [
@@ -238,6 +251,9 @@ const llms = [
   `- [Rules for AI agents](${BASE}/instructions.md): non-negotiable project`,
   '  rules (NITRO-first tables, tokens not hardcoded colors, lucide-react',
   '  icons, a11y, i18n/RTL)',
+  `- [API cheat sheet](${BASE}/api-cheatsheet.md): verified prop signatures`,
+  '  for the components agents most often guess wrong (Select, Checkbox,',
+  '  Modal, NITRO grid wire format) — read before writing component code',
   '',
   '## Skills (reference knowledge)',
   '',
@@ -342,6 +358,10 @@ if (existsSync(indexHtml)) {
     '---',
     '',
     emitted.get('instructions.md'),
+    '',
+    '---',
+    '',
+    emitted.get('api-cheatsheet.md'),
   ].join('\n');
   const escaped = embedText
     .replaceAll('&', '&amp;')
