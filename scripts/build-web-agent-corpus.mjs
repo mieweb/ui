@@ -317,29 +317,36 @@ if (existsSync(indexHtml)) {
   let patched = html
     .replaceAll('content="/llms.txt"', `content="${BASE}/llms.txt"`)
     .replaceAll('href="/agent.md"', `href="${BASE}/agent.md"`);
-  if (patched === html) {
+  if (!patched.includes(`content="${BASE}/llms.txt"`)) {
     console.error(
       'web-agent corpus: WARNING — discovery pointers not found in index.html (manager-head.html changed?)'
     );
-  } else {
-    // Embed the llms.txt index verbatim in the shell so a SINGLE fetch of the
-    // root URL hands any agent the full component/skill index. Several web
-    // fetchers (verified: Claude's) refuse to follow even same-origin
-    // discovered links on low-trust hosts, and the Storybook shell is
-    // otherwise empty to a non-JS fetcher. Hide it from humans via a
-    // stylesheet rule only: readability-style extractors strip elements
-    // carrying hidden/aria-hidden/inline display:none (verified empirically —
-    // Claude reported "no component content" with those present), but they do
-    // not apply <style> sheets, while browsers do. display:none also hides it
-    // from screen readers.
-    const escaped = llms
-      .replaceAll('&', '&amp;')
-      .replaceAll('<', '&lt;')
-      .replaceAll('>', '&gt;');
-    const embed = `<style>#llms-txt{display:none}</style><pre id="llms-txt">\n${escaped}\n</pre>`;
-    patched = patched.includes('</body>')
-      ? patched.replace('</body>', `${embed}</body>`)
-      : patched + embed;
+  }
+  // Embed the llms.txt index verbatim in the shell so a SINGLE fetch of the
+  // root URL hands any agent the full component/skill index. Several web
+  // fetchers (verified: Claude's) refuse to follow even same-origin
+  // discovered links on low-trust hosts, and the Storybook shell is
+  // otherwise empty to a non-JS fetcher. Hide it from humans via a
+  // stylesheet rule only: readability-style extractors strip elements
+  // carrying hidden/aria-hidden/inline display:none (verified empirically —
+  // Claude reported "no component content" with those present), but they do
+  // not apply <style> sheets, while browsers do. display:none also hides it
+  // from screen readers. Refreshed on every run: any prior embed is replaced,
+  // never duplicated, so reruns pick up corpus changes (escaped content
+  // cannot contain a literal "</pre>").
+  const escaped = llms
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+  const embed = `<style>#llms-txt{display:none}</style><pre id="llms-txt">\n${escaped}\n</pre>`;
+  patched = patched.replace(
+    /<style>#llms-txt\{display:none\}<\/style><pre id="llms-txt">[\s\S]*?<\/pre>/,
+    ''
+  );
+  patched = patched.includes('</body>')
+    ? patched.replace('</body>', `${embed}</body>`)
+    : patched + embed;
+  if (patched !== html) {
     writeFileSync(indexHtml, patched);
   }
 }
