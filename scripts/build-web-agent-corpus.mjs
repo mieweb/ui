@@ -314,7 +314,7 @@ for (const [path, content] of emitted) {
 const indexHtml = join(outDir, 'index.html');
 if (existsSync(indexHtml)) {
   const html = readFileSync(indexHtml, 'utf8');
-  const patched = html
+  let patched = html
     .replaceAll('content="/llms.txt"', `content="${BASE}/llms.txt"`)
     .replaceAll('href="/agent.md"', `href="${BASE}/agent.md"`);
   if (patched === html) {
@@ -322,6 +322,20 @@ if (existsSync(indexHtml)) {
       'web-agent corpus: WARNING — discovery pointers not found in index.html (manager-head.html changed?)'
     );
   } else {
+    // Embed the llms.txt index verbatim in the shell so a SINGLE fetch of the
+    // root URL hands any agent the full component/skill index. Several web
+    // fetchers (verified: Claude's) refuse to follow even same-origin
+    // discovered links on low-trust hosts, and the Storybook shell is
+    // otherwise empty to a non-JS fetcher. Hidden from humans (hidden +
+    // display:none), inert to Storybook, skipped by screen readers.
+    const escaped = llms
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;');
+    const embed = `<pre id="llms-txt" hidden aria-hidden="true" style="display:none">\n${escaped}\n</pre>`;
+    patched = patched.includes('</body>')
+      ? patched.replace('</body>', `${embed}</body>`)
+      : patched + embed;
     writeFileSync(indexHtml, patched);
   }
 }
