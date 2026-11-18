@@ -54,10 +54,10 @@ Shared `SectionBaseProps` on every section: `eyebrow?`, `title?`,
 | Conversion | `HeroSection` | `title`, `primaryCta`/`secondaryCta`, `breadcrumbs`, `image`, `highlights`, `meta`, `ctaNote`, `headingLevel` | `centered` \| `split` |
 | Conversion | `CtaSection` | `title`, `primaryCta`/`secondaryCta`, `note` | layout `band` \| `panel` |
 | Conversion | `PricingSection` | `plans: PricingPlan[]` (name, price/period, `features: string[]`, highlighted) | — |
-| Conversion | `LeadFormSection` | `action` (URL string or named Server Action), `fields?`, `hiddenFields?`, `submitLabel?`, `highlights?` | `split` \| `stacked` |
+| Conversion | `LeadFormSection` | `action` (URL string, or a React 19 form-action function when used standalone), `fields?`, `hiddenFields?`, `submitLabel?`, `highlights?` | `split` \| `stacked` |
 | Content | `FeatureGridSection` | `features[]` (`title`, `description`, `icon?`, `tag?`, `link?`), `columns: 2\|3\|4` | `cards` \| `plain` |
 | Content | `SplitContentSection` | `title`, `image`, `bullets?`, CTAs, `caption?` | — |
-| Content | `ProcessStepsSection` | `steps[]` (`title`, `description`, `icon?`), `columns?` | — |
+| Content | `ProcessStepsSection` | `steps[]` (`title`, `description`, `icon?`) — column count is automatic (`min(steps, 4)`) | — |
 | Content | `ComparisonSection` | `columns` (labels), `rows[]` (`feature`, `values: (boolean\|string)[]`), `highlightColumn?` | — |
 | Content | `FaqSection` | `items: FaqItem[]` (`question`, `answer`, `id?`) | — |
 | Content | `ResourceCardsSection` | `items[]` (`title`, `href`, `image?`, `excerpt?`, `kind?`, `meta?`), `viewAll?` | — |
@@ -72,10 +72,13 @@ Shared `SectionBaseProps` on every section: `eyebrow?`, `title?`,
 `TileCartogramSection`, `MetricListSection`, `MetricStatusBadge`,
 `ReportLegend`, `ReportByline`, `ReportMethodology`, `LinkGroupsSection`,
 `PdfEmbedSection`) live in this same entry and follow the same contract —
-static, server-safe, no sorting/filtering. Their data shapes and selection
-guidance are in the **mieweb-ui-charts** skill; when the user needs
-interactive sorting/filtering/export, that is a grid — route to DataVis
-NITRO (**mieweb-ui-datavis-api** skill), not a report section.
+static, server-safe, no sorting/filtering. Their data shapes and per-section
+guidance are on the Reports catalog page
+(https://ui.mieweb.org/?path=/docs/templates-reports-overview--docs) and the
+linked component docs (`reports-*` story ids); the **mieweb-ui-charts** skill covers when a chart or map
+beats a report section. When the user needs interactive
+sorting/filtering/export, that is a grid — route to DataVis NITRO
+(**mieweb-ui-datavis-api** skill), not a report section.
 
 ## LandingPage: a page as data
 
@@ -105,8 +108,10 @@ const blocks: LandingBlock[] = [
 - Non-serializable things are **`LandingPage` props, never block fields**:
   image/link adapters (`components`), icon registry (`icons`), site-owned
   sections (`custom` map, used by `{ type: 'custom', component: 'Name' }`
-  blocks), and Server Actions (`actions` map — a `lead-form` block's `action`
-  string names an entry; function form actions are React 19 only).
+  blocks), and Server Actions (`actions` map — a `lead-form` **block**'s
+  `action` string names an entry, resolved by `LandingPage` only; a
+  standalone `LeadFormSection` treats every string as a form URL and takes
+  the function directly instead. Function form actions are React 19 only).
 - **`landingPresets`** — seven page archetypes with recommended `sequence`
   and `required` blocks: `vertical-hub`, `service-detail`, `campaign`,
   `comparison`, `resource`, `pricing`, `benchmark-report`.
@@ -114,8 +119,10 @@ const blocks: LandingBlock[] = [
   `{ severity: 'error' | 'warning', message, index? }[]` — checks the heading
   contract (exactly one `h1` hero, first), unknown block types, unsafe
   `lead-form` actions, and the preset's required blocks and order. Run it in
-  a build step or test; `LandingPage` itself renders whatever it is given
-  (unknown blocks are skipped silently).
+  a build step or test. It never sees the `custom` registry, so an
+  unregistered `custom` component validates cleanly — check those names
+  against your registry separately. `LandingPage` itself renders whatever it
+  is given (unknown blocks are skipped silently).
 
 ## i18n, RTL & a11y
 
@@ -137,7 +144,7 @@ const blocks: LandingBlock[] = [
 | --- | --- |
 | Want a click handler / React node in a section prop | Wrong model — sections are data-only. Use `href` links, `trackingId` for analytics, or build a site-owned section with `SectionShell` and register it in `LandingPage`'s `custom` map. |
 | Icon prop "doesn't accept my component" | Icons are string tokens. Add custom icons to a `TemplateIconRegistry` and pass it as `LandingPage`'s (or the section's) `icons` prop. |
-| A block renders nothing | Unknown `type`, a `custom` component missing from the `custom` map, or an unsafe `lead-form` `action` — all skipped silently. Run `validateLandingPage` in a test to catch them. |
+| A block renders nothing | Unknown `type`, a `custom` component missing from the `custom` map, or an unsafe `lead-form` `action` — all skipped silently. `validateLandingPage` catches unknown types and unsafe actions; missing `custom` components it cannot see — test those against your registry yourself. |
 | Next.js images/links not optimized | Pass adapters via `components={{ Image, Link }}` on `LandingPage` or the section — don't edit block data. |
 | "Does this work in RSC / app router?" | Yes — the whole entry is Server Component safe (CI-checked); no `'use client'`, no extra peers. |
 | Report table needs sorting/filtering/export | Not a template — use DataVis NITRO (see **mieweb-ui-datavis-api**). Report sections are static by design. |
