@@ -1,13 +1,12 @@
 import type { FormDefinition } from '@esheet/core';
 
 /**
- * The default anonymous encounter template as a frozen native eSheet form —
- * the hand-maintained single source of truth going forward (mieweb/ui#772).
- * defaultForm.test.ts proves it equivalent to converting the legacy
- * DEFAULT_ENCOUNTER_VISIT_DEFINITION, so edit this literal directly.
+ * The default anonymous encounter template as a hand-maintained native eSheet
+ * form — the only structural schema (mieweb/ui#772). Edit this literal
+ * directly; defaultForm.test.ts locks its section views.
  *
  * Encounter fieldTypes (encounterNarrative, encounterVitals, ...) extend the
- * stock eSheet union, hence the widening cast — matching legacy.ts.
+ * stock eSheet union, hence the widening cast.
  */
 export const DEFAULT_ENCOUNTER_FORM: FormDefinition = {
   id: 'anonymous-encounter',

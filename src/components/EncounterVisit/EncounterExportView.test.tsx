@@ -1,21 +1,44 @@
 import * as React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterExportView } from './EncounterExportView';
 import { getEncounterFieldId } from './definition';
 import { createEncounterSnapshot } from './model';
-import {
-  encounterFormFromLegacy,
-  type EncounterVisitDefinition,
-} from './legacy';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'export-test',
   title: 'Visit export',
-  sections: [{ id: 'hpi', title: 'History', kind: 'narrative' }],
-};
-
-const form = encounterFormFromLegacy(definition);
+  pages: [
+    {
+      id: 'export-test:visit',
+      title: 'Visit export',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'History',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'History',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 const mockCreateObjectURL = vi.fn(() => 'blob:visit');
 const mockRevokeObjectURL = vi.fn();

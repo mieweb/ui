@@ -1,217 +1,100 @@
 import { describe, expect, it } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
+import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
 import {
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
   getEncounterFieldId,
   getEncounterFormSections,
+  getEncounterSectionFieldId,
   getEncounterSectionFieldIds,
   validateEncounterForm,
 } from './definition';
-import {
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
-  encounterFormFromLegacy,
-  validateEncounterDefinition,
-  type EncounterSectionDefinition,
-  type EncounterVisitDefinition,
-} from './legacy';
 import type { EncounterNarrativeFinding } from './types';
 
-const finding: EncounterNarrativeFinding = {
-  id: 'finding',
-  label: 'Selected finding',
-  text: 'Explicitly selected finding.',
-  code: { system: 'https://example.test/findings', code: 'explicit' },
-};
-
-function definition(
-  section: EncounterSectionDefinition
-): EncounterVisitDefinition {
-  return { id: 'visit', title: 'Visit', sections: [section] };
-}
-
-function fieldsFor(section: EncounterSectionDefinition) {
-  const field = encounterFormFromLegacy(definition(section)).pages[0]
-    .fields?.[0];
-  if (field?.fieldType !== 'section') throw new Error('Expected a section');
-  return field.fields ?? [];
-}
-
-describe('encounter finding configuration', () => {
-  it('passes section and text-observation suggestions through native source metadata', () => {
-    const fields = fieldsFor({
-      id: 'exam',
-      title: 'Exam',
-      kind: 'observations',
-      narrative: true,
-      findings: [finding],
-      observations: [
+const vitalsOnlyForm = {
+  id: 'visit',
+  title: 'Visit',
+  pages: [
+    {
+      id: 'visit:visit',
+      title: 'Visit',
+      fields: [
         {
-          id: 'back',
-          label: 'Back',
-          type: 'text',
-          code: { system: 'https://example.test/observations', code: 'back' },
-          findings: [{ ...finding, id: 'back-finding' }],
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
         },
       ],
-    });
-    expect(fields[0]).toMatchObject({
-      id: getEncounterFieldId('exam'),
-      fieldType: 'encounterNarrative',
-      _sourceData: {
-        encounterHideLabel: true,
-        encounterFindings: [finding],
-      },
-    });
-    expect(fields[1]).toMatchObject({
-      id: getEncounterFieldId('exam', 'back'),
-      fieldType: 'encounterNarrative',
-      _sourceData: {
-        code: { system: 'https://example.test/observations', code: 'back' },
-        encounterFindings: [{ ...finding, id: 'back-finding' }],
-      },
-    });
-  });
+    },
+  ],
+} as unknown as FormDefinition;
 
-  it('allows finding IDs to repeat in separate independently captured fields', () => {
-    expect(() =>
-      validateEncounterDefinition(
-        definition({
-          id: 'exam',
+const choicePulseForm = {
+  id: 'visit',
+  title: 'Visit',
+  pages: [
+    {
+      id: 'visit:visit',
+      title: 'Visit',
+      fields: [
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
           title: 'Exam',
-          kind: 'observations',
-          narrative: true,
-          findings: [finding],
-          observations: [
-            { id: 'back', label: 'Back', findings: [finding] },
-            { id: 'gait', label: 'Gait', findings: [finding] },
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:pulse',
+              question: 'Pulse',
+              width: 'full',
+              fieldType: 'dropdown',
+              options: [
+                {
+                  id: '60',
+                  value: '60',
+                  text: '60',
+                },
+                {
+                  id: '80',
+                  value: '80',
+                  text: '80',
+                },
+              ],
+            },
           ],
-        })
-      )
-    ).not.toThrow();
-  });
-
-  it.each([
-    { findings: [finding, finding], message: 'duplicate finding id' },
-    {
-      findings: [{ ...finding, id: '  ' }],
-      message: 'findings require id, label and text',
-    },
-    {
-      findings: [{ ...finding, label: '' }],
-      message: 'findings require id, label and text',
-    },
-    {
-      findings: [{ ...finding, text: '\n' }],
-      message: 'findings require id, label and text',
-    },
-    { findings: 'not-an-array', message: 'findings must be an array' },
-    {
-      findings: [{ ...finding, code: { system: '', code: 'finding' } }],
-      message: 'invalid finding code',
-    },
-    {
-      findings: [{ ...finding, code: { system: 'test', code: '' } }],
-      message: 'invalid finding code',
-    },
-    {
-      findings: [
-        { ...finding, code: { system: 'test', code: 'finding', display: 0 } },
+        },
       ],
-      message: 'invalid finding code',
     },
-  ])(
-    'rejects invalid section suggestions: $message',
-    ({ findings, message }) => {
-      expect(() =>
-        validateEncounterDefinition(
-          definition({
-            id: 'history',
-            title: 'History',
-            kind: 'narrative',
-            findings,
-          } as unknown as EncounterSectionDefinition)
-        )
-      ).toThrow(message);
-    }
-  );
+  ],
+} as unknown as FormDefinition;
 
-  it('rejects duplicate observation finding IDs and invalid observation finding codes', () => {
-    for (const findings of [
-      [finding, finding],
-      [{ ...finding, code: { system: 'test', code: '' } }],
-    ]) {
-      expect(() =>
-        validateEncounterDefinition(
-          definition({
-            id: 'exam',
-            title: 'Exam',
-            kind: 'observations',
-            observations: [{ id: 'back', label: 'Back', findings }],
-          })
-        )
-      ).toThrow(/finding (id|code)/);
-    }
-  });
-
-  it.each(['number', 'choice'] as const)(
-    'rejects narrative findings attached to a %s observation',
-    (type) => {
-      expect(() =>
-        validateEncounterDefinition(
-          definition({
-            id: 'exam',
-            title: 'Exam',
-            kind: 'observations',
-            observations: [
-              {
-                id: 'measurement',
-                label: 'Measurement',
-                type,
-                options: type === 'choice' ? ['A', 'B'] : undefined,
-                findings: [finding],
-              },
-            ],
-          })
-        )
-      ).toThrow('findings require a text observation');
-    }
-  );
-
-  it.each([
-    'observations',
-    'vitals',
-    'medications',
-    'allergies',
-    'conditions',
-    'plan',
-    'assessment',
-  ] as const)(
-    'rejects section findings without a narrative in %s sections',
-    (kind) => {
-      expect(() =>
-        validateEncounterDefinition(
-          definition({
-            id: 'section',
-            title: 'Section',
-            kind,
-            findings: [finding],
-            observations:
-              kind === 'observations'
-                ? [{ id: 'back', label: 'Back' }]
-                : undefined,
-          })
-        )
-      ).toThrow('section findings require a narrative');
-    }
-  );
-
+describe('encounter finding configuration', () => {
   it('provides short uncoded suggestion lists for every default narrative without selecting them', () => {
-    const form = encounterFormFromLegacy(DEFAULT_ENCOUNTER_VISIT_DEFINITION);
-    const narratives = form.pages[0].fields?.flatMap((section) =>
-      section.fieldType === 'section'
-        ? (section.fields ?? []).filter(
-            (field) => String(field.fieldType) === 'encounterNarrative'
-          )
-        : []
+    const narratives = DEFAULT_ENCOUNTER_FORM.pages[0].fields?.flatMap(
+      (section) =>
+        section.fieldType === 'section'
+          ? (section.fields ?? []).filter(
+              (field) => String(field.fieldType) === 'encounterNarrative'
+            )
+          : []
     );
     expect(narratives?.length).toBeGreaterThan(15);
     for (const narrative of narratives ?? []) {
@@ -235,106 +118,52 @@ describe('encounter finding configuration', () => {
 });
 
 describe('structured encounter section definitions', () => {
-  it.each([
-    ['medications', 'encounterMedications'],
-    ['allergies', 'encounterAllergies'],
-    ['conditions', 'encounterConditions'],
-    ['plan', 'encounterPlan'],
-    ['assessment', 'encounterAssessment'],
-  ] as const)(
-    'maps %s to its healthcare component with coding required',
-    (kind, fieldType) => {
-      const unset = fieldsFor({ id: kind, title: kind, kind })[0];
-      expect(unset).toMatchObject({
-        id: getEncounterFieldId(kind, 'value'),
-        fieldType,
-      });
-      // Unset stays unstamped so views round-trip; consumers default to true.
-      expect(unset._sourceData).not.toHaveProperty('encounterRequireCoding');
-      expect(
-        fieldsFor({ id: kind, title: kind, kind, requireCoding: true })[0]
-      ).toMatchObject({
-        _sourceData: { encounterRequireCoding: true },
-      });
-      expect(
-        fieldsFor({ id: kind, title: kind, kind, requireCoding: false })[0]
-      ).toMatchObject({
-        _sourceData: { encounterRequireCoding: false },
-      });
-    }
-  );
-
-  it('preserves the existing plan narrative ID alongside the new structured plan field', () => {
-    const section: EncounterSectionDefinition = {
-      id: 'plan',
-      title: 'Plan',
-      kind: 'plan',
-      narrative: true,
-      requireCoding: true,
-      findings: [finding],
-    };
-    expect(getEncounterSectionFieldIds(section)).toEqual([
+  it('preserves the existing plan narrative ID alongside the structured plan field', () => {
+    expect(
+      getEncounterSectionFieldIds({
+        id: 'plan',
+        title: 'Plan',
+        kind: 'plan',
+        narrative: true,
+      })
+    ).toEqual([
       getEncounterFieldId('plan'),
       getEncounterFieldId('plan', 'value'),
     ]);
-    expect(fieldsFor(section)).toMatchObject([
-      {
-        id: getEncounterFieldId('plan'),
-        fieldType: 'encounterNarrative',
-        _sourceData: { encounterFindings: [finding] },
-      },
-      {
-        id: getEncounterFieldId('plan', 'value'),
-        fieldType: 'encounterPlan',
-        _sourceData: { encounterRequireCoding: true },
-      },
-    ]);
-    const defaultPlan = DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections.find(
-      (entry) => entry.id === 'plan'
+    const plan = DEFAULT_ENCOUNTER_FORM.pages[0].fields?.find(
+      (field) => field.id === getEncounterSectionFieldId('plan')
     );
-    expect(defaultPlan).toMatchObject({
+    expect(
+      plan?.fieldType === 'section' && plan.fields?.map((field) => field.id)
+    ).toEqual([
+      getEncounterFieldId('plan'),
+      getEncounterFieldId('plan', 'value'),
+    ]);
+    const sections = getEncounterFormSections(DEFAULT_ENCOUNTER_FORM);
+    expect(sections.find((section) => section.id === 'plan')).toMatchObject({
       kind: 'plan',
       narrative: true,
       requireCoding: true,
     });
-    expect(DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections).toContainEqual({
-      id: 'conditions',
-      title: 'Conditions',
-      kind: 'conditions',
-      requireCoding: true,
-    });
+    expect(
+      sections.find((section) => section.id === 'conditions')
+    ).toMatchObject({ kind: 'conditions', requireCoding: true });
   });
 
   it('rejects a native form whose top-level fields are not sections', () => {
-    const form = encounterFormFromLegacy(
-      definition({ id: 'vitals', title: 'Vitals', kind: 'vitals' })
-    );
-    const section = form.pages[0].fields?.[0];
+    const section = vitalsOnlyForm.pages[0].fields?.[0];
     const broken = {
-      ...form,
+      ...vitalsOnlyForm,
       pages: [
         {
-          ...form.pages[0],
+          ...vitalsOnlyForm.pages[0],
           fields: section?.fieldType === 'section' ? section.fields : [],
         },
       ],
-    } as typeof form;
+    } as typeof vitalsOnlyForm;
     expect(() => validateEncounterForm(broken)).toThrow(
       'every top-level encounter field must be a section'
     );
-  });
-
-  it('rejects a nonboolean coding requirement before creating a form', () => {
-    expect(() =>
-      encounterFormFromLegacy(
-        definition({
-          id: 'plan',
-          title: 'Plan',
-          kind: 'plan',
-          requireCoding: 'yes',
-        } as unknown as EncounterSectionDefinition)
-      )
-    ).toThrow('requireCoding must be boolean');
   });
 });
 
@@ -342,21 +171,7 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
   const observationsForm = (
     mutate: (field: Record<string, unknown>) => Record<string, unknown>
   ) => {
-    const form = encounterFormFromLegacy(
-      definition({
-        id: 'exam',
-        title: 'Exam',
-        kind: 'observations',
-        observations: [
-          {
-            id: 'pulse',
-            label: 'Pulse',
-            type: 'choice',
-            options: ['60', '80'],
-          },
-        ],
-      })
-    );
+    const form = globalThis.structuredClone(choicePulseForm);
     const section = form.pages[0].fields?.[0] as { fields?: unknown[] };
     section.fields = [mutate(section.fields?.[0] as Record<string, unknown>)];
     return form;
@@ -411,9 +226,7 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
   });
 
   it('rejects structured clinical fields that do not use the canonical value id', () => {
-    const form = encounterFormFromLegacy(
-      definition({ id: 'vitals', title: 'Vitals', kind: 'vitals' })
-    );
+    const form = globalThis.structuredClone(vitalsOnlyForm);
     const section = form.pages[0].fields?.[0] as {
       fields?: { id?: string }[];
     };

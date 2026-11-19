@@ -1,21 +1,30 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
-import { getEncounterFormSections } from './definition';
-import {
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
-  encounterFormFromLegacy,
-} from './legacy';
+import { getEncounterFormSections, validateEncounterForm } from './definition';
 
 describe('DEFAULT_ENCOUNTER_FORM', () => {
-  it('stays equivalent to converting the legacy default definition', () => {
-    expect(DEFAULT_ENCOUNTER_FORM).toEqual(
-      encounterFormFromLegacy(DEFAULT_ENCOUNTER_VISIT_DEFINITION)
-    );
+  it('passes native encounter form validation', () => {
+    expect(() => validateEncounterForm(DEFAULT_ENCOUNTER_FORM)).not.toThrow();
   });
 
-  it('derives the legacy sections losslessly', () => {
-    expect(getEncounterFormSections(DEFAULT_ENCOUNTER_FORM)).toEqual(
-      DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections
-    );
+  it('derives the eleven stock section views from the native form', () => {
+    expect(
+      getEncounterFormSections(DEFAULT_ENCOUNTER_FORM).map(({ id, kind }) => ({
+        id,
+        kind,
+      }))
+    ).toEqual([
+      { id: 'hpi', kind: 'narrative' },
+      { id: 'history', kind: 'observations' },
+      { id: 'ros', kind: 'observations' },
+      { id: 'vitals', kind: 'vitals' },
+      { id: 'exam', kind: 'observations' },
+      { id: 'conditions', kind: 'conditions' },
+      { id: 'medications', kind: 'medications' },
+      { id: 'allergies', kind: 'allergies' },
+      { id: 'assessment', kind: 'assessment' },
+      { id: 'plan', kind: 'plan' },
+      { id: 'follow-up', kind: 'observations' },
+    ]);
   });
 });

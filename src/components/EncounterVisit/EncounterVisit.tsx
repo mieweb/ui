@@ -30,7 +30,6 @@ import {
   getEncounterSectionFieldIds,
 } from './definition';
 import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
-import { encounterFormFromLegacy } from './legacy';
 import { registerEncounterFieldTypes } from './fields';
 import { EncounterSectionContext } from './EncounterSectionField';
 import {
@@ -142,11 +141,7 @@ export const EncounterVisit = React.forwardRef<
     () => (initialMdy === undefined ? null : parseEncounterMdy(initialMdy)),
     [initialMdy]
   );
-  // Prefer the one-time legacy import over a stamped form: #762 documents
-  // carry complete section metadata there that their saved forms predate.
-  const importedForm = parsed?.definition
-    ? encounterFormFromLegacy(parsed.definition)
-    : parsed?.form;
+  const importedForm = parsed?.form;
   const visitForm = form ?? importedForm ?? DEFAULT_ENCOUNTER_FORM;
   const loadErrors =
     parsed?.diagnostics.filter(
@@ -163,15 +158,11 @@ export const EncounterVisit = React.forwardRef<
       'Supply an encounter form to open a native eSheet MDY that carries none.'
     );
   }
-  if (parsed?.definition && parsed.definition.id !== visitForm.id) {
-    throw new Error('The MDY visit id does not match the supplied form.');
-  }
   if (parsed?.form && parsed.form.id !== visitForm.id) {
     throw new Error('The MDY form id does not match the encounter form.');
   }
-  // Only a host-supplied form can disagree with the document; compare it
-  // against the migrated importedForm so pre-#772 stamped forms (e.g. choice
-  // units kept in _sourceData) do not reject their own valid documents.
+  // Only a host-supplied form can disagree with the document; compare field
+  // shapes so cosmetic authoring differences do not reject valid documents.
   if (form && importedForm && importedForm !== form) {
     const fieldShapes = (candidate: FormDefinition) => {
       const shapes: { id: string; shape: unknown }[] = [];
