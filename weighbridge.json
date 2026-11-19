@@ -83,7 +83,7 @@
       },
       "agent": {
         "prefix": "agent/",
-        "maxBytes": 450000
+        "maxBytes": 600000
       }
     }
   },
