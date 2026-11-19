@@ -238,6 +238,21 @@ describe('RichTextEsheet MDY round trip', () => {
     expect(parseRichTextEsheetMdy(resaved).form).toEqual(form);
   });
 
+  it('drops removed field rules instead of resurrecting them on re-save', () => {
+    const ruledForm = globalThis.structuredClone(form);
+    const section = ruledForm.pages[0].fields![0] as unknown as {
+      fields: Record<string, unknown>[];
+    };
+    section.fields[0].rules = [
+      { effect: 'show', condition: { field: 'richtext:reason:value' } },
+    ];
+    const imported = createRichTextEsheetMdy({ ...input, form: ruledForm });
+    expect(imported).toContain('rules:');
+    const resaved = createRichTextEsheetMdy(input, undefined, imported);
+    expect(resaved).not.toContain('rules:');
+    expect(parseRichTextEsheetMdy(resaved).form).toEqual(form);
+  });
+
   it('carries an imported document through the reserved response', () => {
     const imported = createRichTextEsheetMdy(input);
     const snapshot = createRichTextEsheetSnapshot(

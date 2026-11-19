@@ -291,45 +291,50 @@ Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install ma
 
 \`\`\`tsx
 import { RichTextEsheet } from '@mieweb/ui/esheet';
+import type { FormDefinition } from '@esheet/core';
+
+// The native eSheet FormDefinition is the only document schema
+// (mieweb/ui#772): one page of section fields with canonical ids, each
+// wrapping one rich text value field. 'esheetNarrative' is a registered
+// custom field type outside @esheet/core's closed union, so the authored
+// literal is asserted to FormDefinition.
+const REFERRAL_FORM = {
+  id: 'referral-letter',
+  title: 'Referral letter',
+  pages: [
+    {
+      id: 'referral-letter:document',
+      title: 'Referral letter',
+      fields: [
+        {
+          // getRichTextEsheetSectionFieldId('reason')
+          id: 'richtext:reason:section',
+          fieldType: 'section',
+          title: 'Reason for referral',
+          fields: [
+            {
+              // getRichTextEsheetFieldId('reason')
+              id: 'richtext:reason:value',
+              fieldType: 'esheetNarrative',
+              question: 'Reason for referral',
+              required: true,
+              _sourceData: {
+                narrativeHideLabel: true,
+                // Memory-aid phrases docked as macros with dot-phrases.
+                narrativeFindings: [
+                  { id: 'thanks', label: 'Thank you', text: 'Thank you.' },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 <RichTextEsheet
-  // The native eSheet FormDefinition is the only document schema
-  // (mieweb/ui#772): one page of section fields with canonical ids, each
-  // wrapping one rich text value field.
-  form={{
-    id: 'referral-letter',
-    title: 'Referral letter',
-    pages: [
-      {
-        id: 'referral-letter:document',
-        title: 'Referral letter',
-        fields: [
-          {
-            // getRichTextEsheetSectionFieldId('reason')
-            id: 'richtext:reason:section',
-            fieldType: 'section',
-            title: 'Reason for referral',
-            fields: [
-              {
-                // getRichTextEsheetFieldId('reason')
-                id: 'richtext:reason:value',
-                fieldType: 'esheetNarrative',
-                question: 'Reason for referral',
-                required: true,
-                _sourceData: {
-                  narrativeHideLabel: true,
-                  // Memory-aid phrases docked as macros with dot-phrases.
-                  narrativeFindings: [
-                    { id: 'thanks', label: 'Thank you', text: 'Thank you.' },
-                  ],
-                },
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  }}
+  form={REFERRAL_FORM}
   parties={[
     { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
     { role: 'Provider', name: 'Dr. Casey Morgan', detail: 'NPI 1234567890' },

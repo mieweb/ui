@@ -476,6 +476,9 @@ const FIELD_PROPERTIES = new Set([
   'inputType',
   'unit',
   'validators',
+  // Behavioral rules are authoritative from the current form: a rule the
+  // author removed must not resurrect from imported front matter on re-save.
+  'rules',
   '_sourceData',
 ]);
 
