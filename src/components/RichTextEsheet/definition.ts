@@ -3,6 +3,7 @@ import {
   validNarrativeFindings,
   type NarrativeFinding,
 } from '../../esheet-fields/narrativeFindings';
+import { STRUCTURAL_FIELD_TYPES } from './documentMdy';
 
 /** A person or system the document references, e.g. a patient and a provider. */
 export interface RichTextEsheetParty {
@@ -116,6 +117,10 @@ function sectionView(field: FieldNode): RichTextEsheetSectionView {
   if (!value) invalid(`section ${id} requires its richtext value field`);
   if (!nonempty(value.fieldType))
     invalid(`fieldType must be a nonempty string in ${id}`);
+  // The engine flattens structural containers and projects only their leaf
+  // children, so a container here could never carry the section's answer.
+  if (STRUCTURAL_FIELD_TYPES.has(value.fieldType))
+    invalid(`the value field in ${id} must be an answer-bearing field`);
   if (value.required !== undefined && typeof value.required !== 'boolean')
     invalid(`required must be boolean in ${id}`);
   return {

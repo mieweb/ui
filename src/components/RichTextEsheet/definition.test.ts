@@ -199,6 +199,17 @@ describe('getRichTextEsheetFormSections (mieweb/ui#772)', () => {
     );
   });
 
+  it('rejects a structural container as the section value field', () => {
+    expect(() =>
+      getRichTextEsheetFormSections(
+        mutated((fields) => {
+          (fields[0].fields![0] as { fieldType?: string }).fieldType =
+            'section';
+        })
+      )
+    ).toThrow('must be an answer-bearing field');
+  });
+
   it('rejects a noncanonical section field id', () => {
     expect(() =>
       getRichTextEsheetFormSections(

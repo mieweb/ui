@@ -615,7 +615,7 @@ interface MdyDocumentSectionGroup {
 }
 
 /** Container field types whose children are traversed rather than projected. */
-const STRUCTURAL_FIELD_TYPES = new Set(['section', 'pages']);
+export const STRUCTURAL_FIELD_TYPES = new Set(['section', 'pages']);
 
 /**
  * Flatten native pages into section groups of projectable leaf fields in
