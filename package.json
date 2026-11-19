@@ -298,6 +298,7 @@
     "rtl:scan:update": "node scripts/rtl-scan.mjs --update",
     "agent:skills": "node scripts/build-agent-skills.mjs",
     "agent:skills:check": "node scripts/build-agent-skills.mjs --check",
+    "agent:evals": "node scripts/eval-agents.mjs",
     "agent:web": "node scripts/build-web-agent-corpus.mjs",
     "condensed:scan": "node scripts/condensed-scan.mjs",
     "catalog:check": "node scripts/catalog-check.mjs",

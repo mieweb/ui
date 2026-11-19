@@ -46,6 +46,9 @@ jobs:
       - name: Catalog guard (taxonomy, tags, ids, descriptions, relationships)
         run: pnpm catalog:check
 
+      - name: Agent evals guard (entry format, agent names, source citations)
+        run: pnpm agent:evals
+
       - name: Type check
         run: pnpm typecheck
 
