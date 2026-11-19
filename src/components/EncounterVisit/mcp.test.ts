@@ -323,6 +323,17 @@ describe('EncounterVisit in-process tools', () => {
     expect(getEncounterDocumentBody(ctx.responses())).toBe('');
   });
 
+  it('rejects an invalid host form without mutating the draft', () => {
+    const ctx = fixture();
+    ctx.setForm({
+      ...form,
+      pages: [{ ...form.pages[0], fields: [] }],
+    } as unknown as FormDefinition);
+    const result = ctx.tools.setDocumentBody('# Visit\n\nProse.');
+    expect(errorCode(result)).toBe('INTERNAL_ERROR');
+    expect(ctx.setResponses).not.toHaveBeenCalled();
+  });
+
   it.each([null, undefined, 45, {}, []])(
     'rejects a document body that is not a string: %j',
     (body) => {
