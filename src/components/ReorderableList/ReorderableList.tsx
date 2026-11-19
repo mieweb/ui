@@ -282,7 +282,15 @@ function ReorderableListInner<T>(
     const from = ids.indexOf(String(active.id));
     const to = ids.indexOf(String(over.id));
     if (from === -1 || to === -1) return;
-    if (canDropOn && !canDropOn(String(active.id), String(over.id))) return;
+    // Like keyboard and button moves, a drop may not cross a row canDropOn
+    // refuses — not just land on one.
+    if (canDropOn) {
+      const dragged = String(active.id);
+      const [lo, hi] = from < to ? [from + 1, to] : [to, from - 1];
+      for (let i = lo; i <= hi; i++) {
+        if (!canDropOn(dragged, ids[i])) return;
+      }
+    }
     commit?.(arrayMove(ids, from, to));
   };
 
