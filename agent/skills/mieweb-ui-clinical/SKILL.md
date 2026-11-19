@@ -111,7 +111,8 @@ The data models above are JSON-serializable. Exceptions live at the prop
 layer, not in the models: `ResultsEntryData.files` is `File[]` (uploads —
 persist them separately, don't JSON-stringify), `HealthSurveillance.now` is a
 `Date`, and besides the search slots (`addSearch`, `renderCodeSearch`,
-`renderOrderSearch`) both headers take React-node `actions`/`alert` slots.
+`renderOrderSearch`) there are React-node slots: `actions` on both headers,
+`alert` on `CaseManagementHeader` only.
 
 ## Constraints & honest limitations
 
