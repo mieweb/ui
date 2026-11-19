@@ -348,6 +348,20 @@ describe('ReorderableList', () => {
       expect(spy).not.toHaveBeenCalled();
     });
 
+    it('refuses a drop that crosses a row canDropOn rejects', () => {
+      // Groups that aren't contiguous: t1 and t3 are "a", t2 is "b".
+      const group = (id: string) => (id === 't2' ? 'b' : 'a');
+      const spy = vi.fn();
+      render(
+        <Harness
+          spy={spy}
+          canDropOn={(dragged, target) => group(dragged) === group(target)}
+        />
+      );
+      drag(rows()[0], 10 + ROW * 2);
+      expect(spy).not.toHaveBeenCalled();
+    });
+
     it('never picks up a fixed row, but drops others past it', () => {
       const spy = vi.fn();
       render(<Harness spy={spy} canDrag={(task) => task.id !== 't1'} />);
