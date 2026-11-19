@@ -152,6 +152,12 @@ function validate() {
     if (m[1] !== 'README.md' && !DOMAINS[m[1]])
       errors.push(`README.md: table lists ${m[1]}, unknown to scripts/eval-agents.mjs DOMAINS`);
 
+  // Every top-level eval file must be registered, or it silently escapes
+  // validation and --full sheets.
+  for (const f of readdirSync(EVALS))
+    if (f.endsWith('.md') && f !== 'README.md' && !DOMAINS[f])
+      errors.push(`${f}: unregistered eval file — add it to scripts/eval-agents.mjs DOMAINS and the README table`);
+
   if (errors.length) {
     console.error(`eval-agents: ${errors.length} error(s)\n`);
     for (const e of errors) console.error(`  ✖ ${e}`);
@@ -161,14 +167,17 @@ function validate() {
   console.log(`eval-agents: ${total} entries across ${Object.keys(DOMAINS).length} domain files — all valid`);
 }
 
-/** Extract checkable repo paths from a Source field. Bare filenames
- * (MAINTAINERS.md, Views.mdx) are not checkable; `mieweb-ui.instructions.md`
- * is special-cased to its canonical home. */
+/** Extract checkable repo paths from a Source field: any token rooted at a
+ * PATH_ROOTS directory, file or directory alike (src/brands/ccme.css,
+ * src/components/Modal). Bare filenames (MAINTAINERS.md, Views.mdx) are not
+ * checkable; `mieweb-ui.instructions.md` is special-cased to its canonical
+ * home. */
 function sourcePaths(source) {
   const out = new Set();
-  for (const m of source.matchAll(/[\w.-]+(?:\/[\w.-]+)+\.(?:mdx|md|mjs|cjs|tsx|ts|json)/g)) {
-    const token = m[0];
-    if (PATH_ROOTS.some((r) => token.startsWith(r))) out.add(token);
+  const roots = PATH_ROOTS.map((r) => r.replace('.', '\\.').slice(0, -1)).join('|');
+  for (const m of source.matchAll(new RegExp(`(?<![\\w@/.-])(?:${roots})/[\\w./-]+`, 'g'))) {
+    const token = m[0].replace(/[.,;:)]+$/, '');
+    if (token.includes('/')) out.add(token);
   }
   if (/(?:^|[\s(])mieweb-ui\.instructions\.md/.test(source))
     out.add('agent/mieweb-ui.instructions.md');
@@ -274,9 +283,15 @@ function score() {
   console.log('| Domain | PASS | PARTIAL | FAIL | unscored |');
   console.log('| --- | --- | --- | --- | --- |');
   let bad = 0;
+  let total = 0;
   for (const [d, t] of Object.entries(tally)) {
     console.log(`| ${d} | ${t.PASS} | ${t.PARTIAL} | ${t.FAIL} | ${t.unscored.join(' ') || '—'} |`);
     bad += t.FAIL + t.unscored.length;
+    total += t.PASS + t.PARTIAL + t.FAIL + t.unscored.length;
+  }
+  if (!total) {
+    console.error('eval-agents: no entries found in the run sheet — wrong file, or truncated?');
+    process.exit(1);
   }
   if (failures.length) console.log(`\nNon-PASS: ${failures.join(', ')}`);
   if (bad) {
