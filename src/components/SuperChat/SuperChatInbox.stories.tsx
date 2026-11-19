@@ -504,7 +504,13 @@ export const CustomComposer: Story = {
     defaultActiveConversationId: 'c1',
   },
   decorators: [fullHeightChat],
-  parameters: { githubSourceFooter: false },
+  parameters: {
+    githubSourceFooter: false,
+    // Storybook's generated source can't print JSX nested in an object prop
+    // (`composerProps.leadingSlot`): it throws "Invalid string length". Show
+    // the story's code as written instead.
+    docs: { source: { type: 'code' } },
+  },
   render: (args) => (
     <InteractiveInbox
       {...args}
