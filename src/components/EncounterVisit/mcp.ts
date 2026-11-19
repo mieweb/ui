@@ -548,8 +548,11 @@ export function createEncounterVisitTools(
         const next = updateEncounterDocumentBody(options.getResponses(), body, {
           _ai: true,
         });
+        // Build the snapshot first: an invalid host form must fail the tool
+        // without mutating the response store.
+        const updated = createEncounterSnapshot(currentForm, next);
         options.setResponses(next);
-        return createEncounterSnapshot(currentForm, next);
+        return updated;
       }),
     navigateToSection: (sectionId) =>
       run(() => {

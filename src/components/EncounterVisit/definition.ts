@@ -151,6 +151,18 @@ function observationView(
   const label = nonempty(field.question) ? field.question : undefined;
   if (!nonempty(label))
     invalid(`observations in ${sectionId} require an id and label`);
+  // Observation responses persist as text answers (encounterNarrative or
+  // plain text inputs) or dropdown selections; other field types (radio,
+  // checkbox, ...) store shapes that clinical validation, export and MCP
+  // writes cannot read.
+  if (
+    field.fieldType !== 'encounterNarrative' &&
+    field.fieldType !== 'text' &&
+    field.fieldType !== 'dropdown'
+  )
+    invalid(
+      `observation fields use encounterNarrative, text or dropdown in ${sectionId}.${id}`
+    );
   const type =
     field.fieldType === 'dropdown'
       ? ('choice' as const)
@@ -203,9 +215,21 @@ function observationView(
 
 const SECTION_FIELD_ID = /^encounter:([^:]+):section$/;
 
+/** The shared MDY parser refuses duplicate field ids on reopen; reject them at authoring time. */
+function uniqueFieldId(
+  id: unknown,
+  fieldIds: Set<string>,
+  where: string
+): void {
+  if (typeof id !== 'string') return;
+  if (fieldIds.has(id)) invalid(`duplicate field id ${id} in ${where}`);
+  fieldIds.add(id);
+}
+
 function sectionView(
   field: Record<string, unknown>,
-  seen: Set<string>
+  seen: Set<string>,
+  fieldIds: Set<string>
 ): EncounterSectionView {
   const encoded =
     typeof field.id === 'string' ? SECTION_FIELD_ID.exec(field.id) : null;
@@ -217,6 +241,7 @@ function sectionView(
   if (!nonempty(field.title)) invalid(`each section requires an id and title`);
   if (seen.has(id)) invalid(`duplicate section id ${id}`);
   seen.add(id);
+  uniqueFieldId(field.id, fieldIds, id);
   const title = field.title;
   const children = Array.isArray(field.fields)
     ? field.fields.filter(record)
@@ -228,6 +253,7 @@ function sectionView(
   const observations: EncounterObservationDefinition[] = [];
   const observationIds = new Set<string>();
   for (const child of children) {
+    uniqueFieldId(child.id, fieldIds, id);
     const fieldType =
       typeof child.fieldType === 'string' ? child.fieldType : '';
     if (fieldType === 'display') {
@@ -236,6 +262,10 @@ function sectionView(
       continue;
     }
     if (child.id === getEncounterFieldId(id)) {
+      // Narrative answers persist as text; a selection control here would
+      // render but never produce a response the clinical model can read.
+      if (fieldType !== 'encounterNarrative')
+        invalid(`the narrative field in ${id} must be an encounterNarrative`);
       narrativeField = child;
       continue;
     }
@@ -344,14 +374,18 @@ export function getEncounterFormSections(
     invalid('id and title must be nonempty strings');
   if (!Array.isArray(form.pages) || form.pages.length === 0)
     invalid('at least one page is required');
+  // The encounter surface renders without page navigation: sections on later
+  // pages would be unreachable yet still gate saving.
+  if (form.pages.length > 1) invalid('exactly one page is required');
   const sections: EncounterSectionView[] = [];
   const seen = new Set<string>();
+  const fieldIds = new Set<string>();
   for (const page of form.pages) {
     if (!record(page) || !Array.isArray(page.fields)) continue;
     for (const field of page.fields) {
       if (!record(field) || field.fieldType !== 'section')
         invalid('every top-level encounter field must be a section');
-      sections.push(sectionView(field, seen));
+      sections.push(sectionView(field, seen, fieldIds));
     }
   }
   if (sections.length === 0) invalid('at least one section is required');

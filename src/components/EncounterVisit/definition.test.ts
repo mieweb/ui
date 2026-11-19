@@ -177,6 +177,14 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
     return form;
   };
 
+  it('rejects forms with more than one page', () => {
+    const form = globalThis.structuredClone(vitalsOnlyForm);
+    form.pages.push({ ...form.pages[0] });
+    expect(() => validateEncounterForm(form)).toThrow(
+      'exactly one page is required'
+    );
+  });
+
   it('rejects a stale _sourceData.id that conflicts with the native field id', () => {
     expect(() =>
       validateEncounterForm(
@@ -222,6 +230,52 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
       )
     ).toThrow(
       'dropdown options use { id: encodeURIComponent(value), value } in exam.pulse'
+    );
+  });
+
+  it('rejects observation field types whose responses cannot be read', () => {
+    expect(() =>
+      validateEncounterForm(
+        observationsForm((field) => ({ ...field, fieldType: 'radio' }))
+      )
+    ).toThrow(
+      'observation fields use encounterNarrative, text or dropdown in exam.pulse'
+    );
+  });
+
+  it('rejects a selection control in the narrative slot', () => {
+    const form = globalThis.structuredClone(choicePulseForm);
+    const section = form.pages[0].fields?.[0] as { fields?: unknown[] };
+    section.fields = [
+      {
+        id: getEncounterFieldId('exam'),
+        fieldType: 'dropdown',
+        question: 'Exam narrative',
+        options: [{ id: '60', value: '60', text: '60' }],
+        width: 'full',
+      },
+    ];
+    expect(() => validateEncounterForm(form)).toThrow(
+      'the narrative field in exam must be an encounterNarrative'
+    );
+  });
+
+  it('rejects duplicate field ids the saved document could not reopen with', () => {
+    const form = globalThis.structuredClone(vitalsOnlyForm);
+    const section = form.pages[0].fields?.[0] as { fields?: unknown[] };
+    const description = {
+      id: 'shared-note',
+      fieldType: 'display',
+      content: 'Capture vitals before the exam.',
+      width: 'full',
+    };
+    section.fields = [
+      description,
+      { ...description },
+      ...(section.fields ?? []),
+    ];
+    expect(() => validateEncounterForm(form)).toThrow(
+      'duplicate field id shared-note in vitals'
     );
   });
 

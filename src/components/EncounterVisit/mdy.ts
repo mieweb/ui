@@ -102,6 +102,9 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
     'encounterKind',
     'encounterSectionRequired',
   ],
+  // The engine preserves imported front matter on re-save: scrub the
+  // removed pre-#772 schema key so no stale second schema rides along.
+  extraFrontMatter: () => ({ encounterDefinition: undefined }),
   projectField: (snapshot) => {
     // Views are rebuilt once per operation from the live form; the field-id
     // lookup keeps each per-field refinement constant time.

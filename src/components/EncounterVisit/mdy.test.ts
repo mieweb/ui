@@ -551,6 +551,20 @@ describe('Encounter MDY data and linked narrative', () => {
     );
   }, 1_000);
 
+  it('scrubs the removed legacy encounterDefinition key on re-save', () => {
+    // A transition-era document may carry the pre-#772 schema key alongside
+    // the native form; the engine otherwise preserves imported front matter.
+    const original = snapshot({ [hpiId]: { answer: 'Original' } });
+    const withLegacy = createEncounterMdy(original).replace(
+      '---\n',
+      '---\nencounterDefinition:\n  id: visit\n  title: Legacy\n  sections: []\n'
+    );
+    expect(withLegacy).toContain('encounterDefinition:');
+    const resaved = createEncounterMdy(original, undefined, withLegacy);
+    expect(resaved).not.toContain('encounterDefinition');
+    expect(parseEncounterMdy(resaved).form).toEqual(form);
+  });
+
   it('preserves imported YAML bytes on no-op and comments/provenance on data writes', () => {
     const originalSnapshot = snapshot({ [hpiId]: { answer: 'Original' } });
     const source = createEncounterMdy(originalSnapshot).replace(
