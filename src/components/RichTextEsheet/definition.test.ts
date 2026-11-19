@@ -6,26 +6,64 @@ import {
   partyFindings,
   withRichTextEsheetParties,
 } from './definition';
-import {
-  richTextEsheetFormFromLegacy,
-  validateRichTextEsheetDefinition,
-  type RichTextEsheetDefinition,
-} from './legacy';
 
-const definition: RichTextEsheetDefinition = {
+const form = {
   id: 'letter',
   title: 'Referral letter',
-  sections: [
-    { id: 'reason', title: 'Reason', required: true },
+  pages: [
     {
-      id: 'closing',
-      title: 'Closing',
-      findings: [{ id: 'thanks', label: 'Thanks', text: 'Thank you.' }],
+      id: 'letter:document',
+      title: 'Referral letter',
+      fields: [
+        {
+          id: 'richtext:reason:section',
+          fieldType: 'section',
+          title: 'Reason',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:reason:value',
+              fieldType: 'esheetNarrative',
+              question: 'Reason',
+              required: true,
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:closing:section',
+          fieldType: 'section',
+          title: 'Closing',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:closing:value',
+              fieldType: 'esheetNarrative',
+              question: 'Closing',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [
+                  {
+                    id: 'thanks',
+                    label: 'Thanks',
+                    text: 'Thank you.',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
-};
-
-const form = richTextEsheetFormFromLegacy(definition);
+} as unknown as FormDefinition;
 
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
@@ -48,29 +86,6 @@ function findingLabels(candidate: FormDefinition, sectionId: string): string[] {
     (finding) => finding.label
   );
 }
-
-describe('validateRichTextEsheetDefinition', () => {
-  it('rejects duplicate section ids and malformed findings', () => {
-    expect(() =>
-      validateRichTextEsheetDefinition({
-        ...definition,
-        sections: [definition.sections[0], definition.sections[0]],
-      })
-    ).toThrow(/duplicate section id/);
-    expect(() =>
-      validateRichTextEsheetDefinition({
-        ...definition,
-        sections: [
-          {
-            id: 'a',
-            title: 'A',
-            findings: [{ id: 'x', label: '', text: 'y' }],
-          },
-        ],
-      })
-    ).toThrow(/findings require/);
-  });
-});
 
 describe('partyFindings', () => {
   it('turns each party into an insertable macro with its detail', () => {
@@ -98,31 +113,6 @@ describe('partyFindings', () => {
         .map((p) => p.id)
         .reverse()
     );
-  });
-});
-
-describe('richTextEsheetFormFromLegacy', () => {
-  it('converts sections to native narrative fields with their own findings', () => {
-    expect(findingLabels(form, 'closing')).toEqual(['Thanks']);
-    const closing = (form.pages[0].fields ?? [])
-      .flatMap((section) => ('fields' in section ? section.fields! : []))
-      .find(
-        (child) => child.id === getRichTextEsheetFieldId('closing')
-      ) as unknown as NarrativeField;
-    expect(closing.fieldType).toBe('esheetNarrative');
-  });
-
-  it('keeps findings when the narrative type is requested explicitly', () => {
-    const explicit = richTextEsheetFormFromLegacy({
-      ...definition,
-      sections: [{ ...definition.sections[1], fieldType: 'esheetNarrative' }],
-    });
-    const field = (explicit.pages[0].fields ?? []).flatMap((section) =>
-      'fields' in section ? section.fields! : []
-    )[0] as unknown as {
-      _sourceData?: { narrativeHideLabel: boolean };
-    };
-    expect(field._sourceData?.narrativeHideLabel).toBe(true);
   });
 });
 

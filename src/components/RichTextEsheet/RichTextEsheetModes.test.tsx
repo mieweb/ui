@@ -10,14 +10,11 @@ import { describe, expect, it, vi } from 'vitest';
 import { Document } from 'yaml';
 import { Modal } from '../Modal/Modal';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
+import type { FormDefinition } from '@esheet/core';
 import {
   getRichTextEsheetFieldId,
   getRichTextEsheetSectionFieldId,
 } from './definition';
-import {
-  richTextEsheetFormFromLegacy,
-  type RichTextEsheetDefinition,
-} from './legacy';
 import {
   parseRichTextEsheetMdy,
   RICHTEXT_ESHEET_DOCUMENT_FIELD_ID,
@@ -90,16 +87,126 @@ vi.mock('./DocumentMdyEditor', async () => {
   };
 });
 
-const definition: RichTextEsheetDefinition = {
+const form = {
   id: 'mode-doc',
   title: 'Support ticket',
-  sections: [
-    { id: 'summary', title: 'Summary' },
-    { id: 'details', title: 'Details' },
+  pages: [
+    {
+      id: 'mode-doc:document',
+      title: 'Support ticket',
+      fields: [
+        {
+          id: 'richtext:summary:section',
+          fieldType: 'section',
+          title: 'Summary',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:summary:value',
+              fieldType: 'esheetNarrative',
+              question: 'Summary',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:details:section',
+          fieldType: 'section',
+          title: 'Details',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:details:value',
+              fieldType: 'esheetNarrative',
+              question: 'Details',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
-};
+} as unknown as FormDefinition;
 
-const form = richTextEsheetFormFromLegacy(definition);
+const addendumForm = {
+  id: 'mode-doc',
+  title: 'Support ticket',
+  pages: [
+    {
+      id: 'mode-doc:document',
+      title: 'Support ticket',
+      fields: [
+        {
+          id: 'richtext:summary:section',
+          fieldType: 'section',
+          title: 'Summary',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:summary:value',
+              fieldType: 'esheetNarrative',
+              question: 'Summary',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:details:section',
+          fieldType: 'section',
+          title: 'Details',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:details:value',
+              fieldType: 'esheetNarrative',
+              question: 'Details',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:addendum:section',
+          fieldType: 'section',
+          title: 'Addendum',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:addendum:value',
+              fieldType: 'esheetNarrative',
+              question: 'Addendum',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 const modeSwitch = () =>
   screen.getByRole('combobox', { name: 'Document mode' });
@@ -113,8 +220,6 @@ describe('RichTextEsheet mode synchronization', () => {
     const original = parseRichTextEsheetMdy(
       createRichTextEsheetSnapshot(form, {}).mdy
     );
-    // Saves no longer write the legacy richTextEsheet key (mieweb/ui#772).
-    expect(original.frontMatter?.richTextEsheet).toBeUndefined();
     const yaml = new Document(original.frontMatter);
     const source = `---\n${yaml.toString()}---\n${original.body}`;
     expect(() => render(<RichTextEsheet initialMdy={source} />)).not.toThrow();
@@ -133,28 +238,10 @@ describe('RichTextEsheet mode synchronization', () => {
       render(
         <RichTextEsheet
           initialMdy={source}
-          form={richTextEsheetFormFromLegacy({
-            ...definition,
-            id: 'another-doc',
-          })}
+          form={{ ...form, id: 'another-doc' }}
         />
       )
     ).toThrow('The MDY form id does not match');
-    // A legacy MDY still validates its one-time import against the host form.
-    // Pre-#772 saves stamped the native form alongside the legacy key.
-    const legacy = new Document(original.frontMatter);
-    legacy.set('richTextEsheet', definition);
-    expect(() =>
-      render(
-        <RichTextEsheet
-          initialMdy={`---\n${legacy.toString()}---\n${original.body}`}
-          form={richTextEsheetFormFromLegacy({
-            ...definition,
-            id: 'another-doc',
-          })}
-        />
-      )
-    ).toThrow('The MDY document id does not match');
   });
 
   it('regenerates the RichEdit fallback body after a configuration change', async () => {
@@ -162,18 +249,7 @@ describe('RichTextEsheet mode synchronization', () => {
     const { rerender } = render(<RichTextEsheet ref={ref} form={form} />);
     const summary = await screen.findByRole('textbox', { name: /Summary/ });
     fireEvent.input(summary, { target: { innerHTML: 'Login fails' } });
-    rerender(
-      <RichTextEsheet
-        ref={ref}
-        form={richTextEsheetFormFromLegacy({
-          ...definition,
-          sections: [
-            ...definition.sections,
-            { id: 'addendum', title: 'Addendum' },
-          ],
-        })}
-      />
-    );
+    rerender(<RichTextEsheet ref={ref} form={addendumForm} />);
     await screen.findByRole('textbox', { name: /Addendum/ });
     selectMode('RichEdit');
     const editor = await screen.findByRole('textbox', {
@@ -430,10 +506,12 @@ describe('RichTextEsheet mode synchronization', () => {
     render(
       <RichTextEsheet
         initialMdy={authored}
-        form={richTextEsheetFormFromLegacy({
-          ...definition,
-          sections: [{ id: 'summary', title: 'Summary' }],
-        })}
+        form={{
+          ...form,
+          pages: [
+            { ...form.pages[0], fields: form.pages[0].fields!.slice(0, 1) },
+          ],
+        }}
       />
     );
     await screen.findByRole('textbox', { name: /Summary/ });

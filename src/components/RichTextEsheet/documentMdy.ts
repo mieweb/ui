@@ -35,7 +35,6 @@ export interface MdyDocumentDiagnostic {
     | 'frontmatter'
     | 'form'
     | 'response'
-    | 'definition'
     | 'dangling-link'
     | 'orphan'
     | 'template-syntax';

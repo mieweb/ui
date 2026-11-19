@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { parseDocument } from 'yaml';
+import type { FormDefinition } from '@esheet/core';
 import {
   getRichTextEsheetFieldId,
   withRichTextEsheetParties,
 } from './definition';
-import {
-  richTextEsheetFormFromLegacy,
-  type RichTextEsheetDefinition,
-} from './legacy';
 import {
   createRichTextEsheetMdy,
   getRichTextEsheetMdyFields,
@@ -20,16 +16,57 @@ import {
 } from './mdy';
 import { createRichTextEsheetSnapshot } from './model';
 
-const definition: RichTextEsheetDefinition = {
+const form = {
   id: 'referral-letter',
   title: 'Referral letter',
-  sections: [
-    { id: 'reason', title: 'Reason', required: true },
-    { id: 'closing', title: 'Closing' },
+  pages: [
+    {
+      id: 'referral-letter:document',
+      title: 'Referral letter',
+      fields: [
+        {
+          id: 'richtext:reason:section',
+          fieldType: 'section',
+          title: 'Reason',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:reason:value',
+              fieldType: 'esheetNarrative',
+              question: 'Reason',
+              required: true,
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:closing:section',
+          fieldType: 'section',
+          title: 'Closing',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:closing:value',
+              fieldType: 'esheetNarrative',
+              question: 'Closing',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
-};
-
-const form = richTextEsheetFormFromLegacy(definition);
+} as unknown as FormDefinition;
 
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
@@ -90,17 +127,34 @@ describe('createRichTextEsheetSnapshot', () => {
   });
 
   it('counts native selection responses as documented content', () => {
-    const selectionForm = richTextEsheetFormFromLegacy({
-      ...definition,
-      sections: [
+    const selectionForm = {
+      id: 'referral-letter',
+      title: 'Referral letter',
+      pages: [
         {
-          id: 'reason',
-          title: 'Reason',
-          required: true,
-          fieldType: 'customChoice',
+          id: 'referral-letter:document',
+          title: 'Referral letter',
+          fields: [
+            {
+              id: 'richtext:reason:section',
+              fieldType: 'section',
+              title: 'Reason',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              fields: [
+                {
+                  id: 'richtext:reason:value',
+                  fieldType: 'customChoice',
+                  question: 'Reason',
+                  required: true,
+                  width: 'full',
+                },
+              ],
+            },
+          ],
         },
       ],
-    });
+    } as unknown as FormDefinition;
     const snapshot = createRichTextEsheetSnapshot(selectionForm, {
       [reasonId]: {
         selected: [{ label: 'Urgency', value: 'Routine' }],
@@ -141,41 +195,11 @@ describe('RichTextEsheet MDY round trip', () => {
     expect(
       parsed.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')
     ).toEqual([]);
-    // Saves no longer write the legacy richTextEsheet key (mieweb/ui#772).
-    expect(parsed.definition).toBeUndefined();
     expect(parsed.form).toEqual(form);
     expect(parsed.response?.[reasonId]?.answer).toBe(
       'Routine evaluation, please.'
     );
     expect(getRichTextEsheetMdyParties(parsed.frontMatter)).toEqual(parties);
-  });
-
-  it('imports the legacy richTextEsheet key once and saves only the native form', () => {
-    const source = createRichTextEsheetMdy(input);
-    const parsed = parseRichTextEsheetMdy(source);
-    const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-    // Pre-#772 saves stamped the native form alongside the legacy key.
-    document.set('richTextEsheet', definition);
-    const legacySource = `---\n${document.toString()}---\n${parsed.body}`;
-    const legacy = parseRichTextEsheetMdy(legacySource);
-    expect(legacy.definition).toEqual(definition);
-    expect(legacy.diagnostics).toEqual([]);
-    const migrated = createRichTextEsheetMdy(
-      {
-        form: richTextEsheetFormFromLegacy(legacy.definition!),
-        responses: legacy.response ?? {},
-        parties,
-      },
-      undefined,
-      legacySource
-    );
-    const reparsed = parseRichTextEsheetMdy(migrated);
-    expect(reparsed.definition).toBeUndefined();
-    expect(migrated).not.toContain('richTextEsheet:');
-    expect(reparsed.form).toEqual(form);
-    expect(reparsed.response?.[reasonId]?.answer).toBe(
-      'Routine evaluation, please.'
-    );
   });
 
   it('preserves authored prose and refreshes projections on data change', () => {
@@ -228,12 +252,10 @@ describe('RichTextEsheet MDY round trip', () => {
     // A same-id definition that drops a section leaves its imported link
     // behind; editors use this projection to normalize and protect it.
     const retired = getRichTextEsheetRetiredMdyFields({
-      form: richTextEsheetFormFromLegacy({
-        ...definition,
-        sections: definition.sections.filter(
-          (section) => section.id !== 'reason'
-        ),
-      }),
+      form: {
+        ...form,
+        pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(1) }],
+      },
       responses,
     });
     expect(retired).toHaveLength(1);
@@ -248,12 +270,10 @@ describe('RichTextEsheet MDY round trip', () => {
     // Authoring in RichEdit stores only the body — no imported front matter
     // to index retired links from; they are found in the prose itself.
     const body = parseRichTextEsheetMdy(createRichTextEsheetMdy(input)).body;
-    const narrowed = richTextEsheetFormFromLegacy({
-      ...definition,
-      sections: definition.sections.filter(
-        (section) => section.id !== 'reason'
-      ),
-    });
+    const narrowed = {
+      ...form,
+      pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(1) }],
+    };
     const responses = {
       [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: { answer: body },
     };

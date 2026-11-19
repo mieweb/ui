@@ -2,10 +2,7 @@ import * as React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
-import {
-  richTextEsheetFormFromLegacy,
-  type RichTextEsheetDefinition,
-} from './legacy';
+import type { FormDefinition } from '@esheet/core';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -14,26 +11,63 @@ vi.mock(
   () => import('../../test/textAreaRichKerebronStub')
 );
 
-const definition: RichTextEsheetDefinition = {
+const form = {
   id: 'test-letter',
   title: 'Referral letter',
-  sections: [
-    { id: 'reason', title: 'Reason for referral', required: true },
+  pages: [
     {
-      id: 'closing',
-      title: 'Closing',
-      findings: [
+      id: 'test-letter:document',
+      title: 'Referral letter',
+      fields: [
         {
-          id: 'thanks',
-          label: 'Thank you',
-          text: 'Thank you for seeing this patient.',
+          id: 'richtext:reason:section',
+          fieldType: 'section',
+          title: 'Reason for referral',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:reason:value',
+              fieldType: 'esheetNarrative',
+              question: 'Reason for referral',
+              required: true,
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:closing:section',
+          fieldType: 'section',
+          title: 'Closing',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:closing:value',
+              fieldType: 'esheetNarrative',
+              question: 'Closing',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [
+                  {
+                    id: 'thanks',
+                    label: 'Thank you',
+                    text: 'Thank you for seeing this patient.',
+                  },
+                ],
+              },
+            },
+          ],
         },
       ],
     },
   ],
-};
-
-const form = richTextEsheetFormFromLegacy(definition);
+} as unknown as FormDefinition;
 
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },

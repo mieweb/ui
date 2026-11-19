@@ -33,7 +33,6 @@ import {
   type RichTextEsheetResponses,
   type RichTextEsheetSnapshot,
 } from './definition';
-import { richTextEsheetFormFromLegacy } from './legacy';
 import {
   getRichTextEsheetDocumentBody,
   getRichTextEsheetMdyFields,
@@ -145,16 +144,10 @@ export const RichTextEsheet = React.forwardRef<
       `Unable to load document MDY: ${loadErrors.map((diagnostic) => diagnostic.message).join(' ')}`
     );
   }
-  // A legacy richTextEsheet definition is a one-time import (mieweb/ui#772).
-  const importedForm = parsed?.definition
-    ? richTextEsheetFormFromLegacy(parsed.definition)
-    : parsed?.form;
+  const importedForm = parsed?.form;
   const documentForm = form ?? importedForm;
   if (!documentForm) {
     throw new Error('Supply a form to open this document.');
-  }
-  if (parsed?.definition && parsed.definition.id !== documentForm.id) {
-    throw new Error('The MDY document id does not match the supplied form.');
   }
   // A native eSheet MDY names its form; foreign responses must not seed a
   // session under another document's form.

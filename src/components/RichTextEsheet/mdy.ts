@@ -13,11 +13,6 @@ import {
   type RichTextEsheetParty,
   type RichTextEsheetResponses,
 } from './definition';
-import {
-  richTextEsheetFormFromLegacy,
-  validateRichTextEsheetDefinition,
-  type RichTextEsheetDefinition,
-} from './legacy';
 
 /** Authored prose is a native answer; it is excluded from its own MDY response layer. */
 export const RICHTEXT_ESHEET_DOCUMENT_FIELD_ID = '__document__';
@@ -34,9 +29,7 @@ export type RichTextEsheetMdyField = MdyDocumentField;
 
 export type RichTextEsheetMdyDiagnostic = MdyDocumentDiagnostic;
 
-export type ParsedRichTextEsheetMdy = ParsedMdyDocument & {
-  definition?: RichTextEsheetDefinition;
-};
+export type ParsedRichTextEsheetMdy = ParsedMdyDocument;
 
 /** One link projection per document section, including empty memory aids. */
 export function getRichTextEsheetMdyFields(
@@ -74,25 +67,6 @@ export function getRichTextEsheetMdyParties(
   }));
 }
 
-/** A legacy richTextEsheet definition is a one-time import, never written back (mieweb/ui#772). */
-function readMdyDefinition(
-  parsed: ParsedMdyDocument
-): RichTextEsheetDefinition | undefined {
-  const raw = parsed.frontMatter?.richTextEsheet;
-  if (raw === undefined) return undefined;
-  try {
-    validateRichTextEsheetDefinition(raw as RichTextEsheetDefinition);
-    return raw as RichTextEsheetDefinition;
-  } catch {
-    parsed.diagnostics.push({
-      severity: 'error',
-      code: 'definition',
-      message: 'Front matter contains an invalid richTextEsheet definition.',
-    });
-    return undefined;
-  }
-}
-
 const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
   documentFieldId: RICHTEXT_ESHEET_DOCUMENT_FIELD_ID,
   linkPrefix: 'doc',
@@ -120,19 +94,14 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
       };
     };
   },
-  // Saves stop writing the legacy schema; undefined deletes an imported key.
   extraFrontMatter: (snapshot) => ({
-    richTextEsheet: undefined,
     parties: snapshot.parties?.length ? snapshot.parties : undefined,
   }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached doc_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
-    // Prefer the legacy import when present: pre-#772 documents stamped the
-    // complete section metadata there.
-    const legacy = readMdyDefinition(parsed);
-    const form = legacy ? richTextEsheetFormFromLegacy(legacy) : parsed.form;
+    const form = parsed.form;
     if (!form || !parsed.response) return null;
     const parties = getRichTextEsheetMdyParties(parsed.frontMatter);
     const { createRichTextEsheetSnapshot } = await import('./model');
@@ -150,7 +119,7 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
     } catch (error) {
       parsed.diagnostics.push({
         severity: 'error',
-        code: 'definition',
+        code: 'form',
         message:
           error instanceof Error ? error.message : 'Invalid document form.',
       });
@@ -163,8 +132,7 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
 export function parseRichTextEsheetMdy(
   source: string
 ): ParsedRichTextEsheetMdy {
-  const parsed = engine.parse(source);
-  return { ...parsed, definition: readMdyDefinition(parsed) };
+  return engine.parse(source);
 }
 
 /** Update existing projections only: unlinked prose and removed links stay authored. */
