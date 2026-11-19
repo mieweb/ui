@@ -26,9 +26,14 @@ consumer's own clinical/EHR owners:
   interactions, drug–allergy conflicts, duplicate therapy, dose ranges, or
   code-validity checks. If the user expects CDS, that is host-application
   logic.
-- **No backend calls.** Every component is controlled: data in via props,
-  intents out via callbacks. The host owns ids, dates, ordering and
-  persistence.
+- **No backend calls.** Data in via props, intents out via callbacks; the
+  host owns ids, dates, ordering and persistence. The lists are controlled;
+  the managers can also run uncontrolled (`default*` + `onChange`); the
+  drafting components (`ResultsEntryForm`, `EncounterVisit`, the editors)
+  own their draft state and seed from `initialData`/`initialResponses`/
+  `initialMdy` — `ResultsEntryForm` seeds on mount and `EncounterVisit`
+  reloads only when `definition.id` changes, so remount/change the id when
+  switching records to avoid stale drafts.
 
 > **Which component?** Ask *whose list is it, and what scope?* The **chart**
 > owns problems, medications and allergies as durable records; an
@@ -52,22 +57,22 @@ All from the **main entry** (`@mieweb/ui`), no extra peers, unless noted.
 | Component | Key props | Notes |
 | --- | --- | --- |
 | `PatientHeader` | `patient: PatientData` (name, mrn, dob, age, sex, status, flags, photo), `allergies?`, `medications?`, `comments?`, `sticky?`, `showAllergyBanner?`, `onAddItem?`, `onEditPatient?` | Demographics banner with flag ribbon, built-in ⋮ menu modals |
-| `CaseManagementHeader` | `caseInfo`, `casePatient`, `caseDetailItems`, `editingUsers`, `labels`, `onAddCaseNote?`, `onCloseCase?` | Case banner; one of the few with an i18n `labels` object |
+| `CaseManagementHeader` | `caseInfo`, `patient: CasePatient`, `details?: CaseDetailItem[]`, `editingUsers?`, `labels?`, `onAddCaseNote?`, `actions?`/`alert?` slots | Case banner; one of the few with an i18n `labels` object |
 | `ProblemList` | `concerns: ConditionConcern[]`, `onAction?`, `onAddProblem?`, `addSearch?`, `onReorder?`, `readOnly?` | Chart-scope; actions: open/observe/refine/revise/resolve/relate/remove |
 | `PresentingProblems` | `presenting` entries tagging chart concerns **Addressed / Relevant Hx / Noted**; `scope` | Encounter-scope reference to chart concerns |
-| `ConditionEditor` | action: `add`/`refine`/`revise`/`relate`/`observe`; `renderCodeSearch?`; returns a `ConditionAssertionDraft` | Capture-first; three-state uncertainty |
+| `ConditionEditor` | `mode: 'add'\|'refine'\|'revise'\|'relate'\|'observe'`, `open` + `onOpenChange` (required — dialog), `concern?` (omit for add), `renderCodeSearch?` | Capture-first; `onSave?(ConditionAssertionDraft)` for add/refine/revise; `onRelate?` / `onAddObservation?` for relate/observe |
 | `MedicationList` | `medications: Medication[]`, `onStatusChange?`, `onAction?`, `quickAddOptions?`, `addSearch?`, `readOnly?` | Presentational — you own dialogs |
 | `MedicationReconciliation` | `medications`/`defaultMedications` + `onChange` (controlled/uncontrolled), `codeLookup?`, `requireCode?`, `inlineAddSearch?` | Owns the NCPDP `MedicationEditor` + dialogs |
 | `AllergyList` | `allergies: Allergy[]`, `noKnownAllergies?` (tri-state: `undefined` = not asked), `onNoKnownAllergiesChange?`, `onAction?`, `addSearch?` | Grouped by category with severity badges |
 | `AllergyManager` | `allergies`/`defaultAllergies` + `onChange`, `noKnownAllergies?`, `codeLookup?`, `requireCode?`, `inlineAddSearch?` | Batteries-included counterpart |
 | `Assessment` | `concerns`, `items`, `orders: AssessmentOrder[]`, `onAddOrder?`, `onLinkOrder?`, `onEditOrder*?`, `onReorder*?` | A&P: orders nest under problems via `concernId` (durable IndicationLink); drag to re-link |
-| `OrderEditor` | `type?`/`defaultType?: 'medication'\|'lab'\|'imaging'\|'procedure'\|'referral'`, `order?: AssessmentOrder`, `codeLookup?`, `onSave?` | Morphs per type: medication → NCPDP editor; others → typed editors |
+| `OrderEditor` | `open` (required), `order?: AssessmentOrder` (edit mode — follows `order.type`), `defaultType?: 'medication'\|'lab'\|'imaging'\|'procedure'\|'referral'` (add mode), `codeLookup?: config\|false`, `onClose` + `onSave` (required) | Morphs per type: medication → NCPDP editor; others → typed editors |
 | `HealthSurveillance` | `history: PatientHistory`, `programs` (programs.json), `enrolledKeys?`, `onOrder?`, `onOrderMany?`, `now?` | Overdue/due/pending/done from `evaluateDue(history, programs)`; multi-select order picklist |
 | `ResultsEntryForm` | `serviceName?`, `initialData?: Partial<ResultsEntryData>` (result passed/failed, dates, files, recommendations), `onSubmit`, `labels?` | Pass/fail results entry (BlueHive operations) |
 | `WebChartReportViewer` | `reports`, `currentReport`, `reportResult`, `dateRange`, `onReportSelect`, `onRefreshReport` | Canned backend reports; renders by result shape |
 | `EncounterVisit` | `definition`, `initialResponses?`/`initialMdy?`, `codeLookup?`, `onChange?`, `onSubmit?`, `onToolsReady?`, `mediaCapture?` | **Experimental**, `/esheet` entry — needs `@esheet/*` peers |
 | `MedicationListField`, `AllergyListField`, `registerMieEsheetFields` | eSheet form-field adapters; answers stored as `{ medications }` / `{ allergies, noKnownAllergies }` JSON | `/esheet` entry |
-| `ChartOrdersGrid`, `EncounterOrdersGrid` | NITRO-backed orders tables | **`/datavis` entry**, optional `@mieweb/datavis` peer; pure row builders (`buildChartOrderRows`, `buildEncounterOrderRows`) are in main |
+| `ChartOrdersGrid`, `EncounterOrdersGrid` | NITRO-backed orders tables | **`/datavis` entry** — `@mieweb/datavis` is **bundled** into it (git submodule, not a published peer: no separate install); pure row builders (`buildChartOrderRows`, `buildEncounterOrderRows`) are in main |
 
 **Not exported:** the `CodeLookup` **component** itself — it is a module-Worker
 component apps import from their own bundler. The main entry ships only
@@ -102,19 +107,25 @@ or the ambient provider.
   (LOINC results), `procedures`, `immunizations` (CVX), `conditions`,
   `allergies`, `medications`.
 
-Everything is JSON-serializable; the only React-node props are search slots
-(`addSearch`, `renderCodeSearch`, `renderOrderSearch`).
+The data models above are JSON-serializable. Exceptions live at the prop
+layer, not in the models: `ResultsEntryData.files` is `File[]` (uploads —
+persist them separately, don't JSON-stringify), `HealthSurveillance.now` is a
+`Date`, and besides the search slots (`addSearch`, `renderCodeSearch`,
+`renderOrderSearch`) both headers take React-node `actions`/`alert` slots.
 
 ## Constraints & honest limitations
 
 - **CodeLookup runtime**: needs a module Worker, `fetch`, ideally OPFS, and
   pre-built `@mieweb/codify` shards (14–81 MB) at `indexUrl`. Everything else
-  is stateless with no fetch/Worker.
-- **i18n is limited**: only `CaseManagementHeader` (`labels`) and parts of
-  `WebChartReportViewer`/`ResultsEntryForm` externalize strings. Assessment,
-  OrderEditor, HealthSurveillance, PatientHeader group headings/action
-  labels/dialog copy are **English constants** — flag this when a consumer
-  needs translation.
+  makes no fetch/Worker use.
+- **i18n is limited**: `CaseManagementHeader` (`labels`), `ResultsEntryForm`
+  (`labels`) and parts of `WebChartReportViewer` externalize strings. Inside
+  `EncounterVisit`, the `messages` prop (`EncounterVisitMessages`) translates
+  built-in labels of the clinical children (Assessment etc. read it via an
+  internal messages context). **Standalone** Assessment, OrderEditor,
+  HealthSurveillance and PatientHeader fall back to English constants — the
+  messages provider is not exported from the main entry — so flag this when a
+  consumer needs translation outside `EncounterVisit`.
 - **RTL does not mirror**: these components use physical `ml-*`/`pl-*`/
   `right-*` classes (unlike `/templates`). Known shared limitation.
 - **A11y pattern**: each list is a `Card` of `<section aria-label>` groups;
@@ -129,7 +140,7 @@ Everything is JSON-serializable; the only React-node props are search slots
 | Symptom | Cause / fix |
 | --- | --- |
 | "Cannot import `CodeLookup` from `@mieweb/ui`" | It isn't exported (module Worker). Import it from your app bundle per the Clinical lists docs; wire components via `CodeLookupProvider` / `codeLookup` config / `addSearch` slots. |
-| Want sortable/filterable orders table | `ChartOrdersGrid` / `EncounterOrdersGrid` from `@mieweb/ui/datavis` (optional `@mieweb/datavis` peer) — see the **mieweb-ui-datavis-api** skill. The `Assessment` card is not a grid. |
+| Want sortable/filterable orders table | `ChartOrdersGrid` / `EncounterOrdersGrid` from `@mieweb/ui/datavis` (`@mieweb/datavis` is bundled in — no separate install) — see the **mieweb-ui-datavis-api** skill. The `Assessment` card is not a grid. |
 | `EncounterVisit` import/peer errors | It's on the `/esheet` entry and experimental — needs `@esheet/*` peers (and `@kerebron/*` for RichTextEsheet). See the **mieweb-ui-datavis-api** skill's eSheet section. |
 | Expecting interaction/allergy/dose warnings | No CDS by design — host-application logic, not the component library. |
 | "No known allergies" won't render | `noKnownAllergies` is tri-state: `undefined` means *not asked yet* (renders "not recorded"); pass `true` explicitly after confirmation. |

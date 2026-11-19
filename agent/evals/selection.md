@@ -322,9 +322,11 @@ pages via the `mieweb-ui-templates` skill, and clinical components via the
 - **Ask:** "I want a sortable orders grid for the chart — `Assessment` isn't a
   table. What do I import?"
 - **Expect:** `ChartOrdersGrid` / `EncounterOrdersGrid` from
-  `@mieweb/ui/datavis` (optional `@mieweb/datavis` peer) — NITRO-backed, so
-  Grids domain. The pure row builders (`buildChartOrderRows`,
-  `buildEncounterOrderRows`) are in the main entry.
-- **Agent:** MIE UI Grids Agent (via the Design Agent's redirect)
+  `@mieweb/ui/datavis` — NITRO-backed; `@mieweb/datavis` is bundled into
+  that entry, so no separate install. The pure row builders
+  (`buildChartOrderRows`, `buildEncounterOrderRows`) are in the main entry.
+  Grid configuration/debugging depth belongs to the Grids Agent.
+- **Agent:** MIE UI Design Agent (selection is always the orchestrator's,
+  even for grids; depth routes to Grids)
 - **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — troubleshooting;
   agent/skills/mieweb-ui-datavis-api/SKILL.md
