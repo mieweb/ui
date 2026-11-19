@@ -52,6 +52,10 @@ const transactionHandler = () =>
 const coreEditorCreate = vi.fn((_opts: unknown) => editorMock);
 vi.mock('@kerebron/editor', () => ({
   CoreEditor: { create: (opts: unknown) => coreEditorCreate(opts) },
+  // Base class of the `@mention` extension (editorMentions.tsx).
+  Extension: class {
+    constructor(public config: unknown) {}
+  },
 }));
 // A stand-in for the real kit's extension list: enough of it to observe which
 // extensions the wrapper drops and which it replaces.
@@ -164,6 +168,17 @@ describe('RichEditor', () => {
     ).editorKits;
     expect(kits).toHaveLength(2);
     expect(kits[1]).toBe(kit);
+  });
+
+  it('installs the @mention kit only when mentionOptions is given', async () => {
+    renderWithTheme(<RichEditor />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalledTimes(1));
+    renderWithTheme(<RichEditor mentionOptions={[]} />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalledTimes(2));
+    const kitsOf = (call: number) =>
+      (coreEditorCreate.mock.calls[call][0] as { editorKits: unknown[] })
+        .editorKits;
+    expect(kitsOf(1)).toHaveLength(kitsOf(0).length + 1);
   });
 
   it('collab mode includes the yjs kit and joins the room', async () => {

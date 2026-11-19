@@ -28,6 +28,23 @@ export interface MentionOption {
   icon?: React.ReactNode;
   /** Optional trailing meta text (e.g. a kind tag). */
   meta?: string;
+  /**
+   * Where the option links to. In a rich editor (`RichEditor`'s
+   * `mentionOptions`), choosing it inserts `label` as a link to `href` instead
+   * of `@value` — a reference to a record, such as a ticket. Plain-text
+   * composers ignore it.
+   */
+  href?: string;
+}
+
+/** The options whose label contains `query`, case-insensitively. */
+export function filterMentionOptions(
+  options: MentionOption[] | undefined,
+  query: string
+): MentionOption[] {
+  if (!options) return [];
+  const q = query.toLowerCase();
+  return options.filter((o) => o.label.toLowerCase().includes(q));
 }
 
 /**
@@ -113,11 +130,10 @@ export function useMentionAutocomplete({
     [listId]
   );
 
-  const suggestions = React.useMemo(() => {
-    if (!mention || !options) return [];
-    const q = mention.query.toLowerCase();
-    return options.filter((o) => o.label.toLowerCase().includes(q));
-  }, [mention, options]);
+  const suggestions = React.useMemo(
+    () => (mention ? filterMentionOptions(options, mention.query) : []),
+    [mention, options]
+  );
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -235,9 +251,23 @@ export function useMentionAutocomplete({
   };
 }
 
+/** What {@link MentionMenu} reads: the textarea hook's state, or a rich editor's. */
+export type MentionMenuState = Pick<
+  MentionAutocomplete,
+  | 'menuOpen'
+  | 'suggestions'
+  | 'highlight'
+  | 'listId'
+  | 'optionId'
+  | 'floatingRef'
+  | 'menuStyle'
+  | 'insert'
+  | 'setHighlight'
+>;
+
 export interface MentionMenuProps {
-  /** State returned by {@link useMentionAutocomplete}. */
-  mention: MentionAutocomplete;
+  /** State from {@link useMentionAutocomplete}, or a rich editor's (`useEditorMentions`). */
+  mention: MentionMenuState;
   /** Accessible label for the listbox. @default 'Mention' */
   label?: string;
   /** `data-slot` for the listbox. @default 'composer-mention-list' */
@@ -271,7 +301,7 @@ export function MentionMenu({
             id={mention.optionId(i)}
             role="option"
             aria-selected={i === mention.highlight}
-            // onMouseDown (not onClick) so the textarea keeps focus.
+            // onMouseDown (not onClick) so the composer keeps focus.
             onMouseDown={(e) => {
               e.preventDefault();
               mention.insert(option);

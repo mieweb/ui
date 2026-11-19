@@ -15,6 +15,11 @@ import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
 import { MDY_PROJECTION_META } from './mdyTransaction';
+import { useEditorMentions } from './editorMentions';
+import {
+  MentionMenu,
+  type MentionOption,
+} from '../Messaging/useMentionAutocomplete';
 import {
   createEditorKits,
   type CollabConfig,
@@ -135,6 +140,17 @@ export interface RichEditorProps {
    * which tolerates read-once hosts that call `getContent()` on submit.
    */
   strictValue?: boolean;
+  /**
+   * `@mention` candidates — the same option shape as `ChatComposer`'s
+   * `mentionOptions`. Typing `@` lists the options whose label matches what
+   * follows; choosing one inserts `@value`, or `label` as a link to `href`
+   * when the option has one (a reference to a record, such as a ticket). The
+   * list may change at any time, but the feature is installed only when this
+   * is set at mount — pass `[]` while options load.
+   */
+  mentionOptions?: MentionOption[];
+  /** Accessible name of the `@mention` list. @default 'Mention' */
+  mentionLabel?: string;
 }
 
 export interface RichEditorHandle {
@@ -176,9 +192,14 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       modifyMenu,
       valueType = MARKDOWN_TYPE,
       strictValue = false,
+      mentionOptions,
+      mentionLabel,
     },
     ref
   ) {
+    const mentions = useEditorMentions(mentionOptions);
+    // Read at mount, like the other kits.
+    const mentionKit = mentionOptions !== undefined ? [mentions.kit] : [];
     const isDark = useIsDarkMode();
     const hostRef = useRef<HTMLDivElement>(null);
     const editorInstance = useRef<CoreEditor | null>(null);
@@ -454,7 +475,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           element: mount,
           uri: 'file:///untitled.md',
           assetLoad: assetLoad ?? createAssetLoad('/kerebron-wasm'),
-          editorKits: [...editorKits, ...(additionalEditorKits ?? [])],
+          editorKits: [
+            ...editorKits,
+            ...mentionKit,
+            ...(additionalEditorKits ?? []),
+          ],
           readOnly: disabledRef.current || readOnlyRef.current,
         });
 
@@ -621,6 +646,8 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             }}
           />
         </div>
+
+        <MentionMenu mention={mentions.menu} label={mentionLabel} />
 
         {showPreview && (
           <div>

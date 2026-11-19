@@ -7,4 +7,6 @@ export {
   type ModifyMenu,
 } from './RichEditor';
 
+export type { MentionOption } from '../Messaging/useMentionAutocomplete';
+
 export { CodeEditor, type CodeEditorProps } from './CodeEditor';
