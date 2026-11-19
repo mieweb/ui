@@ -225,6 +225,19 @@ describe('RichTextEsheet MDY round trip', () => {
     expect(updated).toContain('Authored note stays.');
   });
 
+  it('scrubs the removed legacy richTextEsheet key on re-save', () => {
+    // A transition-era document may carry the pre-#772 schema key alongside
+    // the native form; the engine otherwise preserves imported front matter.
+    const imported = createRichTextEsheetMdy(input).replace(
+      '---\n',
+      '---\nrichTextEsheet:\n  id: letter\n  title: Legacy\n  sections: []\n'
+    );
+    expect(imported).toContain('richTextEsheet:');
+    const resaved = createRichTextEsheetMdy(input, undefined, imported);
+    expect(resaved).not.toContain('richTextEsheet');
+    expect(parseRichTextEsheetMdy(resaved).form).toEqual(form);
+  });
+
   it('carries an imported document through the reserved response', () => {
     const imported = createRichTextEsheetMdy(input);
     const snapshot = createRichTextEsheetSnapshot(

@@ -137,6 +137,9 @@ export function getRichTextEsheetFormSections(
     invalid('id and title must be nonempty strings');
   if (!Array.isArray(form.pages) || form.pages.length === 0)
     invalid('at least one page is required');
+  // The document surface renders without page navigation: sections on later
+  // pages would be unreachable yet still gate saving.
+  if (form.pages.length > 1) invalid('exactly one page is required');
   const views: RichTextEsheetSectionView[] = [];
   const ids = new Set<string>();
   for (const page of form.pages) {

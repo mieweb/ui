@@ -189,6 +189,16 @@ describe('getRichTextEsheetFormSections (mieweb/ui#772)', () => {
     return clone;
   };
 
+  it('rejects forms with more than one page', () => {
+    const multiPage = {
+      ...form,
+      pages: [form.pages[0], { ...form.pages[0], id: 'letter:extra' }],
+    } as FormDefinition;
+    expect(() => getRichTextEsheetFormSections(multiPage)).toThrow(
+      'exactly one page is required'
+    );
+  });
+
   it('rejects a noncanonical section field id', () => {
     expect(() =>
       getRichTextEsheetFormSections(

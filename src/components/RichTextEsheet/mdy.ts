@@ -96,6 +96,9 @@ const engine = createMdyDocumentEngine<RichTextEsheetMdyInput>({
   },
   extraFrontMatter: (snapshot) => ({
     parties: snapshot.parties?.length ? snapshot.parties : undefined,
+    // The engine preserves imported front matter on re-save: scrub the
+    // removed pre-#772 schema key so no stale second schema rides along.
+    richTextEsheet: undefined,
   }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
