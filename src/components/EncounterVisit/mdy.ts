@@ -12,11 +12,6 @@ import {
   getEncounterFormSections,
   getEncounterSectionFieldIds,
 } from './definition';
-import {
-  encounterFormFromLegacy,
-  validateEncounterDefinition,
-  type EncounterVisitDefinition,
-} from './legacy';
 import type {
   EncounterObservation,
   EncounterResponses,
@@ -47,9 +42,7 @@ export type EncounterMdyField = MdyDocumentField;
 
 export type EncounterMdyDiagnostic = MdyDocumentDiagnostic;
 
-export type ParsedEncounterMdy = ParsedMdyDocument & {
-  definition?: EncounterVisitDefinition;
-};
+export type ParsedEncounterMdy = ParsedMdyDocument;
 
 function unitDisplay(unit?: string): string | undefined {
   return unit === 'Cel'
@@ -97,25 +90,6 @@ export function getEncounterMdyFields(
   snapshot: MdySnapshot
 ): EncounterMdyField[] {
   return engine.fields(snapshot);
-}
-
-/** A legacy encounterDefinition is a one-time import, never written back (mieweb/ui#772). */
-function readMdyDefinition(
-  parsed: ParsedMdyDocument
-): EncounterVisitDefinition | undefined {
-  const raw = parsed.frontMatter?.encounterDefinition;
-  if (raw === undefined) return undefined;
-  try {
-    validateEncounterDefinition(raw as EncounterVisitDefinition);
-    return raw as EncounterVisitDefinition;
-  } catch {
-    parsed.diagnostics.push({
-      severity: 'error',
-      code: 'definition',
-      message: 'Front matter contains an invalid encounterDefinition.',
-    });
-    return undefined;
-  }
 }
 
 const engine = createMdyDocumentEngine<MdySnapshot>({
@@ -179,16 +153,11 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
       narrative: section.kind === 'narrative',
     };
   },
-  // Saves stop writing the legacy schema; undefined deletes an imported key.
-  extraFrontMatter: () => ({ encounterDefinition: undefined }),
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached visit_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
-    // Prefer the legacy import when present: #762 documents stamped complete
-    // section metadata there that their saved forms predate.
-    const legacy = readMdyDefinition(parsed);
-    const form = legacy ? encounterFormFromLegacy(legacy) : parsed.form;
+    const form = parsed.form;
     if (!form || !parsed.response) return null;
     const { createEncounterSnapshot } = await import('./model');
     try {
@@ -199,7 +168,7 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
     } catch (error) {
       parsed.diagnostics.push({
         severity: 'error',
-        code: 'definition',
+        code: 'form',
         message:
           error instanceof Error ? error.message : 'Invalid encounter form.',
       });
@@ -210,8 +179,7 @@ const engine = createMdyDocumentEngine<MdySnapshot>({
 
 /** Parse safe YAML and native objects without dropping unknown metadata or provenance. */
 export function parseEncounterMdy(source: string): ParsedEncounterMdy {
-  const parsed = engine.parse(source);
-  return { ...parsed, definition: readMdyDefinition(parsed) };
+  return engine.parse(source);
 }
 
 /** Update existing projections only: unlinked prose and removed links stay authored. */

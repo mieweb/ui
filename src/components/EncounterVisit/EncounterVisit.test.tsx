@@ -7,12 +7,9 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import {
-  encounterFormFromLegacy,
-  type EncounterVisitDefinition,
-} from './legacy';
 import type { EncounterVisitSnapshot } from './types';
 import { CodeLookupProvider } from '../CodeLookup/context';
 
@@ -23,23 +20,107 @@ vi.mock(
   () => import('../../test/textAreaRichKerebronStub')
 );
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'test-visit',
   title: 'Anonymous exam',
-  sections: [
-    { id: 'hpi', title: 'HPI', kind: 'narrative' },
+  pages: [
     {
-      id: 'exam',
-      title: 'Exam',
-      kind: 'observations',
-      narrative: true,
-      observations: [{ id: 'back', label: 'Back examination' }],
+      id: 'test-visit:visit',
+      title: 'Anonymous exam',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Exam narrative',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+            {
+              id: 'encounter:exam:observation:back',
+              question: 'Back examination',
+              width: 'full',
+              fieldType: 'encounterNarrative',
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+      ],
     },
-    { id: 'vitals', title: 'Vitals', kind: 'vitals' },
   ],
-};
+} as unknown as FormDefinition;
 
-const form = encounterFormFromLegacy(definition);
+const PLAN_SECTION = {
+  id: 'encounter:plan:section',
+  fieldType: 'section',
+  title: 'Plan',
+  sectionCollapse: 'expanded',
+  width: 'full',
+  _sourceData: {
+    encounterKind: 'narrative',
+  },
+  fields: [
+    {
+      id: 'encounter:plan:narrative',
+      fieldType: 'encounterNarrative',
+      question: 'Plan',
+      width: 'full',
+      _sourceData: {
+        encounterHideLabel: true,
+      },
+    },
+  ],
+} as unknown as NonNullable<FormDefinition['pages'][number]['fields']>[number];
 
 describe('EncounterVisit with the real eSheet renderer', () => {
   it('translates shell labels and counters without resetting the native visit', async () => {
@@ -182,10 +263,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       );
       return (
         <EncounterVisit
-          form={encounterFormFromLegacy({
-            ...definition,
-            sections: definition.sections.map((section) => ({ ...section })),
-          })}
+          form={globalThis.structuredClone(form)}
           initialResponses={saved?.responses ?? {}}
           onChange={setSaved}
         />
@@ -285,19 +363,15 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     });
     onChange.mockClear();
     const next = {
-      ...definition,
-      sections: [
-        ...definition.sections,
-        { id: 'plan', title: 'Plan', kind: 'narrative' as const },
+      ...form,
+      pages: [
+        {
+          ...form.pages[0],
+          fields: [...(form.pages[0].fields ?? []), PLAN_SECTION],
+        },
       ],
     };
-    rerender(
-      <EncounterVisit
-        ref={ref}
-        form={encounterFormFromLegacy(next)}
-        onChange={onChange}
-      />
-    );
+    rerender(<EncounterVisit ref={ref} form={next} onChange={onChange} />);
     await screen.findByRole('textbox', { name: 'Plan' });
     expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
       'Preserved narrative'
@@ -307,12 +381,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       expect(visit.responses[getEncounterFieldId('hpi')].answer).toBe(
         'Preserved narrative'
       );
-    rerender(
-      <EncounterVisit
-        ref={ref}
-        form={encounterFormFromLegacy({ ...next, id: 'new-visit' })}
-      />
-    );
+    rerender(<EncounterVisit ref={ref} form={{ ...next, id: 'new-visit' }} />);
     await waitFor(() =>
       expect(screen.getByRole('textbox', { name: 'HPI' })).toBeEmptyDOMElement()
     );
