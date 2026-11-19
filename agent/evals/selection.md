@@ -1,8 +1,9 @@
 # Evals — Component selection / catalog
 
 Primary agent: **MIE UI Design Agent** (owns selection via the
-`mieweb-ui-catalog` skill and its selection guidance, and marketing/landing
-pages via the `mieweb-ui-templates` skill). See
+`mieweb-ui-catalog` skill and its selection guidance, marketing/landing
+pages via the `mieweb-ui-templates` skill, and clinical components via the
+`mieweb-ui-clinical` skill). See
 [README.md](./README.md) for format and scoring.
 
 ### SEL-1 — Table or NITRO
@@ -264,3 +265,68 @@ pages via the `mieweb-ui-templates` skill). See
   sections themselves are DataVis-domain)
 - **Source:** agent/skills/mieweb-ui-templates/SKILL.md — troubleshooting;
   agent/skills/mieweb-ui-charts/SKILL.md
+
+### SEL-27 — Chart vs encounter scope
+
+- **Ask:** "I need to show the patient's problems on the visit note — do I use
+  `ProblemList`?"
+- **Expect:** Depends on scope: the chart owns problems as durable records;
+  an encounter only references them. Chart-scope problem list →
+  `ProblemList`; marking which chart problems this visit addressed
+  (Addressed / Relevant Hx / Noted) → `PresentingProblems`. Writing a new or
+  refined problem → `ConditionEditor`.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — "Which component?";
+  src/catalog pages (Clinical lists)
+
+### SEL-28 — Presentational list vs manager
+
+- **Ask:** "`MedicationList` renders my meds but there's no edit dialog when I
+  click a row action — is it broken?"
+- **Expect:** Not broken — `MedicationList` is presentational: it emits
+  `onAction` and you own the dialogs. If you want the built-in NCPDP
+  `MedicationEditor`, dialogs and inline quick-add, use
+  `MedicationReconciliation` (same split: `AllergyList` vs `AllergyManager`).
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — inventory +
+  troubleshooting
+
+### SEL-29 — CodeLookup not exported
+
+- **Ask:** "`import { CodeLookup } from '@mieweb/ui'` fails — where is it?"
+- **Expect:** The `CodeLookup` component is deliberately not exported (it's a
+  module-Worker component needing `@mieweb/codify` shards at `indexUrl`);
+  apps bundle it themselves. The main entry ships `CodeLookupProvider`,
+  `useCodeLookupConfig` and the types; clinical components take coded picks
+  via `codeLookup` config, the ambient provider, or `addSearch`/
+  `renderCodeSearch` slots.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — troubleshooting;
+  src/index.ts
+
+### SEL-30 — FHIR mapping out of scope
+
+- **Ask:** "Which FHIR AllergyIntolerance fields map to the `Allergy` prop, and
+  will the component warn on drug–allergy conflicts?"
+- **Expect:** Both out of scope for the library: components define their own
+  JSON shapes (not FHIR) and the consumer projects their backend model at the
+  boundary, and there is no clinical decision support by design (no
+  interaction/conflict/dose checks) — that's host-application logic. The
+  agent should state the `Allergy` shape and decline to author the FHIR
+  projection or clinical-correctness rules.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — scope section
+
+### SEL-31 — Orders table entry point
+
+- **Ask:** "I want a sortable orders grid for the chart — `Assessment` isn't a
+  table. What do I import?"
+- **Expect:** `ChartOrdersGrid` / `EncounterOrdersGrid` from
+  `@mieweb/ui/datavis` — NITRO-backed; `@mieweb/datavis` is bundled into
+  that entry, so no separate install. The pure row builders
+  (`buildChartOrderRows`, `buildEncounterOrderRows`) are in the main entry.
+  Grid configuration/debugging depth belongs to the Grids Agent.
+- **Agent:** MIE UI Design Agent (selection is always the orchestrator's,
+  even for grids; depth routes to Grids)
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — troubleshooting;
+  agent/skills/mieweb-ui-datavis-api/SKILL.md
