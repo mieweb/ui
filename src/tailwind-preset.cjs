@@ -776,6 +776,10 @@ module.exports = {
     'cursor-grab',
     'active:cursor-grabbing',
     'touch-none',
+    // ReorderableList: whole-row drag and the lifted dragged row
+    'touch-manipulation',
+    'select-none',
+    'opacity-80',
     'opacity-40',
     'group-hover/portlet:opacity-100',
     'focus-visible:opacity-100',
