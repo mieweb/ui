@@ -177,6 +177,14 @@ describe('native form identity and option guards (mieweb/ui#774)', () => {
     return form;
   };
 
+  it('rejects forms with more than one page', () => {
+    const form = globalThis.structuredClone(vitalsOnlyForm);
+    form.pages.push({ ...form.pages[0] });
+    expect(() => validateEncounterForm(form)).toThrow(
+      'exactly one page is required'
+    );
+  });
+
   it('rejects a stale _sourceData.id that conflicts with the native field id', () => {
     expect(() =>
       validateEncounterForm(
