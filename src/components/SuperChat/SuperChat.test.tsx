@@ -991,6 +991,35 @@ describe('SuperChat', () => {
     }
   );
 
+  it.each([
+    ['Ctrl+Enter', { key: 'Enter', ctrlKey: true }],
+    ['Cmd+Enter', { key: 'Enter', metaKey: true }],
+    ['Escape', { key: 'Escape' }],
+  ])('ignores %s while an IME is composing', async (_label, keyInit) => {
+    const { fireEvent } = await import('@testing-library/react');
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    fireEvent.change(editor, { target: { value: 'こんにちは' } });
+    fireEvent.keyDown(editor, { ...keyInit, isComposing: true });
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      'こんにちは'
+    );
+  });
+
   it('pastes an image into the edit window as Markdown', async () => {
     const { fireEvent } = await import('@testing-library/react');
     const { default: userEvent } = await import('@testing-library/user-event');
