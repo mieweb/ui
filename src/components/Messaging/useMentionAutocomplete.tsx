@@ -29,12 +29,20 @@ export interface MentionOption {
   /** Optional trailing meta text (e.g. a kind tag). */
   meta?: string;
   /**
-   * Where the option links to. In a rich editor (`RichEditor`'s
-   * `mentionOptions`), choosing it inserts `label` as a link to `href` instead
-   * of `@value` — a reference to a record, such as a ticket. Plain-text
-   * composers ignore it.
+   * Where the option links to. Choosing it inserts `label` as a link to `href`
+   * instead of `@value` — a reference to a record, such as a ticket: a real
+   * link in `RichEditor`, Markdown (`[label](href)`) in a plain-text composer.
    */
   href?: string;
+}
+
+/** What choosing `option` writes in a plain-text composer, before the trailing space. */
+export function mentionText(option: MentionOption): string {
+  if (option.href) {
+    const label = option.label.replace(/[\\[\]]/g, '\\$&');
+    return `[${label}](${option.href})`;
+  }
+  return `@${option.value ?? option.label.split(' ')[0]}`;
 }
 
 /** The options whose label contains `query`, case-insensitively. */
@@ -170,10 +178,9 @@ export function useMentionAutocomplete({
 
   const insert = (option: MentionOption) => {
     if (!mention) return;
-    const insertValue = option.value ?? option.label.split(' ')[0];
     const before = value.slice(0, mention.start);
     const after = value.slice(mention.start + 1 + mention.query.length);
-    const insertText = `@${insertValue} `;
+    const insertText = `${mentionText(option)} `;
     setValue(before + insertText + after);
     setMention(null);
     // Restore caret just after the inserted mention.

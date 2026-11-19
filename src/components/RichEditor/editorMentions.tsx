@@ -13,6 +13,7 @@ import type { EditorView } from 'prosemirror-view';
 import {
   activeMentionQuery,
   filterMentionOptions,
+  mentionText,
   type MentionMenuState,
   type MentionOption,
 } from '../Messaging/useMentionAutocomplete';
@@ -60,9 +61,7 @@ export function insertMention(
 ): Transaction {
   const { schema } = state;
   const link = option.href ? schema.marks.link : undefined;
-  const text = link
-    ? option.label
-    : `@${option.value ?? option.label.split(' ')[0]}`;
+  const text = link ? option.label : mentionText(option);
   const marks = link ? [link.create({ href: option.href })] : undefined;
   const tr = state.tr.replaceWith(range.from, range.to, [
     schema.text(text, marks),
