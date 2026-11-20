@@ -301,6 +301,49 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  // Heading appearance (mieweb/ui#796): the surface must keep Kerebron's
+  // `kb-editor` class when labelling attributes are applied through setProps,
+  // and the story must load kerebron.css — otherwise every `.kb-editor` rule
+  // stops matching and h1–h6 render as body text while the commands keep
+  // "working" in the DOM. The unit tests guard the class string; this guards
+  // the rendered result end to end, "## " input rule included.
+  test('RichMediaCaptureEditor - headings render styled, not as body text', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-richmediacaptureeditor--default');
+    await placeCaretInParagraph(page, 'Capture something');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('## Heading two');
+    await expect(page.locator('.ProseMirror h2')).toHaveText('Heading two');
+
+    const fontOf = (selector: string) =>
+      page
+        .locator(`.ProseMirror ${selector}`)
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el);
+          return {
+            size: parseFloat(style.fontSize),
+            weight: parseInt(style.fontWeight, 10),
+          };
+        });
+    const [h1, h2, p] = await Promise.all([
+      fontOf('h1'),
+      fontOf('h2'),
+      fontOf('p'),
+    ]);
+    // Regressed surfaces render headings at exactly the paragraph's 16px/400.
+    expect(h1.size).toBeGreaterThan(p.size);
+    expect(h2.size).toBeGreaterThan(p.size);
+    expect(h1.weight).toBeGreaterThanOrEqual(700);
+    expect(h2.weight).toBeGreaterThanOrEqual(700);
+
+    await expect(page).toHaveScreenshot(
+      'rich-media-capture-editor-headings.png'
+    );
+  });
+
   // TextAreaRich (Kerebron) mediaCapture opt-in (mieweb/ui#734): the same
   // ribbon docked above the comment field, round-tripping through the real
   // editor into the HTML the field emits.
