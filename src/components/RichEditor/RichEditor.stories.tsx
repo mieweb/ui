@@ -22,7 +22,6 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 - The stored format is **Markdown** — notes, templates with \`{{placeholders}}\`, documentation — and the writer needs headings, lists, tables, code blocks and a real toolbar.
 - Several people edit the **same document at once** (\`collab.room\`), with a \`CollabStatus\` chip showing presence and sync.
 - You need syntax-highlighted source editing — \`CodeEditor\` from the same entry.
-- The writer **references people or records** as they type — \`mentionOptions\` (same \`MentionOption\` shape as \`ChatComposer\`): \`@\` lists matches, choosing one inserts \`@value\`, or the label as a link when the option has an \`href\` (a ticket, a patient chart). The host owns the list and reads mentions back from the Markdown.
 
 ### Don't use it when
 
@@ -230,37 +229,6 @@ function CodeExample() {
     </div>
   );
 }
-
-const MENTION_OPTIONS = [
-  { id: 'u-pam', label: 'Pam Beesly', description: 'Office Admin' },
-  { id: 'u-jim', label: 'Jim Halpert', description: 'Sales' },
-  {
-    id: 't-923',
-    label: 'TH-923: Update the catalog page',
-    meta: 'Ticket',
-    href: '/tickets/923',
-  },
-];
-
-function MentionsExample() {
-  const [value, setValue] = useState('Type @ to mention someone or a ticket: ');
-  return (
-    <div className="max-w-2xl">
-      <RichEditor
-        value={value}
-        onChange={setValue}
-        mentionOptions={MENTION_OPTIONS}
-        aria-label="Plan"
-      />
-      <pre className="mt-4 text-xs">{value}</pre>
-    </div>
-  );
-}
-
-/** Typing `@` lists people and tickets; a ticket goes in as a link. */
-export const Mentions: Story = {
-  render: () => <MentionsExample />,
-};
 
 export const Code: Story = {
   render: () => <CodeExample />,
