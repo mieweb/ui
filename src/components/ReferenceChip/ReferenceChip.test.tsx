@@ -39,6 +39,35 @@ describe('referencesIn', () => {
     expect(referencesIn(text, triggers)).toEqual([]);
   });
 
+  it('skips links in indented code, multiline code spans and unclosed fences', () => {
+    const text =
+      'Intro\n\n    [a](/tickets/t-1)\n\n`span\n[b](/tickets/t-2)`\n\n' +
+      '![[c](/tickets/t-3)](/img.png)\n\n```\n[d](/tickets/t-4)\n';
+    expect(referencesIn(text, triggers)).toEqual([]);
+  });
+
+  it('reads links with a title or parentheses in the destination', () => {
+    const text = '[@Ann](/people/u-ann "Person") and [TH](/tickets/issue(12))';
+    expect(referencesIn(text, triggers)).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann', href: '/people/u-ann' },
+      {
+        kind: 'ticket',
+        id: 'issue(12)',
+        label: 'TH',
+        href: '/tickets/issue(12)',
+      },
+    ]);
+  });
+
+  it('reads links inside lists and tables', () => {
+    const text =
+      '- [@Ann](/people/u-ann)\n\n| A |\n| - |\n| [TH](/tickets/t-9) |';
+    expect(referencesIn(text, triggers).map((r) => r.id)).toEqual([
+      'u-ann',
+      't-9',
+    ]);
+  });
+
   it('unescapes Markdown in the label', () => {
     expect(
       referencesIn('[TH-1: Fix \\[beta\\] form](/tickets/t-1)', triggers)[0]
