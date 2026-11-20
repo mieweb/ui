@@ -177,6 +177,39 @@
 }
 
 /*
+ * Reference chips (RichEditor \`triggers\`). Kerebron's editor rules are
+ * unlayered — \`.kb-editor *\` zeroes padding, \`.kb-editor :where(a)\` colours
+ * links — so in hosts whose editable carries \`.kb-editor\` they outrank the
+ * chip's layered Badge utilities. Restate the chip look here, unlayered and
+ * more specific, with the same tokens as \`Badge\` \`secondary\` \`sm\`.
+ */
+.kb-component .ProseMirror [data-slot='reference-chip'] {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--mieweb-neutral-100, #f5f5f5);
+  color: var(--mieweb-neutral-900, #171717);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  vertical-align: baseline;
+}
+[data-theme='dark'] .kb-component .ProseMirror [data-slot='reference-chip'],
+.dark .kb-component .ProseMirror [data-slot='reference-chip'] {
+  background-color: var(--mieweb-neutral-800, #262626);
+  color: var(--mieweb-neutral-100, #f5f5f5);
+}
+.kb-component
+  .ProseMirror
+  [data-slot='reference-chip'].ProseMirror-selectednode {
+  outline: 2px solid var(--mieweb-primary-500, #27aae1);
+  outline-offset: 1px;
+}
+
+/*
  * Kerebron's base.css paints inline shortcode pills green without setting a
  * text color, so the inherited foreground fails WCAG AA contrast. Pin an
  * explicit white-on-green pairing (≈5.1:1) that holds in both themes.
