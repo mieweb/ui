@@ -4,18 +4,18 @@ export {
   type RichTextEsheetProps,
 } from './RichTextEsheet';
 export {
-  createRichTextEsheetFormDefinition,
   getRichTextEsheetFieldId,
+  getRichTextEsheetFormSections,
   getRichTextEsheetSectionFieldId,
   getRichTextEsheetSectionText,
   partyFindings,
-  validateRichTextEsheetDefinition,
-  type RichTextEsheetDefinition,
+  validateRichTextEsheetForm,
+  withRichTextEsheetParties,
   type RichTextEsheetIssue,
   type RichTextEsheetMode,
   type RichTextEsheetParty,
   type RichTextEsheetResponses,
-  type RichTextEsheetSection,
+  type RichTextEsheetSectionView,
   type RichTextEsheetSnapshot,
 } from './definition';
 export { createRichTextEsheetSnapshot } from './model';

@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isMap, parseDocument } from 'yaml';
-import {
-  getEncounterFieldId,
-  createEncounterFormDefinition,
-} from './definition';
+import { getEncounterFieldId } from './definition';
 import {
   createEncounterMdy,
   encounterDocumentResponse,
@@ -16,37 +13,132 @@ import {
   updateEncounterDocumentBody,
 } from './mdy';
 import { createEncounterSnapshot } from './model';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import type { FormDefinition } from '@esheet/core';
+import type { EncounterResponses } from './types';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'visit',
   title: 'Visit note',
-  sections: [
-    { id: 'hpi', title: 'History', kind: 'narrative' },
+  pages: [
     {
-      id: 'exam',
-      title: 'Examination',
-      kind: 'observations',
-      observations: [
+      id: 'visit:visit',
+      title: 'Visit note',
+      fields: [
         {
-          id: 'pulse',
-          label: 'Pulse',
-          type: 'number',
-          unit: '/min',
-          code: { system: 'http://loinc.org', code: '8867-4' },
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'History',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'History',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
         },
         {
-          id: 'tobacco',
-          label: 'Tobacco use',
-          type: 'choice',
-          options: ['Yes', 'No'],
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Examination',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:pulse',
+              question: 'Pulse',
+              unit: '/min',
+              width: 'full',
+              _sourceData: {
+                code: {
+                  system: 'http://loinc.org',
+                  code: '8867-4',
+                },
+              },
+              fieldType: 'text',
+              inputType: 'number',
+              validators: [
+                {
+                  type: 'number',
+                  message: 'Enter a finite nonnegative number.',
+                },
+              ],
+            },
+            {
+              id: 'encounter:exam:observation:tobacco',
+              question: 'Tobacco use',
+              width: 'full',
+              fieldType: 'dropdown',
+              options: [
+                {
+                  id: 'Yes',
+                  value: 'Yes',
+                  text: 'Yes',
+                },
+                {
+                  id: 'No',
+                  value: 'No',
+                  text: 'No',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:plan:section',
+          fieldType: 'section',
+          title: 'Plan',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:plan:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Plan',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
         },
       ],
     },
-    { id: 'vitals', title: 'Vitals', kind: 'vitals' },
-    { id: 'plan', title: 'Plan', kind: 'narrative' },
   ],
-};
+} as unknown as FormDefinition;
 
 const hpiId = getEncounterFieldId('hpi');
 const pulseId = getEncounterFieldId('exam', 'pulse');
@@ -54,7 +146,7 @@ const choiceId = getEncounterFieldId('exam', 'tobacco');
 const vitalsId = getEncounterFieldId('vitals', 'value');
 
 function snapshot(responses: EncounterResponses = {}) {
-  return createEncounterSnapshot(definition, responses);
+  return createEncounterSnapshot(form, responses);
 }
 
 describe('Encounter MDY data and linked narrative', () => {
@@ -66,9 +158,8 @@ describe('Encounter MDY data and linked narrative', () => {
     };
     const source = createEncounterMdy(snapshot(responses));
     const parsed = parseEncounterMdy(source);
-    expect(parsed.form).toEqual(createEncounterFormDefinition(definition));
+    expect(parsed.form).toEqual(form);
     expect(parsed.response).toEqual(responses);
-    expect(parsed.definition).toEqual(definition);
     expect(parsed.frontMatter?.mdy).toMatchObject({
       kind: 'document',
       schema: 'esheet',
@@ -89,8 +180,10 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(parsed.body).not.toContain('8867-4');
     expect(parsed.body).not.toContain('](mdy:encounter:');
     const reordered = {
-      ...definition,
-      sections: [...definition.sections].reverse(),
+      ...form,
+      pages: [
+        { ...form.pages[0], fields: [...form.pages[0].fields!].reverse() },
+      ],
     };
     const reorderedFields = getEncounterMdyFields(
       createEncounterSnapshot(reordered, responses)
@@ -156,16 +249,94 @@ describe('Encounter MDY data and linked narrative', () => {
   });
 
   it('treats structured empty containers and vital metadata as uncaptured findings', () => {
-    const structuredDefinition: EncounterVisitDefinition = {
+    const structuredForm = {
       id: 'structured',
       title: 'Structured note',
-      sections: [
-        { id: 'vitals', title: 'Vitals', kind: 'vitals' },
-        { id: 'medications', title: 'Medications', kind: 'medications' },
-        { id: 'allergies', title: 'Allergies', kind: 'allergies' },
-        { id: 'assessment', title: 'Assessment', kind: 'assessment' },
+      pages: [
+        {
+          id: 'structured:visit',
+          title: 'Structured note',
+          fields: [
+            {
+              id: 'encounter:vitals:section',
+              fieldType: 'section',
+              title: 'Vitals',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'vitals',
+              },
+              fields: [
+                {
+                  id: 'encounter:vitals:observation:value',
+                  fieldType: 'encounterVitals',
+                  question: 'Vitals',
+                  _sourceData: {},
+                  width: 'full',
+                },
+              ],
+            },
+            {
+              id: 'encounter:medications:section',
+              fieldType: 'section',
+              title: 'Medications',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'medications',
+              },
+              fields: [
+                {
+                  id: 'encounter:medications:observation:value',
+                  fieldType: 'encounterMedications',
+                  question: 'Medications',
+                  _sourceData: {},
+                  width: 'full',
+                },
+              ],
+            },
+            {
+              id: 'encounter:allergies:section',
+              fieldType: 'section',
+              title: 'Allergies',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'allergies',
+              },
+              fields: [
+                {
+                  id: 'encounter:allergies:observation:value',
+                  fieldType: 'encounterAllergies',
+                  question: 'Allergies',
+                  _sourceData: {},
+                  width: 'full',
+                },
+              ],
+            },
+            {
+              id: 'encounter:assessment:section',
+              fieldType: 'section',
+              title: 'Assessment',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'assessment',
+              },
+              fields: [
+                {
+                  id: 'encounter:assessment:observation:value',
+                  fieldType: 'encounterAssessment',
+                  question: 'Assessment',
+                  _sourceData: {},
+                  width: 'full',
+                },
+              ],
+            },
+          ],
+        },
       ],
-    };
+    } as unknown as FormDefinition;
     const medicationsId = getEncounterFieldId('medications', 'value');
     const allergiesId = getEncounterFieldId('allergies', 'value');
     const assessmentId = getEncounterFieldId('assessment', 'value');
@@ -179,9 +350,9 @@ describe('Encounter MDY data and linked narrative', () => {
         answer: JSON.stringify({ concerns: [], items: [], orders: [] }),
       },
     };
-    const blank = createEncounterSnapshot(structuredDefinition, blankResponses);
+    const blank = createEncounterSnapshot(structuredForm, blankResponses);
     expect(getEncounterMdyFields(blank).every(({ empty }) => empty)).toBe(true);
-    const metadata = createEncounterSnapshot(structuredDefinition, {
+    const metadata = createEncounterSnapshot(structuredForm, {
       ...blankResponses,
       [vitalsId]: {
         answer: JSON.stringify({
@@ -200,7 +371,7 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(getEncounterMdyFields(metadata).every(({ empty }) => empty)).toBe(
       true
     );
-    const entered = createEncounterSnapshot(structuredDefinition, {
+    const entered = createEncounterSnapshot(structuredForm, {
       ...blankResponses,
       [vitalsId]: {
         answer: JSON.stringify({
@@ -279,7 +450,7 @@ describe('Encounter MDY data and linked narrative', () => {
         ({ fieldId }) => fieldId === hpiId
       )!;
       const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-      document.delete('encounterDefinition');
+      document.delete('form');
       document.setIn(['response', hpiId], { answer: JSON.stringify(value) });
       document.setIn([field.id, 'display'], 'Cached placeholder');
       const rendered = await renderEncounterMdy(
@@ -305,7 +476,7 @@ describe('Encounter MDY data and linked narrative', () => {
       const original = snapshot();
       const parsed = parseEncounterMdy(original.mdy);
       const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-      document.delete('encounterDefinition');
+      document.delete('form');
       document.setIn(['response', choiceId], { selected });
       const rendered = await renderEncounterMdy(
         `---\n${document.toString()}---\n${parsed.body}`
@@ -379,6 +550,20 @@ describe('Encounter MDY data and linked narrative', () => {
       `\`\`${link}\`\` [Updated finding](mdy:${hpi.id})`
     );
   }, 1_000);
+
+  it('scrubs the removed legacy encounterDefinition key on re-save', () => {
+    // A transition-era document may carry the pre-#772 schema key alongside
+    // the native form; the engine otherwise preserves imported front matter.
+    const original = snapshot({ [hpiId]: { answer: 'Original' } });
+    const withLegacy = createEncounterMdy(original).replace(
+      '---\n',
+      '---\nencounterDefinition:\n  id: visit\n  title: Legacy\n  sections: []\n'
+    );
+    expect(withLegacy).toContain('encounterDefinition:');
+    const resaved = createEncounterMdy(original, undefined, withLegacy);
+    expect(resaved).not.toContain('encounterDefinition');
+    expect(parseEncounterMdy(resaved).form).toEqual(form);
+  });
 
   it('preserves imported YAML bytes on no-op and comments/provenance on data writes', () => {
     const originalSnapshot = snapshot({ [hpiId]: { answer: 'Original' } });
@@ -530,13 +715,11 @@ describe('Encounter MDY data and linked narrative', () => {
     const source = createEncounterMdy(snapshot());
     const parsed = parseEncounterMdy(source);
     const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-    document.delete('encounterDefinition');
     const portable = parseEncounterMdy(
       `---\n${document.toString()}---\n${parsed.body}`
     );
     expect(portable.form).toBeDefined();
     expect(portable.response).toEqual({});
-    expect(portable.definition).toBeUndefined();
     expect(portable.diagnostics).toEqual([]);
   });
 
@@ -638,8 +821,8 @@ describe('Encounter MDY data and linked narrative', () => {
       section.commentBefore = 'Retain this active section comment.';
     const imported = `---\n${document.toString()}---\n${parsed.body}`;
     const reduced = {
-      ...definition,
-      sections: definition.sections.slice(0, 3),
+      ...form,
+      pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(0, 3) }],
     };
     const updated = createEncounterMdy(
       createEncounterSnapshot(reduced, original.responses),
@@ -668,8 +851,8 @@ describe('Encounter MDY data and linked narrative', () => {
       ({ fieldId }) => fieldId === planId
     )!;
     const reduced = {
-      ...definition,
-      sections: definition.sections.slice(0, 3),
+      ...form,
+      pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(0, 3) }],
     };
     const responses = {
       [planId]: { answer: 'Latest retained answer' },
@@ -727,13 +910,14 @@ describe('Encounter MDY data and linked narrative', () => {
     const original = snapshot({ [pulseId]: { answer: '72' } });
     const parsed = parseEncounterMdy(original.mdy);
     const document = parseDocument(parsed.frontMatterSource.slice(4, -4));
-    document.delete('encounterDefinition');
+    document.delete('form');
     document.setIn(['response', pulseId, 'answer'], '80');
     const rendered = await renderEncounterMdy(
       `---\n${document.toString()}---\n${parsed.body}`
     );
-    expect(rendered.raw).toContain('[80 /min]');
-    expect(rendered.raw).not.toContain('[72 /min]');
+    // Without any form the projection is generic: no unit is known.
+    expect(rendered.raw).toContain('[80](mdy:');
+    expect(rendered.raw).not.toContain('[72');
     expect(
       rendered.diagnostics.some(
         ({ code, fieldId }) => code === 'response' && fieldId === pulseId
@@ -763,6 +947,5 @@ describe('Encounter MDY data and linked narrative', () => {
     expect(rendered.raw).toBe(body);
     expect(rendered.html).toContain('framed: authored prose');
     expect(rendered.html).toContain('Authored heading');
-    expect(rendered.raw).not.toContain('encounterDefinition:');
   });
 });

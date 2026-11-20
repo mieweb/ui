@@ -3,16 +3,16 @@ import {
   validateEncounterResponses,
   validateEncounterVitals,
 } from './model';
-import { getEncounterFieldId, validateEncounterDefinition } from './definition';
+import type { FormDefinition } from '@esheet/core';
+import { getEncounterFieldId, getEncounterFormSections } from './definition';
 import { updateEncounterDocumentBody } from './mdy';
 import { applyEncounterNarrativeFinding } from './narrativeFindings';
 import type {
   EncounterResponses,
-  EncounterSectionDefinition,
+  EncounterSectionView,
   EncounterValidationIssue,
   EncounterVitalReading,
   EncounterVitalsValue,
-  EncounterVisitDefinition,
   EncounterVisitSnapshot,
 } from './types';
 
@@ -42,7 +42,7 @@ export type EncounterVisitToolResult<T = unknown> =
 
 /** Bind to the active eSheet store; getters are evaluated for every call. */
 export interface EncounterVisitToolOptions {
-  getDefinition: () => EncounterVisitDefinition;
+  getForm: () => FormDefinition;
   getResponses: () => EncounterResponses;
   /** Commit the complete next native response map in one update. */
   setResponses: (responses: EncounterResponses) => void;
@@ -52,7 +52,7 @@ export interface EncounterVisitToolOptions {
 
 export interface EncounterVisitTools {
   getVisit: () => EncounterVisitToolResult<EncounterVisitSnapshot>;
-  listSections: () => EncounterVisitToolResult<EncounterSectionDefinition[]>;
+  listSections: () => EncounterVisitToolResult<EncounterSectionView[]>;
   setNarrative: (
     sectionId: string,
     text: string
@@ -186,17 +186,18 @@ export function createEncounterVisitTools(
     }
   }
 
-  function definition(): EncounterVisitDefinition {
-    const current = options.getDefinition();
-    validateEncounterDefinition(current);
-    return current;
+  function form(): FormDefinition {
+    return options.getForm();
   }
 
-  function section(sectionId: string): EncounterSectionDefinition {
+  /** Deriving views also rejects an invalid host form before any tool runs. */
+  function sections(): EncounterSectionView[] {
+    return getEncounterFormSections(form());
+  }
+
+  function section(sectionId: string): EncounterSectionView {
     requireId(sectionId, 'sectionId');
-    const current = definition().sections.find(
-      (entry) => entry.id === sectionId
-    );
+    const current = sections().find((entry) => entry.id === sectionId);
     if (!current)
       throw new ToolError(
         'UNKNOWN_SECTION',
@@ -211,7 +212,7 @@ export function createEncounterVisitTools(
   }
 
   function snapshot(): EncounterVisitSnapshot {
-    return createEncounterSnapshot(definition(), options.getResponses());
+    return createEncounterSnapshot(form(), options.getResponses());
   }
 
   function write(
@@ -220,12 +221,12 @@ export function createEncounterVisitTools(
     response: EncounterResponses[string],
     targetReadingId?: string
   ): EncounterVisitSnapshot {
-    const currentDefinition = definition();
+    const currentForm = form();
     const previous = options.getResponses();
     const replacement = { ...response, _ai: true };
     // Narrative and structured writes replace answer storage, including invalid imports.
     // Choices alone keep selection storage, and setObservation supplies their new identity.
-    const target = currentDefinition.sections.find(
+    const target = getEncounterFormSections(currentForm).find(
       ({ id }) => id === sectionId
     );
     const isChoice = target?.observations?.some(
@@ -244,9 +245,9 @@ export function createEncounterVisitTools(
         issue.message,
       ]);
     const previousIssueKeys = new Set(
-      validateEncounterResponses(currentDefinition, previous).map(issueKey)
+      validateEncounterResponses(currentForm, previous).map(issueKey)
     );
-    const issues = validateEncounterResponses(currentDefinition, next).filter(
+    const issues = validateEncounterResponses(currentForm, next).filter(
       (issue) =>
         (issue.sectionId === sectionId &&
           issue.fieldId === fieldId &&
@@ -261,7 +262,7 @@ export function createEncounterVisitTools(
     if (issues.length)
       throw new ToolError('INVALID_RESPONSE', issues[0].message, issues);
     options.setResponses(next);
-    return createEncounterSnapshot(currentDefinition, next);
+    return createEncounterSnapshot(currentForm, next);
   }
 
   function structured(
@@ -326,7 +327,7 @@ export function createEncounterVisitTools(
 
   return {
     getVisit: () => run(snapshot),
-    listSections: () => run(() => definition().sections),
+    listSections: () => run(() => sections()),
     setNarrative: (sectionId, text) =>
       run(() => {
         writable();
@@ -531,7 +532,7 @@ export function createEncounterVisitTools(
     validateVisit: () =>
       run(() => {
         const issues = validateEncounterResponses(
-          definition(),
+          form(),
           options.getResponses()
         );
         return { valid: issues.length === 0, issues };
@@ -543,12 +544,15 @@ export function createEncounterVisitTools(
         writable();
         if (typeof body !== 'string')
           throw new ToolError('INVALID_ARGUMENT', 'body must be a string.');
-        const currentDefinition = definition();
+        const currentForm = form();
         const next = updateEncounterDocumentBody(options.getResponses(), body, {
           _ai: true,
         });
+        // Build the snapshot first: an invalid host form must fail the tool
+        // without mutating the response store.
+        const updated = createEncounterSnapshot(currentForm, next);
         options.setResponses(next);
-        return createEncounterSnapshot(currentDefinition, next);
+        return updated;
       }),
     navigateToSection: (sectionId) =>
       run(() => {

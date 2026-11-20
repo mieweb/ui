@@ -18,8 +18,8 @@ chrome stylesheet `src/styles/encounter-visit.css` is scoped
 change.
 
 The form, RichEdit and view surfaces share the same FormStore responses. The
-portable document is MDY: YAML front matter retains the generated form, native
-`response` map and `encounterDefinition`, while its Markdown body is stored in
+portable document is MDY: YAML front matter retains the native form and
+`response` map, while its Markdown body is stored in
 the reserved `__encounter_document__` response. Exclude that reserved response
 from the exported `response` map to avoid recursive document copies. Preserve
 imported front matter in `attributes.mdyFrontMatterSource`; body edits retain
@@ -119,8 +119,9 @@ components retain their existing behavior unless `requireCode` is enabled.
 Only an explicit no-known-allergies flag exports
 [SNOMED CT 716186003](https://www.hl7.org/fhir/uv/ipa/STU1/AllergyIntolerance-NKAExample.html).
 
-Assertion dates are real ISO calendar dates (`YYYY-MM-DD`). The host may provide
-`definition.encounterDate`; without a valid date the Conditions/Assessment
+Assertion dates are real ISO calendar dates (`YYYY-MM-DD`). The host may stamp
+`_sourceData.encounterDate` on structured clinical fields; without a valid date
+the Conditions/Assessment
 fields remove the assertion-creating affordances (add search, add pill,
 observe/refine/revise) and show a short notice — undated actions such as
 resolve, relate, remove and orders stay available. Never infer the clinical

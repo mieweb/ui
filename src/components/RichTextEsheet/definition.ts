@@ -1,9 +1,9 @@
-import type {
-  FieldDefinition,
-  FieldResponse,
-  FormDefinition,
-} from '@esheet/core';
-import type { NarrativeFinding } from '../../esheet-fields/narrativeFindings';
+import type { FieldResponse, FormDefinition } from '@esheet/core';
+import {
+  validNarrativeFindings,
+  type NarrativeFinding,
+} from '../../esheet-fields/narrativeFindings';
+import { STRUCTURAL_FIELD_TYPES } from './documentMdy';
 
 /** A person or system the document references, e.g. a patient and a provider. */
 export interface RichTextEsheetParty {
@@ -12,30 +12,6 @@ export interface RichTextEsheetParty {
   name: string;
   /** Identifying line shown beside the name, e.g. a DOB, NPI or email. */
   detail?: string;
-}
-
-export interface RichTextEsheetSection {
-  id: string;
-  title: string;
-  /** Guidance shown above the section's field. */
-  description?: string;
-  /** Memory-aid phrases docked as macros, each with a derived dot-phrase. */
-  findings?: NarrativeFinding[];
-  /** Require content in this section before submitting. */
-  required?: boolean;
-  /**
-   * Registered custom eSheet field type for non-narrative sections. Defaults
-   * to the built-in guided narrative; any other value must be registered with
-   * `registerCustomFieldTypes` before the component mounts.
-   */
-  fieldType?: string;
-}
-
-/** Document sections and their memory aids; contains no identity data. */
-export interface RichTextEsheetDefinition {
-  id: string;
-  title: string;
-  sections: RichTextEsheetSection[];
 }
 
 /** Native eSheet answers, keyed by generated field id. */
@@ -50,7 +26,8 @@ export interface RichTextEsheetIssue {
 export type RichTextEsheetMode = 'esheet' | 'rich' | 'view' | 'export';
 
 export interface RichTextEsheetSnapshot {
-  definition: RichTextEsheetDefinition;
+  /** The native eSheet form — the single structural schema (mieweb/ui#772). */
+  form: FormDefinition;
   /** Native eSheet responses — the canonical draft state. */
   responses: RichTextEsheetResponses;
   /** The parties the document references, retained in the MDY front matter. */
@@ -61,6 +38,18 @@ export interface RichTextEsheetSnapshot {
   errors: RichTextEsheetIssue[];
   /** Portable document: YAML front matter + Markdown body. */
   mdy: string;
+}
+
+/**
+ * One document section reconstructed from its native fields. The form is the
+ * single source of truth; views only exist so document logic can iterate
+ * sections without a parallel schema (mieweb/ui#772).
+ */
+export interface RichTextEsheetSectionView {
+  id: string;
+  title: string;
+  /** Require content in this section before submitting. */
+  required?: boolean;
 }
 
 /** Encode the identifier separately so punctuation cannot collide with delimiters. */
@@ -77,55 +66,104 @@ function nonempty(value: unknown): value is string {
 }
 
 function invalid(message: string): never {
-  throw new Error(`Invalid RichTextEsheet definition: ${message}`);
+  throw new Error(`Invalid RichTextEsheet form: ${message}`);
+}
+
+function safeDecode(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
+
+const SECTION_FIELD_ID = /^richtext:([^:]+):section$/;
+
+type FieldNode = Record<string, unknown> & { fields?: unknown };
+
+function fieldNodes(fields: unknown): FieldNode[] {
+  return Array.isArray(fields) ? (fields as FieldNode[]) : [];
+}
+
+function sectionView(field: FieldNode): RichTextEsheetSectionView {
+  if (field.fieldType !== 'section' || typeof field.id !== 'string')
+    invalid('every top-level field is a richtext section');
+  const encoded = SECTION_FIELD_ID.exec(field.id);
+  const id = encoded ? safeDecode(encoded[1]) : undefined;
+  if (id === undefined)
+    invalid(`section field ids use richtext:<section>:section (${field.id})`);
+  if (field.id !== getRichTextEsheetSectionFieldId(id))
+    invalid(
+      `section field ids use the canonical encoded section id (${field.id})`
+    );
+  if (!nonempty(field.title)) invalid(`sections require a title in ${id}`);
+  const valueId = getRichTextEsheetFieldId(id);
+  const descriptionId = `${field.id}:description`;
+  let value: FieldNode | undefined;
+  let description = false;
+  for (const child of fieldNodes(field.fields)) {
+    if (child.id === descriptionId && child.fieldType === 'display') {
+      if (description) invalid(`duplicate section description field in ${id}`);
+      description = true;
+      continue;
+    }
+    if (child.id === valueId && child.fieldType !== 'display') {
+      if (value) invalid(`duplicate section value field in ${id}`);
+      value = child;
+      continue;
+    }
+    invalid(`unexpected field ${String(child.id)} in section ${id}`);
+  }
+  if (!value) invalid(`section ${id} requires its richtext value field`);
+  if (!nonempty(value.fieldType))
+    invalid(`fieldType must be a nonempty string in ${id}`);
+  // The engine flattens structural containers and projects only their leaf
+  // children, so a container here could never carry the section's answer.
+  if (STRUCTURAL_FIELD_TYPES.has(value.fieldType))
+    invalid(`the value field in ${id} must be an answer-bearing field`);
+  if (value.required !== undefined && typeof value.required !== 'boolean')
+    invalid(`required must be boolean in ${id}`);
+  return {
+    id,
+    title: field.title as string,
+    ...(value.required === true ? { required: true } : {}),
+  };
+}
+
+/**
+ * Rebuild the document's section views from the native form, validating the
+ * structural conventions every RichTextEsheet surface relies on.
+ */
+export function getRichTextEsheetFormSections(
+  form: FormDefinition
+): RichTextEsheetSectionView[] {
+  if (!form || typeof form !== 'object') invalid('expected an object');
+  if (!nonempty(form.id) || !nonempty(form.title))
+    invalid('id and title must be nonempty strings');
+  if (!Array.isArray(form.pages) || form.pages.length === 0)
+    invalid('at least one page is required');
+  // The document surface renders without page navigation: sections on later
+  // pages would be unreachable yet still gate saving.
+  if (form.pages.length > 1) invalid('exactly one page is required');
+  const views: RichTextEsheetSectionView[] = [];
+  const ids = new Set<string>();
+  for (const page of form.pages) {
+    for (const field of fieldNodes(
+      (page as unknown as FieldNode).fields ?? []
+    )) {
+      const view = sectionView(field);
+      if (ids.has(view.id)) invalid(`duplicate section id ${view.id}`);
+      ids.add(view.id);
+      views.push(view);
+    }
+  }
+  if (views.length === 0) invalid('at least one section is required');
+  return views;
 }
 
 /** Reject ambiguous identifiers and invalid configuration before constructing an eSheet. */
-export function validateRichTextEsheetDefinition(
-  definition: RichTextEsheetDefinition
-): void {
-  if (!definition || typeof definition !== 'object')
-    invalid('expected an object');
-  if (!nonempty(definition.id) || !nonempty(definition.title))
-    invalid('id and title must be nonempty strings');
-  if (!Array.isArray(definition.sections) || definition.sections.length === 0)
-    invalid('at least one section is required');
-  const sectionIds = new Set<string>();
-  for (const section of definition.sections) {
-    if (!section || typeof section !== 'object')
-      invalid('expected a section object');
-    if (!nonempty(section.id) || !nonempty(section.title))
-      invalid('each section requires an id and title');
-    if (sectionIds.has(section.id))
-      invalid(`duplicate section id ${section.id}`);
-    sectionIds.add(section.id);
-    if (
-      section.description !== undefined &&
-      typeof section.description !== 'string'
-    )
-      invalid(`invalid description in ${section.id}`);
-    if (section.required !== undefined && typeof section.required !== 'boolean')
-      invalid(`required must be boolean in ${section.id}`);
-    if (section.fieldType !== undefined && !nonempty(section.fieldType))
-      invalid(`fieldType must be a nonempty string in ${section.id}`);
-    if (section.findings === undefined) continue;
-    if (!Array.isArray(section.findings))
-      invalid(`findings must be an array in ${section.id}`);
-    const findingIds = new Set<string>();
-    for (const finding of section.findings) {
-      if (
-        !finding ||
-        typeof finding !== 'object' ||
-        !nonempty(finding.id) ||
-        !nonempty(finding.label) ||
-        !nonempty(finding.text)
-      )
-        invalid(`findings require id, label and text in ${section.id}`);
-      if (findingIds.has(finding.id))
-        invalid(`duplicate finding id ${finding.id} in ${section.id}`);
-      findingIds.add(finding.id);
-    }
-  }
+export function validateRichTextEsheetForm(form: FormDefinition): void {
+  getRichTextEsheetFormSections(form);
 }
 
 /** Each party becomes an insertable macro so authors can drop names into the text. */
@@ -144,63 +182,50 @@ export function partyFindings(
   }));
 }
 
-/** All sections remain native eSheet sections with native FieldResponse values. */
-export function createRichTextEsheetFormDefinition(
-  definition: RichTextEsheetDefinition,
+/**
+ * Dock each party's macro beside every guided narrative section. Macros are
+ * derived presentation state injected at the rendering boundary: previously
+ * generated `party:` findings (forms that stamped macros before mieweb/ui#772)
+ * are replaced by the live parties — including removal when the live list is
+ * empty — while authored findings are kept, sanitized through the same
+ * whitelist the narrative field applies.
+ */
+export function withRichTextEsheetParties(
+  form: FormDefinition,
   parties?: RichTextEsheetParty[]
 ): FormDefinition {
-  validateRichTextEsheetDefinition(definition);
-  const partyMacros = partyFindings(parties);
+  const macros = partyFindings(parties);
   return {
-    id: definition.id,
-    title: definition.title,
-    pages: [
-      {
-        id: `${definition.id}:document`,
-        title: definition.title,
-        fields: definition.sections.map((section) => {
-          const fields: FieldDefinition[] = [];
-          if (section.description) {
-            fields.push({
-              id: `${getRichTextEsheetSectionFieldId(section.id)}:description`,
-              fieldType: 'display',
-              content: section.description,
-              width: 'full',
-            });
-          }
-          // eSheet deliberately keeps custom types outside its built-in TypeScript union.
-          const fieldType = section.fieldType ?? 'esheetNarrative';
-          fields.push({
-            id: getRichTextEsheetFieldId(section.id),
-            fieldType,
-            question: section.title,
-            required: section.required,
-            width: 'full',
-            // Keyed off the resolved type: an explicit 'esheetNarrative'
-            // override keeps its findings, macros and hidden label.
-            _sourceData:
-              fieldType === 'esheetNarrative'
-                ? {
-                    narrativeHideLabel: true,
-                    narrativeFindings: [
-                      ...(section.findings ?? []),
-                      ...partyMacros,
-                    ],
-                  }
-                : undefined,
-          } as unknown as FieldDefinition);
-          return {
-            id: getRichTextEsheetSectionFieldId(section.id),
-            fieldType: 'section' as const,
-            title: section.title,
-            sectionCollapse: 'expanded' as const,
-            width: 'full' as const,
-            fields,
-          };
-        }),
-      },
-    ],
-  };
+    ...form,
+    pages: form.pages.map((page) => ({
+      ...page,
+      fields: fieldNodes((page as unknown as FieldNode).fields).map(
+        (section) => ({
+          ...section,
+          fields: fieldNodes(section.fields).map((field) => {
+            if (field.fieldType !== 'esheetNarrative') return field;
+            const source = (field._sourceData ?? {}) as Record<string, unknown>;
+            // The `party:` id prefix is reserved for generated macros.
+            const authored = validNarrativeFindings(
+              source.narrativeFindings
+            ).filter((finding) => !finding.id.startsWith('party:'));
+            const known = new Set(authored.map((finding) => finding.id));
+            return {
+              ...field,
+              _sourceData: {
+                ...source,
+                narrativeFindings: [
+                  ...authored,
+                  ...macros.filter((macro) => !known.has(macro.id)),
+                ],
+              },
+            };
+          }),
+        })
+      ),
+    })),
+    // Field nodes are opaque records; eSheet keeps custom types outside its union.
+  } as unknown as FormDefinition;
 }
 
 function record(value: unknown): value is Record<string, unknown> {
