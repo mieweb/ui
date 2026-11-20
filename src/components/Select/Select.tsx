@@ -693,8 +693,10 @@ function Select(props: SelectProps) {
                 // Keep unused edges explicitly auto; clearing an edge would
                 // restore the browser's default popover inset of 0.
                 top: 'auto',
+                // rtl-ignore -- reset the physical right inset for viewport positioning.
                 right: 'auto',
                 bottom: 'auto',
+                // rtl-ignore -- useAnchoredPosition sets a physical left coordinate.
                 left: 'auto',
                 margin: 0,
                 padding: 0,
