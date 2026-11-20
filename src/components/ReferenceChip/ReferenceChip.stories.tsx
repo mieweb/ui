@@ -31,9 +31,9 @@ const meta: Meta<typeof ReferenceChip> = {
 \`\`\`tsx
 const triggers: ReferenceTrigger[] = [
   { kind: 'person', char: '@', label: t('people'), search: searchPeople,
-    toHref: (id) => \\\`/people/\\\${id}\\\`, fromHref: (h) => h.match(/^\\/people\\/(.+)/)?.[1] ?? null },
+    toHref: (id) => \`/people/\${id}\`, fromHref: (h) => h.match(/^\\/people\\/(.+)/)?.[1] ?? null },
   { kind: 'ticket', char: '#', label: t('tickets'), search: searchTickets,
-    toHref: (id) => \\\`/tickets/\\\${id}\\\`, fromHref: (h) => h.match(/^\\/tickets\\/(.+)/)?.[1] ?? null },
+    toHref: (id) => \`/tickets/\${id}\`, fromHref: (h) => h.match(/^\\/tickets\\/(.+)/)?.[1] ?? null },
 ];
 
 const mentioned = referencesIn(post.text, triggers)
@@ -61,6 +61,16 @@ The host owns the records: what a kind means, how candidates are found, and chec
           type: 'uses',
           target: 'data-display-badge',
           why: 'Borrows badgeVariants for its look; Badge is the chip for a status or tag with no record behind it.',
+        },
+        {
+          type: 'alternative to',
+          target: 'data-display-badge',
+          why: 'Badge is a status or tag label with no record behind it; ReferenceChip names a record and links to it.',
+        },
+        {
+          type: 'alternative to',
+          target: 'text-inputs-tageditor',
+          why: 'TagEditor edits a list of removable tags in a form; ReferenceChip shows a record named inline in text.',
         },
       ],
     },
