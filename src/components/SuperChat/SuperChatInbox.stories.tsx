@@ -278,6 +278,22 @@ function InteractiveInbox(
     <SuperChatInbox
       {...rest}
       conversations={conversations}
+      onMessageEdited={(messageId, text, meta) => {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === meta.conversation.id
+              ? {
+                  ...c,
+                  thread: c.thread.map((m) =>
+                    m.id === messageId
+                      ? { ...m, text, editedAt: new Date().toISOString() }
+                      : m
+                  ),
+                }
+              : c
+          )
+        );
+      }}
       onMessageSent={(text, meta) => {
         const now = new Date().toISOString();
         const images = meta.attachments
