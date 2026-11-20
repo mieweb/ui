@@ -295,8 +295,11 @@ export interface ChatComposerProps {
    */
   editor?: 'plain' | 'rich';
   /**
-   * Inline references for the `'rich'` editor — e.g. `@` people, `#`
-   * tickets. Sent messages carry them as `references`, read from the text.
+   * Inline references — e.g. `@` people, `#` tickets. Typing a trigger's
+   * character searches it; a pick is a chip in the `'rich'` editor and a
+   * Markdown link (`[label](href)`) in the textarea. A trigger on `@` lists
+   * after `mentionOptions`. Sent messages carry `references`, read from the
+   * text.
    */
   triggers?: ReferenceTrigger[];
 
@@ -508,6 +511,8 @@ export const ChatComposer = React.forwardRef<
   // MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
     options: mentionOptions,
+    // The rich editor handles its own triggers.
+    triggers: rich ? undefined : triggers,
     value,
     setValue,
     textareaRef,
@@ -852,7 +857,7 @@ export const ChatComposer = React.forwardRef<
         <div className={cells.input} ref={mention.anchorRef}>
           <MentionMenu
             mention={mention}
-            label={mentionListLabel}
+            label={mention.activeTrigger?.label ?? mentionListLabel}
             dataSlot="chat-composer-mention-list"
           />
           {rich ? (

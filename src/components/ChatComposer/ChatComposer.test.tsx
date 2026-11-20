@@ -42,6 +42,36 @@ describe('ChatComposer', () => {
     ]);
   });
 
+  it('inserts a # trigger pick in the textarea as a Markdown link', async () => {
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async (query: string) =>
+        'fix login'.includes(query.toLowerCase())
+          ? [{ kind: 'ticket', id: 't-12', label: 'TH-12: Fix [beta] login' }]
+          : [],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'On #fix', selectionStart: 7, selectionEnd: 7 },
+    });
+    const option = await screen.findByRole('option', {
+      name: 'TH-12: Fix [beta] login',
+    });
+    expect(
+      screen.getByRole('listbox', { name: 'Tickets' })
+    ).toBeInTheDocument();
+    fireEvent.mouseDown(option);
+    expect(input).toHaveValue(
+      'On [TH-12: Fix \\[beta\\] login](/tickets/t-12) '
+    );
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);
