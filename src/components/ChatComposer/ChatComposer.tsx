@@ -484,8 +484,13 @@ export const ChatComposer = React.forwardRef<
     );
     return () => cancelAnimationFrame(frame);
   }, [sendMenuOpen]);
+  const hasEnabledSendOption = !!sendOptions?.some((o) => !o.disabled);
   const handleSendMenuKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Escape') {
+    // Escape and Tab both leave the menu for its trigger. The menu is portaled
+    // to <body>, so a Tab left to the browser would follow body order — out of
+    // the composer and past a surrounding Modal's focus trap. Tab resumes from
+    // the trigger, in the composer's own tab order.
+    if (event.key === 'Escape' || event.key === 'Tab') {
       event.preventDefault();
       // Keep Escape from also reaching a surrounding Modal's document listener.
       event.stopPropagation();
@@ -1173,7 +1178,9 @@ export const ChatComposer = React.forwardRef<
                     type="button"
                     data-slot="chat-composer-send-options"
                     aria-label={sendOptionsLabel}
-                    disabled={!canSend}
+                    // With every option disabled the menu would open with
+                    // nothing to focus, so Escape couldn't reach its handler.
+                    disabled={!canSend || !hasEnabledSendOption}
                     onMouseDown={keepInputFocus}
                     className={cn(iconButtonClasses, 'w-6')}
                   >

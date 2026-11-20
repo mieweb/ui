@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
+import { Modal } from '../Modal';
 import {
   ChatComposer,
   type ChatComposerHandle,
@@ -326,6 +327,50 @@ describe('ChatComposer', () => {
         document.removeEventListener('keydown', onDocumentKeyDown);
       }
     });
+
+    it('disables the options trigger when every option is disabled', () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={[
+            { id: 'later', label: 'Send later…', disabled: true },
+            { id: 'quiet', label: 'Send without notifying', disabled: true },
+          ]}
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Later' } });
+      const trigger = screen.getByRole('button', { name: 'More send options' });
+      expect(trigger).toBeDisabled();
+      fireEvent.click(trigger);
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it.each([false, true])(
+      'closes the options menu on Tab (shift: %s) and keeps focus inside a Modal',
+      async (shiftKey) => {
+        renderWithTheme(
+          <Modal open onOpenChange={vi.fn()} aria-label="Compose">
+            <ChatComposer onSend={vi.fn()} sendOptions={sendOptions} />
+          </Modal>
+        );
+        fireEvent.change(getInput(), { target: { value: 'Later' } });
+        const trigger = screen.getByRole('button', {
+          name: 'More send options',
+        });
+        fireEvent.click(trigger);
+        const later = screen.getByRole('menuitem', { name: 'Send later…' });
+        await vi.waitFor(() => expect(later).toHaveFocus());
+
+        // The menu is portaled out of the dialog, past its focus trap.
+        expect(screen.getByRole('dialog')).not.toContainElement(later);
+        const tab = fireEvent.keyDown(later, { key: 'Tab', shiftKey });
+
+        expect(tab).toBe(false); // default prevented: no body-order Tab
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+        expect(trigger).toHaveFocus();
+        expect(screen.getByRole('dialog')).toContainElement(trigger);
+      }
+    );
   });
 
   it('supports controlled value', () => {
