@@ -20,7 +20,22 @@ import {
 } from '../Collapsible';
 import { Spinner } from '../Spinner';
 import { hasToolResultLinks, ToolResultLinks } from './MCPToolCall';
-import type { MCPResourceLink, MCPToolCall, MCPToolStatus } from './types';
+import {
+  defaultToolCallResultLabels,
+  defaultToolHintLabels,
+  hasRichResult,
+  hasToolCallMetadata,
+  isStructuredTwin,
+  ToolCallMetadata,
+  ToolCallResultContent,
+  type ToolCallResultLabels,
+} from './ToolCallResultContent';
+import type {
+  MCPResourceLink,
+  ToolBehaviorHints,
+  ToolCall as MCPToolCall,
+  ToolCallStatus as MCPToolStatus,
+} from './types';
 
 // ============================================================================
 // Labels
@@ -43,8 +58,10 @@ export interface MCPToolCallGroupLabels {
   announceApproval: (count: number) => string;
   /** Live-region announcement when calls fail, sent as each failure lands. */
   announceFailed: (count: number) => string;
-  /** Status badge text per status. */
-  status: Record<MCPToolStatus, string>;
+  /** Status badge text per status; `uncertain` falls back to the default. */
+  status: Record<Exclude<MCPToolStatus, 'uncertain'>, string> & {
+    uncertain?: string;
+  };
   /** Accessible name for a call's row. */
   callLabel: (toolCall: MCPToolCall) => string;
   /** Heads the raw `toolName` in a row's details when `displayName` is set. */
@@ -59,19 +76,40 @@ export interface MCPToolCallGroupLabels {
   allowAlways: string;
   /** Refuse the call. */
   deny: string;
+  /** Shown on a call that may or may not have run. */
+  uncertainNotice?: string;
+  /** Heads a call's labeled arguments. */
+  arguments?: string;
+  /** Disclosure for the raw arguments as JSON. */
+  showRawArguments?: string;
+  /** Provider-declared behavior hints, shown as explanation only. */
+  hints?: Partial<Record<keyof ToolBehaviorHints, string>>;
+  /** Strings for structured, media and embedded results. */
+  result?: Partial<ToolCallResultLabels>;
 }
 
-/** Label overrides; `status` merges per key rather than replacing the record. */
+/** Every label resolved, so rendering never reads an optional key. */
+type ResolvedLabels = Required<
+  Omit<MCPToolCallGroupLabels, 'status' | 'hints' | 'result'>
+> & {
+  status: Record<MCPToolStatus, string>;
+  hints: Record<keyof ToolBehaviorHints, string>;
+  result: ToolCallResultLabels;
+};
+
+/** Label overrides; `status`, `hints` and `result` merge per key. */
 export type MCPToolCallGroupLabelOverrides = Partial<
-  Omit<MCPToolCallGroupLabels, 'status'>
+  Omit<MCPToolCallGroupLabels, 'status' | 'hints' | 'result'>
 > & {
   status?: Partial<Record<MCPToolStatus, string>>;
+  hints?: Partial<Record<keyof ToolBehaviorHints, string>>;
+  result?: Partial<ToolCallResultLabels>;
 };
 
 const plural = (count: number, one: string, other: string) =>
   count === 1 ? one : other;
 
-export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
+export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   used: (count) => `Used ${count} ${plural(count, 'tool', 'tools')}`,
   running: (count) => `Running ${count} ${plural(count, 'tool', 'tools')}`,
   needsApproval: (count) =>
@@ -87,6 +125,7 @@ export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
     running: 'Running',
     success: 'Done',
     error: 'Failed',
+    uncertain: 'Not confirmed',
     cancelled: 'Cancelled',
     denied: 'Denied',
     expired: 'Expired',
@@ -103,16 +142,27 @@ export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
   allowOnce: 'Allow once',
   allowAlways: 'Always allow',
   deny: 'Deny',
+  uncertainNotice:
+    'Could not confirm completion. The action may have taken effect.',
+  arguments: 'Inputs',
+  showRawArguments: 'Show raw inputs',
+  hints: defaultToolHintLabels,
+  result: defaultToolCallResultLabels,
 };
 
 function resolveLabels(
   overrides: MCPToolCallGroupLabelOverrides | undefined
-): MCPToolCallGroupLabels {
+): ResolvedLabels {
   if (!overrides) return defaultMCPToolCallGroupLabels;
+  const base = defaultMCPToolCallGroupLabels;
   return {
-    ...defaultMCPToolCallGroupLabels,
-    ...overrides,
-    status: { ...defaultMCPToolCallGroupLabels.status, ...overrides.status },
+    ...base,
+    ...(Object.fromEntries(
+      Object.entries(overrides).filter(([, value]) => value !== undefined)
+    ) as Partial<ResolvedLabels>),
+    status: { ...base.status, ...overrides.status },
+    hints: { ...base.hints, ...overrides.hints },
+    result: { ...base.result, ...overrides.result },
   };
 }
 
@@ -122,7 +172,11 @@ function resolveLabels(
 
 /** A call the user has to see without expanding anything. */
 function needsAttention(toolCall: MCPToolCall): boolean {
-  return toolCall.status === 'awaiting-approval' || toolCall.status === 'error';
+  return (
+    toolCall.status === 'awaiting-approval' ||
+    toolCall.status === 'error' ||
+    toolCall.status === 'uncertain'
+  );
 }
 
 interface ToolGroupSummary {
@@ -200,7 +254,7 @@ function useAutoCollapse(
 
 function progressAnnouncement(
   summary: ToolGroupSummary,
-  labels: MCPToolCallGroupLabels
+  labels: ResolvedLabels
 ): string {
   if (summary.awaitingApproval > 0) {
     return labels.announceApproval(summary.awaitingApproval);
@@ -222,6 +276,7 @@ const STATUS_BADGE_VARIANT: Record<
   running: 'default',
   success: 'success',
   error: 'danger',
+  uncertain: 'warning',
   cancelled: 'secondary',
   denied: 'secondary',
   expired: 'secondary',
@@ -242,7 +297,9 @@ function formatData(data: unknown): string {
 function formatResult(toolCall: MCPToolCall): string | null {
   const { result } = toolCall;
   if (!result) return null;
-  return result.summary || formatData(result.data);
+  if (isStructuredTwin(result)) return null;
+  if (result.data == null || result.data === '') return result.summary || null;
+  return formatData(result.data);
 }
 
 /** The failure text: `error`, else an error result's detail, else its summary. */
@@ -279,7 +336,7 @@ function OutputDisclosure({ label, text }: { label: string; text: string }) {
 
 interface ToolCallRowProps {
   toolCall: MCPToolCall;
-  labels: MCPToolCallGroupLabels;
+  labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
@@ -312,11 +369,26 @@ function ToolCallRow({
     toolCall.result?.type === 'error' ? null : formatResult(toolCall);
   const errorText = formatError(toolCall);
   const hasLinks = hasToolResultLinks(toolCall.result);
+  const hasRich = hasRichResult(toolCall.result);
+  const hasLabels = toolCall.parameters.some((param) => param.label);
   const hasDetails =
     Boolean(toolCall.displayName) ||
+    hasToolCallMetadata(toolCall) ||
     toolCall.parameters.length > 0 ||
     Boolean(result) ||
-    hasLinks;
+    hasLinks ||
+    hasRich;
+
+  // Approval details must be in view before Allow/Deny, including when a row
+  // already on screen starts awaiting approval or its details arrive later.
+  const mustShowDetails = isAwaitingApproval && hasDetails;
+  const [detailsOpen, setDetailsOpen] = React.useState(mustShowDetails);
+  const [shownForApproval, setShownForApproval] =
+    React.useState(mustShowDetails);
+  if (mustShowDetails !== shownForApproval) {
+    setShownForApproval(mustShowDetails);
+    if (mustShowDetails) setDetailsOpen(true);
+  }
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
@@ -351,7 +423,7 @@ function ToolCallRow({
       className="overflow-hidden text-sm"
     >
       <div role="group" aria-label={labels.callLabel(toolCall)}>
-        <Collapsible defaultOpen={isAwaitingApproval && hasDetails}>
+        <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
           <CollapsibleTrigger
             ref={triggerRef}
             className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
@@ -413,20 +485,56 @@ function ToolCallRow({
                 </p>
               </>
             )}
+            <ToolCallMetadata toolCall={toolCall} hintLabels={labels.hints} />
             {toolCall.result && hasLinks && (
               <ToolResultLinks
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
               />
             )}
-            {toolCall.parameters.length > 0 && (
-              // JSON keeps its left-to-right order in RTL documents.
-              <pre
-                dir="ltr"
-                className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900"
-              >
-                {formatParameters(toolCall)}
-              </pre>
+            {hasLabels ? (
+              <>
+                <div data-slot="ai-tool-call-arguments">
+                  <h4 className="mb-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                    {labels.arguments}
+                  </h4>
+                  <dl className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-3 gap-y-0.5 text-xs">
+                    {toolCall.parameters.map((param) => (
+                      <React.Fragment key={param.name}>
+                        <dt
+                          title={param.description}
+                          className="font-medium break-words text-neutral-600 dark:text-neutral-400"
+                        >
+                          {param.label ?? param.name}
+                        </dt>
+                        <dd dir="auto" className="break-words">
+                          {formatData(param.value)}
+                        </dd>
+                      </React.Fragment>
+                    ))}
+                  </dl>
+                </div>
+                <OutputDisclosure
+                  label={labels.showRawArguments}
+                  text={formatParameters(toolCall)}
+                />
+              </>
+            ) : (
+              toolCall.parameters.length > 0 && (
+                // JSON keeps its left-to-right order in RTL documents.
+                <pre
+                  dir="ltr"
+                  className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900"
+                >
+                  {formatParameters(toolCall)}
+                </pre>
+              )
+            )}
+            {toolCall.result && hasRich && (
+              <ToolCallResultContent
+                result={toolCall.result}
+                labels={labels.result}
+              />
             )}
             {result && (
               <OutputDisclosure label={labels.showResult} text={result} />
@@ -440,6 +548,25 @@ function ToolCallRow({
         {toolCall.status === 'error' && errorText && (
           <p className="ms-6 line-clamp-2 text-xs text-red-600 dark:text-red-400">
             {errorText}
+          </p>
+        )}
+
+        {toolCall.status === 'uncertain' && (
+          <p
+            data-slot="ai-tool-call-uncertain"
+            className="ms-6 line-clamp-2 text-xs text-amber-700 dark:text-amber-400"
+          >
+            {labels.uncertainNotice}
+          </p>
+        )}
+
+        {toolCall.status === 'success' && toolCall.result?.summary && (
+          <p
+            data-slot="ai-tool-call-summary"
+            dir="auto"
+            className="ms-6 line-clamp-1 text-xs text-neutral-600 dark:text-neutral-400"
+          >
+            {toolCall.result.summary}
           </p>
         )}
 

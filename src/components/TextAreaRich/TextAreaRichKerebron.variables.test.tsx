@@ -8,11 +8,15 @@
  * so this suite dodges the alias with a Vite query suffix and exercises the
  * real engine. Positioning/visuals stay covered by the browser tests.
  */
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import type { TextAreaRichProps } from './TextAreaRich';
+
+// Kerebron's markdown snapshot is debounced by 800ms; let it fire before jsdom
+// is torn down, or it rejects with an unhandled dispatchEvent error.
+afterAll(() => new Promise((resolve) => setTimeout(resolve, 1000)));
 
 // @ts-expect-error — the `?real` query dodges the vitest stub alias (it only
 // matches specifiers *ending* in /TextAreaRichKerebron); Vite resolves the

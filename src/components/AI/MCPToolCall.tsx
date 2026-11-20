@@ -1,20 +1,37 @@
 /**
- * MCP Tool Call Display Component
+ * Tool Call Display Component
  *
- * Renders an MCP tool invocation with status, parameters, and results.
+ * Renders a tool invocation (MCP tool, built-in tool or skill) with status,
+ * parameters, and results.
  */
 
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
 import { CollapsiblePill } from './CollapsiblePill';
+import {
+  hasRichResult,
+  hasToolCallMetadata,
+  defaultToolHintLabels,
+  ToolCallMetadata,
+  type ToolHintLabels,
+  isSafeHref,
+  linkHost,
+  resultLinks,
+  ToolCallResultContent,
+} from './ToolCallResultContent';
 import type {
-  MCPToolCall,
-  MCPToolStatus,
-  MCPToolResult,
+  ToolCall,
+  ToolCallStatus,
+  ToolCallResult,
   MCPResourceLink,
-  MCPToolParameter,
+  ToolCallParameter,
 } from './types';
+
+type MCPToolCall = ToolCall;
+type MCPToolStatus = ToolCallStatus;
+type MCPToolResult = ToolCallResult;
+type MCPToolParameter = ToolCallParameter;
 
 // ============================================================================
 // Status Icon Component
@@ -30,6 +47,7 @@ const statusIconVariants = cva(
         running: 'bg-primary-100 dark:bg-primary-900/50',
         success: 'bg-green-100 dark:bg-green-900/50',
         error: 'bg-red-100 dark:bg-red-900/50',
+        uncertain: 'bg-amber-100 dark:bg-amber-900/50',
         cancelled: 'bg-neutral-200 dark:bg-neutral-700',
         denied: 'bg-neutral-200 dark:bg-neutral-700',
         expired: 'bg-neutral-200 dark:bg-neutral-700',
@@ -62,7 +80,7 @@ function ToolStatusIcon({ status, className }: ToolStatusIconProps) {
           <circle cx="10" cy="10" r="3" />
         </svg>
       )}
-      {status === 'awaiting-approval' && (
+      {(status === 'awaiting-approval' || status === 'uncertain') && (
         <svg
           aria-hidden="true"
           className="h-3 w-3 text-amber-600 dark:text-amber-400"
@@ -422,10 +440,35 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
   };
 
   const icon = link.type ? linkTypeIcons[link.type] : linkTypeIcons.internal;
+  const host = linkHost(link.href);
+
+  // A link the browser should not open is shown, but not as a link — even when
+  // the host intercepts clicks, so it is never handed an unsafe href. A resource
+  // with no URI at all stays clickable for hosts that resolve it themselves.
+  const blocked = link.href ? !isSafeHref(link.href) : !onClick;
+  if (blocked) {
+    return (
+      <span
+        data-slot="ai-tool-link-unsupported"
+        className={cn(
+          'inline-flex items-center gap-1.5 text-sm text-neutral-700 dark:text-neutral-300',
+          className
+        )}
+      >
+        {icon}
+        <bdi>{link.label}</bdi>
+        <span className="font-mono text-xs break-all text-neutral-500">
+          {link.href}
+        </span>
+      </span>
+    );
+  }
 
   return (
     <a
-      href={link.href}
+      href={isSafeHref(link.href) ? link.href : '#'}
+      target={host ? '_blank' : undefined}
+      rel={host ? 'noopener noreferrer' : undefined}
       onClick={handleClick}
       className={cn(
         'inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5',
@@ -438,7 +481,8 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
       )}
     >
       {icon}
-      <span>{link.label}</span>
+      <bdi>{link.label}</bdi>
+      {host && <span className="text-xs font-normal opacity-70">({host})</span>}
       {link.type === 'external' && (
         <svg
           aria-hidden="true"
@@ -474,39 +518,33 @@ function ToolResultDisplay({
   onLinkClick,
   className,
 }: ToolResultDisplayProps) {
-  if (result.type === 'error') {
-    return (
-      <div
-        className={cn(
-          'mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20',
-          className
-        )}
-      >
-        <p className="text-sm text-red-700 dark:text-red-300">
-          {typeof result.data === 'string'
-            ? String(result.data)
-            : 'An error occurred'}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className={cn('space-y-2', className)}>
-      {result.summary && (
+      {result.type === 'error' && (
+        <div className="mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20">
+          <p className="text-sm text-red-700 dark:text-red-300">
+            {typeof result.data === 'string'
+              ? String(result.data)
+              : 'An error occurred'}
+          </p>
+        </div>
+      )}
+      {result.type !== 'error' && result.summary && (
         <p className="text-sm text-neutral-700 dark:text-neutral-300">
           {result.summary}
         </p>
       )}
 
       <ToolResultLinks result={result} onLinkClick={onLinkClick} />
+
+      {hasRichResult(result) && <ToolCallResultContent result={result} />}
     </div>
   );
 }
 
-/** True when a result carries a `link` or `resources` to render. */
+/** True when a result carries a `link`, `links` or `resources` to render. */
 export function hasToolResultLinks(result: MCPToolResult | undefined): boolean {
-  return Boolean(result?.link || result?.resources?.length);
+  return resultLinks(result).length > 0;
 }
 
 interface ToolResultLinksProps {
@@ -514,28 +552,20 @@ interface ToolResultLinksProps {
   onLinkClick?: (link: MCPResourceLink) => void;
 }
 
-/** A result's `link` and `resources` as {@link ResourceLink}s. */
+/** A result's `link`, `links` and `resources` as {@link ResourceLink}s. */
 export function ToolResultLinks({ result, onLinkClick }: ToolResultLinksProps) {
+  const links = resultLinks(result);
+  if (!links.length) return null;
   return (
-    <>
-      {result.link && <ResourceLink link={result.link} onClick={onLinkClick} />}
-
-      {result.resources && result.resources.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {result.resources.map((resource) => (
-            <ResourceLink
-              key={resource.id}
-              link={{
-                href: resource.uri || '#',
-                label: resource.name,
-                type: resource.type as MCPResourceLink['type'],
-              }}
-              onClick={onLinkClick}
-            />
-          ))}
-        </div>
-      )}
-    </>
+    <div className="flex flex-wrap gap-2">
+      {links.map((link, index) => (
+        <ResourceLink
+          key={`${index}:${link.href}`}
+          link={link}
+          onClick={onLinkClick}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -648,6 +678,8 @@ const statusPillClasses: Record<MCPToolStatus, string> = {
     'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-300',
   error:
     'bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-300',
+  uncertain:
+    'bg-amber-50 border-amber-200 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300',
   cancelled:
     'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
   denied:
@@ -656,7 +688,7 @@ const statusPillClasses: Record<MCPToolStatus, string> = {
     'bg-neutral-100 border-neutral-200 text-neutral-400 opacity-60 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400',
 };
 
-export interface MCPToolCallDisplayProps {
+export interface ToolCallDisplayProps {
   /** The tool call to display */
   toolCall: MCPToolCall;
   /** Compact (condensed) sizing — tighter pill and box */
@@ -671,15 +703,19 @@ export interface MCPToolCallDisplayProps {
   hidden?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
+  /** Text shown for an `uncertain` call; pass a translation. */
+  uncertainNotice?: string;
+  /** Translations for provider behavior hints. */
+  hintLabels?: Partial<ToolHintLabels>;
   /** Additional class name */
   className?: string;
 }
 
 /**
- * Displays an MCP tool call with its status, parameters, and results.
+ * Displays a tool call with its status, parameters, and results.
  * Shows a user-friendly summary by default, with technical details available on expand.
  */
-export function MCPToolCallDisplay({
+export function ToolCallDisplay({
   toolCall,
   showParameters = true,
   collapsible = true,
@@ -687,8 +723,10 @@ export function MCPToolCallDisplay({
   compact,
   hidden = false,
   onLinkClick,
+  uncertainNotice = 'Could not confirm completion. The action may have taken effect.',
+  hintLabels,
   className,
-}: MCPToolCallDisplayProps) {
+}: ToolCallDisplayProps) {
   const formatDuration = (ms?: number) => {
     if (!ms) return null;
     if (ms < 1000) return `${ms}ms`;
@@ -724,10 +762,17 @@ export function MCPToolCallDisplay({
   );
 
   const hasParams = showParameters && toolCall.parameters.length > 0;
-  const hasBoxContent = Boolean(toolCall.result || toolCall.error || hasParams);
+  const hasMetadata = hasToolCallMetadata(toolCall);
+  const hasBoxContent = Boolean(
+    toolCall.result || toolCall.error || hasParams || hasMetadata
+  );
+  const isAwaitingApproval = toolCall.status === 'awaiting-approval';
   const isCompleted =
-    toolCall.status === 'success' || toolCall.status === 'error';
-  const effectiveDefaultCollapsed = defaultCollapsed ?? !isCompleted;
+    toolCall.status === 'success' ||
+    toolCall.status === 'error' ||
+    toolCall.status === 'uncertain';
+  const effectiveDefaultCollapsed =
+    defaultCollapsed ?? !(isCompleted || isAwaitingApproval);
 
   if (hidden) return null;
 
@@ -739,6 +784,13 @@ export function MCPToolCallDisplay({
         compact ? 'p-2' : 'p-3'
       )}
     >
+      {hasMetadata && (
+        <ToolCallMetadata
+          toolCall={toolCall}
+          hintLabels={{ ...defaultToolHintLabels, ...hintLabels }}
+        />
+      )}
+
       {/* Result Summary & Links */}
       {toolCall.result && (
         <div data-slot="ai-tool-result">
@@ -771,7 +823,7 @@ export function MCPToolCallDisplay({
             {toolCall.parameters.map((param) => (
               <div key={param.name} className="flex items-start gap-2 text-xs">
                 <span className="font-mono text-neutral-600 dark:text-neutral-400">
-                  {param.name}:
+                  {param.label ?? param.name}:
                 </span>
                 <span className="font-mono text-neutral-700 dark:text-neutral-300">
                   {typeof param.value === 'string'
@@ -812,7 +864,8 @@ export function MCPToolCallDisplay({
           label={pillLabel}
           leadingIcon={<ToolStatusIcon status={toolCall.status} />}
           density={compact ? 'condensed' : 'standard'}
-          defaultOpen={!effectiveDefaultCollapsed}
+          // CollapsiblePill re-syncs on change, so entering approval opens it in place.
+          defaultOpen={isAwaitingApproval || !effectiveDefaultCollapsed}
           pillClassName={statusPillClasses[toolCall.status]}
           title="Toggle details"
         >
@@ -825,8 +878,21 @@ export function MCPToolCallDisplay({
           {box}
         </div>
       )}
+      {toolCall.status === 'uncertain' && (
+        <p
+          data-slot="ai-tool-call-uncertain"
+          className="mt-1 text-xs text-amber-700 dark:text-amber-400"
+        >
+          {uncertainNotice}
+        </p>
+      )}
     </div>
   );
 }
+
+/** @deprecated Use {@link ToolCallDisplay}. */
+export const MCPToolCallDisplay = ToolCallDisplay;
+/** @deprecated Use {@link ToolCallDisplayProps}. */
+export type MCPToolCallDisplayProps = ToolCallDisplayProps;
 
 export { ToolStatusIcon, getToolIcon };

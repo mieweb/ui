@@ -42,6 +42,7 @@ hf version    # confirm it runs (older alias: huggingface-cli)
 hf repo create ozwell-voice-assets --type model
 # → creates https://huggingface.co/<your-username>/ozwell-voice-assets
 ```
+
 (Or click "New Model" on the website. Public is fine — these are non-PHI model weights. Make it
 private only if you prefer; private repos need the token at fetch time, which complicates the browser.)
 
@@ -60,10 +61,13 @@ repo. Large files (the 39 MB `.data`, 11 MB `.wasm`) are handled automatically �
 ### 5. Verify the URLs resolve
 
 The fetch base will be:
+
 ```
 https://huggingface.co/<you>/ozwell-voice-assets/resolve/main
 ```
+
 Open these in a browser — each should download / 200:
+
 ```
 .../resolve/main/wakeword/hey-ozwell.onnx
 .../resolve/main/sv-runtime/sherpa-onnx-wasm-main-speaker-diarization.wasm
@@ -76,7 +80,10 @@ Set the base, then **reload** (it's read when the components mount). Use localSt
 path (shared across the Storybook iframe, survives reload), same lesson as the backend key:
 
 ```js
-localStorage.setItem('ozwellAssetBase', 'https://huggingface.co/<you>/ozwell-voice-assets/resolve/main');
+localStorage.setItem(
+  'ozwellAssetBase',
+  'https://huggingface.co/<you>/ozwell-voice-assets/resolve/main'
+);
 // then reload the tab
 ```
 
@@ -93,6 +100,7 @@ Once step 6 works in the browser:
 ```bash
 git rm -r .storybook/public/wakeword .storybook/public/sv-runtime
 ```
+
 Leave a one-line pointer (a README) noting the host URL. Make the hosted base the **default** in code
 (so it works with no runtime config) — change `DEFAULT_ASSET` in `useWakeWord.ts` and the `SV_DIR`
 fallback in `speaker-verify.js`, or set `window.__ozwellAssets` in `.storybook/preview`. Commit.
@@ -105,4 +113,7 @@ fallback in `speaker-verify.js`, or set `window.__ozwellAssets` in `.storybook/p
   HF keeps the filename as-is, so it should fetch fine — but eyeball that one URL in step 5.
 - **First load** is a cold download of ~57 MB from the CDN; subsequent loads are cached. Note the
   cold-vs-warm time (MODEL-HOSTING.md step 5).
+
+```
+
 ```
