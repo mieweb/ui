@@ -176,19 +176,20 @@ const meta = {
       description: {
         component: `### What it's for
 
-A custom **value picker for forms**: a \`<button role="combobox">\` trigger that opens a portaled \`role="listbox"\`. It is not a native \`<select>\`. Options come in as data — \`options: (SelectOption | SelectGroup)[]\` (\`{ value, label, disabled? }\` or \`{ label, options }\`) — and the value flows through \`value\` / \`defaultValue\` / \`onValueChange\`. \`multiple\` switches the props to \`string[]\` and keeps the list open while toggling. Field anatomy matches \`Input\`: \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\` / \`hasError\`, \`required\` + \`requiredVariant\`, \`size\`. \`searchable\` adds a filter box; without it, typing does native-style typeahead. \`selectTriggerVariants\` is exported.
+A custom **value picker for forms**: a \`<button role="combobox">\` trigger that opens a portaled \`role="listbox"\`. It is not a native \`<select>\`. Options come in as data — \`options: (SelectOption | SelectGroup)[]\` (\`{ value, label, description?, disabled? }\` or \`{ label, options }\`) — and the value flows through \`value\` / \`defaultValue\` / \`onValueChange\`. \`multiple\` switches the props to \`string[]\` and keeps the list open while toggling. Field anatomy matches \`Input\`: \`label\` (\`labelVariant\` \`stacked\` | \`floating\`, \`hideLabel\`), \`helperText\`, \`error\` / \`hasError\`, \`required\` + \`requiredVariant\`, \`size\`. \`searchable\` adds a filter box; without it, typing does native-style typeahead. \`selectTriggerVariants\` is exported.
 
 ### Use it when
 
 - The user picks **a value** (one, or several with \`multiple\`) from a known list of ~8+ options, and the choice is part of a form.
 - Options need grouping (\`SelectGroup\`), disabling, or quick filtering of a list you already have in memory (\`searchable\`).
+- Each choice needs a sentence of explanation the user reads before picking, but should stay collapsed to its label once chosen — e.g. a "Group by" choice whose options each say what they group. Give options a \`description\`: it wraps under the label in the open list, and the trigger shows the label only.
 
 ### Don't use it when
 
 - The items are **actions** (Edit, Delete, Export) or a user menu — \`Dropdown\` (\`role="menu"\`, \`DropdownItem\` runs \`onClick\`).
 - The list is large or remote and the user types to search it — \`Autocomplete\` (text input, async \`items\`, "create new" row).
-- Up to ~7 options that benefit from being visible at once — \`Radio\`; several independent yes/no — \`Checkbox\`.
-- A toolbar view switch — \`PillSelect\`.
+- Up to ~7 options that benefit from being visible at once — \`Radio\` (whose options can carry their own descriptions); several independent yes/no — \`Checkbox\`.
+- A toolbar view switch whose labels speak for themselves — \`PillSelect\`. When each view needs explaining, a \`Select\` with option \`description\`s keeps that text out of the toolbar until the list is open.
 - The value is a country — \`CountryDropdown\` / \`CountryCodeDropdown\` (list is built for you).
 
 ### Example
@@ -215,9 +216,9 @@ const [specialty, setSpecialty] = useState('');
 
 ### Limitations
 
-- Accessibility: trigger is \`<button role="combobox" aria-haspopup="listbox" aria-expanded aria-controls>\` with \`aria-invalid\`, \`aria-required\` and \`aria-describedby\` → error or helper text; the \`<label htmlFor>\` targets the trigger's \`id\`. Options are \`<li role="option" aria-selected>\`, groups \`<li role="presentation">\` + \`<ul role="group" aria-label>\`, \`aria-multiselectable\` in \`multiple\` mode. Keyboard: ArrowUp/Down, Home/End, Enter/Space, Escape (returns focus to the trigger), typeahead when not \`searchable\`. The trigger and searchable input expose the listbox through \`aria-controls\` and its highlighted option through \`aria-activedescendant\`, so the focused control identifies the result Enter will select. The active-option reference is omitted when no selectable result exists and removed on close.
+- Accessibility: trigger is \`<button role="combobox" aria-haspopup="listbox" aria-expanded aria-controls>\` with \`aria-invalid\`, \`aria-required\` and \`aria-describedby\` → error or helper text; the \`<label htmlFor>\` targets the trigger's \`id\`. Options are \`<li role="option" aria-selected>\`, groups \`<li role="presentation">\` + \`<ul role="group" aria-label>\`, \`aria-multiselectable\` in \`multiple\` mode. An option's \`description\` is linked with \`aria-describedby\`, so it is announced as the option's description rather than folded into its name. Keyboard: ArrowUp/Down, Home/End, Enter/Space, Escape (returns focus to the trigger), typeahead when not \`searchable\`. The trigger and searchable input expose the listbox through \`aria-controls\` and its highlighted option through \`aria-activedescendant\`, so the focused control identifies the result Enter will select. The active-option reference is omitted when no selectable result exists and removed on close.
 - Not a form control: there is no \`name\` and nothing is submitted. Keep the value in state and post it yourself.
-- Filtering is a case-insensitive \`includes\` on \`label\` only; \`multiple\` shows selected labels joined with \`", "\` and truncates.
+- Filtering is a case-insensitive \`includes\` on \`label\` only — search and typeahead never match an option's \`description\`; \`multiple\` shows selected labels joined with \`", "\` and truncates.
 - The listbox uses a fixed-position portal (\`useAnchoredPosition\`, width matches trigger, max height 300px). Inside a dialog (including an alert dialog) it stays within that dialog's focus and accessibility scope; otherwise it portals to \`<body>\`. A manual popover places it in the browser's top layer so transformed dialog containers do not offset its viewport coordinates.
 - Strings default to English but are props: \`placeholder\` ("Select an option"), \`searchPlaceholder\` ("Search..."), \`noResultsText\` ("No results found"). The search box's \`aria-label="Search options"\` and the listbox fallback \`aria-label="Options"\` are hard-coded.
 - RTL: floating label uses logical \`start-3\`; the chevron sits at the flex end. Theming: \`border-input\`, \`bg-background\`, popover \`bg-card border-border\`, selected option \`bg-primary-50 dark:bg-primary-950\`. Depends on \`class-variance-authority\` and \`Input\`'s \`RequiredMark\`.`,
@@ -244,7 +245,7 @@ const [specialty, setSpecialty] = useState('');
         {
           type: 'alternative to',
           target: 'choice-inputs-pillselect',
-          why: 'Select is a form field with label/error; PillSelect is a compact toolbar pill for one-of-N view choices.',
+          why: 'Select is a form field with label/error, and its options can carry descriptions; PillSelect is a compact toolbar pill for one-of-N view choices whose labels speak for themselves.',
         },
         {
           type: 'alternative to',
