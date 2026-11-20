@@ -1,4 +1,5 @@
 import type * as React from 'react';
+import { Lexer, type Tokens } from 'marked';
 
 /**
  * A record a person picked while writing — a teammate, a ticket, a document —
@@ -60,10 +61,35 @@ export function matchReference(
   return null;
 }
 
-// What renders as something other than a link: code (fenced or inline) and images.
-const NOT_A_LINK =
-  /```[\s\S]*?```|~~~[\s\S]*?~~~|`[^`\n]*`|!\[[^\]]*\]\([^)]*\)/g;
-const LINK = /\[((?:\\.|[^\]\\])*)\]\(([^)\s]+)\)/g;
+// A token, or a table cell (`{ text, tokens }`, no `type`), and where its
+// nested tokens sit.
+interface Nested {
+  type?: string;
+  tokens?: Nested[];
+  items?: Nested[];
+  header?: Nested[];
+  rows?: Nested[][];
+}
+
+// The links in `tokens`, in order. Code holds no tokens and images are
+// skipped, so a link quoted in either never counts.
+function* linksIn(tokens: readonly Nested[]): Generator<Tokens.Link> {
+  for (const token of tokens) {
+    if (token.type === 'image') continue;
+    if (token.type === 'link') {
+      yield token as Tokens.Link;
+      continue;
+    }
+    for (const children of [
+      token.tokens,
+      token.items,
+      token.header,
+      ...(token.rows ?? []),
+    ]) {
+      if (Array.isArray(children)) yield* linksIn(children);
+    }
+  }
+}
 
 /**
  * The references in Markdown `text`, in order, each once: every link one of
@@ -76,15 +102,15 @@ export function referencesIn(
 ): Reference[] {
   const seen = new Set<string>();
   const found: Reference[] = [];
-  for (const [, rawLabel, href] of text
-    .replace(NOT_A_LINK, ' ')
-    .matchAll(LINK)) {
+  for (const { href, text: label } of linksIn(
+    new Lexer().lex(text) as Nested[]
+  )) {
     const match = matchReference(href, triggers);
     if (!match) continue;
     const key = `${match.kind}\u0000${match.id}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    found.push({ ...match, label: rawLabel.replace(/\\(.)/g, '$1'), href });
+    found.push({ ...match, label, href });
   }
   return found;
 }
