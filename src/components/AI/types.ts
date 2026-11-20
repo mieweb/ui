@@ -140,6 +140,8 @@ export interface ToolCallResult {
   embedded?: ToolCallEmbeddedResource[];
   /** Content types the host could not present */
   unsupported?: string[];
+  /** True when the host dropped or shortened parts of the result to fit its limits. */
+  truncated?: boolean;
 }
 
 /** @deprecated Use {@link ToolCallStatus}. */

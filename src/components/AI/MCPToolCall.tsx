@@ -11,6 +11,10 @@ import { cn } from '../../utils/cn';
 import { CollapsiblePill } from './CollapsiblePill';
 import {
   hasRichResult,
+  hasToolCallMetadata,
+  defaultToolHintLabels,
+  ToolCallMetadata,
+  type ToolHintLabels,
   isSafeHref,
   linkHost,
   resultLinks,
@@ -514,26 +518,18 @@ function ToolResultDisplay({
   onLinkClick,
   className,
 }: ToolResultDisplayProps) {
-  if (result.type === 'error') {
-    return (
-      <div
-        className={cn(
-          'mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20',
-          className
-        )}
-      >
-        <p className="text-sm text-red-700 dark:text-red-300">
-          {typeof result.data === 'string'
-            ? String(result.data)
-            : 'An error occurred'}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className={cn('space-y-2', className)}>
-      {result.summary && (
+      {result.type === 'error' && (
+        <div className="mt-2 rounded-md bg-red-50 p-3 dark:bg-red-900/20">
+          <p className="text-sm text-red-700 dark:text-red-300">
+            {typeof result.data === 'string'
+              ? String(result.data)
+              : 'An error occurred'}
+          </p>
+        </div>
+      )}
+      {result.type !== 'error' && result.summary && (
         <p className="text-sm text-neutral-700 dark:text-neutral-300">
           {result.summary}
         </p>
@@ -709,6 +705,8 @@ export interface ToolCallDisplayProps {
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Text shown for an `uncertain` call; pass a translation. */
   uncertainNotice?: string;
+  /** Translations for provider behavior hints. */
+  hintLabels?: Partial<ToolHintLabels>;
   /** Additional class name */
   className?: string;
 }
@@ -726,6 +724,7 @@ export function ToolCallDisplay({
   hidden = false,
   onLinkClick,
   uncertainNotice = 'Could not confirm completion. The action may have taken effect.',
+  hintLabels,
   className,
 }: ToolCallDisplayProps) {
   const formatDuration = (ms?: number) => {
@@ -763,12 +762,17 @@ export function ToolCallDisplay({
   );
 
   const hasParams = showParameters && toolCall.parameters.length > 0;
-  const hasBoxContent = Boolean(toolCall.result || toolCall.error || hasParams);
+  const hasMetadata = hasToolCallMetadata(toolCall);
+  const hasBoxContent = Boolean(
+    toolCall.result || toolCall.error || hasParams || hasMetadata
+  );
+  const isAwaitingApproval = toolCall.status === 'awaiting-approval';
   const isCompleted =
     toolCall.status === 'success' ||
     toolCall.status === 'error' ||
     toolCall.status === 'uncertain';
-  const effectiveDefaultCollapsed = defaultCollapsed ?? !isCompleted;
+  const effectiveDefaultCollapsed =
+    defaultCollapsed ?? !(isCompleted || isAwaitingApproval);
 
   if (hidden) return null;
 
@@ -780,6 +784,13 @@ export function ToolCallDisplay({
         compact ? 'p-2' : 'p-3'
       )}
     >
+      {hasMetadata && (
+        <ToolCallMetadata
+          toolCall={toolCall}
+          hintLabels={{ ...defaultToolHintLabels, ...hintLabels }}
+        />
+      )}
+
       {/* Result Summary & Links */}
       {toolCall.result && (
         <div data-slot="ai-tool-result">
@@ -850,6 +861,8 @@ export function ToolCallDisplay({
       ) : collapsible ? (
         // Pill click reveals the whole box (result + params) in one go.
         <CollapsiblePill
+          // Remounts on entering approval so the details open even if it was closed.
+          key={isAwaitingApproval ? 'approval' : 'call'}
           label={pillLabel}
           leadingIcon={<ToolStatusIcon status={toolCall.status} />}
           density={compact ? 'condensed' : 'standard'}

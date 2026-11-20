@@ -21,6 +21,41 @@ describe('ToolCallDisplay', () => {
   it('keeps the MCP-prefixed export as an alias of the same component', () => {
     expect(MCPToolCallDisplay).toBe(ToolCallDisplay);
   });
+
+  it('shows description and hints while awaiting approval', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          status: 'awaiting-approval',
+          description: 'Creates a container.',
+          hints: { idempotent: true },
+        })}
+      />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Provider says repeating has no extra effect')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps links and rich content on an error result', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          status: 'error',
+          result: {
+            type: 'error',
+            data: 'Quota exceeded',
+            links: [{ href: 'https://a.example/logs', label: 'Open logs' }],
+            truncated: true,
+          },
+        })}
+      />
+    );
+    expect(screen.getByText('Quota exceeded')).toBeInTheDocument();
+    expect(screen.getByText('Open logs')).toBeInTheDocument();
+    expect(screen.getByText(/too large to keep/)).toBeInTheDocument();
+  });
 });
 
 describe('isSafeHref', () => {
@@ -107,6 +142,24 @@ describe('MCPToolCallGroup outcomes', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
     expect(screen.queryByText('Show result')).toBeNull();
+  });
+
+  it('keeps independent text next to structured fields', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: {
+              type: 'json',
+              data: '3 of 10 rows written',
+              structured: { written: 3 },
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.getByText('Show result')).toBeInTheDocument();
   });
 
   it('opens approval details when an existing row starts awaiting approval', () => {

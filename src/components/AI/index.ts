@@ -44,9 +44,11 @@ export {
 export {
   ToolCallResultContent,
   defaultToolCallResultLabels,
+  defaultToolHintLabels,
   isSafeHref,
   type ToolCallResultContentProps,
   type ToolCallResultLabels,
+  type ToolHintLabels,
 } from './ToolCallResultContent';
 
 // MCP Tool Call Group — a run of calls as compact rows under one header

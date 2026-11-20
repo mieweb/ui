@@ -22,7 +22,11 @@ import { Spinner } from '../Spinner';
 import { hasToolResultLinks, ToolResultLinks } from './MCPToolCall';
 import {
   defaultToolCallResultLabels,
+  defaultToolHintLabels,
   hasRichResult,
+  hasToolCallMetadata,
+  isStructuredTwin,
+  ToolCallMetadata,
   ToolCallResultContent,
   type ToolCallResultLabels,
 } from './ToolCallResultContent';
@@ -142,12 +146,7 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
     'Could not confirm completion. The action may have taken effect.',
   arguments: 'Inputs',
   showRawArguments: 'Show raw inputs',
-  hints: {
-    readOnly: 'Read-only',
-    destructive: 'May change or delete data',
-    idempotent: 'Safe to repeat',
-    openWorld: 'Reaches external services',
-  },
+  hints: defaultToolHintLabels,
   result: defaultToolCallResultLabels,
 };
 
@@ -298,18 +297,9 @@ function formatData(data: unknown): string {
 function formatResult(toolCall: MCPToolCall): string | null {
   const { result } = toolCall;
   if (!result) return null;
-  // Structured content renders as fields; its JSON text twin would repeat it.
-  if (result.structured !== undefined) return null;
+  if (isStructuredTwin(result)) return null;
   if (result.data == null || result.data === '') return result.summary || null;
   return formatData(result.data);
-}
-
-function hintList(toolCall: MCPToolCall, labels: ResolvedLabels): string[] {
-  const hints = toolCall.hints;
-  if (!hints) return [];
-  return (Object.keys(labels.hints) as (keyof ToolBehaviorHints)[])
-    .filter((key) => hints[key])
-    .map((key) => labels.hints[key]);
 }
 
 /** The failure text: `error`, else an error result's detail, else its summary. */
@@ -380,12 +370,10 @@ function ToolCallRow({
   const errorText = formatError(toolCall);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasRich = hasRichResult(toolCall.result);
-  const hints = hintList(toolCall, labels);
   const hasLabels = toolCall.parameters.some((param) => param.label);
   const hasDetails =
     Boolean(toolCall.displayName) ||
-    Boolean(toolCall.description) ||
-    hints.length > 0 ||
+    hasToolCallMetadata(toolCall) ||
     toolCall.parameters.length > 0 ||
     Boolean(result) ||
     hasLinks ||
@@ -497,29 +485,7 @@ function ToolCallRow({
                 </p>
               </>
             )}
-            {toolCall.description && (
-              <p
-                data-slot="ai-tool-call-description"
-                dir="auto"
-                className="text-xs break-words text-neutral-600 dark:text-neutral-400"
-              >
-                {toolCall.description}
-              </p>
-            )}
-            {hints.length > 0 && (
-              <ul
-                data-slot="ai-tool-call-hints"
-                className="flex flex-wrap gap-1"
-              >
-                {hints.map((hint) => (
-                  <li key={hint}>
-                    <Badge variant="secondary" size="sm">
-                      {hint}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ToolCallMetadata toolCall={toolCall} hintLabels={labels.hints} />
             {toolCall.result && hasLinks && (
               <ToolResultLinks
                 result={toolCall.result}

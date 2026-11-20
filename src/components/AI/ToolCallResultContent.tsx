@@ -9,12 +9,88 @@
  */
 
 import * as React from 'react';
+import { Badge } from '../Badge';
 import type {
   MCPResourceLink,
+  ToolBehaviorHints,
+  ToolCall,
   ToolCallEmbeddedResource,
   ToolCallMedia,
   ToolCallResult,
 } from './types';
+
+export type ToolHintLabels = Record<keyof ToolBehaviorHints, string>;
+
+/** Hints are the provider's claims, so the wording describes, never reassures. */
+export const defaultToolHintLabels: ToolHintLabels = {
+  readOnly: 'Read-only',
+  destructive: 'May change or delete data',
+  idempotent: 'Provider says repeating has no extra effect',
+  openWorld: 'Reaches external services',
+};
+
+/** A call's description and provider hints, shown before it runs. */
+export function ToolCallMetadata({
+  toolCall,
+  hintLabels = defaultToolHintLabels,
+}: {
+  toolCall: ToolCall;
+  hintLabels?: ToolHintLabels;
+}) {
+  const hints = toolCall.hints;
+  const shown = hints
+    ? (Object.keys(hintLabels) as (keyof ToolBehaviorHints)[]).filter(
+        (key) => hints[key]
+      )
+    : [];
+  if (!toolCall.description && shown.length === 0) return null;
+  return (
+    <>
+      {toolCall.description && (
+        <p
+          data-slot="ai-tool-call-description"
+          dir="auto"
+          className="text-xs break-words text-neutral-600 dark:text-neutral-400"
+        >
+          {toolCall.description}
+        </p>
+      )}
+      {shown.length > 0 && (
+        <ul data-slot="ai-tool-call-hints" className="flex flex-wrap gap-1">
+          {shown.map((key) => (
+            <li key={key}>
+              <Badge variant="secondary" size="sm">
+                {hintLabels[key]}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+/** True when a call has a description or any declared hint to show. */
+export function hasToolCallMetadata(toolCall: ToolCall): boolean {
+  return Boolean(
+    toolCall.description ||
+    (toolCall.hints && Object.values(toolCall.hints).some(Boolean))
+  );
+}
+
+/** True when `data` is only the JSON text of `structured`, so showing both repeats it. */
+export function isStructuredTwin(result: ToolCallResult): boolean {
+  if (result.structured === undefined) return false;
+  if (typeof result.data !== 'string') return result.data === result.structured;
+  try {
+    return (
+      JSON.stringify(JSON.parse(result.data)) ===
+      JSON.stringify(result.structured)
+    );
+  } catch {
+    return false;
+  }
+}
 
 /** Strings the rich result renders; hosts translate them. */
 export interface ToolCallResultLabels {
@@ -36,6 +112,8 @@ export interface ToolCallResultLabels {
   structuredUnavailable: string;
   /** Alt text for a tool image that came without a description. */
   imageAlt: string;
+  /** Notice when the host dropped or shortened parts of the result. */
+  incomplete: string;
 }
 
 export const defaultToolCallResultLabels: ToolCallResultLabels = {
@@ -48,6 +126,7 @@ export const defaultToolCallResultLabels: ToolCallResultLabels = {
   downloadFull: 'Download full result (JSON)',
   structuredUnavailable: 'This result cannot be displayed',
   imageAlt: 'Image returned by the tool',
+  incomplete: 'Part of this result was too large to keep and is not shown.',
 };
 
 const MAX_FIELDS = 20;
@@ -135,6 +214,7 @@ export function hasRichResult(result: ToolCallResult | undefined): boolean {
   return Boolean(
     result &&
     (result.structured !== undefined ||
+      result.truncated ||
       result.media?.length ||
       result.embedded?.length ||
       result.unsupported?.length)
@@ -362,6 +442,14 @@ export function ToolCallResultContent({
       {result.unsupported && result.unsupported.length > 0 && (
         <p className="text-xs text-neutral-500">
           {labels.unsupportedContent(result.unsupported)}
+        </p>
+      )}
+      {result.truncated && (
+        <p
+          data-slot="ai-tool-result-incomplete"
+          className="text-xs text-amber-700 dark:text-amber-400"
+        >
+          {labels.incomplete}
         </p>
       )}
     </div>
