@@ -36,8 +36,10 @@
 - The default `geoUrl` fetches Natural Earth country polygons from a GitHub
   raw URL at runtime. Offline hosts pass their own `geoUrl` (or `null` to skip
   land hexes) — don't make the fetch mandatory for first paint.
-- Theme colors resolve from `--mieweb-*` CSS variables at mount; the canvas
-  doesn't observe later theme flips.
+- Theme colors are fixed hex defaults merged with the `theme` prop on every
+  render; Globe never reads CSS variables. Hosts resolve brand tokens
+  themselves and update `theme` for dark mode — remounting alone changes
+  nothing.
 
 ## Testing
 

@@ -5,6 +5,7 @@ export {
 } from './EncounterVisit';
 export * from './types';
 export * from './definition';
+export * from './defaultForm';
 export * from './model';
 export * from './mcp';
 export * from './mdy';
@@ -13,6 +14,7 @@ export type {
   EncounterMessageTranslator,
   EncounterMessageValues,
 } from './messages';
+export type { EncounterMediaCaptureOptions } from './mediaCapture';
 export { EncounterVitalsField } from './EncounterVitalsField';
 export { EncounterAssessmentField } from './EncounterAssessmentField';
 export { EncounterNarrativeField } from './EncounterNarrativeField';

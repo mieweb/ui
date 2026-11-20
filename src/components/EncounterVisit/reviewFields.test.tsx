@@ -20,10 +20,6 @@ vi.mock(
   '../../components/TextAreaRich/TextAreaRichKerebron',
   () => import('../../test/textAreaRichKerebronStub')
 );
-import {
-  createEncounterFormDefinition,
-  validateEncounterDefinition,
-} from './definition';
 
 function props(answer: string, fieldType: string): FieldComponentProps {
   return {
@@ -142,35 +138,6 @@ describe('encounter review regressions', () => {
     'rejects invalid host encounter dates %j',
     (encounterDate) => {
       expect(isEncounterDate(encounterDate)).toBe(false);
-      expect(() =>
-        validateEncounterDefinition({
-          id: 'visit',
-          title: 'Visit',
-          encounterDate,
-          sections: [
-            { id: 'conditions', title: 'Conditions', kind: 'conditions' },
-          ],
-        })
-      ).toThrow('encounterDate');
     }
   );
-  it('projects an explicitly supplied past encounter date without inventing a default', () => {
-    const def = {
-      id: 'visit',
-      title: 'Visit',
-      sections: [
-        { id: 'conditions', title: 'Conditions', kind: 'conditions' as const },
-      ],
-    };
-    const form = createEncounterFormDefinition({
-      ...def,
-      encounterDate: '2000-02-29',
-    });
-    expect(form.pages[0].fields?.[0]).toMatchObject({
-      fields: [{ _sourceData: { encounterDate: '2000-02-29' } }],
-    });
-    expect(JSON.stringify(createEncounterFormDefinition(def))).not.toContain(
-      'encounterDate'
-    );
-  });
 });

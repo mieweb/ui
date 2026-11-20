@@ -82,15 +82,17 @@ else if (rev && stamp !== rev)
   reason = `revision changed (${stamp ?? 'none'} \u2192 ${rev})`;
 
 if (!reason) {
-  console.log('[build:datavis] up to date, skipping');
+  // stderr: `npm pack --json` runs `prepare` and parses stdout as JSON,
+  // so diagnostics must not pollute stdout.
+  console.error('[build:datavis] up to date, skipping');
   process.exit(0);
 }
 
-console.log(`[build:datavis] rebuilding: ${reason}`);
+console.error(`[build:datavis] rebuilding: ${reason}`);
 execFileSync('npm', ['ci'], { cwd: submodule, stdio: 'inherit' });
 execFileSync('npm', ['run', 'build'], { cwd: submodule, stdio: 'inherit' });
 
 if (rev) {
   writeFileSync(stampFile, `${rev}\n`);
-  console.log(`[build:datavis] stamped ${rev}`);
+  console.error(`[build:datavis] stamped ${rev}`);
 }

@@ -1,27 +1,92 @@
 import * as React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterMdyView } from './EncounterMdyView';
 import { getEncounterFieldId } from './definition';
 import { parseEncounterMdy, type EncounterMdyField } from './mdy';
 import { createEncounterSnapshot } from './model';
 import { createEncounterReportHtml } from './report';
-import type { EncounterVisitDefinition } from './types';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'view-test',
   title: 'Visit report',
-  sections: [
-    { id: 'hpi', title: 'History', kind: 'narrative' },
+  pages: [
     {
-      id: 'exam',
-      title: 'Examination',
-      kind: 'observations',
-      observations: [{ id: 'pulse', label: 'Pulse', type: 'number' }],
+      id: 'view-test:visit',
+      title: 'Visit report',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'History',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'History',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Examination',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:pulse',
+              question: 'Pulse',
+              width: 'full',
+              fieldType: 'text',
+              inputType: 'number',
+              validators: [
+                {
+                  type: 'number',
+                  message: 'Enter a finite nonnegative number.',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'encounter:plan:section',
+          fieldType: 'section',
+          title: 'Plan',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:plan:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Plan',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+      ],
     },
-    { id: 'plan', title: 'Plan', kind: 'narrative' },
   ],
-};
+} as unknown as FormDefinition;
 
 function field(id: string, label: string, empty: boolean): EncounterMdyField {
   return { id, label, empty, fieldId: id, sectionId: id, display: '—' };
@@ -36,7 +101,7 @@ function report(html: string, fields: EncounterMdyField[]) {
 
 describe('Encounter MDY final report', () => {
   it('shows captured values without blank field prompts or empty section headings', async () => {
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Supplied history.' },
     });
     render(<EncounterMdyView source={snapshot.mdy} />);
@@ -58,7 +123,7 @@ describe('Encounter MDY final report', () => {
   });
 
   it('removes the whole empty report and restores a section when a value is captured', async () => {
-    const blank = createEncounterSnapshot(definition, {
+    const blank = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: ' \n ' },
     });
     const { container, rerender } = render(
@@ -71,7 +136,7 @@ describe('Encounter MDY final report', () => {
       container.querySelector('.encounter-mdy-view')?.textContent?.trim()
     ).toBe('');
     expect(screen.queryAllByRole('heading')).toHaveLength(0);
-    const captured = createEncounterSnapshot(definition, {
+    const captured = createEncounterSnapshot(form, {
       [getEncounterFieldId('exam', 'pulse')]: { answer: '0' },
     });
     rerender(<EncounterMdyView source={captured.mdy} />);

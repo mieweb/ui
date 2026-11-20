@@ -204,7 +204,20 @@ function ychartGitInfoPlugin(): Plugin {
 const ychartDependencyNames = readDependencyNames('ychart');
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../packages/datavis/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
+  // Deprecated/retired entries are hidden from both the sidebar tree and
+  // search (one filtered dataset drives both — there is no search-only mode).
+  // Their docs pages stay built and reachable by direct URL; the Deprecated
+  // catalog page (src/catalog/Deprecated.mdx, the one entry left under the
+  // Deprecated root) is the findable directory of what's hidden (mieweb/ui#731).
+  tags: {
+    'maturity:deprecated': { excludeFromSidebar: true },
+    'maturity:retired': { excludeFromSidebar: true },
+  },
   addons: [
     '@storybook/addon-a11y',
     {
@@ -296,6 +309,23 @@ const config: StorybookConfig = {
       ...config.optimizeDeps.esbuildOptions,
       jsx: 'automatic',
       jsxImportSource: 'react',
+      plugins: [
+        ...(config.optimizeDeps.esbuildOptions?.plugins ?? []),
+        // Pre-bundled packages that import @mieweb/ui pull in its source, and esbuild cannot build
+        // `?worker` imports; leave those to Vite's worker plugin.
+        {
+          name: 'vite-worker-imports',
+          setup(build) {
+            build.onResolve({ filter: /\?worker\b/ }, ({ path: id, resolveDir }) => {
+              const [file, query] = id.split('?');
+              const resolved = path.resolve(resolveDir, file);
+              const withExtension =
+                ['.ts', '.js', ''].map((ext) => resolved + ext).find(existsSync) ?? resolved;
+              return { path: `/@fs${withExtension}?${query}`, external: true };
+            });
+          },
+        },
+      ],
     };
 
     return config;

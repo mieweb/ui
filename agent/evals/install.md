@@ -28,10 +28,12 @@ format and scoring.
 
 - **Ask:** "Is there a one-import setup?"
 - **Expect:** Almost — the TW4 quick start is **three** lines in your own CSS
-  entry: `@import 'tailwindcss'`, `@source "../node_modules/@mieweb/ui/dist"`,
-  then `@import '@mieweb/ui/init.css'` (dark variant + `@theme` fallbacks +
-  default brand + base styles). `init.css` is Tailwind input, not standalone;
-  for no-Tailwind apps the one-import answer is `styles.css`.
+  entry: `@import 'tailwindcss'`, `@import '@mieweb/ui/init.css'` (dark
+  variant + `@theme` fallbacks + default brand + base styles), then
+  `@source "../node_modules/@mieweb/ui/dist"`. Both `@import`s must come first
+  and be consecutive — `@source` between them makes PostCSS silently drop the
+  `init.css` import (#705). `init.css` is Tailwind input, not standalone; for
+  no-Tailwind apps the one-import answer is `styles.css`.
 - **Agent:** MIE UI Install Agent
 - **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — CSS entry, Option A; src/styles/init.css usage header
 
@@ -158,16 +160,16 @@ format and scoring.
 
 ### INS-17 — Wiring headless modules
 
-- **Ask:** "How do I connect `ViewSet` (or SuperChat-style modules) to my app
+- **Ask:** "How do I connect SuperChat-style headless modules to my app
   data?"
 - **Expect:** Write an adapter in the app — the module never fetches,
-  subscribes, or navigates. Two distinct contracts: **ViewSet** (collection
-  views) takes `items`/`loading`/`error`, accessor props, promise-returning
-  `on*` callbacks (built-in optimistic UI + revert), and `onOpen` + `getHref`;
-  **SuperChatInbox** has its own props (`conversations`, `onMessageSent`,
-  `onConversationOpened`) — never hand it collection-view props.
-- **Agent:** MIE UI Install Agent
-- **Source:** agent/skills/mieweb-ui-tailwind4/SKILL.md — Wiring headless modules; lessons/wiring-headless-modules.md
+  subscribes, or navigates. `SuperChatInbox` has its own props
+  (`conversations`, `onMessageSent`, promise-returning `on*` callbacks) —
+  never hand it collection-view props. `ViewSet` wiring is the Views
+  Agent's domain; chat/media wiring is the SuperChat Agent's.
+- **Agent:** MIE UI SuperChat Agent (headless chat wiring moved off the
+  Install Agent in #609 — Install keeps package/peer/CSS setup only)
+- **Source:** mieweb-ui-superchat skill — wiring contract; lessons/wiring-headless-modules.md
 
 ### INS-18 — Dark-mode plumbing
 

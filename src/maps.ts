@@ -6,6 +6,7 @@
  *   import { PointMap } from '@mieweb/ui/maps';
  *
  * Client-only. In a deck, register it as a graphic:
- * `<Deck graphics={{ map: PointMap }} />` with `{ type: 'custom', component: 'map', props }`.
+ * `<Deck graphics={{ map: PointMap }} />` + a slide's
+ * `graphic: { type: 'custom', component: 'map', props }` (e.g. a `chart` slide).
  */
 export * from './components/PointMap';

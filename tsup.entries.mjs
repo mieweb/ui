@@ -51,6 +51,7 @@ export const entries = {
   'components/DateInput/index': 'src/components/DateInput/index.ts',
   'components/Dropdown/index': 'src/components/Dropdown/index.ts',
   'components/EmailEditor/index': 'src/components/EmailEditor/index.ts',
+  'components/FileViewer/index': 'src/components/FileViewer/index.ts',
   'components/FilterSummaryBar/index':
     'src/components/FilterSummaryBar/index.ts',
   'components/FloatingWindow/index': 'src/components/FloatingWindow/index.ts',

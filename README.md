@@ -166,7 +166,9 @@ AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.
 Their shared `@esheet/styles` dependency supplies eSheet CSS automatically;
 keep loading `@mieweb/ui/styles.css` for the composed controls. EncounterVisit's
 RichEdit mode also needs the Kerebron peers, CSS and WASM assets. **With Kerebron
-0.8.12, the host must override every `prosemirror-view` resolution to 1.42.3.**
+0.8.12, the host must override the ProseMirror core packages to single
+versions (`prosemirror-view` 1.42.3, `prosemirror-model` 1.25.9,
+`prosemirror-state` 1.4.3, `prosemirror-transform` 1.10.4).**
 The library's development override does not configure an installed consumer.
 Follow the shipped [eSheet and EncounterVisit setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit)
 for the package-manager configuration and verification command.
