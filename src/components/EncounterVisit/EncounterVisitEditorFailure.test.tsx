@@ -1,19 +1,47 @@
 import * as React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import type { EncounterVisitDefinition } from './types';
 
 vi.mock('./EncounterMdyEditor', () => {
   throw new Error('Optional Kerebron dependency is unavailable');
 });
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'optional-editor',
   title: 'Anonymous visit',
-  sections: [{ id: 'hpi', title: 'HPI', kind: 'narrative' }],
-};
+  pages: [
+    {
+      id: 'optional-editor:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 describe('EncounterVisit optional rich editor failure', () => {
   beforeEach(() => {
@@ -31,7 +59,7 @@ describe('EncounterVisit optional rich editor failure', () => {
       render(
         <EncounterVisit
           ref={ref}
-          definition={definition}
+          form={form}
           initialResponses={original}
           defaultMode={defaultMode}
         />

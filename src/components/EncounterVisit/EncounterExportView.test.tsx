@@ -1,16 +1,44 @@
 import * as React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterExportView } from './EncounterExportView';
 import { getEncounterFieldId } from './definition';
 import { createEncounterSnapshot } from './model';
-import type { EncounterVisitDefinition } from './types';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'export-test',
   title: 'Visit export',
-  sections: [{ id: 'hpi', title: 'History', kind: 'narrative' }],
-};
+  pages: [
+    {
+      id: 'export-test:visit',
+      title: 'Visit export',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'History',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'History',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 const mockCreateObjectURL = vi.fn(() => 'blob:visit');
 const mockRevokeObjectURL = vi.fn();
@@ -27,7 +55,7 @@ afterEach(() => {
 
 describe('EncounterExportView', () => {
   it('shows the portable MDY document verbatim, including front matter', () => {
-    const snapshot = createEncounterSnapshot(definition, {
+    const snapshot = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Supplied history.' },
     });
     const { container } = render(
@@ -41,7 +69,7 @@ describe('EncounterExportView', () => {
   });
 
   it('downloads the document as a Markdown file and releases the blob URL', async () => {
-    const snapshot = createEncounterSnapshot(definition, {});
+    const snapshot = createEncounterSnapshot(form, {});
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {});

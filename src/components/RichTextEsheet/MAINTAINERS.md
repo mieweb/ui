@@ -28,13 +28,13 @@ the label-to-input spacing matches EncounterVisit's.
 they render in the header, join each section's docked findings as
 insertable lines, and are recorded in the MDY front matter. They are not form
 fields; changing parties must not reset a draft (content identity is the
-serialized definition + parties).
+serialized form + parties).
 
 The portable output is MDY via `createRichTextEsheetSnapshot`. The YAML front
-matter is the canonical store: `mdy` metadata, the generated native `form`,
-the full `response` map (minus the reserved document response), the complete
-definition under `richTextEsheet`, `parties`, and one flat projection per
-section field bridging the native colon-bearing ids to the MDY link grammar.
+matter is the canonical store: `mdy` metadata, the native `form`, the full
+`response` map (minus the reserved document response), `parties`, and one
+flat projection per section field bridging the native colon-bearing ids to
+the MDY link grammar.
 The generated Markdown body carries one `##` heading and link per section —
 empty sections included (their links display an em dash); only View prunes
 undocumented sections, as render-only cleanup. Linked display text stays
@@ -44,15 +44,15 @@ native response shapes (same rule as encounter MDY). Narrative answers stay
 plain text in `FieldResponse.answer`; rich markup handling lives in the shared
 `EsheetNarrativeField`, not here. MDY round-trips: `initialMdy` reopens a
 saved document, takes precedence over `initialResponses`, and can supply the
-definition and parties from its front matter (a mismatched explicit
-`definition.id` throws rather than silently rebinding answers).
+form and parties from its front matter (a mismatched explicit `form.id`
+throws rather than silently rebinding answers).
 
 ## Shared MDY document engine (mieweb/ui#758)
 
 `documentMdy.ts` is the generic engine factory: parse/create/render/
 refresh-links plus body read/write over a reserved document response, with
-diagnostics. `mdy.ts` configures it for this component (`richTextEsheet`
-front-matter key, `__document__` reserved response, `doc` link prefix);
+diagnostics. `mdy.ts` configures it for this component (`__document__`
+reserved response, `doc` link prefix);
 EncounterVisit configures the same factory in its own `mdy.ts`. The dependency
 direction is one-way — EncounterVisit imports from RichTextEsheet, never the
 reverse — and clinical wording (PHI notices, visit labels) stays on the

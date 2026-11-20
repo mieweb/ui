@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Document } from 'yaml';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
 import {
@@ -16,7 +17,6 @@ import {
   parseEncounterMdy,
 } from './mdy';
 import { createEncounterSnapshot } from './model';
-import type { EncounterVisitDefinition } from './types';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -77,14 +77,252 @@ vi.mock('./EncounterMdyEditor', async () => {
   };
 });
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'mode-test',
   title: 'Anonymous visit',
-  sections: [
-    { id: 'hpi', title: 'HPI', kind: 'narrative' },
-    { id: 'vitals', title: 'Vitals', kind: 'vitals' },
+  pages: [
+    {
+      id: 'mode-test:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+      ],
+    },
   ],
-};
+} as unknown as FormDefinition;
+
+const medicationsSwapForm = {
+  id: 'mode-test',
+  title: 'Anonymous visit',
+  pages: [
+    {
+      id: 'mode-test:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'medications',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterMedications',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
+
+const choicesForm = {
+  id: 'mode-test',
+  title: 'Anonymous visit',
+  pages: [
+    {
+      id: 'mode-test:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:finding',
+              question: 'Finding',
+              width: 'full',
+              fieldType: 'dropdown',
+              options: [
+                {
+                  id: 'Yes',
+                  value: 'Yes',
+                  text: 'Yes',
+                },
+                {
+                  id: 'No',
+                  value: 'No',
+                  text: 'No',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
+
+const renamedChoicesForm = {
+  id: 'mode-test',
+  title: 'Anonymous visit',
+  pages: [
+    {
+      id: 'mode-test:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:finding',
+              question: 'Finding',
+              width: 'full',
+              fieldType: 'dropdown',
+              options: [
+                {
+                  id: 'Positive',
+                  value: 'Positive',
+                  text: 'Positive',
+                },
+                {
+                  id: 'Negative',
+                  value: 'Negative',
+                  text: 'Negative',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
+
+const planTestForm = {
+  id: 'plan-test',
+  title: 'Anonymous visit',
+  pages: [
+    {
+      id: 'plan-test:visit',
+      title: 'Anonymous visit',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:assessment:section',
+          fieldType: 'section',
+          title: 'Assessment',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'assessment',
+          },
+          fields: [
+            {
+              id: 'encounter:assessment:observation:value',
+              fieldType: 'encounterAssessment',
+              question: 'Assessment',
+              _sourceData: {
+                encounterRequireCoding: false,
+              },
+              width: 'full',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
 
 const modeSwitch = () => screen.getByRole('combobox', { name: 'Visit mode' });
 const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
@@ -93,21 +331,28 @@ const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
 };
 
 describe('EncounterVisit mode synchronization', () => {
-  it('requires a compatible explicit definition before opening a native eSheet MDY', () => {
-    const original = parseEncounterMdy(
-      createEncounterSnapshot(definition, {}).mdy
-    );
+  it('opens a native eSheet MDY from its own form and validates a supplied form', () => {
+    const original = parseEncounterMdy(createEncounterSnapshot(form, {}).mdy);
     const yaml = new Document(original.frontMatter);
-    yaml.delete('encounterDefinition');
     const source = `---\n${yaml.toString()}---\n${original.body}`;
-    expect(() => render(<EncounterVisit initialMdy={source} />)).toThrow(
-      'Supply an encounter definition'
-    );
+    expect(() => render(<EncounterVisit initialMdy={source} />)).not.toThrow();
+    const formless = new Document(original.frontMatter);
+    formless.delete('form');
+    expect(() =>
+      render(
+        <EncounterVisit
+          initialMdy={`---\n${formless.toString()}---\n${original.body}`}
+        />
+      )
+    ).toThrow('Unable to load encounter MDY');
     expect(() =>
       render(
         <EncounterVisit
           initialMdy={source}
-          definition={{ ...definition, sections: [definition.sections[0]] }}
+          form={{
+            ...form,
+            pages: [{ ...form.pages[0], fields: [form.pages[0].fields![0]] }],
+          }}
         />
       )
     ).toThrow('The MDY fields do not match');
@@ -116,88 +361,36 @@ describe('EncounterVisit mode synchronization', () => {
       render(
         <EncounterVisit
           initialMdy={`---\n${yaml.toString()}---\n${original.body}`}
-          definition={definition}
+          form={form}
         />
       )
     ).toThrow('The MDY form id does not match');
   });
 
   it('rejects imported field schemas and choice options that reuse the same native IDs', () => {
-    const original = parseEncounterMdy(
-      createEncounterSnapshot(definition, {}).mdy
-    );
+    const original = parseEncounterMdy(createEncounterSnapshot(form, {}).mdy);
     const yaml = new Document(original.frontMatter);
-    yaml.delete('encounterDefinition');
     const source = `---\n${yaml.toString()}---\n${original.body}`;
     expect(() =>
-      render(
-        <EncounterVisit
-          initialMdy={source}
-          definition={{
-            ...definition,
-            sections: [
-              definition.sections[0],
-              { ...definition.sections[1], kind: 'medications' },
-            ],
-          }}
-        />
-      )
+      render(<EncounterVisit initialMdy={source} form={medicationsSwapForm} />)
     ).toThrow('The MDY fields do not match');
-    const choices: EncounterVisitDefinition = {
-      id: definition.id,
-      title: definition.title,
-      sections: [
-        {
-          id: 'exam',
-          title: 'Exam',
-          kind: 'observations',
-          observations: [
-            {
-              id: 'finding',
-              label: 'Finding',
-              type: 'choice',
-              options: ['Yes', 'No'],
-            },
-          ],
-        },
-      ],
-    };
     const choiceMdy = parseEncounterMdy(
-      createEncounterSnapshot(choices, {}).mdy
+      createEncounterSnapshot(choicesForm, {}).mdy
     );
     const choiceYaml = new Document(choiceMdy.frontMatter);
-    choiceYaml.delete('encounterDefinition');
     const imported = `---\n${choiceYaml.toString()}---\n${choiceMdy.body}`;
     expect(() =>
-      render(
-        <EncounterVisit
-          initialMdy={imported}
-          definition={{
-            ...choices,
-            sections: [
-              {
-                ...choices.sections[0],
-                observations: [
-                  {
-                    ...choices.sections[0].observations![0],
-                    options: ['Positive', 'Negative'],
-                  },
-                ],
-              },
-            ],
-          }}
-        />
-      )
+      render(<EncounterVisit initialMdy={imported} form={renamedChoicesForm} />)
     ).toThrow('The MDY fields do not match');
     expect(() =>
-      render(<EncounterVisit initialMdy={imported} definition={choices} />)
+      render(<EncounterVisit initialMdy={imported} form={choicesForm} />)
     ).not.toThrow();
   });
 
   it('flushes rich prose and focuses the requested section after the eSheet is visible', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const { container } = render(
-      <EncounterVisit ref={ref} definition={definition} defaultMode="rich" />
+      <EncounterVisit ref={ref} form={form} defaultMode="rich" />
     );
     const editor = await screen.findByRole('textbox', {
       name: 'Encounter narrative',
@@ -227,9 +420,7 @@ describe('EncounterVisit mode synchronization', () => {
   it('flushes the last rich edit before switching and saving, with coded responses retained', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onSubmit = vi.fn();
-    render(
-      <EncounterVisit ref={ref} definition={definition} onSubmit={onSubmit} />
-    );
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Back pain' } });
     act(() => {
@@ -275,7 +466,7 @@ describe('EncounterVisit mode synchronization', () => {
 
   it('shows the raw portable document with a download button in Export', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(<EncounterVisit ref={ref} definition={definition} />);
+    render(<EncounterVisit ref={ref} form={form} />);
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Back pain' } });
     selectMode('Export');
@@ -295,7 +486,7 @@ describe('EncounterVisit mode synchronization', () => {
 
   it('opens related inputs in the same renderer and refreshes authored linked data after MCP changes', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(<EncounterVisit ref={ref} definition={definition} />);
+    render(<EncounterVisit ref={ref} form={form} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     act(() => {
       ref.current!.getTools().setNarrative('hpi', 'Back pain');
@@ -341,24 +532,7 @@ describe('EncounterVisit mode synchronization', () => {
 
   it('keeps portaled Move menus reachable inside the linked-field resolver focus trap', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(
-      <EncounterVisit
-        ref={ref}
-        definition={{
-          id: 'plan-test',
-          title: 'Anonymous visit',
-          sections: [
-            { id: 'hpi', title: 'HPI', kind: 'narrative' },
-            {
-              id: 'assessment',
-              title: 'Assessment',
-              kind: 'assessment',
-              requireCoding: false,
-            },
-          ],
-        }}
-      />
-    );
+    render(<EncounterVisit ref={ref} form={planTestForm} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     act(() => {
       ref.current!.getTools().updateSection('assessment', {
@@ -406,7 +580,7 @@ describe('EncounterVisit mode synchronization', () => {
   });
 
   it('restores a portable document and allows read-only mode switching without changing answers', async () => {
-    const original = createEncounterSnapshot(definition, {
+    const original = createEncounterSnapshot(form, {
       [getEncounterFieldId('hpi')]: { answer: 'Back pain' },
       [ENCOUNTER_DOCUMENT_FIELD_ID]: {
         answer: '# Final visit\n\n### Follow-up\n\nFree report text.',

@@ -13,7 +13,10 @@
 import * as React from 'react';
 import { cn } from '../../utils/cn';
 import { SuperChat, type SuperChatProps } from './SuperChat';
-import { SuperChatConversations } from './SuperChatConversations';
+import {
+  SuperChatConversations,
+  type SuperChatConversationsProps,
+} from './SuperChatConversations';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -62,12 +65,32 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
+  /** See {@link SuperChatProps.attachmentDataUrls}. @default true */
+  attachmentDataUrls?: boolean;
+  /** See {@link SuperChatProps.maxFileSize}. */
+  maxFileSize?: SuperChatProps['maxFileSize'];
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
   virtualized?: boolean;
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
+  /** Heading above the conversation list; `null` hides it. See {@link SuperChatConversationsProps.listTitle}. */
+  listTitle?: SuperChatConversationsProps['listTitle'];
+  /** Host content in the list header, e.g. filters. See {@link SuperChatConversationsProps.listHeader}. */
+  listHeader?: SuperChatConversationsProps['listHeader'];
+  /**
+   * Search box in the list header. The host filters and passes the matches as
+   * `listConversations`. See {@link SuperChatConversationsProps.search}.
+   */
+  search?: SuperChatConversationsProps['search'];
+  /**
+   * The conversations the list shows, e.g. search or filter results. Defaults
+   * to `conversations`. The panel still opens from `conversations`, so
+   * narrowing the list never closes the open conversation or drops its
+   * unsent draft.
+   */
+  listConversations?: SuperChatConversation[];
   /** Build hrefs for `ref` thread items. */
   linkBuilder?: SuperChatLinkBuilder;
   /** Format for a message's default copy action (Ctrl/Cmd-click on copy). */
@@ -121,9 +144,15 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  attachmentDataUrls,
+  maxFileSize,
   order,
   virtualized,
   showSidebar = true,
+  listTitle,
+  listHeader,
+  search,
+  listConversations,
   linkBuilder,
   defaultCopyFormat,
   className,
@@ -167,10 +196,13 @@ export function SuperChatInbox({
     >
       {showSidebar && (
         <SuperChatConversations
-          conversations={conversations}
+          conversations={listConversations ?? conversations}
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
+          listTitle={listTitle}
+          listHeader={listHeader}
+          search={search}
           className={cn(
             'w-full sm:w-64',
             mobileView === 'chat' && 'hidden sm:flex'
@@ -192,6 +224,8 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           acceptedFileTypes={acceptedFileTypes}
+          attachmentDataUrls={attachmentDataUrls}
+          maxFileSize={maxFileSize}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}
