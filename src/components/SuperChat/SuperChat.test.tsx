@@ -1478,6 +1478,40 @@ describe('SuperChat', () => {
     ).toBeInTheDocument();
   });
 
+  it('fills a scheduled message bubble again while it is edited', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const scheduled: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        { ...conversation.thread[0], scheduledFor: '2026-06-08T09:00:00Z' },
+        conversation.thread[1],
+      ],
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={scheduled}
+          currentParticipantId="u1"
+          onMessageEdited={vi.fn()}
+        />
+      </div>
+    );
+    const pendingBubbles = () =>
+      container.querySelectorAll(
+        '[data-slot="superchat-bubble"][data-pending]'
+      );
+    expect(pendingBubbles()).toHaveLength(1);
+    await startEditViaMenu(user);
+    expect(
+      screen.getByRole('textbox', { name: 'Edit message' })
+    ).toBeInTheDocument();
+    // The editor's Cancel / Save are styled for the filled bubble.
+    expect(pendingBubbles()).toHaveLength(0);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(pendingBubbles()).toHaveLength(1);
+  });
+
   it('shows a copy affordance on every content message', () => {
     render(
       <div style={{ height: 400 }}>

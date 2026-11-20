@@ -1293,7 +1293,9 @@ export const MessageRow = React.memo(function MessageRow({
               data-slot="superchat-bubble"
               variant={isSelf ? 'user' : 'assistant'}
               hasError={message.status === 'error'}
-              pending={!!message.scheduledFor}
+              // Keep the filled bubble while editing: the editor's controls are
+              // styled against it, and the pending outline has no fill.
+              pending={!!message.scheduledFor && !isEditing}
               className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
             >
               {isEditing ? (
