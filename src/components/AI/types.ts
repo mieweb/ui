@@ -100,6 +100,8 @@ export interface ToolCallMedia {
   mimeType: string;
   /** Base64 payload. Hosts must bound its size before passing it in. */
   data: string;
+  /** Accessible description of an image; a generic label is used when absent. */
+  alt?: string;
 }
 
 /** A resource embedded in a tool result. */

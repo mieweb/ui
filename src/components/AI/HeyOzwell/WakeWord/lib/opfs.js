@@ -17,14 +17,22 @@ const DIR = 'ozwell-models';
 // Stable, filesystem-safe name from a URL: basename (readable) + a short hash of the FULL url (so two hosts
 // sharing a basename don't collide, and a URL change busts the cache).
 function fileNameFor(url) {
-  const base = (url.split('?')[0].split('/').pop() || 'model').replace(/[^a-zA-Z0-9._-]/g, '_');
+  const base = (url.split('?')[0].split('/').pop() || 'model').replace(
+    /[^a-zA-Z0-9._-]/g,
+    '_'
+  );
   let h = 0;
-  for (let i = 0; i < url.length; i++) h = (Math.imul(h, 31) + url.charCodeAt(i)) | 0;
+  for (let i = 0; i < url.length; i++)
+    h = (Math.imul(h, 31) + url.charCodeAt(i)) | 0;
   return `${(h >>> 0).toString(36)}-${base}`;
 }
 
 function opfsAvailable() {
-  return typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.getDirectory === 'function';
+  return (
+    typeof navigator !== 'undefined' &&
+    navigator.storage &&
+    typeof navigator.storage.getDirectory === 'function'
+  );
 }
 
 async function modelsDir() {
@@ -34,7 +42,10 @@ async function modelsDir() {
 
 async function fetchBytes(url) {
   const resp = await fetch(url);
-  if (!resp || !resp.ok) throw new Error(`[opfs] fetch ${url} → ${resp ? resp.status : 'no response'}`);
+  if (!resp || !resp.ok)
+    throw new Error(
+      `[opfs] fetch ${url} → ${resp ? resp.status : 'no response'}`
+    );
   return resp.arrayBuffer();
 }
 
@@ -66,7 +77,9 @@ export async function getModelBytes(url) {
       const writable = await fh.createWritable();
       await writable.write(buf);
       await writable.close();
-      console.log(`[opfs] stored ${name} (${(buf.byteLength / 1e6).toFixed(1)} MB)`);
+      console.log(
+        `[opfs] stored ${name} (${(buf.byteLength / 1e6).toFixed(1)} MB)`
+      );
     } catch (e) {
       console.warn('[opfs] store failed for', name, e); // serve the bytes anyway
     }

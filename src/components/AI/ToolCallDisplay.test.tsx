@@ -108,4 +108,72 @@ describe('MCPToolCallGroup outcomes', () => {
     fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
     expect(screen.queryByText('Show result')).toBeNull();
   });
+
+  it('opens approval details when an existing row starts awaiting approval', () => {
+    const details = {
+      description: 'Creates a container.',
+      result: undefined,
+    };
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call({ status: 'pending', ...details })]} />
+    );
+    expect(screen.queryByText('Creates a container.')).toBeNull();
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval', ...details })]}
+        onApprove={() => {}}
+      />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+  });
+
+  it('never hands an unsafe href to a host click handler', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        onLinkClick={() => {}}
+        toolCalls={[
+          call({
+            result: {
+              type: 'text',
+              data: 'ok',
+              links: [{ href: '/\\evil.example', label: 'Sneaky' }],
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.getByText('Sneaky').closest('a')).toBeNull();
+  });
+});
+
+describe('ToolCallDisplay uncertain outcome', () => {
+  it('explains the outcome outside the disclosure', () => {
+    renderWithTheme(
+      <ToolCallDisplay toolCall={call({ status: 'uncertain' })} />
+    );
+    expect(
+      screen.getByText(/Could not confirm completion/)
+    ).toBeInTheDocument();
+  });
+});
+
+describe('structured results that JSON cannot represent', () => {
+  it('shows a fallback instead of throwing', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: [1n] }}
+      />
+    );
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: { a: cyclic } }}
+      />
+    );
+    expect(
+      screen.getByText('This result cannot be displayed')
+    ).toBeInTheDocument();
+  });
 });

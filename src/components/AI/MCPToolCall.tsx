@@ -438,8 +438,11 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
   const icon = link.type ? linkTypeIcons[link.type] : linkTypeIcons.internal;
   const host = linkHost(link.href);
 
-  // A link the browser should not open is shown, but not as a link.
-  if (!onClick && !isSafeHref(link.href)) {
+  // A link the browser should not open is shown, but not as a link — even when
+  // the host intercepts clicks, so it is never handed an unsafe href. A resource
+  // with no URI at all stays clickable for hosts that resolve it themselves.
+  const blocked = link.href ? !isSafeHref(link.href) : !onClick;
+  if (blocked) {
     return (
       <span
         data-slot="ai-tool-link-unsupported"
@@ -704,6 +707,8 @@ export interface ToolCallDisplayProps {
   hidden?: boolean;
   /** Callback when a resource link is clicked */
   onLinkClick?: (link: MCPResourceLink) => void;
+  /** Text shown for an `uncertain` call; pass a translation. */
+  uncertainNotice?: string;
   /** Additional class name */
   className?: string;
 }
@@ -720,6 +725,7 @@ export function ToolCallDisplay({
   compact,
   hidden = false,
   onLinkClick,
+  uncertainNotice = 'Could not confirm completion. The action may have taken effect.',
   className,
 }: ToolCallDisplayProps) {
   const formatDuration = (ms?: number) => {
@@ -859,6 +865,14 @@ export function ToolCallDisplay({
           {staticPill}
           {box}
         </div>
+      )}
+      {toolCall.status === 'uncertain' && (
+        <p
+          data-slot="ai-tool-call-uncertain"
+          className="mt-1 text-xs text-amber-700 dark:text-amber-400"
+        >
+          {uncertainNotice}
+        </p>
       )}
     </div>
   );

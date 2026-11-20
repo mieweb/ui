@@ -28,6 +28,14 @@ export interface ToolCallResultLabels {
   unsupportedContent: (types: string[]) => string;
   /** Notice when a list or table was cut short. */
   truncated: (shown: number, total: number) => string;
+  /** Notice when table columns were cut short. */
+  columnsTruncated: (shown: number, total: number) => string;
+  /** Download control for the complete structured result. */
+  downloadFull: string;
+  /** Shown when structured data cannot be displayed. */
+  structuredUnavailable: string;
+  /** Alt text for a tool image that came without a description. */
+  imageAlt: string;
 }
 
 export const defaultToolCallResultLabels: ToolCallResultLabels = {
@@ -36,6 +44,10 @@ export const defaultToolCallResultLabels: ToolCallResultLabels = {
   download: 'Download',
   unsupportedContent: (types) => `Not shown: ${types.join(', ')}`,
   truncated: (shown, total) => `Showing ${shown} of ${total}`,
+  columnsTruncated: (shown, total) => `Showing ${shown} of ${total} columns`,
+  downloadFull: 'Download full result (JSON)',
+  structuredUnavailable: 'This result cannot be displayed',
+  imageAlt: 'Image returned by the tool',
 };
 
 const MAX_FIELDS = 20;
@@ -60,6 +72,8 @@ const BASE64 = /^[A-Za-z0-9+/]+=*$/;
 
 /** True for links the browser may open: http(s) URLs and same-origin paths. */
 export function isSafeHref(href: string): boolean {
+  // Browsers strip tabs/newlines and treat `\` as `/`, turning a path into another origin.
+  if (/[\\\t\n\r]/.test(href)) return false;
   if (href.startsWith('/') && !href.startsWith('//')) return true;
   try {
     const { protocol } = new URL(href);
@@ -83,11 +97,18 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+/** JSON text, or null for values JSON cannot represent (BigInt, cycles). */
+function safeStringify(value: unknown, indent?: number): string | null {
+  try {
+    return JSON.stringify(value, null, indent) ?? String(value);
+  } catch {
+    return null;
+  }
+}
+
 function cellText(value: unknown): string {
   const text =
-    typeof value === 'string'
-      ? value
-      : (JSON.stringify(value) ?? String(value));
+    typeof value === 'string' ? value : (safeStringify(value) ?? '…');
   return text.length > MAX_CELL_CHARS
     ? `${text.slice(0, MAX_CELL_CHARS)}…`
     : text;
@@ -160,10 +181,8 @@ function StructuredFields({
 
   if (Array.isArray(value) && value.length > 0 && value.every(isPlainObject)) {
     const rows = value.slice(0, MAX_ROWS) as Record<string, unknown>[];
-    const columns = Array.from(new Set(rows.flatMap(Object.keys))).slice(
-      0,
-      MAX_COLUMNS
-    );
+    const allColumns = Array.from(new Set(rows.flatMap(Object.keys)));
+    const columns = allColumns.slice(0, MAX_COLUMNS);
     return (
       <div data-slot="ai-tool-result-table" className="overflow-x-auto">
         <table className="w-full text-start text-xs">
@@ -197,17 +216,49 @@ function StructuredFields({
             {labels.truncated(rows.length, value.length)}
           </p>
         )}
+        {allColumns.length > columns.length && (
+          <p className="mt-1 text-xs text-neutral-500">
+            {labels.columnsTruncated(columns.length, allColumns.length)}
+          </p>
+        )}
       </div>
     );
   }
 
+  const json = safeStringify(value, 2);
+  if (json === null) {
+    return (
+      <p className="text-xs text-neutral-500">{labels.structuredUnavailable}</p>
+    );
+  }
   return (
     <pre
       dir="ltr"
       className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900"
     >
-      {JSON.stringify(value, null, 2)}
+      {json}
     </pre>
+  );
+}
+
+/** The complete structured result as a JSON download, beyond the bounded preview. */
+function FullResultDownload({
+  value,
+  labels,
+}: {
+  value: unknown;
+  labels: ToolCallResultLabels;
+}) {
+  const json = safeStringify(value, 2);
+  if (json === null) return null;
+  return (
+    <a
+      href={`data:application/octet-stream;charset=utf-8,${encodeURIComponent(json)}`}
+      download="result.json"
+      className="text-primary-700 dark:text-primary-300 text-xs underline"
+    >
+      {labels.downloadFull}
+    </a>
   );
 }
 
@@ -225,7 +276,7 @@ function MediaPreview({
     return (
       <img
         src={src}
-        alt=""
+        alt={media.alt || labels.imageAlt}
         className="max-h-60 max-w-full rounded border border-neutral-200 dark:border-neutral-700"
       />
     );
@@ -293,11 +344,14 @@ export function ToolCallResultContent({
   return (
     <div data-slot="ai-tool-result-content" className="space-y-2">
       {result.structured !== undefined && (
-        <StructuredFields
-          value={result.structured}
-          fieldLabels={result.fieldLabels}
-          labels={labels}
-        />
+        <>
+          <StructuredFields
+            value={result.structured}
+            fieldLabels={result.fieldLabels}
+            labels={labels}
+          />
+          <FullResultDownload value={result.structured} labels={labels} />
+        </>
       )}
       {result.media?.map((media, index) => (
         <MediaPreview key={index} media={media} labels={labels} />

@@ -54,8 +54,10 @@ export interface MCPToolCallGroupLabels {
   announceApproval: (count: number) => string;
   /** Live-region announcement when calls fail, sent as each failure lands. */
   announceFailed: (count: number) => string;
-  /** Status badge text per status. */
-  status: Record<MCPToolStatus, string>;
+  /** Status badge text per status; `uncertain` falls back to the default. */
+  status: Record<Exclude<MCPToolStatus, 'uncertain'>, string> & {
+    uncertain?: string;
+  };
   /** Accessible name for a call's row. */
   callLabel: (toolCall: MCPToolCall) => string;
   /** Heads the raw `toolName` in a row's details when `displayName` is set. */
@@ -71,16 +73,25 @@ export interface MCPToolCallGroupLabels {
   /** Refuse the call. */
   deny: string;
   /** Shown on a call that may or may not have run. */
-  uncertainNotice: string;
+  uncertainNotice?: string;
   /** Heads a call's labeled arguments. */
-  arguments: string;
+  arguments?: string;
   /** Disclosure for the raw arguments as JSON. */
-  showRawArguments: string;
+  showRawArguments?: string;
   /** Provider-declared behavior hints, shown as explanation only. */
-  hints: Record<keyof ToolBehaviorHints, string>;
+  hints?: Partial<Record<keyof ToolBehaviorHints, string>>;
   /** Strings for structured, media and embedded results. */
-  result: ToolCallResultLabels;
+  result?: Partial<ToolCallResultLabels>;
 }
+
+/** Every label resolved, so rendering never reads an optional key. */
+type ResolvedLabels = Required<
+  Omit<MCPToolCallGroupLabels, 'status' | 'hints' | 'result'>
+> & {
+  status: Record<MCPToolStatus, string>;
+  hints: Record<keyof ToolBehaviorHints, string>;
+  result: ToolCallResultLabels;
+};
 
 /** Label overrides; `status`, `hints` and `result` merge per key. */
 export type MCPToolCallGroupLabelOverrides = Partial<
@@ -94,7 +105,7 @@ export type MCPToolCallGroupLabelOverrides = Partial<
 const plural = (count: number, one: string, other: string) =>
   count === 1 ? one : other;
 
-export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
+export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   used: (count) => `Used ${count} ${plural(count, 'tool', 'tools')}`,
   running: (count) => `Running ${count} ${plural(count, 'tool', 'tools')}`,
   needsApproval: (count) =>
@@ -142,12 +153,14 @@ export const defaultMCPToolCallGroupLabels: MCPToolCallGroupLabels = {
 
 function resolveLabels(
   overrides: MCPToolCallGroupLabelOverrides | undefined
-): MCPToolCallGroupLabels {
+): ResolvedLabels {
   if (!overrides) return defaultMCPToolCallGroupLabels;
   const base = defaultMCPToolCallGroupLabels;
   return {
     ...base,
-    ...overrides,
+    ...(Object.fromEntries(
+      Object.entries(overrides).filter(([, value]) => value !== undefined)
+    ) as Partial<ResolvedLabels>),
     status: { ...base.status, ...overrides.status },
     hints: { ...base.hints, ...overrides.hints },
     result: { ...base.result, ...overrides.result },
@@ -242,7 +255,7 @@ function useAutoCollapse(
 
 function progressAnnouncement(
   summary: ToolGroupSummary,
-  labels: MCPToolCallGroupLabels
+  labels: ResolvedLabels
 ): string {
   if (summary.awaitingApproval > 0) {
     return labels.announceApproval(summary.awaitingApproval);
@@ -291,10 +304,7 @@ function formatResult(toolCall: MCPToolCall): string | null {
   return formatData(result.data);
 }
 
-function hintList(
-  toolCall: MCPToolCall,
-  labels: MCPToolCallGroupLabels
-): string[] {
+function hintList(toolCall: MCPToolCall, labels: ResolvedLabels): string[] {
   const hints = toolCall.hints;
   if (!hints) return [];
   return (Object.keys(labels.hints) as (keyof ToolBehaviorHints)[])
@@ -336,7 +346,7 @@ function OutputDisclosure({ label, text }: { label: string; text: string }) {
 
 interface ToolCallRowProps {
   toolCall: MCPToolCall;
-  labels: MCPToolCallGroupLabels;
+  labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
@@ -381,6 +391,17 @@ function ToolCallRow({
     hasLinks ||
     hasRich;
 
+  // Approval details must be in view before Allow/Deny, including when a row
+  // already on screen starts awaiting approval or its details arrive later.
+  const mustShowDetails = isAwaitingApproval && hasDetails;
+  const [detailsOpen, setDetailsOpen] = React.useState(mustShowDetails);
+  const [shownForApproval, setShownForApproval] =
+    React.useState(mustShowDetails);
+  if (mustShowDetails !== shownForApproval) {
+    setShownForApproval(mustShowDetails);
+    if (mustShowDetails) setDetailsOpen(true);
+  }
+
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
     try {
@@ -414,7 +435,7 @@ function ToolCallRow({
       className="overflow-hidden text-sm"
     >
       <div role="group" aria-label={labels.callLabel(toolCall)}>
-        <Collapsible defaultOpen={isAwaitingApproval && hasDetails}>
+        <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
           <CollapsibleTrigger
             ref={triggerRef}
             className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
