@@ -113,6 +113,21 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
+   * Whether `onMessageSent`'s attachments carry a base64 `dataUrl`. Set
+   * `false` when the host uploads each attachment's `file` itself: the read is
+   * skipped, so a large video doesn't become a string bigger than a browser —
+   * let alone a phone's WebView — can hold. `dataUrl` is then empty.
+   * @default true
+   */
+  attachmentDataUrls?: boolean;
+  /**
+   * Largest file the composer takes, in bytes; a larger one is refused. A
+   * function sets the cap per file, e.g. a higher one for videos than photos
+   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
+   * @default 26214400 (25 MB)
+   */
+  maxFileSize?: ChatComposerProps['maxFileSize'];
+  /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
    *   classic messenger (auto-scrolls to the newest message).
@@ -233,6 +248,8 @@ export function SuperChat({
   readOnly,
   composerProps,
   acceptedFileTypes,
+  attachmentDataUrls = true,
+  maxFileSize = 25 * 1024 * 1024,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -794,7 +811,8 @@ export function SuperChat({
   const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
-  // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  // SuperChat's host callback (mentions + attachments: each one's File, and
+  // its base64 `data:` URL unless `attachmentDataUrls` is off).
   const handleComposerSend = React.useCallback(
     async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
       if (readOnly) return;
@@ -814,7 +832,8 @@ export function SuperChat({
             )
           : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
-          message.attachments ?? []
+          message.attachments ?? [],
+          { dataUrls: attachmentDataUrls }
         );
         // The declared type is `void` for backward compatibility, but a
         // returned promise (e.g. an async host callback) is awaited so its
@@ -839,7 +858,13 @@ export function SuperChat({
         }
       }
     },
-    [conversation, onMessageSent, composerProps?.mentionOptions, readOnly]
+    [
+      conversation,
+      onMessageSent,
+      composerProps?.mentionOptions,
+      readOnly,
+      attachmentDataUrls,
+    ]
   );
 
   return (
@@ -1067,7 +1092,7 @@ export function SuperChat({
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
         // Same cap MessageComposer applied by default.
-        maxFileSize={25 * 1024 * 1024}
+        maxFileSize={maxFileSize}
         maxLength={100000}
         inputLabel="Message"
         showAgentSelector={!!agents?.length}

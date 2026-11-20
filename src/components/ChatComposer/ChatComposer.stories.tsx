@@ -133,7 +133,7 @@ Host integration escape hatches: \`textareaProps\` spreads extra props onto the 
 
 ### Don't use it when
 
-- You want the **complete multi-participant chat surface** — \`SuperChat\` mounts this composer internally (participants become \`mentionOptions\`, attachments reach the host as base64 \`dataUrl\`s) and adds the thread, header, and Markdown pipeline.
+- You want the **complete multi-participant chat surface** — \`SuperChat\` mounts this composer internally (participants become \`mentionOptions\`, attachments reach the host as the picked \`File\`, plus a base64 \`dataUrl\` unless \`attachmentDataUrls={false}\`) and adds the thread, header, and Markdown pipeline.
 - You want a **complete AI assistant surface** — \`AIChat\` mounts this composer internally (legacy \`MessageComposer\`-style \`composerProps\` keys are mapped for compatibility) and adds the message thread, streaming/generating states, and suggestion chips.
 - You want a **human-to-human messaging thread** — \`MessageThread\` mounts this composer internally and adds the conversation header, message list, typing-callback emulation and lightbox.
 - A single-line command input fits better — \`CommandPalette\` or a plain \`Input\`.
