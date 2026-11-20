@@ -177,6 +177,7 @@ export * from './components/DictationButton';
 export * from './components/RecordHeader';
 export * from './components/RecordLayout';
 export * from './components/RecurringServiceCard';
+export * from './components/ReferenceChip';
 export * from './components/RejectionModal';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
