@@ -68,6 +68,15 @@ describe('referencesIn', () => {
     ]);
   });
 
+  it('reads reference-style links resolved from their definitions', () => {
+    const text =
+      'Ask [@Ann][ann] about [TH-12]\n\n[ann]: /people/u-ann\n[TH-12]: /tickets/t-12';
+    expect(referencesIn(text, triggers)).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann', href: '/people/u-ann' },
+      { kind: 'ticket', id: 't-12', label: 'TH-12', href: '/tickets/t-12' },
+    ]);
+  });
+
   it('unescapes Markdown in the label', () => {
     expect(
       referencesIn('[TH-1: Fix \\[beta\\] form](/tickets/t-1)', triggers)[0]
