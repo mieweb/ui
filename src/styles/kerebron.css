@@ -155,6 +155,58 @@
 }
 
 /*
+ * ProseMirror needs \`white-space: pre-wrap\` on the editable element, or the
+ * browser collapses a trailing space and the next keystroke replaces it —
+ * typing after an inline chip ("[chip] with") lost the space. Kerebron sets it
+ * on \`.kb-editor\`, which the custom-menu editor (RichEditor) doesn't carry.
+ */
+.kb-component .ProseMirror {
+  white-space: pre-wrap;
+}
+
+/*
+ * Reference chips (RichEditor \`triggers\`). Kerebron's editor rules are
+ * unlayered — \`.kb-editor *\` zeroes padding, \`.kb-editor :where(a)\` colours
+ * links — so in hosts whose editable carries \`.kb-editor\` they outrank the
+ * chip's layered Badge utilities. Restate the chip look here, unlayered and
+ * more specific, with the same tokens as \`Badge\` \`secondary\` \`sm\`.
+ */
+.kb-component .ProseMirror [data-slot='reference-chip'] {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--mieweb-neutral-100, #f5f5f5);
+  color: var(--mieweb-neutral-900, #171717);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  vertical-align: baseline;
+}
+[data-theme='dark'] .kb-component .ProseMirror [data-slot='reference-chip'],
+.dark .kb-component .ProseMirror [data-slot='reference-chip'] {
+  background-color: var(--mieweb-neutral-800, #262626);
+  color: var(--mieweb-neutral-100, #f5f5f5);
+}
+/* ProseMirror puts a hidden separator image after an inline node that ends a
+ * line (a chip). Preflight's `img { display: block }` turned it into a line
+ * break, so every chip-ending line got an empty line under it; prosemirror.css
+ * keeps it inline, and Kerebron doesn't ship that rule. */
+.kb-component .ProseMirror img.ProseMirror-separator {
+  display: inline !important;
+  border: none !important;
+  margin: 0 !important;
+}
+.kb-component
+  .ProseMirror
+  [data-slot='reference-chip'].ProseMirror-selectednode {
+  outline: 2px solid var(--mieweb-primary-500, #27aae1);
+  outline-offset: 1px;
+}
+
+/*
  * Kerebron's base.css paints inline shortcode pills green without setting a
  * text color, so the inherited foreground fails WCAG AA contrast. Pin an
  * explicit white-on-green pairing (≈5.1:1) that holds in both themes.
@@ -446,4 +498,31 @@
  * content, up to the field's width (minus its inset on both sides). */
 [data-slot='textarea-rich'] .kb-custom-menu__overflow-menu {
   max-width: calc(100% - 2 * var(--kb-space-xs, 4px));
+}
+
+/*
+ * ChatComposer's rich input (`editor="rich"`): the composer card is the
+ * frame, so the editor drops its own border, padding and toolbar space and
+ * sizes to its text, like the plain textarea.
+ */
+[data-slot='chat-composer-rich-input'] .kb-component {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+/* No stock mobile toolbar here either: drop menu.css's phone clearance
+ * (!important to beat it), as TextAreaRich does above. */
+[data-slot='chat-composer-rich-input'] .kb-component,
+[data-slot='chat-composer-rich-input'] .ProseMirror {
+  padding-bottom: 0 !important;
+}
+[data-slot='chat-composer-rich-input'] .kb-custom-menu {
+  display: none;
+}
+[data-slot='chat-composer-rich-input'] .ProseMirror {
+  min-height: 1.5rem;
+  padding: 0;
+}
+[data-slot='chat-composer-rich-input'] .ProseMirror p {
+  margin: 0;
 }

@@ -23,6 +23,11 @@ import {
 } from '../Messaging/useMentionAutocomplete';
 import type { AttachmentType, NewMessage } from '../Messaging/types';
 import {
+  referencesIn,
+  type ReferenceTrigger,
+} from '../ReferenceChip/references';
+import type { RichEditorHandle } from '../RichEditor/RichEditor';
+import {
   AlertTriangleIcon,
   ArrowUpIcon,
   BotIcon,
@@ -86,7 +91,8 @@ export interface ChatComposerHandle {
   focus: () => void;
   /**
    * The underlying textarea element, for host integrations that need caret
-   * access (e.g. mention insertion via `setSelectionRange`).
+   * access (e.g. mention insertion via `setSelectionRange`). Null with
+   * `editor="rich"`.
    */
   getTextarea: () => HTMLTextAreaElement | null;
 }
@@ -282,8 +288,30 @@ export interface ChatComposerProps {
   /** Accessible label for the reply preview's cancel button. @default 'Cancel reply' */
   cancelReplyLabel?: string;
 
+  /**
+   * The text input. `'rich'` is a compact Markdown editor (Kerebron, loaded
+   * on first use) in which {@link triggers} insert references as chips;
+   * `'plain'` is the textarea. Experimental. @default 'plain'
+   */
+  editor?: 'plain' | 'rich';
+  /**
+   * Inline references — e.g. `@` people, `#` tickets. Typing a trigger's
+   * character searches it; a pick is a chip in the `'rich'` editor and a
+   * Markdown link (`[label](href)`) in the textarea. A trigger on `@` lists
+   * after `mentionOptions`. Sent messages carry `references`, read from the
+   * text.
+   */
+  triggers?: ReferenceTrigger[];
+
   className?: string;
 }
+
+// The rich input's editor: loaded only when a composer asks for it, so the
+// plain composer never downloads Kerebron.
+const LazyRichEditor = React.lazy(() =>
+  import('../RichEditor/RichEditor').then((m) => ({ default: m.RichEditor }))
+);
+const NO_MENU = () => [];
 
 // ============================================================================
 // Styles
@@ -328,6 +356,8 @@ const CARD_INTERACTIVE_SELECTOR = [
   'label',
   'video',
   '[role="listbox"]',
+  // The rich input: the editor and its toolbar take their own clicks.
+  '[data-slot="chat-composer-rich-input"]',
   '[role="menu"]',
   '[data-slot="chat-composer-reply-preview"]',
   '[data-slot="chat-composer-attachments"]',
@@ -400,10 +430,14 @@ export const ChatComposer = React.forwardRef<
     dropFilesLabel = 'Drop files here',
     replyingToLabel = 'Replying to',
     cancelReplyLabel = 'Cancel reply',
+    editor = 'plain',
+    triggers,
     className,
   },
   ref
 ) {
+  const richEditorRef = React.useRef<RichEditorHandle>(null);
+  const rich = editor === 'rich';
   const [internalValue, setInternalValue] = React.useState('');
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
@@ -477,6 +511,8 @@ export const ChatComposer = React.forwardRef<
   // MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
     options: mentionOptions,
+    // The rich editor handles its own triggers.
+    triggers: rich ? undefined : triggers,
     value,
     setValue,
     textareaRef,
@@ -636,10 +672,11 @@ export const ChatComposer = React.forwardRef<
     ref,
     () => ({
       addFiles,
-      focus: () => textareaRef.current?.focus(),
+      focus: () =>
+        rich ? richEditorRef.current?.focus() : textareaRef.current?.focus(),
       getTextarea: () => textareaRef.current,
     }),
-    [addFiles]
+    [addFiles, rich]
   );
 
   // --------------------------------------------------------------------
@@ -653,6 +690,9 @@ export const ChatComposer = React.forwardRef<
       attachments: attachments.map((attachment) => attachment.file),
       // Only add the key when replying — hosts may key-check the payload.
       ...(replyTo ? { replyToId: replyTo.id } : {}),
+      ...(triggers?.length
+        ? { references: referencesIn(value, triggers) }
+        : {}),
     };
     for (const attachment of attachments) {
       if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
@@ -673,7 +713,8 @@ export const ChatComposer = React.forwardRef<
     } catch {
       onError?.(sendFailedLabel, { reason: 'send-failed' });
     }
-    textareaRef.current?.focus();
+    if (rich) richEditorRef.current?.focus();
+    else textareaRef.current?.focus();
   };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
@@ -692,7 +733,8 @@ export const ChatComposer = React.forwardRef<
     const target = event.target as HTMLElement;
     if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
     event.preventDefault();
-    textareaRef.current?.focus();
+    if (rich) richEditorRef.current?.focus();
+    else textareaRef.current?.focus();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -815,72 +857,116 @@ export const ChatComposer = React.forwardRef<
         <div className={cells.input} ref={mention.anchorRef}>
           <MentionMenu
             mention={mention}
-            label={mentionListLabel}
+            label={mention.activeTrigger?.label ?? mentionListLabel}
             dataSlot="chat-composer-mention-list"
           />
-          <textarea
-            // Mobile keyboard hints; overridable via `textareaProps`.
-            enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
-            inputMode="text"
-            autoCapitalize="sentences"
-            autoCorrect="on"
-            spellCheck
-            // Follows the typed script, so RTL text aligns correctly.
-            dir="auto"
-            {...textareaProps}
-            ref={textareaRef}
-            data-slot="chat-composer-input"
-            value={value}
-            onChange={(event) => {
-              textareaProps?.onChange?.(event);
-              setValue(event.target.value);
-              mention.sync(
-                event.target.value,
-                event.target.selectionStart ?? event.target.value.length
-              );
-            }}
-            // Host handlers run first; preventDefault() opts out of the
-            // built-in behavior (mention menu, Enter-to-send,
-            // paste-to-attach).
-            onKeyDown={(event) => {
-              textareaProps?.onKeyDown?.(event);
-              if (event.defaultPrevented) return;
-              handleKeyDown(event);
-            }}
-            onClick={(event) => {
-              textareaProps?.onClick?.(event);
-              if (event.defaultPrevented) return;
-              const el = event.currentTarget;
-              mention.sync(el.value, el.selectionStart ?? el.value.length);
-            }}
-            onPaste={(event) => {
-              textareaProps?.onPaste?.(event);
-              if (event.defaultPrevented) return;
-              handlePaste(event);
-            }}
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={1}
-            aria-label={inputLabel}
-            {...mention.inputProps}
-            style={{
-              ...textareaProps?.style,
-              maxHeight:
-                typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
-            }}
-            className={cn(
-              'block w-full resize-none bg-transparent',
-              // 16px below `sm`: iOS zooms the page when focusing an input
-              // with a smaller font.
-              'rounded-lg text-base sm:text-sm',
-              cells.textarea,
-              'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
-              // Ring the input itself on focus rather than the whole shell.
-              'focus:ring-primary-500 focus:ring-1 focus:outline-none',
-              'disabled:cursor-not-allowed',
-              textareaProps?.className
-            )}
-          />
+          {rich ? (
+            <div
+              data-slot="chat-composer-rich-input"
+              className={cn('min-w-0', cells.textarea)}
+              style={{
+                maxHeight:
+                  typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+                overflowY: 'auto',
+              }}
+              // Enter sends (Shift+Enter is a new line), before the editor
+              // splits the paragraph — unless the reference list is open, in
+              // which case Enter picks (the editor then carries aria-controls).
+              onKeyDownCapture={(event) => {
+                if (
+                  event.key !== 'Enter' ||
+                  event.shiftKey ||
+                  !sendsOnEnter ||
+                  event.nativeEvent.isComposing ||
+                  (event.target as HTMLElement).hasAttribute?.('aria-controls')
+                )
+                  return;
+                event.preventDefault();
+                event.stopPropagation();
+                handleSend();
+              }}
+            >
+              <React.Suspense
+                fallback={
+                  <div className="text-sm text-neutral-400">{placeholder}</div>
+                }
+              >
+                <LazyRichEditor
+                  ref={richEditorRef}
+                  value={value}
+                  onChange={setValue}
+                  triggers={triggers}
+                  modifyMenu={NO_MENU}
+                  disabled={disabled}
+                  aria-label={inputLabel}
+                />
+              </React.Suspense>
+            </div>
+          ) : (
+            <textarea
+              // Mobile keyboard hints; overridable via `textareaProps`.
+              enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
+              inputMode="text"
+              autoCapitalize="sentences"
+              autoCorrect="on"
+              spellCheck
+              // Follows the typed script, so RTL text aligns correctly.
+              dir="auto"
+              {...textareaProps}
+              ref={textareaRef}
+              data-slot="chat-composer-input"
+              value={value}
+              onChange={(event) => {
+                textareaProps?.onChange?.(event);
+                setValue(event.target.value);
+                mention.sync(
+                  event.target.value,
+                  event.target.selectionStart ?? event.target.value.length
+                );
+              }}
+              // Host handlers run first; preventDefault() opts out of the
+              // built-in behavior (mention menu, Enter-to-send,
+              // paste-to-attach).
+              onKeyDown={(event) => {
+                textareaProps?.onKeyDown?.(event);
+                if (event.defaultPrevented) return;
+                handleKeyDown(event);
+              }}
+              onClick={(event) => {
+                textareaProps?.onClick?.(event);
+                if (event.defaultPrevented) return;
+                const el = event.currentTarget;
+                mention.sync(el.value, el.selectionStart ?? el.value.length);
+              }}
+              onPaste={(event) => {
+                textareaProps?.onPaste?.(event);
+                if (event.defaultPrevented) return;
+                handlePaste(event);
+              }}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              aria-label={inputLabel}
+              {...mention.inputProps}
+              style={{
+                ...textareaProps?.style,
+                maxHeight:
+                  typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+              }}
+              className={cn(
+                'block w-full resize-none bg-transparent',
+                // 16px below `sm`: iOS zooms the page when focusing an input
+                // with a smaller font.
+                'rounded-lg text-base sm:text-sm',
+                cells.textarea,
+                'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
+                // Ring the input itself on focus rather than the whole shell.
+                'focus:ring-primary-500 focus:ring-1 focus:outline-none',
+                'disabled:cursor-not-allowed',
+                textareaProps?.className
+              )}
+            />
+          )}
         </div>
 
         {(showAddMenu || leadingSlot != null) && (

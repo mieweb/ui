@@ -18,6 +18,60 @@ function getInput() {
 }
 
 describe('ChatComposer', () => {
+  it('sends the references its triggers claim with the message', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'Ask [@Ann Lee](/people/u-ann) [docs](https://x.y)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann Lee', href: '/people/u-ann' },
+    ]);
+  });
+
+  it('inserts a # trigger pick in the textarea as a Markdown link', async () => {
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async (query: string) =>
+        'fix login'.includes(query.toLowerCase())
+          ? [{ kind: 'ticket', id: 't-12', label: 'TH-12: Fix [beta] login' }]
+          : [],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'On #fix', selectionStart: 7, selectionEnd: 7 },
+    });
+    const option = await screen.findByRole('option', {
+      name: 'TH-12: Fix [beta] login',
+    });
+    expect(
+      screen.getByRole('listbox', { name: 'Tickets' })
+    ).toBeInTheDocument();
+    fireEvent.mouseDown(option);
+    expect(input).toHaveValue(
+      'On [TH-12: Fix \\[beta\\] login](/tickets/t-12) '
+    );
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);
