@@ -10,6 +10,7 @@ import { cn } from '../../utils/cn';
 import type {
   AIMessage,
   AIMessageContent,
+  AIRenderCustomContent,
   AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
@@ -23,6 +24,7 @@ import {
 import { SparklesIcon } from './icons';
 import { CollapsiblePill } from './CollapsiblePill';
 import { AudioPlayer } from '../AudioPlayer';
+import { formatFileSize } from '../../utils/fileSize';
 
 // ============================================================================
 // Avatar Component
@@ -240,6 +242,7 @@ interface ContentBlockProps {
   streaming: boolean;
   role: AIMessage['role'];
   renderTextContent?: AIRenderTextContent;
+  renderCustomContent?: AIRenderCustomContent;
 }
 
 function ContentBlock({
@@ -249,6 +252,7 @@ function ContentBlock({
   streaming,
   role,
   renderTextContent,
+  renderCustomContent,
 }: ContentBlockProps) {
   if (content.type === 'text' && content.text) {
     if (renderTextContent) {
@@ -262,6 +266,13 @@ function ContentBlock({
       <div className="prose prose-sm dark:prose-invert max-w-none">
         <p className="whitespace-pre-wrap">{content.text}</p>
       </div>
+    );
+  }
+
+  // Host-owned widgets (e.g. players) are not prose, so no `prose` wrapper.
+  if (content.type === 'custom') {
+    return (
+      <>{renderCustomContent?.(content.data, { messageId, streaming, role })}</>
     );
   }
 
@@ -411,13 +422,6 @@ function ContentBlock({
   return null;
 }
 
-/** Human-readable file size (e.g. "1.2 MB"). */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 // ============================================================================
 // AI Message Component
 // ============================================================================
@@ -517,6 +521,12 @@ export interface AIMessageDisplayProps {
    */
   renderTextContent?: AIRenderTextContent;
   /**
+   * Optional renderer for `custom` content blocks. Called per custom block with
+   * its `data` and `{ messageId, streaming, role }`. Without it, custom blocks
+   * render nothing.
+   */
+  renderCustomContent?: AIRenderCustomContent;
+  /**
    * Optional renderer for a per-message footer shown below the bubble (e.g.
    * message action controls). Aligned with the message (right for user, left
    * for assistant).
@@ -543,12 +553,14 @@ function MessageContentBlocks({
   streaming,
   onLinkClick,
   renderTextContent,
+  renderCustomContent,
   toolCallGroup,
 }: {
   message: AIMessage;
   streaming: boolean;
   onLinkClick?: (link: MCPResourceLink) => void;
   renderTextContent?: AIRenderTextContent;
+  renderCustomContent?: AIRenderCustomContent;
   toolCallGroup?: MCPToolCallGroupOptions;
 }) {
   const nodes: React.ReactNode[] = [];
@@ -581,6 +593,7 @@ function MessageContentBlocks({
         streaming={streaming}
         role={message.role}
         renderTextContent={renderTextContent}
+        renderCustomContent={renderCustomContent}
       />
     );
   });
@@ -599,6 +612,7 @@ export function AIMessageDisplay({
   showTimestamp = false,
   onLinkClick,
   renderTextContent,
+  renderCustomContent,
   renderMessageFooter,
   toolCallGroup,
   className,
@@ -612,6 +626,7 @@ export function AIMessageDisplay({
       streaming={isStreaming}
       onLinkClick={onLinkClick}
       renderTextContent={renderTextContent}
+      renderCustomContent={renderCustomContent}
       toolCallGroup={toolCallGroup}
     />
   );

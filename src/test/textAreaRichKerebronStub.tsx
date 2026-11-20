@@ -23,11 +23,18 @@
 import * as React from 'react';
 import { TextAreaRichLegacy } from '../components/TextAreaRich/TextAreaRichLegacy';
 import type { TextAreaRichProps } from '../components/TextAreaRich/TextAreaRich';
+import type { TextAreaRichKerebronProps } from '../components/TextAreaRich/TextAreaRichKerebron';
 
 export const TextAreaRichKerebron = React.forwardRef<
   HTMLDivElement,
-  TextAreaRichProps
->(function TextAreaRichKerebron(props, ref) {
+  TextAreaRichKerebronProps
+>(function TextAreaRichKerebron(
+  // The Kerebron-only media/extension props have no legacy counterpart; the
+  // capture ribbon itself is browser-verified. A marker element lets suites
+  // assert the opt-in (and its upload tuning) reached the surface.
+  { mediaCapture, mediaUpload, omitExtensions: _omit, ...props },
+  ref
+) {
   // The legacy surface forwards its ref to the contenteditable region.
   const editableRef = React.useRef<HTMLDivElement | null>(null);
   // Runs after every render: converge the editable to `value`, as the
@@ -39,13 +46,23 @@ export const TextAreaRichKerebron = React.forwardRef<
     if (editable && editable.innerHTML !== html) editable.innerHTML = html;
   });
   return (
-    <TextAreaRichLegacy
-      {...props}
-      ref={(node: HTMLDivElement | null) => {
-        editableRef.current = node;
-        if (typeof ref === 'function') ref(node);
-        else if (ref) ref.current = node;
-      }}
-    />
+    <>
+      {!!mediaCapture && (
+        <div
+          data-testid="capture-ribbon-stub"
+          data-videos-disabled={
+            mediaUpload?.allowedVideoTypes?.length === 0 ? 'true' : undefined
+          }
+        />
+      )}
+      <TextAreaRichLegacy
+        {...(props as TextAreaRichProps)}
+        ref={(node: HTMLDivElement | null) => {
+          editableRef.current = node;
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}
+      />
+    </>
   );
 });

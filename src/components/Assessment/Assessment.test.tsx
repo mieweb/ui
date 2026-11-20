@@ -175,6 +175,57 @@ describe('Assessment actions', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('can hide a single add mode and add a concern without selecting a mode', () => {
+    const onAddAssessment = vi.fn();
+    const onAddOrder = vi.fn();
+    renderAssessment({
+      addModes: ['problem'],
+      hideSingleAddModeSelector: true,
+      onAddAssessment,
+      onAddOrder,
+      renderOrderSearch: ({ onPick }) => (
+        <button
+          type="button"
+          onClick={() =>
+            onPick({
+              fullid: 'ICD10|I10',
+              label: 'Essential hypertension',
+              codetype: 'ICD10',
+              fullcode: 'I10',
+            })
+          }
+        >
+          Pick diagnosis
+        </button>
+      ),
+    });
+
+    expect(
+      screen.queryByRole('combobox', { name: 'What to add' })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Pick diagnosis' }));
+    expect(onAddAssessment).toHaveBeenCalledWith({
+      label: 'Essential hypertension',
+      code: { fullid: 'ICD10|I10', codetype: 'ICD10', fullcode: 'I10' },
+    });
+    expect(onAddOrder).not.toHaveBeenCalled();
+  });
+
+  it('keeps multiple add modes selectable when hiding single-mode selectors', () => {
+    renderAssessment({
+      addModes: ['problem', 'order'],
+      defaultAddMode: 'problem',
+      hideSingleAddModeSelector: true,
+      onAddAssessment: vi.fn(),
+      onAddOrder: vi.fn(),
+    });
+
+    const selector = screen.getByRole('combobox', { name: 'What to add' });
+    expect(selector).toHaveValue('problem');
+    fireEvent.change(selector, { target: { value: 'order' } });
+    expect(selector).toHaveValue('order');
+  });
+
   it('requires each configured add mode to have executable callbacks', () => {
     const renderOrderSearch: NonNullable<
       AssessmentProps['renderOrderSearch']

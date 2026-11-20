@@ -344,6 +344,10 @@ function Select(props: SelectProps) {
     }
     return result;
   }, [filteredOptions]);
+  const optionId = (option: SelectOption) =>
+    `${listboxId}-option-${flatOptions.indexOf(option)}`;
+  const activeOption = filteredFlatOptions[highlightedIndex];
+  const activeOptionId = activeOption ? optionId(activeOption) : undefined;
 
   // Get selected options (in selection order)
   const selectedOptions = selectedValues
@@ -475,7 +479,11 @@ function Select(props: SelectProps) {
             setIsOpen(true);
           } else {
             setHighlightedIndex((prev) =>
-              prev < filteredFlatOptions.length - 1 ? prev + 1 : 0
+              filteredFlatOptions.length === 0
+                ? -1
+                : prev < filteredFlatOptions.length - 1
+                  ? prev + 1
+                  : 0
             );
           }
           break;
@@ -493,14 +501,15 @@ function Select(props: SelectProps) {
         case ' ':
           e.preventDefault();
           if (isOpen && highlightedIndex >= 0) {
-            handleValueChange(filteredFlatOptions[highlightedIndex].value);
+            const option = filteredFlatOptions[highlightedIndex];
+            if (option) handleValueChange(option.value);
           } else if (!isOpen) {
             setIsOpen(true);
           }
           break;
         case 'Home':
           e.preventDefault();
-          setHighlightedIndex(0);
+          setHighlightedIndex(filteredFlatOptions.length > 0 ? 0 : -1);
           break;
         case 'End':
           e.preventDefault();
@@ -517,12 +526,12 @@ function Select(props: SelectProps) {
     ]
   );
 
-  // Focus search input when dropdown opens
+  // Browsers cannot focus the search until the positioned popup is visible.
   React.useEffect(() => {
-    if (isOpen && searchable && searchInputRef.current) {
-      searchInputRef.current.focus();
+    if (isOpen && searchable && dropdownStyle.visibility !== 'hidden') {
+      searchInputRef.current?.focus({ preventScroll: true });
     }
-  }, [isOpen, searchable]);
+  }, [isOpen, searchable, dropdownStyle.visibility]);
 
   // Reset highlighted index when search changes
   React.useEffect(() => {
@@ -614,6 +623,7 @@ function Select(props: SelectProps) {
           // Only reference the listbox while it exists in the DOM (it is
           // portaled and unmounted when closed) so the ID is always valid.
           aria-controls={isOpen ? listboxId : undefined}
+          aria-activedescendant={isOpen ? activeOptionId : undefined}
           aria-invalid={hasError || !!error}
           aria-required={required || undefined}
           aria-label={!label ? ariaLabel : undefined}
@@ -668,7 +678,7 @@ function Select(props: SelectProps) {
           </label>
         )}
 
-        {/* Dropdown (portaled to body to avoid overflow clipping) */}
+        {/* Keep modal popups within their focus and accessibility scope. */}
         {isOpen &&
           createPortal(
             <div
@@ -676,10 +686,18 @@ function Select(props: SelectProps) {
               ref={(node) => {
                 dropdownRef.current = node;
                 floatingRef.current = node;
+                // The top layer keeps viewport positioning valid inside transformed dialogs.
+                node?.showPopover?.();
               }}
-              style={dropdownStyle}
+              popover={
+                typeof HTMLElement !== 'undefined' &&
+                'showPopover' in HTMLElement.prototype
+                  ? 'manual'
+                  : undefined
+              }
+              style={{ inset: 'auto', margin: 0, padding: 0, ...dropdownStyle }}
               className={cn(
-                'border-border bg-card rounded-lg border shadow-lg',
+                'border-border bg-card text-card-foreground rounded-lg border shadow-lg',
                 'flex flex-col overflow-hidden',
                 'animate-in fade-in zoom-in-95 duration-100'
               )}
@@ -703,6 +721,9 @@ function Select(props: SelectProps) {
                       'focus:ring-ring focus:ring-2 focus:outline-none'
                     )}
                     aria-label="Search options"
+                    aria-controls={listboxId}
+                    aria-autocomplete="list"
+                    aria-activedescendant={activeOptionId}
                   />
                 </div>
               )}
@@ -737,6 +758,7 @@ function Select(props: SelectProps) {
                             {item.options.map((option) => (
                               <SelectOptionItem
                                 key={option.value}
+                                id={optionId(option)}
                                 option={option}
                                 isSelected={selectedValues.includes(
                                   option.value
@@ -763,6 +785,7 @@ function Select(props: SelectProps) {
                     return (
                       <SelectOptionItem
                         key={item.value}
+                        id={optionId(item)}
                         option={item}
                         isSelected={selectedValues.includes(item.value)}
                         isHighlighted={
@@ -782,7 +805,9 @@ function Select(props: SelectProps) {
                 )}
               </ul>
             </div>,
-            document.body
+            triggerRef.current?.closest(
+              '[role="dialog"], [role="alertdialog"], dialog'
+            ) ?? document.body
           )}
       </div>
 
@@ -825,6 +850,7 @@ function toValueArray(value: string | string[] | undefined): string[] {
 // ============================================================================
 
 interface SelectOptionItemProps {
+  id: string;
   option: SelectOption;
   isSelected: boolean;
   isHighlighted: boolean;
@@ -833,6 +859,7 @@ interface SelectOptionItemProps {
 }
 
 function SelectOptionItem({
+  id,
   option,
   isSelected,
   isHighlighted,
@@ -855,6 +882,7 @@ function SelectOptionItem({
 
   return (
     <li
+      id={id}
       data-slot="select-option"
       role="option"
       aria-selected={isSelected}

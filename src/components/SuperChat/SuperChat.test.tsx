@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -514,6 +515,23 @@ describe('SuperChat', () => {
     expect(screen.getByText('hi').tagName).toBe('STRONG');
   });
 
+  it("sets a message's text, author and time in their own direction, not the page's", () => {
+    const { container } = render(
+      <div dir="rtl">
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    // "hi Alice." in an RTL page keeps its full stop at the end, and
+    // "9:00 AM" doesn't read "AM 9:00".
+    const text = screen.getByText('hi').closest('.prose');
+    expect(text).toHaveAttribute('dir', 'auto');
+    const meta = container.querySelector(
+      '[data-slot="superchat-message-meta"]'
+    )!;
+    for (const part of meta.querySelectorAll('span:not([data-slot])'))
+      expect(part).toHaveAttribute('dir', 'auto');
+  });
+
   it('fires onMessageSent with detected mentions', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -603,6 +621,30 @@ describe('SuperChat', () => {
     await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(1));
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(input).toHaveValue('newer draft');
+  });
+
+  it('takes a larger file when maxFileSize allows it, per file', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        maxFileSize={(file) =>
+          (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024
+        }
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const video = new File(['x'], 'long.mp4', { type: 'video/mp4' });
+    Object.defineProperty(video, 'size', { value: 400 * 1024 * 1024 });
+    const photo = new File(['x'], 'huge.png', { type: 'image/png' });
+    Object.defineProperty(photo, 'size', { value: 25 * 1024 * 1024 + 1 });
+    await user.upload(fileInput, [video, photo]);
+    await screen.findByLabelText('Remove long.mp4');
+    expect(screen.queryByLabelText('Remove huge.png')).toBeNull();
   });
 
   it('rejects files over the 25 MiB cap', async () => {
@@ -696,11 +738,55 @@ describe('SuperChat', () => {
               name: 'picked.png',
               type: 'image/png',
               dataUrl: expect.stringMatching(/^data:image\/png/),
+              file,
             }),
           ],
         })
       )
     );
+  });
+
+  it('hands over only the file when attachmentDataUrls is off', async () => {
+    const onMessageSent = vi.fn();
+    const readAsDataURL = vi.spyOn(
+      window.FileReader.prototype,
+      'readAsDataURL'
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['fake-bytes'], 'clip.mp4', { type: 'video/mp4' });
+    await user.upload(fileInput, file);
+    await screen.findByLabelText('Remove clip.mp4');
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'clip.mp4',
+              type: 'video/mp4',
+              dataUrl: '',
+              file,
+            }),
+          ],
+        })
+      )
+    );
+    // Never read into memory as base64.
+    expect(readAsDataURL).not.toHaveBeenCalled();
+    readAsDataURL.mockRestore();
   });
 
   it('attaches a non-image file (pdf) with an icon preview', async () => {
@@ -742,6 +828,35 @@ describe('SuperChat', () => {
     );
   });
 
+  it("puts a message's actions beside its bubble, not under the avatar", () => {
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageEdited={() => {}}
+      />
+    );
+    const gutter = container.querySelector(
+      '[data-slot="superchat-message-gutter"]'
+    )!;
+    expect(gutter.querySelector('button')).toBeNull();
+    const slot = container.querySelector(
+      '[data-slot="superchat-message-actions-slot"]'
+    )!;
+    const bubble = slot.parentElement?.querySelector(
+      '[data-slot="superchat-bubble"]'
+    );
+    expect(bubble).toBeTruthy();
+    // On the outer side, by the avatar: first in the row, which runs the
+    // author's way.
+    expect(
+      slot.compareDocumentPosition(bubble!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      within(slot as HTMLElement).getAllByRole('button').length
+    ).toBeGreaterThan(0);
+  });
+
   it('restricts the file picker to acceptedFileTypes', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -757,11 +872,82 @@ describe('SuperChat', () => {
     const fileInput = container.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
-    expect(fileInput.accept).toBe('image/*');
+    expect(fileInput.accept).toBe(
+      'image/jpeg,image/png,image/gif,image/webp,image/avif'
+    );
     // A disallowed type (audio) is ignored — no preview chip appears.
     const file = new File(['id3'], 'song.mp3', { type: 'audio/mpeg' });
     await user.upload(fileInput, file);
     expect(screen.queryByLabelText('Remove song.mp3')).toBeNull();
+  });
+
+  it('refuses a HEIC photo and a file over maxFileSize, and says why', async () => {
+    const onComposerError = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    // Past the picker's own filter, as a drop or a paste would be.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        acceptedFileTypes={['image', 'document']}
+        maxFileSize={1000}
+        onComposerError={onComposerError}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    expect(fileInput.accept).toContain('.docx');
+    await user.upload(fileInput, [
+      new File(['x'], 'IMG_0001.HEIC', { type: 'image/heic' }),
+      new File(['x'.repeat(2000)], 'big.png', { type: 'image/png' }),
+      new File(['x'], 'notes.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    ]);
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('IMG_0001.HEIC'),
+      expect.objectContaining({ reason: 'file-type' })
+    );
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('big.png'),
+      expect.objectContaining({ reason: 'file-size' })
+    );
+    expect(screen.getByLabelText('Remove notes.docx')).toBeTruthy();
+  });
+
+  it('shows the send in progress, and a failed send puts the files back', async () => {
+    let fail: (error: Error) => void = () => {};
+    const onMessageSent = vi.fn(
+      () => new Promise<void>((_, reject) => (fail = reject))
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(['png'], 'shot.png', { type: 'image/png' })
+    );
+    await user.type(screen.getByLabelText('Message'), 'See this');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalled());
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('Remove shot.png')).toBeNull();
+    await act(async () => fail(new Error('offline')));
+    expect(await screen.findByLabelText('Remove shot.png')).toBeTruthy();
+    expect(screen.getByLabelText('Message')).toHaveValue('See this');
   });
 
   it('does not detect mentions for system participants', async () => {
@@ -929,6 +1115,8 @@ describe('SuperChat', () => {
 
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      removedMedia: [],
+      removedFiles: [],
       conversation,
     });
   });
@@ -964,6 +1152,46 @@ describe('SuperChat', () => {
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     const [, savedText] = onMessageEdited.mock.calls[0];
     expect(savedText).toMatch(/!\[edited\.png\]\(data:image\/png/);
+  });
+
+  it('keeps the editor inside its bubble, however wide its content was', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    // The message measured wider than the bubble will have room for once it
+    // edits (a host card on thinner padding, say).
+    // At its widest (997px), on a host's thinner frame (6px) until the
+    // editor shows, then the usual 16px.
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(997);
+    const computed = window.getComputedStyle;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudo) => {
+      const style = computed(el, pseudo);
+      const bubble = el as HTMLElement;
+      if (bubble.dataset?.slot === 'superchat-bubble') {
+        const pad = bubble.querySelector(
+          '[data-slot="superchat-message-editor"]'
+        )
+          ? '16px'
+          : '6px';
+        Object.defineProperty(style, 'paddingLeft', { value: pad });
+        Object.defineProperty(style, 'paddingRight', { value: pad });
+      }
+      return style;
+    });
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={() => {}}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen
+      .getByRole('textbox', { name: 'Edit message' })
+      .closest<HTMLElement>('[data-slot="superchat-message-editor"]')!;
+    // Measured at 985px (997 - 2 × 6), kept to the 965px it has room for now.
+    expect(editor.style.minWidth).toBe('965px');
   });
 
   it('cancels an edit without firing onMessageEdited', async () => {
@@ -1698,6 +1926,135 @@ describe('SuperChatConversations', () => {
     await user.click(screen.getByLabelText('New conversation'));
     expect(onNewConversation).toHaveBeenCalled();
   });
+
+  describe('list header', () => {
+    it('renders exactly as before when no header props are passed', () => {
+      const { container } = render(
+        <SuperChatConversations conversations={conversations} />
+      );
+      expect(screen.getByText('Conversations')).toBeInTheDocument();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-header"]')
+      ).toBeNull();
+    });
+
+    it('replaces the heading with listTitle', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle="Work sessions"
+        />
+      );
+      expect(screen.getByText('Work sessions')).toBeInTheDocument();
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+    });
+
+    it('hides the heading row when listTitle is null and there is no new button', () => {
+      const { container } = render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-title"]')
+      ).toBeNull();
+    });
+
+    it('keeps the new-conversation button when listTitle is null', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+          onNewConversation={() => {}}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('New conversation')).toBeInTheDocument();
+    });
+
+    it('renders listHeader content above the list', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listHeader={<button type="button">Group by: Day</button>}
+        />
+      );
+      const filter = screen.getByRole('button', { name: 'Group by: Day' });
+      const list = screen.getByRole('list');
+      expect(
+        filter.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('renders a labelled search box that reports each change', async () => {
+      const onChange = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ value: '', onChange }}
+        />
+      );
+      const box = screen.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      expect(box).toHaveAttribute('placeholder', 'Search…');
+      await user.type(box, 'a');
+      expect(onChange).toHaveBeenCalledWith('a');
+    });
+
+    it('uses the host labels for the search box', () => {
+      render(
+        <SuperChatConversations
+          conversations={[]}
+          search={{
+            value: 'zzz',
+            onChange: () => {},
+            label: 'Search posts',
+            placeholder: 'Search posts, people…',
+            noResultsLabel: 'No matching posts',
+          }}
+        />
+      );
+      expect(
+        screen.getByRole('searchbox', { name: 'Search posts' })
+      ).toHaveAttribute('placeholder', 'Search posts, people…');
+      expect(screen.getByRole('status')).toHaveTextContent('No matching posts');
+    });
+
+    it('announces no results only when a query matches nothing', () => {
+      const search = { value: '', onChange: () => {} };
+      const { rerender } = render(
+        <SuperChatConversations conversations={[]} search={search} />
+      );
+      // An empty query with an empty list is not a "no results" state.
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ ...search, value: 'Intake' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={[]}
+          search={{ ...search, value: 'nothing' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'No matching conversations'
+      );
+    });
+  });
 });
 
 describe('SuperChatInbox', () => {
@@ -1750,6 +2107,79 @@ describe('SuperChatInbox', () => {
     expect(panel).not.toBeNull();
     const thread = within(panel as HTMLElement);
     expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('passes the list header props through to the conversation list', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          listTitle="Days"
+          listHeader={<span>Team: Platform</span>}
+          search={{ value: '', onChange: () => {} }}
+        />
+      </div>
+    );
+    const list = within(
+      container.querySelector(
+        '[data-slot="superchat-conversations"]'
+      ) as HTMLElement
+    );
+    expect(list.getByText('Days')).toBeInTheDocument();
+    expect(list.getByText('Team: Platform')).toBeInTheDocument();
+    expect(
+      list.getByRole('searchbox', { name: 'Search conversations' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the open conversation and its draft when a search empties the list', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const inbox = (
+      query: string,
+      listConversations?: SuperChatConversation[]
+    ) => (
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={listConversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          search={{ value: query, onChange: () => {} }}
+        />
+      </div>
+    );
+    const { container, rerender } = render(inbox(''));
+    await user.type(screen.getByLabelText('Message'), 'unsent reply');
+
+    rerender(inbox('nothing', []));
+
+    const panel = within(
+      container.querySelector('[data-slot="superchat"]') as HTMLElement
+    );
+    expect(panel.getByText('first conversation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveValue('unsent reply');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'No matching conversations'
+    );
+  });
+
+  it('highlights no row when the open conversation is filtered out of the list', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={conversations.filter((c) => c.id === 'c2')}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const list = screen.getByRole('list');
+    expect(within(list).getByText('Follow-up')).toBeInTheDocument();
+    expect(within(list).queryByText('Intake')).not.toBeInTheDocument();
+    expect(list.querySelector('[aria-current="true"]')).not.toBeInTheDocument();
   });
 
   it('switches the active panel when another conversation is opened', async () => {

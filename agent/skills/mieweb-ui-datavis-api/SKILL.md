@@ -45,10 +45,17 @@ NITRO grid never need it.
 </DataVisNitroSource>
 ```
 
-- `type: 'http'` — `url` is fetched by the engine; parsing and type inference
-  are automatic. **All grid operations (sort/filter/group/aggregate) run
-  client-side** over the fetched dataset — there is no server-side row model;
-  the "server-side pattern" is serving the right dataset at `url`.
+- `type: 'http'` — `url` is fetched by the engine. **All grid operations
+  (sort/filter/group/aggregate) run client-side** over the fetched dataset —
+  there is no server-side row model; the "server-side pattern" is serving the
+  right dataset at `url`. The response must be one of the engine's two wire
+  formats — a bare JSON array is **not** accepted:
+  - **JSON envelope** — `{ "typeInfo": [...], "data": [...] }`, both
+    properties required. `typeInfo` is an array of
+    `{ field, type, displayText?, format? }` entries; `data` is an array of
+    row objects keyed by `field` (or per-row arrays in `typeInfo` order).
+  - **CSV text** — header row then data rows; every column is typed
+    `string` (no typeInfo).
 - `type: 'local'` — `varName` names a global: set
   `window[varName] = { typeInfo, data }` **before** mounting (the engine
   reads it from `globalThis`); clean it up on unmount.
@@ -163,6 +170,8 @@ to the A11y agent.
 | `datavis_ace.Source is not a constructor` | `datavis-ace` missing/unresolved — it is a hard runtime requirement of `DataVisNitroSource` (ships as a regular dependency of `@mieweb/ui`, external in the bundle) | Reinstall; check the host's resolution (`pnpm why datavis-ace`) — never add it as a direct import |
 | Grid renders nothing, no error | `DataVisNitroGrid` not inside a `DataVisNitroSource` (context is null) | Nest Grid/Graph inside the Source |
 | `type="local"` grid is empty | `window[varName]` unset at mount, or not shaped `{ typeInfo, data }` | Set the global before mounting; delete it on unmount |
+| `type="http"`: `JSON Parser / Missing (data) property` | Endpoint served a bare JSON array (or other shape) instead of the `{ typeInfo, data }` envelope | Serve the envelope or CSV (see DataVisNitroSource above) |
+| `type="http"` with a blob URL: `ERR_FILE_NOT_FOUND` / "Failed to fetch" | Blob URLs get revoked/recreated between the engine's fetches | Use `type="local"` with `window[varName]` instead of a blob URL |
 | Grouping/aggregation "doesn't stick" | Imperative `setGroup`/`setAggregate` calls on the context fight the declarative props | Use the Source's `groupBy`/`aggregates` props only |
 | Huge dataset scrolls poorly | No virtualization in the engine — `height` + show-more/limit is the mechanism | Reduce the served dataset (http source), group/aggregate, or page upstream |
 | "How do I turn on pagination?" | NITRO has no page controls; `Pagination` is for server-paged `Table`/card lists | Filtering/grouping/show-more replace paging in NITRO |

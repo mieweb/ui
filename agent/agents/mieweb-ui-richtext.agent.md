@@ -2,6 +2,7 @@
 name: MIE UI Rich Text Agent
 description: Rich-text editing specialist for the @mieweb/ui design system — the Kerebron entry (RichEditor, CodeEditor, TextAreaRich), the Kerebron-backed main-barrel Textarea, EmailEditor, MarkdownRenderer, Yjs collaboration, WASM grammar serving, the exact-0.8.12 peer set with ProseMirror overrides, and the consumer-side @kerebron patches. Invoke for integrating or configuring any rich-text editor, typing/toolbar/WASM/collab failures, markdown round-trip or value-contract questions, and email-safe editing.
 tools: ['search', 'codebase', 'fetch', 'runInTerminal']
+user-invocable: false
 handoffs:
   - label: Apply Fixes
     agent: agent

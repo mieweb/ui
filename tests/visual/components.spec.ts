@@ -251,6 +251,25 @@ test.describe('Visual Regression Tests - Core Components', () => {
     ).toBeVisible();
   });
 
+  // Clicking right after mount can land before ProseMirror is interactive,
+  // leaving the caret at the document start (the heading) — and headings drop
+  // images in markdown serialization, so the round-trip silently loses the
+  // capture on slow CI runners. Retry until the caret really sits in the
+  // target paragraph.
+  async function placeCaretInParagraph(page: Page, text: string) {
+    const paragraph = page.locator('.ProseMirror p', { hasText: text });
+    await expect(async () => {
+      await paragraph.click();
+      expect(
+        await page.evaluate(() => {
+          const node = window.getSelection()?.anchorNode;
+          const element = node instanceof Element ? node : node?.parentElement;
+          return element?.closest('p')?.textContent ?? '';
+        })
+      ).toContain(text);
+    }).toPass();
+  }
+
   // Real-editor round-trip (mieweb/ui#733): capture → uploadHandler → image
   // node in the live Kerebron document → serialized markdown. Complements the
   // unit tests, which mock the editor because tree-sitter WASM can't run in
@@ -258,21 +277,20 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('RichMediaCaptureEditor - Attach file round-trips into markdown via uploadHandler', async ({
     page,
   }) => {
-    await gotoStory(page, 'editors-richmediacaptureeditor--with-upload-handler');
+    await gotoStory(
+      page,
+      'editors-richmediacaptureeditor--with-upload-handler'
+    );
     // Insertion happens at the caret, exactly like paste — put it in the
     // paragraph (markdown headings cannot carry images through serialization).
-    await page
-      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
-      .click();
+    await placeCaretInParagraph(page, 'Attach evidence below.');
     // The unrestricted hidden input backs "Attach file" (the other is
     // accept="image/*" for Capture image).
-    await page
-      .locator('input[type="file"]:not([accept])')
-      .setInputFiles({
-        name: 'note-photo.png',
-        mimeType: 'image/png',
-        buffer: Buffer.from('fake-png-bytes'),
-      });
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
     await expect(page.getByRole('status')).toHaveText('Attached', {
       timeout: 15000,
     });
@@ -290,9 +308,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
     page,
   }) => {
     await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
-    await page
-      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
-      .click();
+    await placeCaretInParagraph(page, 'Attach evidence below.');
     await page.locator('input[type="file"]:not([accept])').setInputFiles({
       name: 'note-photo.png',
       mimeType: 'image/png',
@@ -304,6 +320,65 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // The story echoes the field's HTML: the image carries the uploaded URL
     // (the mock returns an object URL), not a base64 embed.
     await expect(page.getByTestId('html-output')).toContainText('src="blob:');
+  });
+
+  // Image annotation (mieweb/ui#735): hover a document image, draw on it in
+  // the dialog, save — the flattened PNG replaces the image node's src
+  // through the same uploadHandler pipeline.
+  test('TextAreaRich Kerebron - annotate flattens and replaces the image', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    // A real decodable PNG — the annotate canvas has to actually load it.
+    const dataUrl = await page.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = 200;
+      c.height = 120;
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = '#cccccc';
+      ctx.fillRect(0, 0, 200, 120);
+      return c.toDataURL('image/png');
+    });
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'evidence.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(dataUrl.split(',')[1], 'base64'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // ProseMirror renders a decorative separator <img> too — pick by alt.
+    const docImage = page.locator('.ProseMirror img[alt="evidence.png"]');
+    const srcBefore = await docImage.getAttribute('src');
+
+    await docImage.hover();
+    await page.waitForTimeout(450); // the affordance's placement settle window
+    await page.locator('[data-slot="annotate-image-button"]').click();
+    const canvas = page.locator('[data-slot="annotate-canvas"]');
+    await expect(canvas).toBeVisible();
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7, {
+      steps: 8,
+    });
+    await page.mouse.up();
+    await page.getByRole('button', { name: 'Save annotation' }).click();
+
+    await expect(page.getByRole('status')).toHaveText('Image annotated', {
+      timeout: 15000,
+    });
+    await expect(canvas).not.toBeVisible();
+    // The node kept its alt but carries the flattened PNG's new upload URL.
+    const srcAfter = await docImage.getAttribute('src');
+    expect(srcAfter).toMatch(/^blob:/);
+    expect(srcAfter).not.toBe(srcBefore);
+    await expect(page.getByTestId('html-output')).toContainText(
+      'alt="evidence.png"'
+    );
   });
 
   test('DictationButton - Mock provider', async ({ page }) => {
@@ -702,6 +777,58 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .waitFor({ state: 'visible' });
     await expect(page).toHaveScreenshot('superchat-playground.png');
   });
+
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`SuperChatConversations - List header${name}`, async ({ page }) => {
+      // Short enough that the list scrolls under the fixed header.
+      await page.setViewportSize({ width: 320, height: 190 });
+      await gotoStory(
+        page,
+        'superchat-conversations-list--list-header',
+        options
+      );
+      const search = page.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      await search.waitFor({ state: 'visible' });
+
+      // The icon sits at the input's inline start, and the text clears it.
+      const icon = page.locator(
+        "[data-slot='superchat-conversations-search'] svg"
+      );
+      const [iconBox, inputBox] = await Promise.all([
+        icon.boundingBox(),
+        search.boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(
+          inputBox!.x + inputBox!.width - (iconBox!.x + iconBox!.width)
+        ).toBeLessThan(24);
+      } else {
+        expect(iconBox!.x - inputBox!.x).toBeLessThan(24);
+      }
+      expect(
+        await search.evaluate((el) => getComputedStyle(el).paddingInlineStart)
+      ).toBe('32px');
+
+      // The header stays put while the list scrolls.
+      const list = page.locator("[data-slot='superchat-conversation-list']");
+      const headerTop = (await search.boundingBox())!.y;
+      const scrolled = await list.evaluate((el) => {
+        el.scrollTop = el.scrollHeight;
+        return el.scrollTop;
+      });
+      expect(scrolled).toBeGreaterThan(0);
+      expect((await search.boundingBox())!.y).toBe(headerTop);
+
+      await expect(page).toHaveScreenshot(
+        `superchat-conversations-list-header${name}.png`
+      );
+    });
+  }
 
   test('SuperChat - Composer selectors', async ({ page }) => {
     // Agent + model selector row in the SuperChat composer.
@@ -1182,6 +1309,60 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
 
     await expect(page).toHaveScreenshot('select-with-descriptions-open.png');
+  });
+
+  test('Select - Search stays anchored inside a transformed dialog', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-select--searchable');
+    const trigger = page.getByRole('combobox').first();
+    await trigger.evaluate((element) => {
+      const wrapper = element.closest<HTMLElement>(
+        '[data-slot="select-wrapper"]'
+      )!;
+      wrapper.setAttribute('role', 'dialog');
+      wrapper.setAttribute('aria-modal', 'true');
+      wrapper.style.transform = 'translate(80px, 40px) scale(0.9)';
+    });
+    await trigger.click();
+    const popup = page.locator('[data-slot="select-dropdown"]');
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'light';
+      root.style.setProperty('--mieweb-card', '#111827', 'important');
+      root.style.setProperty(
+        '--mieweb-card-foreground',
+        '#f9fafb',
+        'important'
+      );
+    });
+    await popup.evaluate((element) => {
+      element.style.colorScheme = 'light';
+    });
+    await expect(popup).toHaveCSS('background-color', 'rgb(17, 24, 39)');
+    await expect(
+      popup.locator('[role="option"][aria-selected="false"]').first()
+    ).toHaveCSS('color', 'rgb(249, 250, 251)');
+    await expect(
+      page.getByRole('dialog').getByRole('textbox', { name: 'Search options' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('textbox', { name: 'Search options' })
+    ).toBeFocused();
+    await expect
+      .poll(async () => {
+        const anchor = await trigger.boundingBox();
+        const menu = await popup.boundingBox();
+        if (!anchor || !menu) return Infinity;
+        return Math.max(
+          Math.abs(menu.x - anchor.x),
+          Math.abs(menu.y - anchor.y - anchor.height - 4),
+          Math.abs(menu.width - anchor.width)
+        );
+      })
+      .toBeLessThan(2);
   });
 
   test('CountryDropdown - Default (empty placeholder)', async ({ page }) => {

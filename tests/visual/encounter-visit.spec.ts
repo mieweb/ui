@@ -685,7 +685,10 @@ test('Export shows the portable MDY document and downloads it as Markdown', asyn
   await expect(source).toContainText('back pain');
   const mdy = await source.evaluate((element) => element.textContent!);
   expect(mdy).toMatch(/^---\r?\n/);
-  expect(mdy).toContain('encounterDefinition');
+  // The native eSheet form is the only document schema (mieweb/ui#772);
+  // the legacy encounterDefinition key is no longer written.
+  expect(mdy).toContain('\nform:\n');
+  expect(mdy).not.toContain('encounterDefinition');
   await expect(page).toHaveScreenshot('encounter-desktop-export.png');
 
   const downloading = page.waitForEvent('download');
