@@ -18,6 +18,9 @@ import {
   type KeyboardInsetSource,
 } from '../../hooks/useKeyboardInset';
 import { CameraIcon, FileTextIcon, GlobeIcon } from '../Icons';
+import { ReferenceChip } from '../ReferenceChip';
+import { sampleTriggers } from '../ReferenceChip/storyData';
+import type { NewMessage } from '../Messaging/types';
 
 const sampleAgents: ChatComposerAgentOption[] = [
   { id: 'general', label: 'General assistant' },
@@ -312,6 +315,55 @@ export const WithMentions: Story = {
       description: {
         story:
           'Typing `@` opens the shared Messaging mention autocomplete (arrow keys to navigate, Enter/Tab to insert, Escape to dismiss).',
+      },
+    },
+  },
+};
+
+function RichReferencesDemo() {
+  const [sent, setSent] = React.useState<NewMessage | null>(null);
+  return (
+    <div className="w-[560px] max-w-full space-y-3">
+      <ChatComposerDemo
+        editor="rich"
+        triggers={sampleTriggers}
+        placeholder="Type @ for people or # for tickets…"
+        onSend={setSent}
+      />
+      {sent && (
+        <div
+          data-slot="story-sent"
+          className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-700"
+        >
+          <p className="font-mono text-xs break-all">{sent.content}</p>
+          <p className="mt-2 flex flex-wrap gap-1">
+            {sent.references?.map((r) => (
+              <ReferenceChip
+                key={`${r.kind}:${r.id}`}
+                kind={r.kind}
+                label={r.label}
+                href={r.href}
+              />
+            ))}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Experimental: `editor="rich"` swaps the textarea for a compact RichEditor
+ * in which `triggers` insert references as chips. Enter sends; the message
+ * carries `references`.
+ */
+export const RichReferences: Story = {
+  render: () => <RichReferencesDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Experimental. `editor="rich"` loads a compact RichEditor (Kerebron) on first use; `triggers` (`@` people, `#` tickets) insert references as atomic chips. Enter sends unless the list is open (then it picks); Shift+Enter is a new line. `onSend` receives the Markdown in `content` and the references in `references`. Not yet in rich mode: `mentionOptions`, paste-to-attach and the placeholder.',
       },
     },
   },

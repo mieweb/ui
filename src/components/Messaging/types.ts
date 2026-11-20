@@ -6,6 +6,8 @@
  * SMS, MMS, and enterprise messaging.
  */
 
+import type { Reference } from '../ReferenceChip/references';
+
 // ============================================================================
 // Message Status Types
 // ============================================================================
@@ -254,6 +256,11 @@ export interface NewMessage {
   uploads?: { file: File; result: unknown }[];
   /** Reply-to message ID */
   replyToId?: string;
+  /**
+   * The people, tickets, … the text references, read from its links by the
+   * composer's `triggers` (each once). Present only when it has triggers.
+   */
+  references?: Reference[];
   /** Custom metadata */
   metadata?: Record<string, unknown>;
 }
