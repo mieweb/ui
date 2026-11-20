@@ -67,6 +67,19 @@ The host owns \`open\`; keep form state in the form so closing discards it predi
 - Fixed \`z-50\` layer, not portalled: render it outside any ancestor with \`transform\`/\`overflow\` or it will clip.
 - Full-screen on mobile means the footer sits at the bottom of the viewport; test with the keyboard open.
 
+### Safe-area insets
+
+Below \`sm\` the full-screen dialog pads its top and bottom so the header clears the status bar / notch and the footer clears the home indicator. Above \`sm\` the padding is removed.
+
+| Variable | Default |
+| --- | --- |
+| \`--mieweb-safe-area-top\` | \`env(safe-area-inset-top)\` |
+| \`--mieweb-safe-area-bottom\` | \`env(safe-area-inset-bottom)\` |
+
+- On the web and in iOS WKWebView shells the defaults just work, provided the page sets \`viewport-fit=cover\` in its viewport meta tag (without it the \`env()\` insets are \`0\`).
+- Set these variables when the app already tracks insets in its own tokens, or when a native shell reports them itself, so the app and the dialog agree: \`:root { --mieweb-safe-area-top: var(--safe-top); }\`.
+- Tests can set them to fixed values to simulate a notch; Chromium cannot emulate \`env(safe-area-inset-*)\`.
+
 ### Motion
 
 Transitions are CSS by default. An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--docs) gets spring transitions and a real **exit** animation — which the CSS path cannot do, because the dialog unmounts on close and leaves nothing to transition. See the **Motion** story below; nothing changes at the call site either way.

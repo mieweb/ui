@@ -15,7 +15,7 @@ const meta: Meta<typeof RichEditor> = {
 
 **A Markdown document editor built on Kerebron's \`CoreEditor\` (ProseMirror), with optional live collaboration.** \`RichEditor\` loads \`value\` as Markdown (\`text/x-markdown\`), renders the Kerebron **AdvancedEditorKit** toolbar and surface, and reports Markdown back through \`onChange\` on every transaction. \`RichEditorHandle\` gives \`getContent()\` (awaits the initial load — read this on submit, \`onChange\` can lag a keystroke) and \`focus()\`. \`collab={{ room, wsUrl?, params?, user?, WebSocketPolyfill? }}\` switches to a Yjs CRDT document shared by every peer in the room (the Yjs kit is lazy-loaded; \`history\` is swapped for CRDT undo). \`disabled\` makes the surface read-only and dims it; \`id\`, \`aria-label\`, \`aria-labelledby\`, \`className\` land on the host; \`showPreview\` prints the Markdown under the editor; \`assetLoad\` redirects the tree-sitter WASM grammars. The same entry exports \`CodeEditor\` (\`value\`, \`onChange\`, \`lang\` default \`typescript\`) over Kerebron's **CodeEditorKit**, plus the \`CollabConfig\` type.
 
-Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: install the peers \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (plus \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\` for \`collab\`), import \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and serve \`@kerebron/wasm\`'s \`assets/\` directory at \`/kerebron-wasm\`. Until the fixes land upstream, also apply the [\`patches/@kerebron__*\` fixes](https://github.com/mieweb/ui/tree/main/patches) in the host app — they target \`@kerebron/*@0.8.12\` exactly (matching the \`>=0.8.12\` peer floor) and are pnpm-format, so pnpm hosts list them under \`patchedDependencies\` as-is, while npm/yarn hosts must convert them to their patch tool's native format (e.g. \`patch-package\` expects its own filenames and \`node_modules/…\` paths). Without the \`extension-menu\` patch the toolbar's Heading/List dropdowns do not fire in browsers; without the \`extension-markdown\` patch the highlight/superscript/subscript marks are silently dropped when the document is saved back to Markdown (they round-trip as \`<mark>\`/\`<sup>\`/\`<sub>\` inline HTML).
+Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: install the peers \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (plus \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\` for \`collab\`), import \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and serve \`@kerebron/wasm\`'s \`assets/\` directory at \`/kerebron-wasm\`. Until the fixes land upstream, also apply the [\`patches/@kerebron__*\` fixes](https://github.com/mieweb/ui/tree/main/patches) in the host app — they target \`@kerebron/*@0.8.12\` exactly (matching the \`>=0.8.12\` peer floor) and are pnpm-format, so pnpm hosts list them under \`patchedDependencies\` as-is, while npm/yarn hosts must convert them to their patch tool's native format (e.g. \`patch-package\` expects its own filenames and \`node_modules/…\` paths). Without the \`extension-menu\` patch the toolbar's Heading/List dropdowns do not fire in browsers; without the \`extension-markdown\` patch the highlight/superscript/subscript marks are silently dropped when the document is saved back to Markdown (they round-trip as \`<mark>\`/\`<sup>\`/\`<sub>\` inline HTML). With Kerebron 0.8.12, configure the host to resolve all \`prosemirror-view\` dependencies to 1.42.3, as required by the protected MDY bridge. The library’s development override is not inherited by consumers; [published package-manager setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit) covers pnpm, npm and Yarn.
 
 ### Use it when
 
@@ -25,9 +25,10 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 
 ### Don't use it when
 
-- The stored format is **HTML**, or you need template-variable insertion and dictation from a toolbar — \`RichTextEditor\` (main barrel, no peers).
+- The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
+- Users mostly **read** a file and only occasionally fix it in place — [FileDocument](?path=/docs/files-filedocument--docs) shows it rendered, with a plain-text Edit mode and Save/Cancel, without the Kerebron peers or WASM.
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
 
 ### Example
@@ -70,7 +71,7 @@ Images and videos can be pasted or dropped straight onto the surface. **Set \`me
 />
 \`\`\`
 
-The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters. The handle's \`insertFiles(files)\` runs the same pipeline programmatically — host UI (a capture ribbon, a picker) inserts image/video nodes at the cursor and gets \`{ inserted, skipped }\` back; [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) is the packaged version of exactly that.
 
 \`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 
@@ -80,13 +81,18 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
 - Runtime: tree-sitter WASM grammars load from \`/kerebron-wasm\` (or \`assetLoad\`); the first load per editor is serialised, so many editors on one page start one after another. \`autocomplete\` and \`hover\` extensions are removed from the kit for teardown safety. The editor mounts into a disposable child \`div\` because \`CoreEditor.destroy()\` clones its host.
 - Collaboration: \`wsUrl\` defaults to \`<ws|wss>://<host>/yjs\` and the room is appended by the provider; the host must run a Yjs websocket relay. Joining an empty room seeds it from \`value\`; the component re-seeds if the sync lands as a blank overwrite (observed with extension-yjs 0.8.x). There is no offline queue, permissions or comment model.
 - \`showPreview\` renders an unstyled \`<h5>Markdown Output</h5><pre>\` for debugging, not for end users. No \`placeholder\`, character count or validation props.
-- i18n/RTL/theming: toolbar labels and menus are Kerebron's (English); direction and colours follow Kerebron's CSS with \`kb-component--dark\` toggled by \`useIsDarkMode\`. Peers: \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (\`>=0.8.12\`), optional \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\`. Entry \`@mieweb/ui/kerebron\` + \`@mieweb/ui/kerebron.css\`.`,
+- i18n/RTL/theming: toolbar labels and menus are Kerebron's (English); colours follow Kerebron's CSS with \`kb-component--dark\` toggled by \`useIsDarkMode\`. The editor mirrors under an inherited \`dir="rtl"\` — toolbar, menus and prose follow the direction natively, and \`@mieweb/ui/kerebron.css\` restates Kerebron's physical list/blockquote/task-item rules as logical properties. Code blocks are deliberate LTR islands (program code must not bidi-reorder). Peers: \`@kerebron/editor\`, \`@kerebron/editor-kits\`, \`@kerebron/wasm\` (\`>=0.8.12\`), optional \`@kerebron/extension-yjs\`, \`yjs\`, \`y-protocols\`. Entry \`@mieweb/ui/kerebron\` + \`@mieweb/ui/kerebron.css\`.`,
       },
     },
     catalog: {
       entry: '@mieweb/ui/kerebron',
       peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'editors-textarearich-kerebron',
+          why: 'Same @mieweb/ui/kerebron entry, peers, CSS and WASM setup; RichEditor is the full Markdown document editor, TextAreaRich (Kerebron) is the comment-sized HTML surface.',
+        },
         {
           type: 'composes with',
           target: 'feedback-collabstatus',
@@ -98,9 +104,9 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           why: 'RichEditor when the text needs formatting or collaboration; Textarea for plain multi-line text.',
         },
         {
-          type: 'alternative to',
-          target: 'editors-richtexteditor',
-          why: 'RichEditor stores Markdown on ProseMirror via the @mieweb/ui/kerebron entry with Yjs collab; RichTextEditor stores HTML from a contentEditable div on the main barrel with variables and dictation.',
+          type: 'supersedes',
+          target: 'deprecated-richtexteditor',
+          why: 'RichEditor is the supported rich-text surface — Markdown on the ProseMirror/Kerebron engine with real undo history and Yjs collab; the legacy RichTextEditor (HTML, document.execCommand) is deprecated (mieweb/ui#692).',
         },
         {
           type: 'composes with',
@@ -111,6 +117,16 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           type: 'alternative to',
           target: 'editors-q',
           why: 'RichEditor edits free-form Markdown prose; Q edits a structured agent configuration through a generated form plus YAML/JSON view.',
+        },
+        {
+          type: 'alternative to',
+          target: 'editors-emaileditor',
+          why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-filedocument',
+          why: 'RichEditor for formatted or collaborative Markdown editing; FileDocument when a file is mostly read and only occasionally edited as plain text.',
         },
       ],
     },

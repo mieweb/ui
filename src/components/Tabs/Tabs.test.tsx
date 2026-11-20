@@ -30,6 +30,40 @@ describe('Tabs', () => {
     expect(screen.queryByText('Panel one')).not.toBeInTheDocument();
   });
 
+  describe('keyboard navigation', () => {
+    function renderThreeTabs() {
+      renderWithTheme(
+        <Tabs defaultValue="one">
+          <TabsList aria-label="Sections">
+            <TabsTrigger value="one">One</TabsTrigger>
+            <TabsTrigger value="two">Two</TabsTrigger>
+            <TabsTrigger value="three">Three</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      );
+      return screen.getByRole('tablist');
+    }
+
+    it('moves focus to the next tab on ArrowRight', () => {
+      const list = renderThreeTabs();
+      screen.getByRole('tab', { name: 'Two' }).focus();
+      fireEvent.keyDown(list, { key: 'ArrowRight' });
+      expect(screen.getByRole('tab', { name: 'Three' })).toHaveFocus();
+    });
+
+    it('inverts ArrowRight/ArrowLeft under RTL', () => {
+      const list = renderThreeTabs();
+      // jsdom does not cascade dir → direction; set both (see useDirection.test).
+      list.setAttribute('dir', 'rtl');
+      list.style.direction = 'rtl';
+      screen.getByRole('tab', { name: 'Two' }).focus();
+      fireEvent.keyDown(list, { key: 'ArrowRight' });
+      expect(screen.getByRole('tab', { name: 'One' })).toHaveFocus();
+      fireEvent.keyDown(list, { key: 'ArrowLeft' });
+      expect(screen.getByRole('tab', { name: 'Two' })).toHaveFocus();
+    });
+  });
+
   describe('urlParam', () => {
     it('reads the initial tab from the URL', () => {
       window.history.replaceState(null, '', '/?tab=two');

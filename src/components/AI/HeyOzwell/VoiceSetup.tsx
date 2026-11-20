@@ -142,6 +142,7 @@ export function VoiceSetup({
               key={i}
               style={{
                 position: 'absolute',
+                // rtl-ignore -- symmetric centering: left:50% + translate(-50%) is direction-independent
                 left: '50%',
                 top: '50%',
                 width: 150,
@@ -155,6 +156,7 @@ export function VoiceSetup({
         <div
           style={{
             position: 'absolute',
+            // rtl-ignore -- symmetric centering: left:50% + translate(-50%) is direction-independent
             left: '50%',
             top: '50%',
             width: 180,
@@ -218,7 +220,7 @@ export function VoiceSetup({
             <div
               className="absolute flex items-center justify-center rounded-full text-white"
               style={{
-                right: -2,
+                insetInlineEnd: -2,
                 bottom: -2,
                 width: 36,
                 height: 36,

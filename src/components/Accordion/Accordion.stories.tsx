@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { ClipboardListIcon, ClockIcon, HelpCircleIcon } from '../Icons';
 import { Accordion, type AccordionItem } from './Accordion';
 
 const meta: Meta<typeof Accordion> = {
@@ -12,7 +13,7 @@ const meta: Meta<typeof Accordion> = {
       description: {
         component: `### What it's for
 
-**A vertically stacked set of labelled, expandable panels** driven by data — FAQ lists, settings groups, progressive disclosure. One component, no sub-components: pass \`items: AccordionItem[]\` (\`{ id, title, content, disabled? }\`); \`type\` (\`single\` keeps at most one open, \`multiple\` any number); \`collapsible\` (single mode may close the open panel, default \`true\`); \`defaultOpenIds\` (uncontrolled) or \`openIds\` + \`onOpenChange(openIds)\` (controlled); \`variant\` (\`separated\` cards with gaps | \`joined\` one bordered, divided list); \`headingLevel\` (\`h2\` | \`h3\` | \`h4\`, default \`h3\`) for the document outline. Panels animate to natural height with \`grid-template-rows\` 0fr→1fr — no max-height clipping.
+**A vertically stacked set of labelled, expandable panels** driven by data — FAQ lists, settings groups, progressive disclosure. One component, no sub-components: pass \`items: AccordionItem[]\` (\`{ id, title, content, icon?, disabled? }\`); \`type\` (\`single\` keeps at most one open, \`multiple\` any number); \`collapsible\` (single mode may close the open panel, default \`true\`); \`defaultOpenIds\` (uncontrolled) or \`openIds\` + \`onOpenChange(openIds)\` (controlled); \`variant\` (\`separated\` cards with gaps | \`joined\` one bordered, divided list); \`headingLevel\` (\`h2\` | \`h3\` | \`h4\`, default \`h3\`) for the document outline. Panels animate to natural height with \`grid-template-rows\` 0fr→1fr — no max-height clipping.
 
 ### Use it when
 
@@ -24,7 +25,7 @@ const meta: Meta<typeof Accordion> = {
 - There is a **single** toggle, or you need to style the trigger and panel yourself — \`Collapsible\` (headless \`CollapsibleTrigger\` / \`CollapsibleContent\`, unmounts when closed).
 - Only one section is visible at a time **and** the sections are peer views the user switches between — \`Tabs\`.
 - The disclosure lives inside a \`Card\` as a "Show more" tail — \`CardCollapsible\`.
-- Panel headers need actions, badges or rich layout — the trigger is a single button whose content is \`title\` plus a chevron; put controls in \`content\` or use \`Collapsible\`.
+- Panel headers need actions, badges or rich layout — the trigger is a single button whose content is \`title\` plus a chevron; put controls in \`content\` or use \`Collapsible\`. The only header decoration is the optional leading \`icon\`, and it is **restricted to library icon components** (lucide-react / the \`@mieweb/ui\` Icons barrel) passed as a component reference — \`icon: HelpCircleIcon\`, not \`icon: <HelpCircleIcon />\`. Elements, strings and other nodes are ignored (with a dev-only console warning); the slot is not a free-form content area.
 
 ### Example
 
@@ -52,7 +53,7 @@ Controlled so sections with validation errors can be forced open; \`defaultOpenI
 
 ### Limitations
 
-- Accessibility: each trigger is a native \`<button type="button">\` inside the chosen heading, with \`aria-expanded\` and \`aria-controls\` pointing at the panel; each panel is \`role="region"\` with \`aria-labelledby\` the trigger, and when closed it gets \`aria-hidden\` **and** \`inert\` so hidden content is unreachable. Ids come from \`useId()\` + \`item.id\`, so repeated Accordions do not collide. Keyboard is native only: Tab / Enter / Space — **no Arrow Up/Down, Home/End** between headers (not required by the APG pattern, but absent). \`disabled\` items keep their heading but the button is disabled.
+- Accessibility: each trigger is a native \`<button type="button">\` inside the chosen heading, with \`aria-expanded\` and \`aria-controls\` pointing at the panel; each panel is \`role="region"\` with \`aria-labelledby\` the trigger, and when closed it gets \`aria-hidden\` **and** \`inert\` so hidden content is unreachable. The leading \`icon\` is decorative (\`aria-hidden\`) — the accessible name stays \`title\`. Ids come from \`useId()\` + \`item.id\`, so repeated Accordions do not collide. Keyboard is native only: Tab / Enter / Space — **no Arrow Up/Down, Home/End** between headers (not required by the APG pattern, but absent). \`disabled\` items keep their heading but the button is disabled.
 - Closed panels stay **mounted** (content renders even when hidden); there is no lazy-mount or \`forceMount\` switch.
 - In \`single\` mode extra ids in \`defaultOpenIds\` / \`openIds\` are truncated to the first one.
 - \`storageKey\` remembers which panels are open in \`localStorage\` (a JSON array of ids) across reloads — uncontrolled only, ignored when \`openIds\` is set. It is read after mount, so server and hydration renders use \`defaultOpenIds\` and restored panels animate open on the next frame. Storage errors and corrupt values fall back to \`defaultOpenIds\`; ids no longer in \`items\` are harmless. Keys are global to the origin — namespace them.
@@ -169,6 +170,26 @@ export const Multiple: Story = {
     items: FAQ_ITEMS.slice(0, 3),
     type: 'multiple',
     defaultOpenIds: ['what-is-recordable', 'who-keeps-logs'],
+  },
+};
+
+export const WithLeadingIcons: Story = {
+  args: {
+    items: [
+      { ...FAQ_ITEMS[0], icon: HelpCircleIcon },
+      { ...FAQ_ITEMS[1], icon: ClockIcon },
+      { ...FAQ_ITEMS[2], icon: ClipboardListIcon },
+    ],
+    type: 'single',
+    defaultOpenIds: ['what-is-recordable'],
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each item takes an optional `icon` — a **library icon component reference** (`icon: HelpCircleIcon`, not an element). Icons sit before the title, stay put across expand/collapse, and are `aria-hidden`. Items without an `icon` render exactly as before; unsupported values (elements, strings) are ignored with a dev-only warning.',
+      },
+    },
   },
 };
 

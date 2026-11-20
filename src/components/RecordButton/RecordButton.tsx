@@ -63,8 +63,8 @@ export interface RecordButtonProps extends Omit<
   // Recording callbacks (for uncontrolled usage)
   /** Callback when recording is complete with the audio blob */
   onRecordingComplete?: (blob: Blob, duration: number) => void;
-  /** Callback when recording starts */
-  onRecordingStart?: () => void;
+  /** Callback when recording starts, with the microphone stream being recorded */
+  onRecordingStart?: (stream: MediaStream) => void;
   /** Callback when a recording error occurs */
   onRecordingError?: (error: Error) => void;
   /** Maximum recording duration in seconds (0 for unlimited) */
@@ -442,6 +442,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
       maxDuration = 0,
       mimeType = 'audio/webm',
       onClick,
+      'aria-label': ariaLabel,
       ...props
     },
     ref
@@ -627,7 +628,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
         if (!isControlled) {
           setInternalState('recording');
         }
-        onRecordingStart?.();
+        onRecordingStart?.(stream);
 
         timerRef.current = window.setInterval(() => {
           const elapsed = (Date.now() - startTimeRef.current) / 1000;
@@ -739,7 +740,7 @@ const RecordButton = React.forwardRef<HTMLButtonElement, RecordButtonProps>(
             getStateStyles(effectiveState, variant),
             className
           )}
-          aria-label={getAriaLabel()}
+          aria-label={ariaLabel ?? getAriaLabel()}
           aria-pressed={effectiveState === 'recording' ? true : undefined}
           aria-busy={effectiveState === 'processing' ? true : undefined}
         >

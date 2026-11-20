@@ -58,8 +58,11 @@ dates go to [DateInput](?path=/docs/date-time-dateinput--docs).
 - Keyboard coverage is uneven: `Select` and `Autocomplete` implement arrow keys, Enter and Escape
   (`Select` adds Home/End and typeahead); the country pickers arrow between options once focus is
   inside the panel; **`Dropdown` and `PillSelect` have no arrow-key navigation** (Tab only).
-  `Select` and `Dropdown` mark the highlighted row visually but do not set
-  `aria-activedescendant`; only `Autocomplete` does.
+  `Select` and `Autocomplete` expose the active option through `aria-activedescendant`.
+  In `Select`, both the trigger and searchable input reference the listbox with
+  `aria-controls` and the highlighted option with `aria-activedescendant`; the active-option
+  reference is omitted when no selectable result exists and removed on close.
+  `Dropdown` marks the highlighted row visually but does not set `aria-activedescendant`.
 - Focus return on close: `Select` and `PillSelect` return focus to the trigger on Escape;
   `Dropdown`, `Autocomplete` and the country pickers do not.
 - Built-in English strings: `Select` (`"Select an option"`, `"Search..."`, `"No results found"`

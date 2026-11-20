@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent, act } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MegaMenu, MegaMenuBar, type MegaMenuConfig } from './MegaMenu';
 
@@ -107,6 +107,73 @@ describe('MegaMenu', () => {
     fireEvent.keyDown(region, { key: 'Escape' });
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(screen.getByRole('link', { name: 'Resources' })).toHaveFocus();
+  });
+});
+
+describe('MegaMenu panel clamp (direction-aware)', () => {
+  // jsdom has no layout: fake the root rect, panel width and viewport, then
+  // fire a resize so `position()` re-runs with the mocked geometry.
+  const PANEL_WIDTH = 600;
+  const setupGeometry = (rect: { left: number; right: number }) => {
+    const panel = document.querySelector(
+      '[data-slot="mega-menu-panel"]'
+    ) as HTMLElement;
+    const root = panel.parentElement as HTMLElement;
+    root.getBoundingClientRect = () =>
+      ({
+        ...rect,
+        top: 0,
+        bottom: 40,
+        width: rect.right - rect.left,
+        height: 40,
+        x: rect.left,
+        y: 0,
+        toJSON: () => ({}),
+      }) as ReturnType<HTMLElement['getBoundingClientRect']>;
+    Object.defineProperty(panel, 'offsetWidth', {
+      value: PANEL_WIDTH,
+      configurable: true,
+    });
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      value: 1024,
+      configurable: true,
+    });
+    return { panel, root };
+  };
+
+  // jsdom has no [dir] cascade — set direction on the element the reactive
+  // useDirection(rootRef) hook reads, then flush its MutationObserver.
+  const setRtl = async (root: HTMLElement) => {
+    await act(async () => {
+      root.setAttribute('dir', 'rtl');
+      root.style.direction = 'rtl';
+    });
+  };
+
+  it('anchors the panel left edge to the trigger in LTR', () => {
+    renderWithTheme(<MegaMenu menu={menu} open onOpenChange={() => {}} />);
+    const { panel } = setupGeometry({ left: 100, right: 250 });
+    fireEvent(window, new Event('resize'));
+    // desired = rect.left (100) → offset 100 − 100 = 0
+    expect(panel.style.left).toBe('0px');
+  });
+
+  it('anchors the panel right edge to the trigger in RTL', async () => {
+    renderWithTheme(<MegaMenu menu={menu} open onOpenChange={() => {}} />);
+    const { panel, root } = setupGeometry({ left: 700, right: 850 });
+    await setRtl(root);
+    fireEvent(window, new Event('resize'));
+    // desired = rect.right − panel width = 850 − 600 = 250 → offset 250 − 700
+    expect(panel.style.left).toBe('-450px');
+  });
+
+  it('clamps to viewport padding when the RTL panel would overflow left', async () => {
+    renderWithTheme(<MegaMenu menu={menu} open onOpenChange={() => {}} />);
+    const { panel, root } = setupGeometry({ left: 100, right: 250 });
+    await setRtl(root);
+    fireEvent(window, new Event('resize'));
+    // desired = 250 − 600 = −350 → clamped to pad 16 → offset 16 − 100 = −84
+    expect(panel.style.left).toBe('-84px');
   });
 });
 

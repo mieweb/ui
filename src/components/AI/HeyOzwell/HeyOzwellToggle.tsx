@@ -337,6 +337,7 @@ export function HeyOzwellToggle({
         aria-hidden="true"
         style={{
           position: 'absolute',
+          // rtl-ignore -- symmetric centering: left:50% + translate(-50%) is direction-independent
           left: '50%',
           top: '50%',
           width: size * 1.7,

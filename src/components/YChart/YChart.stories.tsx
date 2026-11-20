@@ -40,9 +40,13 @@ type YChartEditorConstructor = new (
 ) => YChartEditorInstance;
 
 const storyLayoutStyles = `
-  html,
-  body,
-  #storybook-root {
+  /* Full-viewport canvas layout. Scoped via :has() to canvas view only
+     (story mounted in #storybook-root) — on autodocs pages the story is
+     inlined in #storybook-docs and this global scroll lock must not leak,
+     or the docs page can't scroll. */
+  html:has(#storybook-root [data-ychart-story-root]),
+  body:has(#storybook-root [data-ychart-story-root]),
+  #storybook-root:has([data-ychart-story-root]) {
     height: 100%;
     min-height: 0;
     overflow: hidden;
@@ -554,7 +558,7 @@ editor.destroy?.();
 
 - Not shipped: the dynamic import 404s unless \`git submodule update --init --recursive\` has been run. The wrapper's \`useEffect\` re-creates the editor on every option change.
 - Accessibility is **patched after the fact** by the story: it walks the generated DOM to add \`aria-hidden\` to icon SVGs, copy tooltips into \`aria-label\`s, label the CodeMirror region and the "Show/Hide YAML editor" toggle — the engine itself emits none of this, and the patch re-runs only on click.
-- Theming is bespoke: the story bridges light/dark by overriding the engine's inline colours with \`[data-ychart-story-root][data-yc-theme]\` CSS and \`!important\`; \`--mieweb-*\` tokens are not used. The story also forces \`html, body, #storybook-root { overflow: hidden }\`.
+- Theming is bespoke: the story bridges light/dark by overriding the engine's inline colours with \`[data-ychart-story-root][data-yc-theme]\` CSS and \`!important\`; \`--mieweb-*\` tokens are not used. The story also forces \`html, body, #storybook-root { overflow: hidden }\` in canvas view (scoped with \`:has()\` so docs pages keep scrolling).
 - No RTL handling, no i18n (engine strings are English), no React props contract — everything above is the demo wrapper's API, not a library API.`,
       },
     },

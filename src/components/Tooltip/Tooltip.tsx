@@ -1,9 +1,19 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
+import { useDirection } from '../../hooks/useDirection';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
-export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
+export type TooltipPlacement =
+  | 'top'
+  | 'bottom'
+  | 'left'
+  | 'right'
+  | 'start'
+  | 'end';
+
+/** Physical placements — what `start`/`end` resolve to at position time. */
+type PhysicalPlacement = 'top' | 'bottom' | 'left' | 'right';
 
 export interface TooltipProps {
   /** The content to display in the tooltip */
@@ -14,7 +24,11 @@ export interface TooltipProps {
     onBlur?: () => void;
     'aria-describedby'?: string;
   }>;
-  /** Preferred placement of the tooltip relative to the trigger. Will flip if not enough space. */
+  /**
+   * Preferred placement of the tooltip relative to the trigger. Will flip if
+   * not enough space. `left`/`right` are physical; `start`/`end` are logical
+   * (they follow the trigger's text direction, so `start` is right in RTL).
+   */
   placement?: TooltipPlacement;
   /** Delay in ms before showing the tooltip */
   delay?: number;
@@ -70,7 +84,7 @@ function Tooltip({
   const [position, setPosition] = React.useState<{
     top: number;
     left: number;
-    actualPlacement: TooltipPlacement;
+    actualPlacement: PhysicalPlacement;
     arrowOffset: number;
   } | null>(null);
   const [isDarkMode, setIsDarkMode] = React.useState(false);
@@ -111,7 +125,9 @@ function Tooltip({
     }
   }, []);
 
-  // Calculate optimal position for tooltip
+  // Calculate optimal position for tooltip. `useDirection` is reactive, so an
+  // open tooltip repositions immediately when the nearest `dir` changes.
+  const direction = useDirection(wrapperRef);
   const calculatePosition = React.useCallback(() => {
     if (!wrapperRef.current || !tooltipRef.current) return;
 
@@ -120,8 +136,21 @@ function Tooltip({
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
+    // Resolve logical placements against the trigger's text direction.
+    const rtl = direction === 'rtl';
+    const resolvedPlacement: PhysicalPlacement =
+      preferredPlacement === 'start'
+        ? rtl
+          ? 'right'
+          : 'left'
+        : preferredPlacement === 'end'
+          ? rtl
+            ? 'left'
+            : 'right'
+          : preferredPlacement;
+
     // Helper to check if placement fits
-    const fitsPlacement = (p: TooltipPlacement): boolean => {
+    const fitsPlacement = (p: PhysicalPlacement): boolean => {
       switch (p) {
         case 'top':
           return (
@@ -145,21 +174,21 @@ function Tooltip({
     };
 
     // Determine actual placement (flip if preferred doesn't fit)
-    let actualPlacement = preferredPlacement;
-    if (!fitsPlacement(preferredPlacement)) {
-      const opposites: Record<TooltipPlacement, TooltipPlacement> = {
+    let actualPlacement = resolvedPlacement;
+    if (!fitsPlacement(resolvedPlacement)) {
+      const opposites: Record<PhysicalPlacement, PhysicalPlacement> = {
         top: 'bottom',
         bottom: 'top',
         left: 'right',
         right: 'left',
       };
-      const opposite = opposites[preferredPlacement];
+      const opposite = opposites[resolvedPlacement];
       if (fitsPlacement(opposite)) {
         actualPlacement = opposite;
       } else {
         // Try perpendicular placements
-        const perpendicular: TooltipPlacement[] =
-          preferredPlacement === 'top' || preferredPlacement === 'bottom'
+        const perpendicular: PhysicalPlacement[] =
+          resolvedPlacement === 'top' || resolvedPlacement === 'bottom'
             ? ['right', 'left']
             : ['bottom', 'top'];
         for (const p of perpendicular) {
@@ -220,7 +249,7 @@ function Tooltip({
     }
 
     setPosition({ top, left, actualPlacement, arrowOffset });
-  }, [preferredPlacement, offset]);
+  }, [preferredPlacement, offset, direction]);
 
   // Detect dark mode from document
   React.useEffect(() => {
@@ -395,6 +424,7 @@ function Tooltip({
             style={{
               position: 'fixed',
               top: position?.top ?? -9999,
+              // rtl-ignore -- fixed viewport coordinate; direction is handled
               left: position?.left ?? -9999,
               maxWidth: maxWidth === 'none' ? undefined : maxWidth,
               visibility: position ? 'visible' : 'hidden',

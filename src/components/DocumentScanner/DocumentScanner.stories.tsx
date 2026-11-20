@@ -94,6 +94,11 @@ Throwing from \`onScan\` shows its \`message\` in the error state with **Try aga
           target: 'chat-reconciliationpanel',
           why: 'Hand the fields from onResult to AIReconciliationPanel so the user reviews AI-extracted values before they are saved.',
         },
+        {
+          type: 'alternative to',
+          target: 'chat-chatcomposer-action-ribbon-poc',
+          why: 'Use DocumentScanner to turn one document into fields on the web; the experimental Composer Action Ribbon POC instead opens the native iOS/Android document camera (Cordova/Capacitor plugin) and attaches the pages to a chat message.',
+        },
       ],
     },
   },

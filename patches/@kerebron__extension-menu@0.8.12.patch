@@ -1,5 +1,5 @@
 diff --git a/esm/CustomMenuPlugin.js b/esm/CustomMenuPlugin.js
-index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227e3bc7c2b 100644
+index d630c6893dd77f148ca72cf2b137364bbce3830c..1343edaa278513e7653415f181c399115932fa75 100644
 --- a/esm/CustomMenuPlugin.js
 +++ b/esm/CustomMenuPlugin.js
 @@ -38,6 +38,12 @@ export class CustomMenuView {
@@ -23,7 +23,27 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
          const currentLevel = this.pinnedDropdownStack[this.pinnedDropdownStack.length - 1];
          const isSubmenu = this.pinnedDropdownStack.length > 1;
          // Create dropdown menu
-@@ -595,7 +602,10 @@ export class CustomMenuView {
+@@ -538,11 +545,16 @@ export class CustomMenuView {
+         this.pinnedDropdownMenu.classList.add(CSS_PREFIX + '__pinned-dropdown');
+         this.pinnedDropdownMenu.setAttribute('role', 'menu');
+         this.pinnedDropdownMenu.setAttribute('aria-label', currentLevel.title);
+-        // Position it below the trigger element
++        // Position it below the trigger element. The menu is appended to
++        // document.body with position:absolute, so the viewport coordinates
++        // from getBoundingClientRect() must be offset by the document scroll —
++        // otherwise, on a scrolled page, the menu lands scrollY px above the
++        // trigger (typically off-screen, so the dropdown looks dead).
+         const rect = triggerElement.getBoundingClientRect();
++        const win = triggerElement.ownerDocument.defaultView ?? window;
+         this.pinnedDropdownMenu.style.position = 'absolute';
+-        this.pinnedDropdownMenu.style.top = `${rect.bottom + 4}px`;
+-        this.pinnedDropdownMenu.style.left = `${rect.left}px`;
++        this.pinnedDropdownMenu.style.top = `${rect.bottom + win.scrollY + 4}px`;
++        this.pinnedDropdownMenu.style.left = `${rect.left + win.scrollX}px`;
+         // Create scrollable content container
+         const overflowContent = document.createElement('div');
+         overflowContent.classList.add(CSS_PREFIX + '__overflow-content');
+@@ -595,7 +607,10 @@ export class CustomMenuView {
              }
              else {
                  // Regular menu item
@@ -35,7 +55,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                  // Hide button's internal label
                  const spans = dom.querySelectorAll('span');
                  spans.forEach((span) => {
-@@ -617,12 +627,15 @@ export class CustomMenuView {
+@@ -617,12 +632,15 @@ export class CustomMenuView {
                  wrapper.appendChild(label);
                  // Make wrapper clickable
                  wrapper.addEventListener('mousedown', (e) => {
@@ -53,7 +73,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                          });
                          dom.dispatchEvent(mousedownEvent);
                      }
-@@ -665,6 +678,7 @@ export class CustomMenuView {
+@@ -665,6 +683,7 @@ export class CustomMenuView {
      renderOverflowMenu() {
          // Clear overflow menu
          this.overflowMenu.innerHTML = '';
@@ -61,7 +81,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
          // Set ARIA attributes for overflow menu
          this.overflowMenu.setAttribute('role', 'menu');
          this.overflowMenu.setAttribute('aria-label', 'More tools');
-@@ -740,6 +754,9 @@ export class CustomMenuView {
+@@ -740,6 +759,9 @@ export class CustomMenuView {
                  else {
                      // Regular menu item
                      const { dom, update } = tool.element.render(this.editorView);
@@ -71,7 +91,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                      // Hide the button's internal label to avoid duplication
                      const internalLabel = dom.querySelector('span');
                      if (internalLabel) {
-@@ -754,12 +771,15 @@ export class CustomMenuView {
+@@ -754,12 +776,15 @@ export class CustomMenuView {
                      wrapper.appendChild(label);
                      // Make the entire wrapper clickable by dispatching mousedown to the button
                      wrapper.addEventListener('mousedown', (e) => {
@@ -89,7 +109,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                              });
                              dom.dispatchEvent(mousedownEvent);
                          }
-@@ -771,7 +791,7 @@ export class CustomMenuView {
+@@ -771,7 +796,7 @@ export class CustomMenuView {
                              const mousedownEvent = new MouseEvent('mousedown', {
                                  bubbles: true,
                                  cancelable: true,
@@ -98,7 +118,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                              });
                              dom.dispatchEvent(mousedownEvent);
                          }
-@@ -839,6 +859,9 @@ export class CustomMenuView {
+@@ -839,6 +864,9 @@ export class CustomMenuView {
                  else {
                      // Regular menu item - show icon only with tooltip
                      const { dom, update } = tool.element.render(this.editorView);
@@ -108,7 +128,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
                      // Hide any text labels, keep only icons
                      const spans = dom.querySelectorAll('span');
                      spans.forEach((span) => {
-@@ -904,22 +927,27 @@ export class CustomMenuView {
+@@ -904,22 +932,27 @@ export class CustomMenuView {
              wrapper.setAttribute('data-tool-id', tool.id);
              wrapper.setAttribute('draggable', 'false');
              const isDropdown = tool.element.content !== undefined;
@@ -139,7 +159,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
          });
          // Second pass: determine which items fit
          // Account for gaps between items (4px gap) and separators between groups
-@@ -949,6 +977,9 @@ export class CustomMenuView {
+@@ -949,6 +982,9 @@ export class CustomMenuView {
                  overflowItems.push(item);
              }
          }
@@ -149,7 +169,7 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
          // Clear toolbar again and re-render only visible items
          this.toolbar.innerHTML = '';
          // Track previous group index for inserting separators between groups
-@@ -1514,11 +1545,29 @@ export class CustomMenuView {
+@@ -1514,11 +1550,36 @@ export class CustomMenuView {
          }
      }
      update(view, prevState) {
@@ -180,6 +200,13 @@ index d630c6893dd77f148ca72cf2b137364bbce3830c..a4ee62e433dc1f429e1613e5c9bb1227
 +        }
 +        if (this.pinnedDropdownMenu) {
 +            this.dropdownUpdates.forEach((update) => update(state));
++        }
++        // In-place updates can widen items (e.g. the heading dropdown label
++        // tracking the caret), which the ResizeObserver cannot see because
++        // the toolbar's own box does not change. Re-split visible/overflow
++        // items whenever the refreshed content no longer fits.
++        if (this.toolbar.scrollWidth > this.toolbar.clientWidth) {
++            this.render();
 +        }
      }
      destroy() {

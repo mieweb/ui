@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '../../utils/cn';
+import { isRtl } from '../../hooks/useDirection';
 import { useUrlSearchParam } from '../../hooks/useUrlTab';
 
 // ============================================================================
@@ -163,7 +164,15 @@ const TabsList = React.forwardRef<HTMLDivElement, TabsListProps>(
 
         let nextIndex: number;
 
-        switch (e.key) {
+        // Horizontal arrows are visual: under RTL, ArrowRight moves to the
+        // previous tab (the visually next one) and vice versa.
+        let key = e.key;
+        if (isRtl(e.currentTarget)) {
+          if (key === 'ArrowRight') key = 'ArrowLeft';
+          else if (key === 'ArrowLeft') key = 'ArrowRight';
+        }
+
+        switch (key) {
           case 'ArrowRight':
           case 'ArrowDown':
             e.preventDefault();

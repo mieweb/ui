@@ -1,0 +1,459 @@
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../utils/cn';
+import { RequiredMark, type RequiredMarkVariant } from '../Input';
+
+const textareaVariants = cva(
+  [
+    'w-full px-3 py-2',
+    'border border-input rounded-lg',
+    'bg-background text-foreground',
+    'placeholder:text-muted-foreground',
+    'transition-colors duration-200',
+    'focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+    'resize-y',
+  ],
+  {
+    variants: {
+      size: {
+        sm: 'text-sm min-h-[60px]',
+        md: 'text-base min-h-[80px]',
+        lg: 'text-lg min-h-[100px]',
+      },
+      hasError: {
+        true: 'border-destructive focus:ring-destructive',
+        false: '',
+      },
+      resize: {
+        none: 'resize-none',
+        vertical: 'resize-y',
+        horizontal: 'resize-x',
+        both: 'resize',
+      },
+      labelVariant: {
+        stacked: '',
+        floating: 'peer placeholder:text-transparent',
+      },
+      autoResize: {
+        true: '',
+        false: '',
+      },
+    },
+    compoundVariants: [
+      // Floating labels reserve top padding so entered text always starts
+      // below the floated label, plus a little extra min-height.
+      {
+        labelVariant: 'floating',
+        size: 'sm',
+        className: 'pt-5 min-h-[76px]',
+      },
+      {
+        labelVariant: 'floating',
+        size: 'md',
+        className: 'pt-6 min-h-[96px]',
+      },
+      {
+        labelVariant: 'floating',
+        size: 'lg',
+        className: 'pt-7 min-h-[120px]',
+      },
+      // Auto-growing textareas start at the same visual height as a
+      // single-line Input (h-8/h-10/h-12): min-height matches the Input
+      // size token and the vertical padding is tuned so one line of text
+      // plus padding plus borders lands exactly on that height.
+      {
+        autoResize: true,
+        labelVariant: 'stacked',
+        size: 'sm',
+        className: 'min-h-8 py-[5px]',
+      },
+      {
+        autoResize: true,
+        labelVariant: 'stacked',
+        size: 'md',
+        className: 'min-h-10 py-[7px]',
+      },
+      {
+        autoResize: true,
+        labelVariant: 'stacked',
+        size: 'lg',
+        className: 'min-h-12 py-[9px]',
+      },
+      // Floating label + auto-grow: single line below the floated label.
+      {
+        autoResize: true,
+        labelVariant: 'floating',
+        size: 'sm',
+        className: 'min-h-[50px]',
+      },
+      {
+        autoResize: true,
+        labelVariant: 'floating',
+        size: 'md',
+        className: 'min-h-[58px]',
+      },
+      {
+        autoResize: true,
+        labelVariant: 'floating',
+        size: 'lg',
+        className: 'min-h-[66px]',
+      },
+    ],
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+      resize: 'vertical',
+      labelVariant: 'stacked',
+      autoResize: true,
+    },
+  }
+);
+
+const floatingLabelVariants = cva(
+  [
+    'absolute start-3 pointer-events-none select-none',
+    'transition-all duration-200 ease-out',
+  ],
+  {
+    variants: {
+      size: {
+        sm: [
+          'text-sm top-3',
+          'peer-focus:top-1 peer-[:not(:placeholder-shown)]:top-1 peer-autofill:top-1',
+          'peer-focus:text-[0.65rem] peer-[:not(:placeholder-shown)]:text-[0.65rem] peer-autofill:text-[0.65rem]',
+        ],
+        md: [
+          'text-base top-4',
+          'peer-focus:top-1.5 peer-[:not(:placeholder-shown)]:top-1.5 peer-autofill:top-1.5',
+          'peer-focus:text-xs peer-[:not(:placeholder-shown)]:text-xs peer-autofill:text-xs',
+        ],
+        lg: [
+          'text-lg top-5',
+          'peer-focus:top-2 peer-[:not(:placeholder-shown)]:top-2 peer-autofill:top-2',
+          'peer-focus:text-sm peer-[:not(:placeholder-shown)]:text-sm peer-autofill:text-sm',
+        ],
+      },
+      hasError: {
+        true: 'text-destructive',
+        false: 'text-muted-foreground',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+      hasError: false,
+    },
+  }
+);
+
+export interface TextAreaPlainProps
+  extends
+    Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'>,
+    Omit<VariantProps<typeof textareaVariants>, 'labelVariant'> {
+  /** Label for the textarea */
+  label?: string;
+  /**
+   * How the label is rendered.
+   * - `stacked` (default): label above the textarea.
+   * - `floating`: label rests inside the textarea like a placeholder and
+   *   floats to the top (staying inside it) when focused or filled.
+   *   Ignores `placeholder`; when `hideLabel` is set, falls back to a
+   *   visually-hidden stacked label.
+   */
+  labelVariant?: 'stacked' | 'floating';
+  /** Whether the label should be visually hidden */
+  hideLabel?: boolean;
+  /** Error message to display */
+  error?: string;
+  /** Helper text to display */
+  helperText?: string;
+  /** Maximum character count */
+  maxLength?: number;
+  /** Show character count */
+  showCount?: boolean;
+  /**
+   * Grow and shrink with content (default). The empty control matches a
+   * single-line `Input`'s height; `rows` sets a taller growth floor, and
+   * dragging the native resize handle sets a new floor the same way. Set
+   * `false` for a classic fixed-height textarea.
+   */
+  autoResize?: boolean;
+  /**
+   * Color of the required asterisk.
+   * - `default`: destructive (hard requirement).
+   * - `warning`: warning color (soft requirement / recommended).
+   */
+  requiredVariant?: RequiredMarkVariant;
+}
+
+/**
+ * A multi-line text input component with character count and auto-resize.
+ *
+ * @example
+ * ```tsx
+ * <TextAreaPlain label="Description" placeholder="Enter a description..." />
+ * <TextAreaPlain
+ *   label="Bio"
+ *   maxLength={280}
+ *   showCount
+ *   helperText="Tell us about yourself"
+ * />
+ * ```
+ */
+const TextAreaPlain = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
+  (
+    {
+      className,
+      size,
+      hasError,
+      resize,
+      label,
+      labelVariant = 'stacked',
+      hideLabel,
+      error,
+      helperText,
+      maxLength,
+      showCount = false,
+      autoResize = true,
+      required = false,
+      requiredVariant,
+      id,
+      rows,
+      value,
+      defaultValue,
+      onChange,
+      placeholder,
+      'aria-describedby': ariaDescribedBy,
+      ...props
+    },
+    ref
+  ) => {
+    const internalRef = React.useRef<HTMLTextAreaElement>(null);
+    const [internalValue, setInternalValue] = React.useState(
+      (defaultValue as string) || ''
+    );
+
+    const generatedId = React.useId();
+    const textareaId = id || generatedId;
+    const errorId = `${textareaId}-error`;
+    const helperId = `${textareaId}-helper`;
+    const countId = `${textareaId}-count`;
+
+    // Combine refs
+    React.useImperativeHandle(ref, () => internalRef.current!);
+
+    // Get current value
+    const currentValue = value !== undefined ? String(value) : internalValue;
+    const characterCount = currentValue.length;
+
+    // Auto-resize logic: collapse to natural height, then grow to fit
+    // content. CSS min-height (single-line baseline) and rows (via
+    // scrollHeight) act as floors; a consumer-configured initial height
+    // (style/class) and dragging the native resize handle set a user floor;
+    // a consumer max-height still caps the rendered height.
+    const userFloorRef = React.useRef<number | null>(null);
+    const expectedHeightRef = React.useRef<number | null>(null);
+    const initialFloorCapturedRef = React.useRef(false);
+
+    const adjustHeight = React.useCallback(() => {
+      const textarea = internalRef.current;
+      if (textarea && autoResize) {
+        textarea.style.height = 'auto';
+        const borders = textarea.offsetHeight - textarea.clientHeight;
+        const next = Math.max(
+          textarea.scrollHeight + borders,
+          userFloorRef.current ?? 0
+        );
+        textarea.style.height = `${next}px`;
+        // Record the actual rendered height (a CSS max-height may clamp the
+        // value we set) so clamping is never mistaken for a manual drag.
+        expectedHeightRef.current = textarea.offsetHeight || next;
+      }
+    }, [autoResize]);
+
+    // Measures prefilled values on mount and controlled values on update.
+    // On mount, a consumer-configured initial height (inline style or a
+    // height class) that exceeds the content height becomes the growth
+    // floor — auto-sizing must not collapse below a configured baseline.
+    React.useEffect(() => {
+      const textarea = internalRef.current;
+      if (textarea && autoResize && !initialFloorCapturedRef.current) {
+        initialFloorCapturedRef.current = true;
+        const configured = textarea.offsetHeight;
+        adjustHeight();
+        if (configured - textarea.offsetHeight > 1) {
+          userFloorRef.current = configured;
+          textarea.style.height = `${configured}px`;
+          expectedHeightRef.current = textarea.offsetHeight || configured;
+        }
+        return;
+      }
+      adjustHeight();
+    }, [currentValue, adjustHeight, autoResize]);
+
+    // Re-measure when the available width changes (wrapping changes), and
+    // detect heights we didn't set ourselves — the user dragging the native
+    // resize handle — adopting the dragged height as the new growth floor.
+    // The drag check runs first so a diagonal resize (width + height in one
+    // notification) keeps the dragged height through the re-measure.
+    React.useEffect(() => {
+      const textarea = internalRef.current;
+      if (!autoResize || !textarea || typeof ResizeObserver === 'undefined') {
+        return;
+      }
+      let lastWidth = textarea.offsetWidth;
+      const observer = new ResizeObserver(() => {
+        const expected = expectedHeightRef.current;
+        const height = textarea.offsetHeight;
+        if (expected !== null && Math.abs(height - expected) > 1) {
+          userFloorRef.current = height;
+          expectedHeightRef.current = height;
+        }
+        if (textarea.offsetWidth !== lastWidth) {
+          lastWidth = textarea.offsetWidth;
+          adjustHeight();
+        }
+      });
+      observer.observe(textarea);
+      return () => observer.disconnect();
+    }, [autoResize, adjustHeight]);
+
+    // Handle change
+    const handleChange = React.useCallback(
+      (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        if (value === undefined) {
+          setInternalValue(e.target.value);
+        }
+        onChange?.(e);
+        adjustHeight();
+      },
+      [value, onChange, adjustHeight]
+    );
+
+    // Build aria-describedby
+    const describedByIds = [
+      error ? errorId : null,
+      helperText && !error ? helperId : null,
+      showCount ? countId : null,
+      ariaDescribedBy,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    const isFloating = labelVariant === 'floating' && !!label && !hideLabel;
+
+    const requiredMark = required && <RequiredMark variant={requiredVariant} />;
+
+    const textareaElement = (
+      <textarea
+        data-slot="textarea"
+        data-auto-resize={autoResize ? 'true' : undefined}
+        ref={internalRef}
+        id={textareaId}
+        value={value}
+        defaultValue={value === undefined ? defaultValue : undefined}
+        onChange={handleChange}
+        maxLength={maxLength}
+        aria-invalid={hasError || !!error}
+        aria-describedby={describedByIds || undefined}
+        required={required}
+        // Auto-grow starts at one visible line; an explicit rows raises the
+        // floor (scrollHeight never reports less than the rows box).
+        rows={autoResize ? (rows ?? 1) : rows}
+        // A single-space placeholder keeps :placeholder-shown reliable so the
+        // label can float via CSS alone.
+        placeholder={isFloating ? ' ' : placeholder}
+        className={cn(
+          textareaVariants({
+            size,
+            hasError: hasError || !!error,
+            resize,
+            labelVariant: isFloating ? 'floating' : 'stacked',
+            autoResize,
+          }),
+          className
+        )}
+        {...props}
+      />
+    );
+
+    return (
+      <div data-slot="textarea-wrapper" className="flex flex-col gap-1.5">
+        {label && !isFloating && (
+          <label
+            data-slot="textarea-label"
+            htmlFor={textareaId}
+            className={cn(
+              'text-foreground text-sm font-medium',
+              hideLabel && 'sr-only'
+            )}
+          >
+            {label}
+            {requiredMark}
+          </label>
+        )}
+        {isFloating ? (
+          <div className="relative">
+            {textareaElement}
+            <label
+              data-slot="textarea-label"
+              htmlFor={textareaId}
+              className={floatingLabelVariants({
+                size,
+                hasError: hasError || !!error,
+              })}
+            >
+              {label}
+              {requiredMark}
+            </label>
+          </div>
+        ) : (
+          textareaElement
+        )}
+        <div
+          data-slot="textarea-footer"
+          className="flex items-center justify-between gap-2"
+        >
+          <div className="flex-1">
+            {error && (
+              <p
+                id={errorId}
+                data-slot="textarea-error"
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+                role="alert"
+              >
+                {error}
+              </p>
+            )}
+            {helperText && !error && (
+              <p
+                id={helperId}
+                data-slot="textarea-helper"
+                className="text-muted-foreground text-sm"
+              >
+                {helperText}
+              </p>
+            )}
+          </div>
+          {showCount && (
+            <p
+              id={countId}
+              data-slot="textarea-count"
+              className={cn(
+                'text-muted-foreground shrink-0 text-xs',
+                maxLength && characterCount >= maxLength && 'text-destructive'
+              )}
+            >
+              {characterCount}
+              {maxLength && `/${maxLength}`}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+);
+
+TextAreaPlain.displayName = 'TextAreaPlain';
+
+export { TextAreaPlain, textareaVariants };

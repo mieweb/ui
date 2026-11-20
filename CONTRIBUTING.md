@@ -84,11 +84,12 @@ If you cloned without `--recurse-submodules`, run
 
 Use Node.js 24 (the version used by CI) and the pnpm version declared in
 `package.json`. The `prestorybook` hook builds eSheet when its required artifacts
-are missing; it does not detect every stale build after a submodule update. To
-rebuild updated eSheet sources explicitly:
+are missing or its submodule revision changes. Local `@esheet/*` development
+dependencies link to that checkout, and Storybook uses its shared stylesheet.
+To rebuild updated eSheet sources explicitly:
 
 ```bash
-pnpm --dir packages/esheet --filter '@esheet/builder...' --filter '@esheet/renderer...' build
+pnpm build:esheet
 ```
 
 Storybook uses HMR for source and documentation edits. Do not restart it after
@@ -160,6 +161,9 @@ Coding conventions (the full standard lives in
   hardcode hex colors.** Support dark mode and brand switching.
 - **Accessibility** — semantic roles, `aria-*`, keyboard operability, visible
   focus. Modal/overlay components trap focus and close on `Escape`.
+- **RTL-safe styling** — logical properties, flipped directional icons,
+  direction-aware arrow keys. See
+  [RTL & direction-agnostic styling](#rtl--direction-agnostic-styling).
 - **Icons** from `lucide-react`; dates via `luxon`.
 
 For new date parsing, formatting, and comparisons, use Luxon's `DateTime`. Keep
@@ -199,6 +203,65 @@ The full rationale lives in
 [lessons/component-policy.md → Tier 2.5](lessons/component-policy.md#tier-25-headless-modules);
 the agent rules restate it as Rule 14. Keep the three in agreement.
 
+## RTL & direction-agnostic styling
+
+Components must render correctly in right-to-left locales
+(`<html dir="rtl">`). Write direction-agnostic code by default; reach for
+`rtl:` overrides only where a logical property cannot express the behavior.
+
+- **Logical Tailwind utilities, never physical ones** — `ms-`/`me-`,
+  `ps-`/`pe-`, `start-`/`end-`, `text-start`/`text-end`,
+  `rounded-s`/`rounded-e`, `border-s`/`border-e`. A `space-x-*` or
+  `divide-x-*` utility needs its paired `rtl:space-x-reverse` /
+  `rtl:divide-x-reverse` on the same element.
+- **Logical inline styles** — in `style={{ … }}` use `insetInlineStart`,
+  `marginInlineStart`, `paddingInlineEnd`, `textAlign: 'start'`, … — never
+  `left`, `marginLeft`, `textAlign: 'left'`.
+- **Directional icons flip with `rtl:-scale-x-100`** — arrows and chevrons
+  that point along the reading direction (navigation, "more", breadcrumb,
+  back/forward) get `className="rtl:-scale-x-100"`. Use this idiom
+  consistently — not `rtl:rotate-180`. Icons with fixed physical meaning
+  (media play/seek triangles, trig or chart geometry) do **not** flip.
+- **Keyboard arrows invert** — `ArrowLeft`/`ArrowRight` handling must follow
+  the reading direction. Use the `useDirection()` hook from
+  [src/hooks/useDirection.ts](src/hooks/useDirection.ts), or
+  `getComputedStyle(element).direction` inside an event handler (see
+  [BoardView](src/components/BoardView/BoardView.tsx) for the pattern).
+- **Safelist new class strings** — any new `rtl:*` or logical utility a
+  component emits must be added to **both**
+  [src/tailwind-preset.ts](src/tailwind-preset.ts) and
+  [src/tailwind-preset.cjs](src/tailwind-preset.cjs).
+- **LTR islands for inherently left-to-right content** — phone numbers,
+  dates, URLs, dial codes and numeric table cells keep their character order
+  with an explicit `dir="ltr"` on the element (see PhoneInput, DateInput,
+  WebsiteInput, CountryCodeDropdown's dial-code spans, `TableCell numeric`,
+  and the AudioPlayer waveform). Inside an island, logical utilities resolve
+  LTR — `text-end` is the physical right. Add a short comment saying why the
+  island exists, and mention it in the story's RTL note.
+- **Genuinely physical code is exempt, with a reason** — pointer-coordinate
+  math, overlays anchored to an SVG coordinate space, LTR-by-convention
+  charts. Annotate the line (or the line above) with
+  `// rtl-ignore -- <reason>`.
+
+### The RTL guard
+
+CI runs `pnpm rtl:scan`, which flags physical-direction Tailwind classes and
+inline-style properties in `src/components`. It is a ratchet against
+[scripts/rtl-baseline.json](scripts/rtl-baseline.json): pre-existing debt is
+allowed, new offenses fail. `node scripts/rtl-scan.mjs --list` prints every
+match; after migrating a file, tighten the ratchet with
+`pnpm rtl:scan:update`.
+
+### Testing in RTL
+
+Use the **direction** toolbar global in Storybook to preview any story in
+RTL. In Playwright visual tests, load the story with
+`gotoStory(page, storyId, { globals: 'direction:rtl' })` — and pair the
+screenshot with computed-style or geometry assertions (e.g.
+`getComputedStyle(el).scale === '-1 1'` for a flipped icon, or
+`getBoundingClientRect()` alignment checks), because the screenshot
+comparison's 5% pixel tolerance can swallow icon-sized regressions.
+
 ## Stories & documentation (autodocs convention)
 
 Consumer-facing component docs are generated by Storybook **autodocs** through the
@@ -224,6 +287,13 @@ ingests, so **the story is the record of truth and the manifest is derived from 
 `maturity:` and `scope:` drive the sidebar badge and the banner at the top of the
 page (deprecated, experimental, product-specific, demo-only), so a component never
 needs a hand-written status notice.
+
+`maturity:deprecated` and `maturity:retired` additionally **hide the entry from
+the sidebar and search** (the `tags` option in [.storybook/main.ts](.storybook/main.ts),
+[mieweb/ui#731](https://github.com/mieweb/ui/issues/731)); the docs page stays
+built and reachable by direct URL. When deprecating a component, in the same PR:
+move its `title` under the flat `Deprecated/` tier and add its row (status,
+replacement, why) to the directory at [src/catalog/Deprecated.mdx](src/catalog/Deprecated.mdx).
 
 ### Description template
 
@@ -361,9 +431,15 @@ If a submodule-backed component fails to resolve, run
 
 ## Optional peer dependencies
 
-`react` / `react-dom` are required peers. Everything else heavy is **optional**:
-`datavis-ace`, `@mieweb/datavis`, `@esheet/builder`, `@esheet/renderer`,
-`@kerebron/*`, `@mieweb/q`, `wavesurfer.js`, `@xyflow/react`, `elkjs`. Components that need them must live behind a
+`react` / `react-dom` are required peers. Since 0.12 the `@kerebron/*` runtime
+packages (`editor`, `editor-kits`, `extension-basic-editor`, `extension-menu`,
+`wasm`) are required too: the main-barrel `Textarea` rides the Kerebron engine,
+and bundling it instead would duplicate `prosemirror-state` in consumer apps
+(ProseMirror breaks when two copies meet). Only the collab stack
+(`@kerebron/extension-yjs`, `yjs`, `y-protocols`) stays optional. Everything
+else heavy is **optional**:
+`datavis-ace`, `@mieweb/datavis`, `@esheet/core`, `@esheet/fields`, `@esheet/builder`, `@esheet/renderer`,
+`@mieweb/q`, `wavesurfer.js`, `@xyflow/react`, `elkjs`. Components that need optional peers must live behind a
 subpath entry (not the main barrel) so consumers who don't use them aren't forced
 to install them.
 
@@ -396,15 +472,21 @@ Current notes:
 | [ChatComposer](src/components/ChatComposer/MAINTAINERS.md)                   | Object-URL lifecycle with an `attachmentsRef` mirror; pure state updaters; controlled menus; stable `onError` reason keys                                                                                       |
 | [CountryCodeDropdown](src/components/CountryCodeDropdown/MAINTAINERS.md)     | Base shared with `CountryDropdown` with diverging defaults (US vs. empty); empty-state contract; lazy `google-libphonenumber` singletons                                                                        |
 | [CustomizableDashboard](src/components/CustomizableDashboard/MAINTAINERS.md) | Ported portlet grid; `@dnd-kit` is a regular dependency; layout persistence and widget registry coupling                                                                                                        |
-| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a submodule (nx); needs `build:esheet`; Storybook-only `src`                                                                                                                                  |
+| [ESheet](src/components/ESheet/MAINTAINERS.md)                               | Implementation is a pnpm submodule; revision-aware `build:esheet`; shared styles; Storybook-only `src`                                                                                                                                  |
 | [DataVisNITRO](src/components/DataVisNITRO/MAINTAINERS.md)                   | Implementation is the `packages/datavis` submodule (`@mieweb/datavis`, bundled) + the `datavis-ace` dependency (transitive, external); needs `build:datavis`; context/source/grid wiring                        |
 | [Deck](src/components/Deck/MAINTAINERS.md) | Client-only `@mieweb/ui/deck` entry; JSON slide schema + `satisfies` renderer registry; CSS-only reveal gated on `data-ready`/`data-seen`; renderers resolve tone with `toneOf`; window key handler yields to inputs and tabs |
+| [DictationButton](src/components/DictationButton/MAINTAINERS.md) | Session-guarded mic lifecycle; `transcribe` extension point; default provider shares the Whisper worker (shared model setting, English-only, no mid-decode cancel) |
+| [EmailEditor](src/components/EmailEditor/MAINTAINERS.md) | Canvas preview (`EmailBlockPreview`) and MJML renderer (`renderEmailMjml`) must change together (validate with strict `mjml`); one DOMPurify policy (`sanitizeEmailHtml`) sanitises every output and pasted input — stored documents are never normalised in place |
+| [EncounterVisit](src/components/EncounterVisit/MAINTAINERS.md) | One eSheet response store across form, RichEdit and View; coded clinical adapters, MCP validation, protected MDY links and empty-report rendering invariants |
+| [FileViewer](src/components/FileViewer/MAINTAINERS.md) | Separate entry for SuperChat's optional Markdown peers; sanitising belongs to the default renderer only; LTR code safelist in both presets; FileDocument draft sync and single-flight Save/Cancel |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                                                                             |
 | [Globe](src/components/Globe/MAINTAINERS.md)                                 | Optional `three`/`react-globe.gl` peers isolated to the `@mieweb/ui/globe` entry; WebGL palette + escaped tooltip HTML; pointer-only canvas (hosts add the keyboard path via `selectedId`)                      |
-| [MediaFeed](src/components/MediaFeed/MAINTAINERS.md)                         | Imported `news-widget` history (merge, don't squash); host owns data/navigation; feed-owned visibility via IntersectionObserver with hydration-safe fallback; consume-once `playbackRequest`; shares `MediaPlayer` with SuperChat thread previews |
+| [MediaFeed](src/components/MediaFeed/MAINTAINERS.md)                         | Imported `news-widget` history (merge, don't squash); host owns data/navigation; feed-owned visibility via IntersectionObserver with hydration-safe fallback; consume-once `playbackRequest`; shares `MediaPlayer` with SuperChat thread previews; `stacked`/`overlay` layouts (dark by `data-theme` scoping, condensed rules scoped to stacked) |
+| [MediaPlayer](src/components/MediaPlayer/MAINTAINERS.md) | Overlay controls span two picture-in-picture and two full-screen APIs (standard and iPhone Safari); support read after mount; internal PiP helpers shared with MediaFeed |
 | [MegaMenu](src/components/MegaMenu/MAINTAINERS.md)                           | Shared open state across `MegaMenuBar`; viewport re-clamping incl. featured-layout swaps; `normalizePath` shared with `SiteHeader`'s mobile drawer                                                              |
 | [Messaging](src/components/Messaging/MAINTAINERS.md)                         | Shared @mention module consumed by both `MessageComposer` and `ChatComposer` (run all affected suites — see notes); `DragDropZone` reused as a pure drop target                                                 |
 | [Motion](src/motion/MAINTAINERS.md)                                          | Optional `motion` peer isolated to the `@mieweb/ui/motion` entry; cross-entry context pinned to `globalThis`; CSS fallback contract                                                                             |
+| [Nemotron diarization](src/components/AI/HeyOzwell/nemotron/MAINTAINERS.md) | Experimental shared worker/session with serialised requests and per-request cache reset; voiceprints are speaker-cache frames tied to the pinned checkpoint, preprocessing and lane order; CDN/Hugging Face assets; port validation steps |
 | [OrgChart](src/components/OrgChart/MAINTAINERS.md)                           | Optional `@xyflow/react` + `elkjs` peers isolated to `@mieweb/ui/org-chart`; consumer imports the React Flow CSS; accessible tree view is the keyboard path; elk mocked in tests                                |
 | [OrbitRing](src/components/OrbitRing/MAINTAINERS.md)                         | Pure-CSS rotation with counter-spinning chips; `motion-safe` reduced-motion contract; container-driven sizing; safelisted arbitrary-value utilities                                                             |
 | [PointMap](src/components/PointMap/MAINTAINERS.md) | Optional `leaflet` peer isolated to the `@mieweb/ui/maps` entry and loaded dynamically; cancellation + `map.remove()` cleanup contract; runtime token colours; the text list carries the data; no unit test (stories only) |
@@ -578,7 +660,9 @@ when a consuming application is involved; the audit and PR requirements still ap
 
 1. `src/components/<Name>/` with `index.ts`, `<Name>.tsx`, `<Name>.stories.tsx`.
 2. Follow the [anatomy](#anatomy-of-a-component) conventions (CVA, `cn`,
-   `forwardRef`, theme tokens, a11y).
+   `forwardRef`, theme tokens, a11y) and
+   [RTL conventions](#rtl--direction-agnostic-styling) (`pnpm rtl:scan` must
+   pass).
 3. Autodocs story that satisfies the
    [metadata contract](#stories--documentation-autodocs-convention): stable `id`,
    taxonomy `title`, `scope:`/`maturity:` tags, the five-heading description,

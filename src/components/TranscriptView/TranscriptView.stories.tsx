@@ -94,6 +94,7 @@ const meta: Meta<typeof TranscriptView> = {
 ### Don't use it when
 
 - The user must **change** the words or the cut — \`MediaEditor\` (same \`Transcript\` type, editable).
+- Reviewers need to see **who spoke when**, including overlap, and play single segments — \`TranscriptPlayer\` (same \`Transcript\` type, with its own audio).
 - There is no media position to follow and you just need formatted text — render the text; the component adds seek affordances that would go nowhere.
 - Times are in seconds: convert to milliseconds first (\`AudioPlayer\` reports seconds; \`MediaPlayer\` reports ms).
 
@@ -141,6 +142,11 @@ const [positionMs, setPositionMs] = useState(0);
           type: 'alternative to',
           target: 'media-mediaeditor',
           why: 'MediaEditor when the user edits words (delete, cut, speed markers); TranscriptView when the transcript is read-only click-to-seek.',
+        },
+        {
+          type: 'alternative to',
+          target: 'voice-transcript-player',
+          why: 'TranscriptView for read-along next to a host player; TranscriptPlayer when reviewers need who-spoke-when lanes, overlap and segment playback built in.',
         },
       ],
     },

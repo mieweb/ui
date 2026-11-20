@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   AIMessageDisplay,
   type AIMessage,
+  type AIRenderCustomContent,
   type AIRenderTextContent,
 } from './index';
 import { successToolCall } from './storyData';
@@ -24,13 +25,14 @@ const meta: Meta<typeof AIMessageDisplay> = {
       description: {
         component: `### What it's for
 
-**Renders one \`AIMessage\` — avatar, bubble and its ordered content blocks — for any role.** \`AIMessageDisplay\` takes \`message: AIMessage\` (\`role\` \`user\` | \`assistant\` | \`system\` | \`tool\`, \`status\` \`pending\` | \`streaming\` | \`complete\` | \`error\`, \`content: AIMessageContent[]\`) plus \`userName\` (initials for the user avatar), \`showAvatar\`, \`showTimestamp\`, \`onLinkClick(link)\` for resource links inside tool results, \`renderTextContent\` and \`renderMessageFooter\`. Each block type has a fixed renderer: \`text\` → \`whitespace-pre-wrap\` paragraph or your \`renderTextContent(text, { messageId, streaming, role })\`; \`tool_use\` → an embedded \`MCPToolCallDisplay\`; \`thinking\` → a violet \`CollapsiblePill\` ("Thinking" while streaming, then "Thought for Ns"; auto-collapses when streaming finishes, click to re-open); \`code\` → \`<pre><code class="language-…">\`; \`image\` → lazy \`<img>\` inside a new-tab link; \`file\` → card with name and formatted size, linked when \`fileUrl\` is set; \`audio\` → \`AudioPlayer variant="waveform"\`; \`video\` → native \`<video controls>\`. A \`streaming\` message with no blocks shows \`AITypingIndicator\`; \`status: 'error'\` adds a red border and "Failed to send" / "An error occurred". \`tool\` messages render bubble-less. Also exported: \`ChatBubble\` (the shared bubble shell with \`variant\`, \`hasError\`, \`accent\`), \`MessageAvatar\`, \`AITypingIndicator\`, \`bubbleVariants\`.
+**Renders one \`AIMessage\` — avatar, bubble and its ordered content blocks — for any role.** \`AIMessageDisplay\` takes \`message: AIMessage\` (\`role\` \`user\` | \`assistant\` | \`system\` | \`tool\`, \`status\` \`pending\` | \`streaming\` | \`complete\` | \`error\`, \`content: AIMessageContent[]\`) plus \`userName\` (initials for the user avatar), \`showAvatar\`, \`showTimestamp\`, \`onLinkClick(link)\` for resource links inside tool results, \`renderTextContent\`, \`renderCustomContent\` and \`renderMessageFooter\`. Each block type has a fixed renderer: \`text\` → \`whitespace-pre-wrap\` paragraph or your \`renderTextContent(text, { messageId, streaming, role })\`; \`custom\` → your \`renderCustomContent(data, { messageId, streaming, role })\` with no \`prose\` wrapper (nothing without it); \`tool_use\` → an embedded \`MCPToolCallDisplay\`, or, with \`toolCallGroup\` set, one \`MCPToolCallGroup\` per run of consecutive \`tool_use\` blocks (the options carry its \`onApprove\`, \`onDeny\` and \`labels\`; \`onLinkClick\` is passed through); \`thinking\` → a violet \`CollapsiblePill\` ("Thinking" while streaming, then "Thought for Ns"; auto-collapses when streaming finishes, click to re-open); \`code\` → \`<pre><code class="language-…">\`; \`image\` → lazy \`<img>\` inside a new-tab link; \`file\` → card with name and formatted size, linked when \`fileUrl\` is set; \`audio\` → \`AudioPlayer variant="waveform"\`; \`video\` → native \`<video controls>\`. A \`streaming\` message with no blocks shows \`AITypingIndicator\`; \`status: 'error'\` adds a red border and "Failed to send" / "An error occurred". \`tool\` messages render with no bubble and no avatar. Also exported: \`ChatBubble\` (the shared bubble shell with \`variant\`, \`hasError\`, \`accent\`), \`MessageAvatar\`, \`AITypingIndicator\`, \`bubbleVariants\`.
 
 ### Use it when
 
 - You are building your own thread layout (virtualised list, side-by-side compare, transcript export view) but want the library's message rendering, including MCP tool calls and thinking blocks.
 - You need the shared \`ChatBubble\` look for a non-AI surface (SuperChat uses it with a per-participant \`accent\`).
 - You want Markdown, Mermaid or custom widgets: pass \`renderTextContent\` and use \`ctx.streaming\` to defer expensive work and \`ctx.messageId\` as a cache key.
+- You need a host widget (a player, a card) driven by typed data: push \`{ type: 'custom', data }\` and pass \`renderCustomContent\` instead of encoding the data into text.
 
 ### Don't use it when
 
@@ -68,7 +70,7 @@ const renderText: AIRenderTextContent = (text, { streaming }) => (
 - **Sanitisation is yours.** Whatever \`renderTextContent\` returns is mounted verbatim inside a \`prose\` wrapper; the default is plain text. \`image\`/\`file\`/\`audio\`/\`video\` URLs are only rejected when they start with \`javascript:\` — validate hosts and MIME types before they reach the message.
 - **No announcements.** The component has no \`aria-live\`; streaming, the typing indicator, the error text and the thinking/tool pills changing state are silent unless the host wraps the thread in a live region. Timestamps use \`toLocaleTimeString\` and the \`ai-message-timestamp\` span is not a \`<time>\`. Avatars are decorative (icon or initials, no accessible name); the image link's label is \`View <name>\` and the video's label falls back to "Video recording".
 - **Layout is not virtualised** and a \`renderTextContent\` runs for every text block on every render; memoise heavy renderers.
-- **RTL / theming.** User messages use \`flex-row-reverse\` and bubbles are \`max-w-[85%]\`; the thinking block uses logical \`border-s\`/\`ps-3\` but \`ChatBubble accent\` sets a physical \`borderLeft\`. Colours are hard-coded \`neutral-*\`, \`primary-800\`, \`violet-*\`, \`red-*\`; the \`prose\` classes need \`@tailwindcss/typography\` to have any effect.
+- **RTL / theming.** User messages use \`flex-row-reverse\` and bubbles are \`max-w-[85%]\`; the thinking block uses logical \`border-s\`/\`ps-3\` and \`ChatBubble accent\` sets a logical \`borderInlineStart\`. Colours are hard-coded \`neutral-*\`, \`primary-800\`, \`violet-*\`, \`red-*\`; the \`prose\` classes need \`@tailwindcss/typography\` to have any effect.
 - i18n: "Thinking", "Thought for Ns", "Failed to send", "An error occurred", "Audio recording", "Video recording", "Uploaded image", "Document" and the \`B\`/\`KB\`/\`MB\` size labels are English. The \`audio\` block requires the \`wavesurfer.js\` optional peer via \`AudioPlayer\`. Entry \`@mieweb/ui\`.`,
       },
     },
@@ -125,6 +127,12 @@ const renderText: AIRenderTextContent = (text, { streaming }) => (
       description:
         'Render-prop for `text` blocks. Receives `(text, { messageId, streaming, role })`. Plug in Markdown/Mermaid here. Host must sanitize.',
       table: { type: { summary: 'AIRenderTextContent' } },
+    },
+    renderCustomContent: {
+      control: false,
+      description:
+        'Render-prop for `custom` blocks. Receives `(data, { messageId, streaming, role })` and is mounted without the `prose` wrapper. Without it, custom blocks render nothing.',
+      table: { type: { summary: 'AIRenderCustomContent' } },
     },
     className: { table: { disable: true } },
   },
@@ -368,6 +376,44 @@ export const WithCustomMarkdownRenderer: Story = {
       <AIMessageDisplay
         message={message}
         renderTextContent={renderTextContent}
+      />
+    );
+  },
+};
+
+/**
+ * Demonstrates the `renderCustomContent` extension point. The host passes a
+ * typed object in a `custom` block (no encoding into text) and renders it
+ * itself; `data.kind` is the host's own discriminator.
+ */
+export const WithCustomContentBlock: Story = {
+  render: () => {
+    const message: AIMessage = {
+      id: '6b',
+      role: 'assistant',
+      content: [
+        { type: 'text', text: 'Latest vitals from this visit:' },
+        { type: 'custom', data: { kind: 'vitals', bp: '120/80', pulse: 72 } },
+      ],
+      timestamp: new Date(),
+      status: 'complete',
+    };
+    const renderCustomContent: AIRenderCustomContent = (data) => {
+      const vitals = data as { kind?: string; bp?: string; pulse?: number };
+      if (vitals.kind !== 'vitals') return null;
+      return (
+        <dl className="grid grid-cols-2 gap-2 rounded-lg border border-neutral-300 p-3 text-sm dark:border-neutral-600">
+          <dt className="font-medium">Blood pressure</dt>
+          <dd>{vitals.bp}</dd>
+          <dt className="font-medium">Pulse</dt>
+          <dd>{vitals.pulse} bpm</dd>
+        </dl>
+      );
+    };
+    return (
+      <AIMessageDisplay
+        message={message}
+        renderCustomContent={renderCustomContent}
       />
     );
   },

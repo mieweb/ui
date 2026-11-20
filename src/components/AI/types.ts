@@ -12,14 +12,21 @@ import type * as React from 'react';
 // ============================================================================
 
 /**
- * Status of an MCP tool invocation
+ * Status of an MCP tool invocation.
+ *
+ * `awaiting-approval` is a call the user has to allow before it runs;
+ * `denied` and `expired` are calls that never ran because the user refused
+ * or did not answer in time.
  */
 export type MCPToolStatus =
   | 'pending'
+  | 'awaiting-approval'
   | 'running'
   | 'success'
   | 'error'
-  | 'cancelled';
+  | 'cancelled'
+  | 'denied'
+  | 'expired';
 
 /**
  * MCP Tool parameter definition
@@ -39,6 +46,19 @@ export interface MCPToolCall {
   id: string;
   /** Name of the tool being invoked */
   toolName: string;
+  /**
+   * What the call did in the user's words, e.g. "Read notes.md". Shown in
+   * place of `toolName`, which then moves into the call's details. Omit it to
+   * show `toolName`.
+   */
+  displayName?: string;
+  /**
+   * Who provides the tool — an MCP server's display name, for example. Shown
+   * before the tool name; omit it for first-party tools.
+   */
+  serverName?: string;
+  /** Leading icon for the call. Defaults to a wrench where one is shown. */
+  icon?: React.ReactNode;
   /** Human-readable description of what the tool does */
   description?: string;
   /** Parameters passed to the tool */
@@ -140,7 +160,8 @@ export interface AIMessageContent {
     | 'image'
     | 'file'
     | 'audio'
-    | 'video';
+    | 'video'
+    | 'custom';
   /** Text content (also used as the label for `audio` and `video` blocks) */
   text?: string;
   /** Tool call reference */
@@ -165,6 +186,11 @@ export interface AIMessageContent {
   videoUrl?: string;
   /** Duration in seconds for `audio` blocks */
   duration?: number;
+  /**
+   * Host-defined payload for `custom` blocks, passed as-is to
+   * `renderCustomContent`. The library never renders or inspects it.
+   */
+  data?: unknown;
 }
 
 /**
@@ -197,7 +223,7 @@ export interface AIMessage {
 // Render Customization Types
 // ============================================================================
 
-/** Context passed to a custom text content renderer. */
+/** Context passed to `renderTextContent` and `renderCustomContent`. */
 export interface AITextRenderContext {
   /** id of the parent message (useful as a render cache key) */
   messageId: string;
@@ -213,6 +239,16 @@ export interface AITextRenderContext {
  */
 export type AIRenderTextContent = (
   text: string,
+  ctx: AITextRenderContext
+) => React.ReactNode;
+
+/**
+ * Render-prop for `custom` content blocks. Receives the block's `data` so the
+ * host can render a typed payload without encoding it as text. The result is
+ * mounted without the `prose` wrapper used for text.
+ */
+export type AIRenderCustomContent = (
+  data: unknown,
   ctx: AITextRenderContext
 ) => React.ReactNode;
 

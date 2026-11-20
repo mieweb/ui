@@ -1,0 +1,62 @@
+/* RichTextEsheet: a guided document backed by a native eSheet renderer.
+   Sections render as stock eSheet sections; only the layout rhythm and
+   narrative text wrapping below are component-specific. */
+.richtext-esheet .renderer-body {
+  display: grid;
+  row-gap: 1.25rem;
+}
+
+.richtext-esheet .section-children {
+  display: grid;
+  /* Matches the encounter's 10px heading-to-input rhythm: 6px here plus the
+     editor's own mt-1. A description hint hugs the heading the same way. */
+  row-gap: 0.375rem;
+}
+
+.richtext-esheet .field-wrapper {
+  min-width: 0;
+  margin-block: 0;
+  padding-block: 0;
+}
+
+/* Sections are document headings (they become `##` in the saved MDY), not
+   input labels: size them like the encounter MDY view's h2 and keep the
+   description a muted hint beneath. The input's own label stays sr-only. */
+.richtext-esheet .section-field-preview > h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.richtext-esheet .display-field-preview {
+  color: var(--color-muted-foreground);
+  font-size: 0.875rem;
+}
+
+.richtext-esheet .display-field-preview p {
+  margin-block: 0;
+}
+
+.richtext-esheet .renderer-readonly-banner {
+  padding-inline: 0;
+  border: 0;
+  background: transparent;
+}
+
+.richtext-esheet [data-slot='esheet-narrative'] [role='textbox'] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.richtext-esheet [data-slot='esheet-narrative'] [role='textbox'] ul,
+.richtext-esheet [data-slot='esheet-narrative'] [role='textbox'] ol {
+  padding-inline-start: 1.5rem;
+}
+
+.richtext-esheet [data-slot='esheet-narrative'] [role='textbox'] ul {
+  list-style-type: disc;
+}
+
+.richtext-esheet [data-slot='esheet-narrative'] [role='textbox'] ol {
+  list-style-type: decimal;
+}

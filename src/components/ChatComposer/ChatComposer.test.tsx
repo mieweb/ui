@@ -348,6 +348,40 @@ describe('ChatComposer', () => {
     });
   });
 
+  it('caps each file by its own size when maxFileSize is a function', () => {
+    const onError = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const sized = (name: string, type: string, size: number) => {
+      const file = new File(['x'], name, { type });
+      Object.defineProperty(file, 'size', { value: size });
+      return file;
+    };
+    renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onError={onError}
+        maxFileSize={(file) =>
+          file.type.startsWith('video/') ? 500 : file.type ? 100 : undefined
+        }
+      />
+    );
+
+    const video = sized('clip.mp4', 'video/mp4', 400);
+    const photo = sized('big.png', 'image/png', 400);
+    const unknown = sized('blob.bin', '', 10_000);
+    React.act(() => ref.current?.addFiles([video, photo, unknown]));
+
+    // The video is under its own cap, the photo over its; no cap for the last.
+    expect(screen.getByText('clip.mp4')).toBeInTheDocument();
+    expect(screen.queryByText('big.png')).toBeNull();
+    expect(screen.getByText('blob.bin')).toBeInTheDocument();
+    expect(onError).toHaveBeenCalledTimes(1);
+    expect(onError).toHaveBeenCalledWith(expect.stringContaining('big.png'), {
+      reason: 'file-size',
+      file: photo,
+    });
+  });
+
   it('enforces maxAttachments across addFiles calls in the same batch', () => {
     const ref = React.createRef<ChatComposerHandle>();
     renderWithTheme(<ChatComposer ref={ref} maxAttachments={1} />);
@@ -629,6 +663,54 @@ describe('ChatComposer', () => {
     );
 
     expect(screen.getByRole('button', { name: /gpt-5/i })).toBeInTheDocument();
+  });
+
+  it('shows the bottom row for selectorsEndSlot alone', () => {
+    const { container } = renderWithTheme(
+      <ChatComposer selectorsEndSlot={<button type="button">Voice</button>} />
+    );
+
+    const end = container.querySelector(
+      '[data-slot="chat-composer-selectors-end"]'
+    );
+    expect(end).toContainElement(screen.getByRole('button', { name: 'Voice' }));
+    expect(
+      container.querySelector('[data-slot="chat-composer-selectors"]')
+    ).toContainElement(end as HTMLElement);
+  });
+
+  it('renders selectorsEndSlot after the model selector', () => {
+    renderWithTheme(
+      <ChatComposer
+        showModelSelector
+        modelSelectorProps={{
+          models: [
+            {
+              provider: 'openai',
+              providerLabel: 'OpenAI',
+              model: 'gpt-5',
+              label: 'GPT-5',
+            },
+          ],
+          value: { provider: 'openai', model: 'gpt-5' },
+          onChange: vi.fn(),
+        }}
+        selectorsEndSlot={<button type="button">Voice</button>}
+      />
+    );
+
+    const model = screen.getByRole('button', { name: /gpt-5/i });
+    const voice = screen.getByRole('button', { name: 'Voice' });
+    expect(model.compareDocumentPosition(voice)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('omits the bottom row when no selector or end slot is set', () => {
+    const { container } = renderWithTheme(<ChatComposer />);
+    expect(
+      container.querySelector('[data-slot="chat-composer-selectors"]')
+    ).toBeNull();
   });
 
   it('shows a read-only notice instead of the input', () => {

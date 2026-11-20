@@ -41,7 +41,7 @@ A short label that appears on hover or keyboard focus of a single child element.
 - The child must accept \`onFocus\` / \`onBlur\` / \`aria-describedby\` props (any \`Button\` or native element does). A disabled button fires no events, so wrap it in a span.
 - The tooltip is a description, not a name: an icon button still needs \`aria-label\`.
 - Respects \`prefers-reduced-motion\` by skipping the fade.
-- Rendered at \`z-[9999]\` so it clears modals; \`placement\` is physical (\`left\`/\`right\`), not logical.`,
+- Rendered at \`z-[9999]\` so it clears modals; \`placement\` accepts physical (\`left\`/\`right\`) and logical (\`start\`/\`end\`) values — logical ones follow the trigger's text direction, so \`start\` is the right side in RTL.`,
       },
     },
     catalog: {
@@ -64,9 +64,9 @@ A short label that appears on hover or keyboard focus of a single child element.
   argTypes: {
     placement: {
       control: 'select',
-      options: ['top', 'bottom', 'left', 'right'],
+      options: ['top', 'bottom', 'left', 'right', 'start', 'end'],
       description:
-        'Preferred placement. Automatically flips if not enough space.',
+        'Preferred placement. `start`/`end` are logical (direction-aware). Automatically flips if not enough space.',
     },
     delay: {
       control: 'number',
@@ -113,6 +113,28 @@ export const Placements: Story = {
       </div>
       <Tooltip content="Tooltip on bottom" placement="bottom">
         <Button variant="outline">Bottom</Button>
+      </Tooltip>
+    </div>
+  ),
+};
+
+export const LogicalPlacements: Story = {
+  name: 'Logical Placements (start/end)',
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`start` and `end` follow the trigger text direction: in LTR `start` is the left side, in RTL it is the right. Toggle the toolbar direction global to see them swap. Rendered open for visual testing.',
+      },
+    },
+  },
+  render: () => (
+    <div className="flex items-center justify-center gap-32 p-20">
+      <Tooltip content="Inline start" placement="start" open>
+        <Button variant="outline">Start</Button>
+      </Tooltip>
+      <Tooltip content="Inline end" placement="end" open>
+        <Button variant="outline">End</Button>
       </Tooltip>
     </div>
   ),

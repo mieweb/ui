@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import './condensed-view.css';
+@import './encounter-visit.css';
+@import './richtext-esheet.css';
 @import '@mieweb/datavis/styles.css';
 @import './effects.css';
 @source "../../node_modules/@mieweb/datavis/dist";
@@ -193,6 +195,45 @@
     100% {
       transform: translateX(0);
       opacity: 1;
+    }
+  }
+
+  /* ── Animations (LoadingPage bar + skeleton shimmer; rtl: mirrors) ──── */
+  --animate-loading-bar: loading-bar 1.5s ease infinite;
+  --animate-loading-bar-rtl: loading-bar-rtl 1.5s ease infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-shimmer-rtl: shimmer-rtl 2s linear infinite;
+
+  @keyframes loading-bar {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
+  }
+  @keyframes loading-bar-rtl {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-300%);
+    }
+  }
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+  @keyframes shimmer-rtl {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
     }
   }
 }
@@ -428,10 +469,24 @@ kbd {
   font-family: var(--mieweb-font-mono);
 }
 
-/* Focus visible styles for accessibility */
-:focus-visible {
-  outline: 2px solid var(--mieweb-ring);
-  outline-offset: 2px;
+/* Focus visible styles for accessibility.
+   Layered so component utilities (e.g. focus-visible:outline-none on
+   elements that render their own focus ring) can override it —
+   unlayered rules would beat Tailwind's utilities layer. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--mieweb-ring);
+    outline-offset: 2px;
+  }
+
+  /* Theme the focus ring offset. Tailwind's --tw-ring-offset-color is
+     registered with inherits:false and defaults to #fff, which renders
+     as a glaring white box around focused elements in dark mode
+     (mieweb/ui#512). Set it per-element to the background token so
+     ring-offset-* utilities blend with the current theme. */
+  * {
+    --tw-ring-offset-color: var(--mieweb-background, #ffffff);
+  }
 }
 
 /* Reduce motion for users who prefer it */

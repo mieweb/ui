@@ -70,7 +70,7 @@ For the common "keep the tab in the URL" case, an uncontrolled \`Tabs\` can do i
 - Accessibility: \`TabsList\` is \`role="tablist"\`; triggers are \`<button role="tab" aria-selected aria-controls="tabpanel-{value}" id="tab-{value}">\` with roving \`tabIndex\` (selected 0, others −1); panels are \`role="tabpanel" aria-labelledby tabIndex={0}\`. Arrow Left/Right and Up/Down move focus (wrapping), Home/End jump — but **focus does not select**: the user must press Enter/Space (manual activation). \`TabsList\` itself also has \`tabIndex={0}\`, so Tab stops once on the list before the active tab. Pass \`aria-label\` to \`TabsList\` yourself; none is set. Ids are derived from \`value\`, so two \`Tabs\` on one page with the same values produce duplicate ids.
 - No \`orientation\` prop: the list is always horizontal, though arrow keys accept both axes. No overflow handling — many tabs wrap or overflow the container; \`whitespace-nowrap\` on triggers.
 - The \`variant\` is read from context, so all triggers share one style; \`TabsContent\` adds \`mt-4\`.
-- RTL: symmetric flex; ArrowRight always moves to the *next* DOM tab, which is visually leftward in RTL.
+- RTL: symmetric flex; horizontal arrows are visual — under RTL ArrowRight moves to the *previous* DOM tab (the visually-right neighbour) and ArrowLeft to the next.
 - Theming: semantic tokens (\`border-border\`, \`bg-muted\`, \`bg-background\`, \`text-muted-foreground\`) plus \`primary-700/800\` for the active underline. No built-in strings. Depends on \`class-variance-authority\`.
 - \`urlParam\` is ignored when \`value\` is set. An unrecognised value in the URL (e.g. a stale link) selects no tab. Server and hydration renders use \`defaultValue\`; the URL value applies right after hydration.`,
       },

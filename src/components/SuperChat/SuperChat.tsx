@@ -21,10 +21,14 @@ import {
 } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
-import type { ChatComposerAgentOption } from '../ChatComposer/ChatComposer';
+import type {
+  ChatComposerAgentOption,
+  ChatComposerProps,
+} from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import { DictationButton, type DictationButtonProps } from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
@@ -94,6 +98,21 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
+   * Whether `onMessageSent`'s attachments carry a base64 `dataUrl`. Set
+   * `false` when the host uploads each attachment's `file` itself: the read is
+   * skipped, so a large video doesn't become a string bigger than a browser —
+   * let alone a phone's WebView — can hold. `dataUrl` is then empty.
+   * @default true
+   */
+  attachmentDataUrls?: boolean;
+  /**
+   * Largest file the composer takes, in bytes; a larger one is refused. A
+   * function sets the cap per file, e.g. a higher one for videos than photos
+   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
+   * @default 26214400 (25 MB)
+   */
+  maxFileSize?: ChatComposerProps['maxFileSize'];
+  /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
    *   classic messenger (auto-scrolls to the newest message).
@@ -132,11 +151,20 @@ export interface SuperChatProps {
   agentSelectorLabel?: string;
   /** Props for the composer's model selector (shown when provided). */
   modelSelectorProps?: ComposerModelSelectorProps;
+  /** Extra controls at the end of the composer's agent/model row (e.g. a display setting). */
+  composerSelectorsEndSlot?: React.ReactNode;
   /** While true, the send button becomes a stop button (requires `onStop`). */
   isStreaming?: boolean;
   onStop?: () => void;
   /** Localized accessible label for the icon-only stop button. */
   stopLabel?: string;
+  /**
+   * Show a dictation (voice typing) button in the composer. The transcript is
+   * appended to the editable draft and never sent automatically. `true` uses
+   * on-device Whisper (large first-use download); pass `{ transcribe }` to use
+   * a server provider. See the `Dictation` story and `DictationButton`.
+   */
+  dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -190,6 +218,8 @@ export function SuperChat({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  attachmentDataUrls = true,
+  maxFileSize = 25 * 1024 * 1024,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -203,9 +233,11 @@ export function SuperChat({
   onAgentChange,
   agentSelectorLabel,
   modelSelectorProps,
+  composerSelectorsEndSlot,
   isStreaming,
   onStop,
   stopLabel,
+  dictation,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -738,9 +770,17 @@ export function SuperChat({
     draftEpochRef.current += 1;
     setDraft(value);
   }, []);
+  const appendDictation = React.useCallback((text: string) => {
+    draftEpochRef.current += 1;
+    setDraft((current) =>
+      !current || /\s$/.test(current) ? current + text : `${current} ${text}`
+    );
+  }, []);
+  const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
-  // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  // SuperChat's host callback (mentions + attachments: each one's File, and
+  // its base64 `data:` URL unless `attachmentDataUrls` is off).
   const handleComposerSend = React.useCallback(
     async (message: NewMessage) => {
       const epoch = draftEpochRef.current;
@@ -748,7 +788,8 @@ export function SuperChat({
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
-          message.attachments ?? []
+          message.attachments ?? [],
+          { dataUrls: attachmentDataUrls }
         );
         // The declared type is `void` for backward compatibility, but a
         // returned promise (e.g. an async host callback) is awaited so its
@@ -766,7 +807,7 @@ export function SuperChat({
         }
       }
     },
-    [conversation, onMessageSent]
+    [conversation, onMessageSent, attachmentDataUrls]
   );
 
   return (
@@ -1000,7 +1041,7 @@ export function SuperChat({
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
         // Same cap MessageComposer applied by default.
-        maxFileSize={25 * 1024 * 1024}
+        maxFileSize={maxFileSize}
         maxLength={100000}
         inputLabel="Message"
         showAgentSelector={!!agents?.length}
@@ -1010,9 +1051,23 @@ export function SuperChat({
         agentSelectorLabel={agentSelectorLabel}
         showModelSelector={!!modelSelectorProps}
         modelSelectorProps={modelSelectorProps}
+        selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
+        micSlot={
+          dictation && !readOnly ? (
+            // Keyed by conversation so switching drops any in-flight take.
+            <DictationButton
+              key={conversation.id}
+              showStatus
+              // Pulse rings overflow the composer row; the caption shows it's live.
+              showPulse={false}
+              {...dictationProps}
+              onText={appendDictation}
+            />
+          ) : undefined
+        }
       />
     </section>
   );

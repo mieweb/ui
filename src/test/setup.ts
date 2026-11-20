@@ -73,6 +73,9 @@ beforeAll(() => {
   // DataTransfer is not available in jsdom
   if (typeof globalThis.DataTransfer === 'undefined') {
     class MockDataTransfer {
+      effectAllowed = 'none';
+      dropEffect = 'none';
+      private _data: Record<string, string> = {};
       private _files: File[] = [];
       private _items: {
         add: (file: File) => void;
@@ -114,11 +117,15 @@ beforeAll(() => {
         return this._items;
       }
 
-      setData() {}
-      getData() {
-        return '';
+      setData(type: string, value: string) {
+        this._data[type] = value;
       }
-      clearData() {}
+      getData(type: string) {
+        return this._data[type] ?? '';
+      }
+      clearData() {
+        this._data = {};
+      }
     }
 
     globalThis.DataTransfer =

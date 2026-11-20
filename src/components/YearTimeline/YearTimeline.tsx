@@ -284,8 +284,8 @@ export function YearTimeline({
           {nowFraction != null && (
             <span
               data-slot="year-timeline-today"
-              style={{ left: `calc(var(--yt-now) * 100%)` }}
-              className="bg-primary-800 absolute top-1.5 z-[5] inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-[0.09em] whitespace-nowrap text-white uppercase"
+              style={{ insetInlineStart: `calc(var(--yt-now) * 100%)` }}
+              className="bg-primary-800 absolute top-1.5 z-[5] inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full px-2 py-0.5 text-[9px] font-bold tracking-[0.09em] whitespace-nowrap text-white uppercase rtl:translate-x-1/2"
             >
               <i aria-hidden className="h-1.5 w-1.5 rounded-full bg-white" />
               {text.today}
@@ -299,9 +299,10 @@ export function YearTimeline({
         {/* month gridlines */}
         <div
           aria-hidden
+          data-slot="year-timeline-gridlines"
           className="pointer-events-none absolute inset-y-0 end-0 z-0 hidden md:block"
           style={{
-            left: 'var(--yt-label)',
+            insetInlineStart: 'var(--yt-label)',
             backgroundImage:
               'repeating-linear-gradient(90deg, var(--mieweb-border) 0, var(--mieweb-border) 1px, transparent 1px, transparent calc(100% / 12))',
             opacity: 0.5,
@@ -312,10 +313,11 @@ export function YearTimeline({
             aria-hidden
             data-slot="year-timeline-playhead"
             style={{
-              left: 'calc(var(--yt-label) + (100% - var(--yt-label)) * var(--yt-now))',
+              insetInlineStart:
+                'calc(var(--yt-label) + (100% - var(--yt-label)) * var(--yt-now))',
             }}
             className={cn(
-              'pointer-events-none absolute inset-y-0 z-[3] hidden w-0.5 -translate-x-px md:block',
+              'pointer-events-none absolute inset-y-0 z-[3] hidden w-0.5 -translate-x-px md:block rtl:translate-x-px',
               '[background:linear-gradient(180deg,var(--mieweb-primary-700),color-mix(in_srgb,var(--mieweb-primary-700)_15%,transparent))]',
               'before:bg-primary-700 before:absolute before:top-0 before:left-1/2 before:h-2.5 before:w-2.5 before:-translate-x-1/2 before:rounded-full before:content-[""]'
             )}

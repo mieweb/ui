@@ -32,6 +32,9 @@ import { getStorySortParameter, loadCsf } from 'storybook/internal/csf-tools';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(root, 'src');
+// Story roots must mirror the `stories` globs in .storybook/main.ts. DataVis
+// NITRO stories live in the datavis submodule but are catalogued here.
+const STORY_ROOTS = [SRC, join(root, 'packages', 'datavis', 'stories')];
 const TAXONOMY = JSON.parse(
   readFileSync(join(root, '.storybook', 'taxonomy.json'), 'utf8')
 );
@@ -107,6 +110,11 @@ function walk(dir, out = []) {
   return out;
 }
 
+function walkStoryRoots(out = []) {
+  for (const dir of STORY_ROOTS) walk(dir, out);
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Parse
 // ---------------------------------------------------------------------------
@@ -145,7 +153,7 @@ function parseTitle(title, file) {
 }
 
 const entries = [];
-for (const file of walk(SRC)) {
+for (const file of walkStoryRoots()) {
   const code = readFileSync(file, 'utf8');
   if (file.endsWith('.mdx')) {
     const m = code.match(/<Meta\s+title="([^"]+)"/);
@@ -392,9 +400,24 @@ for (const e of csfEntries) {
         );
     }
   }
+}
+
+// Entry / availability metadata — validated for every entry that declares
+// `parameters.catalog`, independently of whether it lists relationships.
+for (const e of csfEntries) {
+  if (!e.catalog) continue;
+  const loc = rel(e.file);
   if (e.catalog.entry && typeof e.catalog.entry !== 'string')
     errors.push(
       `${loc}: parameters.catalog.entry must be a string like "@mieweb/ui/datavis"`
+    );
+  if (e.catalog.unexported !== undefined && e.catalog.unexported !== true)
+    errors.push(
+      `${loc}: parameters.catalog.unexported must be true (omit it once the component is exported)`
+    );
+  if (e.catalog.unexported && e.catalog.entry)
+    errors.push(
+      `${loc}: parameters.catalog.unexported contradicts catalog.entry — an unexported component has no import entry`
     );
 }
 
@@ -407,7 +430,7 @@ for (const e of csfEntries) {
       .filter((e) => e.kind === 'mdx')
       .map((e) => e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))
   );
-  for (const file of walk(SRC)) {
+  for (const file of walkStoryRoots()) {
     const code = readFileSync(file, 'utf8');
     for (const [, id] of code.matchAll(/\?path=\/docs\/([a-z0-9-]+)--docs/g)) {
       if (!byId.has(id) && !pageIds.has(id))

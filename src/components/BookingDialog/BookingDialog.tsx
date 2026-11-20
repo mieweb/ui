@@ -313,7 +313,9 @@ export function ConsentSwitch({
           data-slot="consent-switch-thumb"
           className={cn(
             'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform duration-200 ease-in-out',
-            checked ? 'translate-x-5' : 'translate-x-0.5'
+            checked
+              ? 'translate-x-5 rtl:-translate-x-5'
+              : 'translate-x-0.5 rtl:-translate-x-0.5'
           )}
         />
       </button>

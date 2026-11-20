@@ -245,6 +245,11 @@ const meta: Meta<typeof CommandPalette> = {
           why: 'CommandPalette is a global ⌘K overlay that runs a command or opens a record; Autocomplete is a form field that puts a chosen value into the form.',
         },
         {
+          type: 'alternative to',
+          target: 'editors-macrolibrary',
+          why: 'CommandPalette is a transient global surface for running actions; MacroLibrary stays docked beside an editor and inserts text snippets into it.',
+        },
+        {
           type: 'composes with',
           target: 'layout-appheader',
           why: 'AppHeaderSearch is the ⌘K placeholder button whose onClick opens the CommandPalette.',

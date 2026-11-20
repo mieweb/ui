@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { AIMessageDisplay } from './AIMessage';
@@ -13,6 +13,81 @@ function thinkingMessage(status: AIMessage['status']): AIMessage {
     content: [{ type: 'thinking', text: 'Reasoning about the request…' }],
   };
 }
+
+describe('AIMessageDisplay tool message', () => {
+  const toolMessage: AIMessage = {
+    id: 'tool-1',
+    role: 'tool',
+    status: 'complete',
+    timestamp: new Date('2026-01-01T10:00:00Z'),
+    content: [{ type: 'text', text: 'Ran list_dir' }],
+  };
+
+  it('renders the content without an avatar, even when showAvatar is set', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={toolMessage} showAvatar />
+    );
+
+    expect(screen.getByText('Ran list_dir')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-slot="ai-message-avatar"]')
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('AIMessageDisplay toolCallGroup', () => {
+  const toolUse = (id: string): AIMessage['content'][number] => ({
+    type: 'tool_use',
+    toolCall: {
+      id,
+      toolName: `tool_${id}`,
+      parameters: [],
+      status: 'success',
+      startedAt: new Date('2026-01-01T10:00:00Z'),
+    },
+  });
+  const message: AIMessage = {
+    id: 'msg-tools',
+    role: 'assistant',
+    status: 'complete',
+    timestamp: new Date('2026-01-01T10:00:00Z'),
+    content: [
+      toolUse('a'),
+      toolUse('b'),
+      { type: 'text', text: 'Halfway there' },
+      toolUse('c'),
+    ],
+  };
+
+  it('groups each run of consecutive tool_use blocks', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={message} toolCallGroup={{}} />
+    );
+
+    const groups = container.querySelectorAll(
+      '[data-slot="ai-tool-call-group"]'
+    );
+    expect(groups).toHaveLength(2);
+    expect(
+      screen.getByRole('button', { name: 'Used 2 tools' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Halfway there')).toBeInTheDocument();
+    expect(container.querySelector('[data-slot="ai-tool-pill"]')).toBeNull();
+  });
+
+  it('keeps a pill per call without toolCallGroup', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={message} />
+    );
+
+    expect(
+      container.querySelector('[data-slot="ai-tool-call-group"]')
+    ).toBeNull();
+    expect(
+      container.querySelectorAll('[data-slot="ai-tool-call"]')
+    ).toHaveLength(3);
+  });
+});
 
 describe('AIMessageDisplay thinking block', () => {
   it('auto-collapses the thinking block when streaming finishes', () => {
@@ -63,5 +138,58 @@ describe('AIMessageDisplay thinking block', () => {
       'aria-expanded',
       'true'
     );
+  });
+});
+
+describe('AIMessageDisplay custom block', () => {
+  const message = (content: AIMessage['content']): AIMessage => ({
+    id: 'msg-custom',
+    role: 'user',
+    status: 'complete',
+    timestamp: new Date('2026-01-01T10:00:00Z'),
+    content,
+  });
+  const data = { kind: 'widget', id: 'w-1' };
+
+  it('passes the typed data and context to renderCustomContent, outside the prose wrapper', () => {
+    const renderCustomContent = vi.fn(() => <div data-testid="widget" />);
+    renderWithTheme(
+      <AIMessageDisplay
+        message={message([{ type: 'custom', data }])}
+        renderCustomContent={renderCustomContent}
+      />
+    );
+
+    expect(renderCustomContent).toHaveBeenCalledWith(data, {
+      messageId: 'msg-custom',
+      streaming: false,
+      role: 'user',
+    });
+    expect(screen.getByTestId('widget').closest('.prose')).toBeNull();
+  });
+
+  it('renders nothing for a custom block without renderCustomContent', () => {
+    const { container } = renderWithTheme(
+      <AIMessageDisplay message={message([{ type: 'custom', data }])} />
+    );
+
+    expect(
+      container.querySelector('[data-slot="ai-message-bubble"] > div')
+    ).toBeEmptyDOMElement();
+  });
+
+  it('renders text that looks like an encoded payload as text, never as a custom block', () => {
+    const encoded = '\u0001ozwell-speaker-transcript\u0001{"v":1,"chatId":"c"}';
+    const renderCustomContent = vi.fn(() => <div data-testid="widget" />);
+    renderWithTheme(
+      <AIMessageDisplay
+        message={message([{ type: 'text', text: encoded }])}
+        renderCustomContent={renderCustomContent}
+      />
+    );
+
+    expect(renderCustomContent).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('widget')).not.toBeInTheDocument();
+    expect(screen.getByText(encoded)).toBeInTheDocument();
   });
 });

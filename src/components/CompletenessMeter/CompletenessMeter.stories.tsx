@@ -18,7 +18,16 @@ const meta: Meta<typeof CompletenessMeter> = {
   component: CompletenessMeter,
   tags: ['autodocs', 'scope:general-purpose', 'maturity:experimental'],
   parameters: {
-    catalog: { entry: '@mieweb/ui' },
+    catalog: {
+      entry: '@mieweb/ui',
+      relationships: [
+        {
+          type: 'composes with',
+          target: 'loading-progress',
+          why: 'The bar is the Progress component; the meter tones its fill by completion band and supplies srLabel/valueText.',
+        },
+      ],
+    },
     docs: {
       description: {
         component: `
@@ -53,7 +62,7 @@ same calculation for sorting or filtering records.
 
 ### Limitations
 
-- The bar is \`role="progressbar"\` with \`aria-valuenow\` / \`aria-valuetext\`, named by \`labels.progress\`; the full variant is a \`role="group"\` labelled by its heading.
+- The bar composes \`Progress\`: \`role="progressbar"\` with \`aria-valuenow\` / \`aria-valuetext\`, named by \`labels.progress\`; the full variant is a \`role="group"\` labelled by its heading.
 - Missing fields are buttons only when \`onFieldClick\` is set. \`compact\` drops the heading and list — pair it with a popover if users need the details.
 - An empty \`fields\` array reads as 100%. The width transition respects \`prefers-reduced-motion\`.
 - Strings default to English; override through \`labels\`.

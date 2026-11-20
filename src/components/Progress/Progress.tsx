@@ -24,7 +24,9 @@ const progressBarTrackVariants = cva(
 );
 
 const progressBarFillVariants = cva(
-  ['h-full rounded-full transition-all duration-300 ease-out'],
+  [
+    'h-full rounded-full motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out',
+  ],
   {
     variants: {
       variant: {
@@ -69,12 +71,18 @@ export interface ProgressProps
   max?: number;
   /** Label for the progress bar */
   label?: string;
+  /** Accessible name when no visible `label` is rendered. */
+  srLabel?: string;
+  /** Human-readable `aria-valuetext` announced instead of the raw value. */
+  valueText?: string;
   /** Show the percentage value */
   showValue?: boolean;
   /** Format the displayed value */
   formatValue?: (value: number, max: number) => string;
   /** Additional class name */
   className?: string;
+  /** Class for the fill, e.g. to tone its colour by value. */
+  fillClassName?: string;
   /** Whether the progress is indeterminate */
   indeterminate?: boolean;
 }
@@ -93,6 +101,8 @@ function Progress({
   value,
   max = 100,
   label,
+  srLabel,
+  valueText,
   showValue = false,
   formatValue,
   size,
@@ -100,6 +110,7 @@ function Progress({
   animated,
   striped,
   className,
+  fillClassName,
   indeterminate = false,
 }: ProgressProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
@@ -141,8 +152,9 @@ function Progress({
         aria-valuenow={indeterminate ? undefined : value}
         aria-valuemin={0}
         aria-valuemax={max}
+        aria-valuetext={indeterminate ? undefined : valueText}
         aria-labelledby={label ? `${progressId}-label` : undefined}
-        aria-label={!label ? 'Progress' : undefined}
+        aria-label={!label ? (srLabel ?? 'Progress') : undefined}
         className={cn(progressBarTrackVariants({ size }))}
       >
         <div
@@ -154,7 +166,8 @@ function Progress({
             !striped && variant === 'default' && 'bg-primary-800',
             !striped && variant === 'success' && 'bg-green-500',
             !striped && variant === 'warning' && 'bg-yellow-500',
-            !striped && variant === 'danger' && 'bg-red-500'
+            !striped && variant === 'danger' && 'bg-red-500',
+            fillClassName
           )}
           style={indeterminate ? undefined : { width: `${percentage}%` }}
         />

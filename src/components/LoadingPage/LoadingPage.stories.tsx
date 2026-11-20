@@ -127,6 +127,10 @@ function LoadingPageDemo({
           </div>
           <LoadingSkeleton variant="rounded" height={160} />
           <LoadingSkeleton variant="text" count={3} />
+          <div>
+            <p className="text-muted-foreground mb-1 text-sm">Wave</p>
+            <LoadingSkeleton variant="text" count={2} animation="wave" />
+          </div>
         </div>
       );
 
@@ -177,6 +181,10 @@ function LoadingPageDemo({
           <div>
             <p className="text-muted-foreground mb-1 text-sm">Error</p>
             <LoadingBar progress={60} color="error" />
+          </div>
+          <div>
+            <p className="text-muted-foreground mb-1 text-sm">Indeterminate</p>
+            <LoadingBar color="primary" />
           </div>
         </div>
       );

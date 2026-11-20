@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
+import { HelpCircleIcon } from '../Icons';
 import { Accordion, type AccordionItem } from './Accordion';
 
 const ITEMS: AccordionItem[] = [
@@ -94,6 +95,117 @@ describe('Accordion', () => {
   it('disables items', () => {
     renderWithTheme(<Accordion items={ITEMS} />);
     expect(screen.getByRole('button', { name: 'Question C' })).toBeDisabled();
+  });
+
+  describe('leading icon', () => {
+    const triggerIcon = (name: string) =>
+      screen
+        .getByRole('button', { name })
+        .querySelector('[data-slot="accordion-icon"]');
+
+    it('renders no icon slot when icon is omitted (backward compatible)', () => {
+      renderWithTheme(<Accordion items={ITEMS} />);
+      expect(triggerIcon('Question A')).toBeNull();
+      // Only the chevron svg is present
+      expect(
+        screen
+          .getByRole('button', { name: 'Question A' })
+          .querySelectorAll('svg')
+      ).toHaveLength(1);
+    });
+
+    it('renders a supported library icon before the title', () => {
+      renderWithTheme(
+        <Accordion items={[{ ...ITEMS[0], icon: HelpCircleIcon }, ITEMS[1]]} />
+      );
+      const trigger = screen.getByRole('button', { name: 'Question A' });
+      const icon = triggerIcon('Question A');
+      expect(icon).toBeInTheDocument();
+      expect(icon).toHaveAttribute('aria-hidden', 'true');
+      // Leading: the icon precedes the title text in DOM order
+      expect(
+        icon!.compareDocumentPosition(screen.getByText('Question A'))
+      ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      // Items without an icon are unaffected
+      expect(triggerIcon('Question B')).toBeNull();
+      expect(trigger.querySelectorAll('svg')).toHaveLength(2);
+    });
+
+    it('keeps the icon in expanded and collapsed states', () => {
+      renderWithTheme(
+        <Accordion items={[{ ...ITEMS[0], icon: HelpCircleIcon }]} />
+      );
+      const trigger = screen.getByRole('button', { name: 'Question A' });
+      expect(triggerIcon('Question A')).toBeInTheDocument();
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(triggerIcon('Question A')).toBeInTheDocument();
+      fireEvent.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      expect(triggerIcon('Question A')).toBeInTheDocument();
+    });
+
+    it('ignores unsupported icon values and warns in dev', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      try {
+        renderWithTheme(
+          <Accordion
+            items={[
+              {
+                ...ITEMS[0],
+                icon: (<HelpCircleIcon />) as unknown as AccordionItem['icon'],
+              },
+            ]}
+          />
+        );
+        expect(triggerIcon('Question A')).toBeNull();
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('Accordion item "a"')
+        );
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    // The dev warning fires once per session, so the remaining rejection
+    // tests assert non-rendering only.
+    it('rejects custom (non-library) function components', () => {
+      const CustomIcon = () => <svg data-testid="custom-icon" />;
+      renderWithTheme(
+        <Accordion
+          items={[
+            {
+              ...ITEMS[0],
+              icon: CustomIcon as unknown as AccordionItem['icon'],
+            },
+          ]}
+        />
+      );
+      expect(triggerIcon('Question A')).toBeNull();
+      expect(screen.queryByTestId('custom-icon')).toBeNull();
+    });
+
+    it('rejects malformed $$typeof-tagged objects without crashing', () => {
+      const malformed = {
+        $$typeof: Symbol.for('react.unknown'),
+        render: 'not-a-function',
+      };
+      renderWithTheme(
+        <Accordion
+          items={[
+            {
+              ...ITEMS[0],
+              icon: malformed as unknown as AccordionItem['icon'],
+            },
+          ]}
+        />
+      );
+      // Renders the item normally with no icon instead of throwing
+      expect(
+        screen.getByRole('button', { name: 'Question A' })
+      ).toBeInTheDocument();
+      expect(triggerIcon('Question A')).toBeNull();
+    });
   });
 
   it('hides collapsed panels from AT and keyboard via aria-hidden + inert', () => {

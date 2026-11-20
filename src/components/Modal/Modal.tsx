@@ -58,6 +58,10 @@ const modalContentVariants = cva(
     // Full viewport height on mobile, constrained on larger screens
     'max-h-dvh sm:max-h-[calc(100dvh-2rem)]',
     'min-h-dvh sm:min-h-0',
+    // Full-screen on mobile covers the status bar and home indicator, so
+    // clear the safe areas there. Overridable for tests and native shells.
+    'pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] sm:pt-0',
+    'pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))] sm:pb-0',
     // If a <form> is used as a direct child (wrapping ModalBody + ModalFooter),
     // make it participate in the flex column layout so overflow constraints work.
     '[&>form]:flex [&>form]:flex-col [&>form]:flex-1 [&>form]:min-h-0',
@@ -140,6 +144,7 @@ function Modal({
 }: ModalProps) {
   const generatedId = React.useId();
   const modalId = id || generatedId;
+  const pointerDownOnOverlay = React.useRef(false);
 
   /*
    * The dialog outlives `open`.
@@ -188,17 +193,31 @@ function Modal({
   // by `Animated`, which is element-agnostic.
   const focusTrapRef = useFocusTrap<HTMLElement>(isGuarded);
 
-  // Handle escape key
-  useEscapeKey(() => {
-    if (closeOnEscape && open) {
-      onOpenChange(false);
-    }
-  }, open);
+  // Handle escape key — exclusive, so a stacked overlay above this modal
+  // (nested modal, linked-section resolver) owns Escape and only the topmost
+  // layer dismisses per keypress. The content ref resolves stacking from DOM
+  // depth — nested modals mounting open in the same commit register their
+  // effects child-first, so registration order alone would be inverted.
+  useEscapeKey(
+    () => {
+      if (closeOnEscape && open) {
+        onOpenChange(false);
+      }
+    },
+    open,
+    focusTrapRef
+  );
 
   // Handle overlay click
   const handleOverlayClick = React.useCallback(
     (e: React.MouseEvent) => {
-      if (closeOnOverlayClick && e.target === e.currentTarget) {
+      const startedOnOverlay = pointerDownOnOverlay.current;
+      pointerDownOnOverlay.current = false;
+      if (
+        closeOnOverlayClick &&
+        startedOnOverlay &&
+        e.target === e.currentTarget
+      ) {
         onOpenChange(false);
       }
     },
@@ -247,7 +266,11 @@ function Modal({
       */}
       <AnimatedPresence onExitComplete={() => setIsExiting(false)}>
         {open && (
-          <div key="modal-root" className="fixed inset-0 z-50">
+          <div
+            key="modal-root"
+            data-slot="modal-root"
+            className="fixed inset-0 z-50"
+          >
             {/* Overlay backdrop */}
             <Animated
               preset="overlay"
@@ -262,6 +285,14 @@ function Modal({
               {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
               <div
                 className="flex min-h-full items-center justify-center p-0 sm:p-4"
+                onPointerDown={(e) => {
+                  pointerDownOnOverlay.current = e.target === e.currentTarget;
+                }}
+                onPointerUp={(e) => {
+                  if (e.target !== e.currentTarget) {
+                    pointerDownOnOverlay.current = false;
+                  }
+                }}
                 onClick={handleOverlayClick}
               >
                 {/* Content */}

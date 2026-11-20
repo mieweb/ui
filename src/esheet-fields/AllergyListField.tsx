@@ -58,6 +58,7 @@ export function AllergyListField({
   response,
   isPreview,
   isEnabled,
+  isReadOnly,
   onResponse,
   codeLookup,
 }: FieldComponentProps & {
@@ -103,7 +104,7 @@ export function AllergyListField({
       title={definition.question ?? 'Allergies'}
       codeLookup={codeLookup}
       inlineAddSearch={Boolean(effectiveCodeLookup)}
-      readOnly={!(isPreview && isEnabled)}
+      readOnly={!(isPreview && isEnabled) || isReadOnly}
     />
   );
 }

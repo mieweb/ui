@@ -4,6 +4,7 @@ import { waitFor } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { RichEditor, type RichEditorHandle } from './RichEditor';
 import { CodeEditor } from './CodeEditor';
+import { MDY_PROJECTION_META } from './mdyTransaction';
 
 // The Kerebron editor loads tree-sitter WASM grammars at runtime, which isn't
 // available under jsdom. Mock the editor so these stay fast, deterministic
@@ -14,6 +15,16 @@ const setProps = vi.fn();
 // to tell an edit from a selection change, so tests swap the object to mean
 // "the document changed" and leave it alone to mean "only the caret moved".
 const docMock = { current: { id: 'doc-0' } as object };
+// insertFiles support: node factories and the dispatch sink it writes to.
+const imageNodeCreate = vi.fn((attrs: Record<string, unknown>) => ({
+  nodeSize: 1,
+  attrs,
+}));
+const videoNodeCreate = vi.fn((attrs: Record<string, unknown>) => ({
+  nodeSize: 1,
+  attrs,
+}));
+const dispatch = vi.fn();
 const editorMock = {
   addEventListener: vi.fn(),
   removeEventListener: vi.fn(),
@@ -25,8 +36,28 @@ const editorMock = {
   run: { changeRoom },
   view: {
     setProps,
+    hasFocus: () => false,
+    focus: vi.fn(),
+    dispatch,
+    dom: document.createElement('div'),
     get state() {
-      return { doc: docMock.current };
+      // insertFiles clamps against doc.content.size; give every stand-in doc
+      // one without disturbing its identity (tests compare references).
+      const doc = docMock.current as { content?: { size: number } };
+      doc.content ??= { size: 1000 };
+      return {
+        doc,
+        selection: { from: 1 },
+        schema: {
+          nodes: {
+            image: { create: imageNodeCreate },
+            video: { create: videoNodeCreate },
+          },
+        },
+        tr: {
+          insert: (pos: number, node: unknown) => ({ pos, node }),
+        },
+      };
     },
   },
 };
@@ -43,7 +74,7 @@ const extensionNames = () => {
 const transactionHandler = () =>
   editorMock.addEventListener.mock.calls.find(
     ([event]) => event === 'transaction'
-  )?.[1] as () => Promise<void>;
+  )?.[1] as (event?: Event) => Promise<void>;
 
 const coreEditorCreate = vi.fn((_opts: unknown) => editorMock);
 vi.mock('@kerebron/editor', () => ({
@@ -80,27 +111,40 @@ const { extensionMediaUpload } = vi.hoisted(() => ({
 vi.mock('@kerebron/extension-basic-editor/ExtensionMediaUpload', () => ({
   ExtensionMediaUpload: extensionMediaUpload,
 }));
+// Imported statically by editorKits.ts for `modifyMenu` support.
+const { extensionCustomMenu } = vi.hoisted(() => ({
+  extensionCustomMenu: vi.fn(function (
+    this: Record<string, unknown>,
+    config: unknown
+  ) {
+    this.name = 'customMenu';
+    this.config = config;
+  }),
+}));
+vi.mock('@kerebron/extension-menu', () => ({
+  ExtensionCustomMenu: extensionCustomMenu,
+  MenuItem: vi.fn(),
+}));
 vi.mock('@kerebron/wasm/web', () => ({
   createAssetLoad: vi.fn(() => vi.fn()),
 }));
 // The collab kit is lazy-imported by editorKits.ts only when `collab` is set;
 // mock it so the yjs optional peers aren't needed under jsdom.
-const huddleYjsKit = vi.fn(function (
-  this: Record<string, unknown>,
-  url: string,
-  params: Record<string, string>
-) {
-  this.name = 'yjs-editor';
-  this.url = url;
-  this.params = params;
-  this.getExtensions = () => [];
-});
-// Set to simulate the lazy chunk failing to load: reading the export throws
-// where the real `await import('./collabKit')` would reject. Cleared between
-// tests by `beforeEach`.
+const huddleYjsKit = vi.fn(
+  async (url: string, params: Record<string, string>) => ({
+    name: 'yjs-editor',
+    url,
+    params,
+    getExtensions: () => [],
+  })
+);
+// Set to simulate the lazy chunk (or its optional peers, loaded inside
+// createHuddleYjsKit) failing to load: reading the export throws where the
+// real `await import('./collabKit')` would reject. Cleared between tests by
+// `beforeEach`.
 let collabKitLoadError: Error | null = null;
 vi.mock('./collabKit', () => ({
-  get HuddleYjsKit() {
+  get createHuddleYjsKit() {
     if (collabKitLoadError) throw collabKitLoadError;
     return huddleYjsKit;
   },
@@ -112,6 +156,9 @@ describe('RichEditor', () => {
     vi.clearAllMocks();
     collabKitLoadError = null;
     docMock.current = { id: 'doc-0' };
+    // A fresh editable element per test: attribute writes (tabindex
+    // ownership) must not leak between cases.
+    editorMock.view.dom = document.createElement('div');
   });
 
   it('renders without throwing', async () => {
@@ -132,6 +179,17 @@ describe('RichEditor', () => {
     await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
     expect(huddleYjsKit).not.toHaveBeenCalled();
     expect(changeRoom).not.toHaveBeenCalled();
+  });
+
+  it('installs additional host editor kits beside the standard kit', async () => {
+    const kit = { name: 'host-fields', getExtensions: () => [] };
+    renderWithTheme(<RichEditor editorKits={[kit]} />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    const kits = (
+      coreEditorCreate.mock.calls[0][0] as { editorKits: unknown[] }
+    ).editorKits;
+    expect(kits).toHaveLength(2);
+    expect(kits[1]).toBe(kit);
   });
 
   it('collab mode includes the yjs kit and joins the room', async () => {
@@ -194,9 +252,321 @@ describe('RichEditor', () => {
 
   it('exposes the editor content through the imperative handle', async () => {
     const ref = createRef<RichEditorHandle>();
-    renderWithTheme(<RichEditor ref={ref} />);
+    renderWithTheme(<RichEditor ref={ref} value="# hello" />);
     await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
     await expect(ref.current?.getContent()).resolves.toBe('# hello');
+  });
+
+  // insertFiles mirrors the paste/drop pipeline (ExtensionMediaUpload): same
+  // validation, upload-or-embed, and node insertion at the selection — so the
+  // capture ribbon and pasting produce identical documents (mieweb/ui#733).
+  describe('insertFiles', () => {
+    const png = (name = 'shot.png', content = 'x') =>
+      new File([content], name, { type: 'image/png' });
+
+    it('uploads through mediaUpload.uploadHandler and inserts an image node at the selection', async () => {
+      const uploadHandler = vi
+        .fn()
+        .mockResolvedValue('https://cdn.test/shot.png');
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} mediaUpload={{ uploadHandler }} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const file = png();
+      const result = await ref.current!.insertFiles!([file]);
+
+      expect(uploadHandler).toHaveBeenCalledWith(file);
+      expect(imageNodeCreate).toHaveBeenCalledWith({
+        src: 'https://cdn.test/shot.png',
+        alt: 'shot.png',
+      });
+      expect(dispatch).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ inserted: [file], skipped: [] });
+    });
+
+    it('embeds images as base64 data URLs without an uploadHandler, like paste does', async () => {
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const result = await ref.current!.insertFiles!([png()]);
+
+      expect(imageNodeCreate).toHaveBeenCalledWith({
+        src: expect.stringMatching(/^data:image\/png;base64,/) as string,
+        alt: 'shot.png',
+      });
+      expect(result.inserted).toHaveLength(1);
+    });
+
+    it('skips files the schema or limits reject, without throwing', async () => {
+      const uploadHandler = vi.fn();
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(
+        <RichEditor ref={ref} mediaUpload={{ uploadHandler, maxFileSize: 1 }} />
+      );
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const pdf = new File(['x'], 'doc.pdf', { type: 'application/pdf' });
+      const oversize = png('big.png', 'xx'); // 2 bytes > maxFileSize: 1
+      const result = await ref.current!.insertFiles!([pdf, oversize]);
+
+      expect(result).toEqual({ inserted: [], skipped: [pdf, oversize] });
+      expect(dispatch).not.toHaveBeenCalled();
+      expect(uploadHandler).not.toHaveBeenCalled();
+    });
+
+    it('reports an upload failure as skipped, not thrown', async () => {
+      const uploadHandler = vi.fn().mockRejectedValue(new Error('offline'));
+      const ref = createRef<RichEditorHandle>();
+      renderWithTheme(<RichEditor ref={ref} mediaUpload={{ uploadHandler }} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+
+      const file = png();
+      const result = await ref.current!.insertFiles!([file]);
+
+      expect(result).toEqual({ inserted: [], skipped: [file] });
+      expect(dispatch).not.toHaveBeenCalled();
+    });
+  });
+
+  it('retains the exact loaded Markdown and emits no change on opening or selection', async () => {
+    const source = '\n##  Assessment\n\nWeight: [198 lb](mdy:weight).  \n\n';
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value={source} onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await expect(ref.current?.getContent()).resolves.toBe(source);
+    await transactionHandler()();
+    expect(onChange).not.toHaveBeenCalled();
+    expect(editorMock.saveDocument).not.toHaveBeenCalled();
+  });
+
+  it('preserves the replacement source when an external value reload completes', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    const { rerender } = renderWithTheme(
+      <RichEditor ref={ref} value="# first" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    const replacement = '#  New assessment\n\n[198 lb](mdy:weight)  \n';
+    rerender(<RichEditor ref={ref} value={replacement} onChange={onChange} />);
+    await expect(ref.current?.getContent()).resolves.toBe(replacement);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('serializes edits when reading content for submit', async () => {
+    const ref = createRef<RichEditorHandle>();
+    renderWithTheme(<RichEditor ref={ref} value="# original" />);
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    docMock.current = { id: 'edited' };
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it('accepts a content read as the source for later reads and clinical projections', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value="# original" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    docMock.current = { id: 'edited' };
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    const before = docMock.current;
+    docMock.current = { id: 'clinical-projection' };
+    await transactionHandler()(
+      new globalThis.CustomEvent('transaction', {
+        detail: {
+          transaction: {
+            before,
+            getMeta: (key: string) => key === MDY_PROJECTION_META,
+          },
+        },
+      })
+    );
+    await expect(ref.current?.getContent()).resolves.toBe('# hello');
+    await transactionHandler()();
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('reports a failed initial load and rejects content reads', async () => {
+    const failure = new Error('WASM grammar failed to load');
+    editorMock.loadDocumentText.mockRejectedValueOnce(failure);
+    const ref = createRef<RichEditorHandle>();
+    const onError = vi.fn();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor
+        ref={ref}
+        value="# original"
+        onError={onError}
+        onChange={onChange}
+      />
+    );
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(failure));
+    await expect(ref.current?.getContent()).rejects.toBe(failure);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('keeps the exact source after a clean host projection update', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    const source = '##  Assessment\n\n[198 lb](mdy:weight)  \n';
+    renderWithTheme(
+      <RichEditor ref={ref} value={source} onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    const before = docMock.current;
+    docMock.current = { id: 'projection' };
+    await transactionHandler()(
+      new globalThis.CustomEvent('transaction', {
+        detail: {
+          transaction: {
+            before,
+            getMeta: (key: string) => key === MDY_PROJECTION_META,
+          },
+        },
+      })
+    );
+    await expect(ref.current?.getContent()).resolves.toBe(source);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(editorMock.saveDocument).not.toHaveBeenCalled();
+  });
+
+  it('discards a serialized transaction when a newer edit has arrived', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value="# original" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    let finishSave!: (buffer: Uint8Array) => void;
+    editorMock.saveDocument.mockReturnValueOnce(
+      new Promise<Uint8Array>((resolve) => {
+        finishSave = resolve;
+      })
+    );
+    docMock.current = { id: 'first-edit' };
+    const first = transactionHandler()();
+    docMock.current = { id: 'second-edit' };
+    await transactionHandler()();
+    finishSave(new TextEncoder().encode('# stale first edit'));
+    await first;
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('# hello');
+  });
+
+  it('does not return an outdated save when a newer external body is loaded', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const { rerender } = renderWithTheme(
+      <RichEditor ref={ref} value="# original" />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    let finishSave!: (buffer: Uint8Array) => void;
+    editorMock.saveDocument.mockReturnValueOnce(
+      new Promise<Uint8Array>((resolve) => {
+        finishSave = resolve;
+      })
+    );
+    docMock.current = { id: 'edited' };
+    const pending = ref.current!.getContent();
+    await waitFor(() => expect(editorMock.saveDocument).toHaveBeenCalled());
+    const replacement = '#  New MCP body\n\n[200 lb](mdy:weight)  \n';
+    rerender(<RichEditor ref={ref} value={replacement} />);
+    await waitFor(() =>
+      expect(editorMock.loadDocumentText).toHaveBeenLastCalledWith(
+        'text/x-markdown',
+        replacement
+      )
+    );
+    finishSave(new TextEncoder().encode('# stale local body'));
+    await expect(pending).resolves.toBe(replacement);
+  });
+
+  it('retries a content read after a live projection refresh while retaining free prose', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value="# original" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    let finishSave!: (buffer: Uint8Array) => void;
+    editorMock.saveDocument.mockReturnValueOnce(
+      new Promise<Uint8Array>((resolve) => {
+        finishSave = resolve;
+      })
+    );
+    docMock.current = { id: 'authored-edit' };
+    const pending = ref.current!.getContent();
+    await waitFor(() => expect(editorMock.saveDocument).toHaveBeenCalled());
+    const before = docMock.current;
+    docMock.current = { id: 'same-prose-new-data' };
+    await transactionHandler()(
+      new globalThis.CustomEvent('transaction', {
+        detail: {
+          transaction: {
+            before,
+            getMeta: (key: string) => key === MDY_PROJECTION_META,
+          },
+        },
+      })
+    );
+    finishSave(new TextEncoder().encode('# old projected value'));
+    await expect(pending).resolves.toBe('# hello');
+    expect(onChange).toHaveBeenCalledWith('# hello');
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it('publishes the freshest prose after a projection overtakes a pending edit save', async () => {
+    const ref = createRef<RichEditorHandle>();
+    const onChange = vi.fn();
+    renderWithTheme(
+      <RichEditor ref={ref} value="# original" onChange={onChange} />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    await ref.current?.getContent();
+    let finishOldSave!: (buffer: Uint8Array) => void;
+    editorMock.saveDocument.mockReturnValueOnce(
+      new Promise<Uint8Array>((resolve) => {
+        finishOldSave = resolve;
+      })
+    );
+    const freshest = '# Authored prose\n\n[200 lb](mdy:weight)';
+    editorMock.saveDocument.mockResolvedValueOnce(
+      new TextEncoder().encode(freshest)
+    );
+    docMock.current = { id: 'authored-edit-old-data' };
+    const oldSave = transactionHandler()();
+    const before = docMock.current;
+    docMock.current = { id: 'same-prose-fresh-data' };
+    await transactionHandler()(
+      new globalThis.CustomEvent('transaction', {
+        detail: {
+          transaction: {
+            before,
+            getMeta: (key: string) => key === MDY_PROJECTION_META,
+          },
+        },
+      })
+    );
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith(freshest));
+    finishOldSave(
+      new TextEncoder().encode('# Authored prose\n\n[198 lb](mdy:weight)')
+    );
+    await oldSave;
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(editorMock.saveDocument).toHaveBeenCalledTimes(2);
   });
 
   it('reloads when value changes, without echoing the load back', async () => {
@@ -418,6 +788,38 @@ describe('RichEditor', () => {
       .filter(Boolean)
       .pop();
     expect(editable?.()).toBe(false);
+    expect(editorMock.view.dom.hasAttribute('tabindex')).toBe(false);
+  });
+
+  it('readOnly announces aria-readonly on the textbox surface, not the host', async () => {
+    const { container } = renderWithTheme(
+      <RichEditor readOnly id="note-body" aria-label="Note body" />
+    );
+    await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+    // `aria-readonly` is only valid alongside a role that supports it; the
+    // host div is roleless, so it belongs on the textbox surface instead.
+    expect(container.querySelector('#note-body')).not.toHaveAttribute(
+      'aria-readonly'
+    );
+    const attributes = setProps.mock.calls
+      .map(
+        ([props]) =>
+          (props as { attributes?: Record<string, string> }).attributes
+      )
+      .filter(Boolean)
+      .pop();
+    expect(attributes).toMatchObject({
+      role: 'textbox',
+      'aria-readonly': 'true',
+    });
+    const editable = setProps.mock.calls
+      .map(([props]) => (props as { editable?: () => boolean }).editable)
+      .filter(Boolean)
+      .pop();
+    expect(editable?.()).toBe(false);
+    // Losing contenteditable costs keyboard focusability; the surface gets
+    // it back with an owned tabindex (disabled surfaces must not).
+    expect(editorMock.view.dom.getAttribute('tabindex')).toBe('0');
   });
 
   it('follows dark mode changes without remounting the editor', async () => {

@@ -92,6 +92,7 @@ const meta: Meta<typeof SuperChat> = {
 - You want the list and the panel together with selection handled — \`SuperChatInbox\`.
 - One user talks to one assistant and you do not need Markdown, participants or a conversation model — \`AIChat\` is lighter (no \`react-markdown\` peers).
 - Plain human-to-human messaging with delivery states and read receipts — the Messaging module; SuperChat has no \`status\` icons or read receipts.
+- The messages are rows in a DataVis view (an exported thread, an audit log) that users only read — [DataVisNitroChat](?path=/docs/grids-datavis-chat--docs) maps sender / message / time columns onto this panel in read-only mode, alongside the NITRO grid over the same view.
 - The host cannot install the Markdown-core peers (\`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\`) — they are required for the default renderer.
 
 ### Example
@@ -127,9 +128,9 @@ const append = (m: SuperChatMessage) =>
 
 - **Accessibility as implemented:** panel is a \`section role="group"\` labelled by its \`<h2>\`; the thread is \`role="log" aria-label="Messages" aria-live="polite"\` and focusable; each message is \`role="article"\` named "author, time"; system messages are \`role="status"\`. The composer is the shared \`ChatComposer\` (textarea "Message", mention listbox "Mention", Enter sends; attachments live behind the \`+\` menu "Add to message" → "Attach files"; internals expose \`chat-composer-*\` data-slots). Copy / Edit / Close / Back are icon buttons with English \`aria-label\`s; the Copy menu appears on hover **or** focus. Nothing moves focus after send.
 - **Security is shared.** Default rendering sanitises with \`rehype-sanitize\`; \`trustedContent\`, a custom \`renderTextContent\`, the Mermaid plugin (\`dangerouslySetInnerHTML\` under \`securityLevel: 'strict'\`) and any plugin's \`sanitizeSchema\` widen the trust boundary — you own it. GenUI widgets render only host-registered, schema-validated components.
-- Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments are delivered to the host as base64 \`dataUrl\`s — upload and swap URLs yourself; \`attachmentCache\` (IndexedDB) is opt-in.
+- Copy uses \`navigator.clipboard.write\` (secure context; plain-text fallback). Attachments reach the host as base64 \`dataUrl\`s plus the picked \`file\`. To upload, set \`attachmentDataUrls={false}\` (no base64 read; \`dataUrl\` is empty), upload \`attachment.file\` and put the hosted URL in the message, and raise \`maxFileSize\` (25 MB by default; a function sets it per file) — see the README's [Attaching files](https://github.com/mieweb/ui/blob/main/src/components/SuperChat/README.md#attaching-files). \`attachmentCache\` (IndexedDB) is opt-in.
 - **Layout.** Fills its flex parent (\`h-full\`); you must give it a bounded height. Non-virtualised threads render every row (rows are \`React.memo\`; keep message objects referentially stable). \`order="desc"\` anchors to the top.
-- i18n: "Messages", "Participants", "Send message", "Copy message", "Edit message", "(edited)" and time via \`toLocaleTimeString\` are English/locale-default. RTL: alignment is flex-based, but the speaker accent is a physical \`borderLeft\` and the Copy control floats left/right by author.
+- i18n: "Messages", "Participants", "Send message", "Copy message", "Edit message", "(edited)" and time via \`toLocaleTimeString\` are English/locale-default. RTL: alignment is flex-based, the speaker accent is a logical \`borderInlineStart\`, and the Copy control follows the author's side via flex order and logical Dropdown placements — all flip with \`dir\`.
 - Peers: \`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\` (core); \`rehype-highlight\`, \`remark-math\` + \`rehype-katex\` + \`katex\`, \`mermaid\`, \`@mieweb/datavis\` per plugin — all optional in \`package.json\`. Not in the main barrel: import from \`@mieweb/ui/components/SuperChat\`.
 
 ### Motion
@@ -160,6 +161,11 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
           type: 'uses',
           target: 'chat-chatcomposer',
           why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
+        },
+        {
+          type: 'composes with',
+          target: 'media-dictationbutton',
+          why: 'The `dictation` prop puts DictationButton in the composer and appends its transcript to the draft; use DictationButton directly only for host-owned inputs.',
         },
         {
           type: 'composes with',
@@ -885,4 +891,32 @@ function ComposerSelectorsPanel() {
 
 export const ComposerSelectors: Story = {
   render: () => <ComposerSelectorsPanel />,
+};
+
+const mockTranscribe = (_audio: Blob, signal: AbortSignal) =>
+  new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => resolve('Please summarize my last visit.'),
+      800
+    );
+    signal.addEventListener('abort', () => {
+      window.clearTimeout(timer);
+      reject(new Error('Dictation cancelled'));
+    });
+  });
+
+export const Dictation: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    dictation: { transcribe: mockTranscribe },
+  },
+  render: (args) => <InteractivePanel {...args} initial={conversation} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Voice typing in the composer. Click the mic, speak, then click again: the transcript is appended to the draft for review and is never sent automatically. Escape discards the take. This story uses a mock `transcribe`; in an app pass a server provider (e.g. an OpenAI-compatible `/v1/audio/transcriptions` call). `dictation={true}` instead uses on-device, English-only Whisper with a large first-use model download. The browser asks for microphone permission; inside an iframe the host must also grant `allow="microphone"`. Denied permission and failures show a status message and leave the draft intact. See [DictationButton](?path=/docs/media-dictationbutton--docs).',
+      },
+    },
+  },
 };

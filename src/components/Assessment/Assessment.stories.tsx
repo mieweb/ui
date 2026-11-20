@@ -23,16 +23,19 @@ const meta: Meta<typeof Assessment> = {
       description: {
         component: `### What it's for
 
-The visit's **Assessment & Plan**: an ordered list (\`items: AssessmentItem[]\` — \`{ concernId, assertionId, note? }\`) of the problems assessed today, each block showing that day's assertion (name, non-confirmed verification badge, \`CodingChips\`) and, with \`showPlan\`, the **orders nested under it**. Orders (\`AssessmentOrder\` — \`type: medication | lab | imaging | procedure | referral\`, \`display\`, \`detail\`, \`code?\`, \`priority\`, \`timing\`, \`indication\`, \`notes\`, \`bodySite\`, \`referTo\`) link to a problem through \`concernId\`, the **durable IndicationLink** that survives recoding; orders without one collect in an amber **unlinked bucket** with one-click link chips, and dragging an order onto another problem re-links it (\`onLinkOrder\`). A **unified add row** (\`renderOrderSearch\`) adds a concern or an order from one coded search: in \`auto\` mode the pick's coding system decides (\`isConditionCodetype\` → \`onAddAssessment\`, otherwise \`orderTypeForCodetype\` → \`onAddOrder\`), free text asks which; \`defaultAddMode\` and \`billableOnly\` tune it. Per-problem **+** opens an inline add-order form filtered by order type. Everything is controlled: \`concerns\` (the \`ConditionConcern[]\` the items point into), \`items\`, \`orders\` in; \`onAction(item, 'refine' | 'revise' | 'add-order')\`, \`onAddOrder\`, \`onAddAssessment\`, \`onLinkOrder\`, \`onEditOrderStart\` / \`onEditOrder\`, \`onRemoveOrder\`, \`onRemoveAssessment\`, \`onReorderItems\`, \`onReorderOrders\`, \`onShowPlanChange\` out. Exported alongside: \`ORDER_TYPE_META\`, \`ORDER_TYPE_SEARCH_DOMAINS\`, \`orderTypeForCodetype\`, \`isConditionCodetype\`.
+The visit's **Assessment & Plan**: an ordered list (\`items: AssessmentItem[]\` — \`{ concernId, assertionId, note? }\`) of the problems assessed today, each block showing that day's assertion (name, non-confirmed verification badge, \`CodingChips\`) and, with \`showPlan\`, the **orders nested under it**. Orders (\`AssessmentOrder\` — \`type: medication | lab | imaging | procedure | referral\`, \`display\`, \`detail\`, \`code?\`, \`priority\`, \`timing\`, \`indication\`, \`notes\`, \`bodySite\`, \`referTo\`) link to a problem through \`concernId\`, the **durable IndicationLink** that survives recoding; orders without one collect in an amber **unlinked bucket** with one-click link chips, and dragging an order onto another problem re-links it (\`onLinkOrder\`). A **unified add row** (\`renderOrderSearch\`) adds a concern or an order from one coded search: in \`auto\` mode the pick's coding system decides (\`isConditionCodetype\` → \`onAddAssessment\`, otherwise \`orderTypeForCodetype\` → \`onAddOrder\`), free text asks which; \`defaultAddMode\` and \`billableOnly\` tune it. Per-problem **+** opens an inline add-order form filtered by order type. \`rowActions\` defaults to all problem actions, \`orderActions\` defaults to all existing-order actions, and \`addModes\` defaults to every mode; each list is intersected with its required callbacks, and \`auto\` requires both add callbacks. Everything is controlled: \`concerns\` (the \`ConditionConcern[]\` the items point into), \`items\`, \`orders\` in; \`onAction(item, 'refine' | 'revise' | 'add-order')\`, \`onAddOrder\`, \`onAddAssessment\`, \`onLinkOrder\`, \`onEditOrderStart\` / \`onEditOrder\`, \`onRemoveOrder\`, \`onRemoveAssessment\`, \`onReorderItems\`, \`onReorderOrders\`, \`onShowPlanChange\` out. Exported alongside: \`ORDER_TYPE_META\`, \`ORDER_TYPE_SEARCH_DOMAINS\`, \`orderTypeForCodetype\`, \`isConditionCodetype\`.
 
 ### Use it when
 
 - You are building the **encounter note's A&P** — what was concluded about each problem today and what was ordered for it — and want orders visibly tied to their indication.
 - The host owns the encounter's items and orders and can persist link, order and sequence changes; the chart concerns come from the same model \`ProblemList\` renders.
 - Orders should be **coded** at entry — inject \`CodeLookup\` through \`renderOrderSearch\` (or an ambient \`CodeLookupProvider\`); omit both and the add forms degrade to free text.
+- You need to tailor controls to a workflow: use \`rowActions\`, \`orderActions\`, and \`addModes\` to select from actions the supplied callbacks can execute. Use explicit lists for a restricted workflow; omit them for callback-driven defaults.
+- For a problem-only capture layout, pair \`addModes={['problem']}\` with \`hideSingleAddModeSelector\` and supply \`onAddAssessment\` (see below). Visibility is based on executable modes after callback filtering: \`problem\` requires \`onAddAssessment\`, \`order\` requires \`onAddOrder\`, and \`auto\` requires both. The sole mode still applies automatically when the selector is hidden. The selector remains visible by default or whenever multiple executable modes remain.
 
 ### Don't use it when
 
+- You need the whole visit document — [EncounterVisit](?path=/docs/encounter-orders-encountervisit--docs) includes this assessment model alongside narrative sections, repeatable vitals, clinical lists and MCP tools in one eSheet response store. Use Assessment directly when the host owns its items and orders independently.
 - You need the **chart** problem list with statuses and assertion history — [ProblemList](?path=/docs/clinical-lists-problemlist--docs).
 - You need to record which problems are **relevant** this visit (Addressed / Relevant Hx / Noted) rather than assessed with a plan — [PresentingProblems](?path=/docs/clinical-lists-presentingproblems--docs). Typical flow: PresentingProblems at the start of the visit, Assessment at the end.
 - You need to **edit** an assertion or an order in full — pair with [ConditionEditor](?path=/docs/clinical-lists-conditioneditor--docs) (\`refine\` / \`revise\`) and [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs) (\`onEditOrderStart\`); Assessment itself only edits an order's \`display\` / \`detail\` inline.
@@ -51,6 +54,9 @@ const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(null);
   concerns={chartConcerns}
   items={items}
   orders={orders}
+  rowActions={['refine', 'revise', 'add-order', 'remove', 'move']}
+  orderActions={['edit', 'remove', 'move']}
+  addModes={['auto', 'problem', 'order']}
   onAction={(item, action) => action !== 'add-order' && setEditor({ mode: action, concern: byId(item.concernId) })}
   onAddOrder={(item, order) => setOrders((prev) => [...prev, { orderId: newId(), ...order, concernId: item?.concernId }])} // null item = unlinked
   onAddAssessment={(pick) => { const concern = addConcernFromPick(pick); setItems((prev) => [...prev, { concernId: concern.concernId, assertionId: concern.assertions[0].id }]); }}
@@ -70,6 +76,24 @@ const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(null);
 
 \`items\` and \`orders\` are encounter state; \`concerns\` is chart state — when a refine / revise lands, append the assertion to the concern **and** repoint the item's \`assertionId\`.
 
+For problem-only capture, keep the host-owned concern and item updates while hiding the redundant mode selector:
+
+\`\`\`tsx
+<Assessment
+  concerns={chartConcerns}
+  items={items}
+  addModes={['problem']}
+  hideSingleAddModeSelector
+  onAddAssessment={(pick) => {
+    const concern = addConcernFromPick(pick);
+    setItems((prev) => [...prev, {
+      concernId: concern.concernId,
+      assertionId: concern.assertions[0].id,
+    }]);
+  }}
+/>
+\`\`\`
+
 ### Limitations
 
 - **Accessibility as implemented.** Problem blocks are an \`<ol>\` of \`<li>\` that are **not** focus stops — reordering a problem block is drag-only, with no keyboard equivalent. Order rows *are* focusable (\`tabIndex={0}\`, \`aria-label\` spelling out the keys): ↑/↓ move between orders in a plan, Alt+↑/↓ reorder, Alt+←/→ move the order to the adjacent problem; a \`Dropdown\` move menu (\`aria-label="Move …"\`) offers the same. Each plan is a \`<ul aria-label="Plan for …">\`; the unlinked bucket is \`aria-label="Orders not linked to a concern"\`; add forms are \`role="form"\` with labelled selects and inputs. Row actions use \`RowActionToolbar\` (hover-revealed on fine pointers, visible on touch, Tab-reachable), and Add order reports its expanded state and controlled form. Reorders, re-links, edits, removals and per-problem order additions are announced via \`useLiveAnnouncement\` (\`sr-only\` \`aria-live="polite"\`); link-chip clicks are **not**.
@@ -83,6 +107,11 @@ const [orderEditing, setOrderEditing] = useState<AssessmentOrder | null>(null);
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'encounter-orders-encountervisit',
+          why: 'EncounterVisit records Assessment concerns, assertions and linked orders as one section of an eSheet visit; use Assessment directly for a standalone controlled plan.',
+        },
         {
           type: 'composes with',
           target: 'encounter-orders-ordereditor',

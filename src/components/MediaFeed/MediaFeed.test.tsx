@@ -328,6 +328,94 @@ describe('MediaFeed', () => {
     await waitFor(() => expect(clips[0].paused).toBe(false));
   });
 
+  it('leaves an autoplayed clip to autoPlay when the viewer comes back to it', async () => {
+    const { container, rerender } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const clip = container.querySelector('video') as HTMLVideoElement;
+    await waitFor(() => expect(clip.paused).toBe(false));
+    rerender(<MediaFeed items={updates} {...accessors} autoPlay={false} />);
+    feedVisibility(false);
+    await waitFor(() => expect(clip.paused).toBe(true));
+    feedVisibility(true);
+    await act(async () => {});
+    expect(clip.paused).toBe(true);
+  });
+
+  it('counts a Play from the bar after a called-off autoplay as the viewer’s', async () => {
+    let reject = (_error: Error) => {};
+    play.mockImplementationOnce(
+      () => new Promise<void>((_resolve, fail) => (reject = fail))
+    );
+    const { container, rerender } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const clip = container.querySelector('video') as HTMLVideoElement;
+    // Autoplay is turned off while its start is still pending, which then
+    // fails.
+    rerender(<MediaFeed items={updates} {...accessors} autoPlay={false} />);
+    await act(async () => {
+      reject(new globalThis.DOMException('Interrupted', 'AbortError'));
+    });
+    // The viewer presses Play on the player's own bar.
+    act(() => void clip.play());
+    expect(clip.paused).toBe(false);
+    feedVisibility(false);
+    await waitFor(() => expect(clip.paused).toBe(true));
+    feedVisibility(true);
+    await waitFor(() => expect(clip.paused).toBe(false));
+  });
+
+  it("leaves a full screen the host page entered, not the clip's player", () => {
+    const exit = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'fullscreenElement', {
+      configurable: true,
+      value: document.documentElement,
+    });
+    Object.defineProperty(document, 'exitFullscreen', {
+      configurable: true,
+      value: exit,
+    });
+    try {
+      renderFeed();
+      visibility([0.9, 0.1, 0]);
+      visibility([0.1, 0.9, 0]);
+      expect(exit).not.toHaveBeenCalled();
+    } finally {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
+    }
+  });
+
+  it("leaves the clip's own full screen when its item stops being active", () => {
+    const exit = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'exitFullscreen', {
+      configurable: true,
+      value: exit,
+    });
+    try {
+      renderFeed({ layout: 'overlay' });
+      visibility([0.9, 0.1, 0]);
+      const box = screen
+        .getByRole('article', { name: 'First update' })
+        .querySelector('[data-slot="media-player-box"]');
+      expect(box).not.toBeNull();
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: box,
+      });
+      visibility([0.1, 0.9, 0]);
+      expect(exit).toHaveBeenCalledOnce();
+    } finally {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
+    }
+  });
+
   it('pauses the inline player for fullscreen and restores trigger focus on Escape', async () => {
     const { container } = renderFeed();
     visibility([0.9, 0.1, 0]);
@@ -441,6 +529,433 @@ describe('MediaFeed', () => {
     expect(container.querySelector('video')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Reconnect' }));
     await waitFor(() => expect(onRetry).toHaveBeenCalledOnce());
+  });
+
+  it('offers Show more when the title or caption is cut off, and shows them in full', () => {
+    // jsdom has no layout: say the long caption and the long title overflow.
+    vi.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.textContent?.startsWith('A long') ? 80 : 20;
+      }
+    );
+    vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(32);
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.textContent === 'Third update' ? 400 : 100;
+      }
+    );
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(200);
+    renderFeed({
+      layout: 'overlay',
+      getCaption: (item) =>
+        item.id === 'first' ? (
+          <>
+            A long message with <a href="https://example.com">a link</a>
+          </>
+        ) : (
+          'Short'
+        ),
+    });
+    const first = screen.getByRole('article', { name: 'First update' });
+    const more = within(first).getByRole('button', { name: 'Show more' });
+    expect(more).toHaveAttribute('aria-expanded', 'false');
+    expect(first.querySelector('[data-slot="caption"]')).toHaveClass(
+      'line-clamp-2'
+    );
+    fireEvent.click(more);
+    expect(
+      within(first).getByRole('button', { name: 'Show less' })
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(first.querySelector('[data-slot="caption"]')).not.toHaveClass(
+      'line-clamp-2'
+    );
+    // Links in a host caption still work.
+    expect(within(first).getByRole('link', { name: 'a link' })).toBeVisible();
+    // A short caption with a title that fits needs no toggle.
+    const second = screen.getByRole('article', { name: 'Second update' });
+    expect(
+      within(second).queryByRole('button', { name: 'Show more' })
+    ).toBeNull();
+    // A title cut off on its one line gets one too.
+    const third = screen.getByRole('article', { name: 'Third update' });
+    expect(
+      within(third).getByRole('button', { name: 'Show more' })
+    ).toBeInTheDocument();
+  });
+
+  it('leaves out a caption that is empty or repeats the title', () => {
+    renderFeed({
+      layout: 'overlay',
+      getCaption: (item) =>
+        item.id === 'first'
+          ? 'First update'
+          : item.id === 'second'
+            ? ''
+            : 'Said',
+    });
+    const caption = (name: string) =>
+      screen
+        .getByRole('article', { name })
+        .querySelector('[data-slot="caption"]')?.textContent;
+    expect(caption('First update')).toBeUndefined();
+    expect(caption('Second update')).toBeUndefined();
+    expect(caption('Third update')).toBe('Said');
+  });
+
+  it('keeps the stacked card layout by default', () => {
+    const { container } = renderFeed();
+    const root = container.querySelector('[data-component="media-feed"]');
+    expect(root).not.toHaveAttribute('data-theme');
+    const first = screen.getByRole('article', { name: 'First update' });
+    expect(first.firstElementChild).toHaveAttribute('data-slot', 'media');
+    expect(within(first).getByRole('button', { name: 'Play' })).toBeVisible();
+    expect(container.querySelector('[data-slot="media-controls"]')).toBeNull();
+  });
+
+  it('lays the overlay out as a dark stage, details first for focus order', () => {
+    const { container } = renderFeed({ layout: 'overlay' });
+    const root = container.querySelector('[data-component="media-feed"]');
+    expect(root).toHaveAttribute('data-theme', 'dark');
+    const first = screen.getByRole('article', { name: 'First update' });
+    expect(first.firstElementChild).toHaveAttribute('data-slot', 'details');
+    // Host text takes its own direction, so English truncates at its end
+    // in an RTL page, and the other way round.
+    expect(first.querySelector('[data-slot="title"]')).toHaveAttribute(
+      'dir',
+      'auto'
+    );
+    expect(
+      screen.getByRole('button', { name: 'Previous item' })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next item' })).toBeEnabled();
+  });
+
+  it("sets the overlay details on the active player's bar, not over it", async () => {
+    // jsdom has no layout: the player's bar is 48px tall.
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const bar = this.getAttribute('data-slot') === 'media-controls-bar';
+        return { height: bar ? 48 : 0 } as globalThis.DOMRect;
+      }
+    );
+    renderFeed({
+      layout: 'overlay',
+      renderActions: () => <button type="button">Share</button>,
+    });
+    const details = (name: string) =>
+      screen
+        .getByRole('article', { name })
+        .querySelector<HTMLElement>('[data-slot="details"]')!;
+    visibility([0.9, 0.1, 0]);
+    await waitFor(() =>
+      expect(details('First update').style.bottom).toBe('48px')
+    );
+    // An inactive item has no bar: its details sit at the very foot.
+    expect(details('Second update').style.bottom).toBe('0px');
+    visibility([0.1, 0.9, 0]);
+    await waitFor(() =>
+      expect(details('Second update').style.bottom).toBe('48px')
+    );
+    expect(details('First update').style.bottom).toBe('0px');
+    // The host's actions sit in the details, beside the text.
+    expect(
+      within(
+        details('First update').querySelector<HTMLElement>(
+          '[data-slot="actions"]'
+        )!
+      ).getByRole('button', { name: 'Share' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps opened details within the item above the bar, scrolling the text', async () => {
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      function (this: Element) {
+        const bar = this.getAttribute('data-slot') === 'media-controls-bar';
+        return { height: bar ? 48 : 0 } as globalThis.DOMRect;
+      }
+    );
+    // A title too long for its line, so Show more is offered.
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(400);
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(200);
+    renderFeed({ layout: 'overlay', getCaption: () => 'A long caption' });
+    visibility([0.9, 0.1, 0]);
+    const first = screen.getByRole('article', { name: 'First update' });
+    const details = first.querySelector<HTMLElement>('[data-slot="details"]')!;
+    await waitFor(() => expect(details.style.bottom).toBe('48px'));
+    // Capped at the item's height above the bar, so it can't run off its top.
+    expect(details.style.maxHeight).toBe('calc(100% - 48px)');
+    const more = within(first).getByRole('button', { name: 'Show more' });
+    const text = document.getElementById(more.getAttribute('aria-controls')!);
+    expect(text).not.toHaveClass('overflow-y-auto');
+    fireEvent.click(more);
+    // jsdom can't lay it out: check that the text column, not the caption
+    // alone, is what fills the cap and scrolls, and that it takes the
+    // scroll gesture (the details layer lets taps through to the player).
+    expect(text).toHaveClass(
+      'self-stretch',
+      'min-h-0',
+      'overflow-y-auto',
+      'pointer-events-auto'
+    );
+    expect(first.querySelector('[data-slot="caption"]')).not.toHaveClass(
+      'overflow-y-auto'
+    );
+  });
+
+  it('keeps the position counter in order in an RTL page', () => {
+    renderFeed({ layout: 'overlay', dir: 'rtl' });
+    // Isolated, so its numbers don't take the page's direction.
+    expect(screen.getByText('1 / 3').tagName).toBe('BDI');
+  });
+
+  it('names an untitled overlay item for assistive tech only', () => {
+    renderFeed({ layout: 'overlay', getTitle: () => '' });
+    const first = screen.getByRole('article', { name: 'Media item 1 of 3' });
+    expect(first.querySelector('[data-slot="title"]')).toBeNull();
+  });
+
+  it('leaves the full-screen viewer out of the overlay unless asked', () => {
+    const { rerender } = renderFeed({ layout: 'overlay' });
+    expect(
+      screen.queryByRole('button', { name: 'Open fullscreen' })
+    ).toBeNull();
+    rerender(
+      <MediaFeed
+        items={updates}
+        {...accessors}
+        layout="overlay"
+        allowFullscreen
+      />
+    );
+    expect(
+      screen.getAllByRole('button', { name: 'Open fullscreen' }).length
+    ).toBeGreaterThan(0);
+  });
+
+  it('closes the viewer when the host turns allowFullscreen off', () => {
+    const { rerender } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    fireEvent.click(
+      within(screen.getByRole('article', { name: 'First update' })).getByRole(
+        'button',
+        { name: 'Open fullscreen' }
+      )
+    );
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    rerender(
+      <MediaFeed items={updates} {...accessors} allowFullscreen={false} />
+    );
+    expect(screen.queryByRole('dialog')).toBeNull();
+    // The inline feed is live again: its first clip is the active one.
+    expect(
+      screen.getByRole('article', { name: 'First update' })
+    ).toHaveAttribute('data-active', 'true');
+  });
+
+  it('brings a floating clip back before opening the viewer', async () => {
+    renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const card = screen.getByRole('article', { name: 'First update' });
+    const exit = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: card.querySelector('video'),
+    });
+    Object.defineProperty(document, 'exitPictureInPicture', {
+      configurable: true,
+      value: exit,
+    });
+    try {
+      fireEvent.click(
+        within(card).getByRole('button', { name: 'Open fullscreen' })
+      );
+      expect(exit).toHaveBeenCalledOnce();
+      expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+
+  it("brings back a clip floating in Safari's own picture in picture", async () => {
+    renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const card = screen.getByRole('article', { name: 'First update' });
+    const video = card.querySelector('video') as HTMLVideoElement & {
+      webkitPresentationMode?: string;
+      webkitSetPresentationMode?: (mode: string) => void;
+    };
+    video.webkitPresentationMode = 'picture-in-picture';
+    video.webkitSetPresentationMode = vi.fn((mode: string) => {
+      video.webkitPresentationMode = mode;
+      video.dispatchEvent(new Event('webkitpresentationmodechanged'));
+    });
+    fireEvent.click(
+      within(card).getByRole('button', { name: 'Open fullscreen' })
+    );
+    expect(video.webkitSetPresentationMode).toHaveBeenCalledWith('inline');
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('pauses a clip that stays floating, rather than play it beside the viewer', async () => {
+    const { container } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const video = container.querySelector('video') as HTMLVideoElement & {
+      webkitPresentationMode?: string;
+      webkitSetPresentationMode?: (mode: string) => void;
+    };
+    await waitFor(() => expect(video.paused).toBe(false));
+    // Safari is asked to bring it back, and never does or says so.
+    video.webkitPresentationMode = 'picture-in-picture';
+    video.webkitSetPresentationMode = vi.fn();
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(
+        within(screen.getByRole('article', { name: 'First update' })).getByRole(
+          'button',
+          { name: 'Open fullscreen' }
+        )
+      );
+      await act(() => vi.advanceTimersByTimeAsync(1000));
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(video.paused).toBe(true);
+  });
+
+  it('can leave out the full-screen viewer', () => {
+    renderFeed({ allowFullscreen: false });
+    expect(
+      screen.queryByRole('button', { name: 'Open fullscreen' })
+    ).toBeNull();
+  });
+
+  it('remembers a pause made in the floating window', async () => {
+    const { container } = renderFeed({ autoPlay: false });
+    visibility([0.9, 0.1, 0]);
+    const clips = [...container.querySelectorAll('video')];
+    fireEvent.click(
+      within(screen.getByRole('article', { name: 'First update' })).getByRole(
+        'button',
+        { name: 'Play' }
+      )
+    );
+    await waitFor(() => expect(clips[0].paused).toBe(false));
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: clips[0],
+    });
+    try {
+      // Scroll on with it floating, then pause it from the floating window.
+      visibility([0.1, 0.9, 0]);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('article', { name: 'Second update' })
+        ).toHaveAttribute('data-active', 'true')
+      );
+      act(() => clips[0].pause());
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+      act(() => {
+        clips[0].dispatchEvent(new Event('leavepictureinpicture'));
+      });
+      // Back to it: the viewer paused it, so it stays paused.
+      visibility([0.9, 0.1, 0]);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('article', { name: 'First update' })
+        ).toHaveAttribute('data-active', 'true')
+      );
+      expect(clips[0].paused).toBe(true);
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+
+  it('remembers a Play made in the floating window after a pause there', async () => {
+    const { container } = renderFeed({ autoPlay: false });
+    visibility([0.9, 0.1, 0]);
+    const clips = [...container.querySelectorAll('video')];
+    fireEvent.click(
+      within(screen.getByRole('article', { name: 'First update' })).getByRole(
+        'button',
+        { name: 'Play' }
+      )
+    );
+    await waitFor(() => expect(clips[0].paused).toBe(false));
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: clips[0],
+    });
+    try {
+      // Scroll on with it floating; pause it and play it again from there.
+      visibility([0.1, 0.9, 0]);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('article', { name: 'Second update' })
+        ).toHaveAttribute('data-active', 'true')
+      );
+      act(() => clips[0].pause());
+      await act(() => clips[0].play());
+      // Its window closes, which stops it in the feed (no controls there).
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+      act(() => {
+        clips[0].dispatchEvent(new Event('leavepictureinpicture'));
+      });
+      expect(clips[0].paused).toBe(true);
+      // Back to it: the viewer's last word was Play, so it plays on.
+      visibility([0.9, 0.1, 0]);
+      await waitFor(() => expect(clips[0].paused).toBe(false));
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
+  });
+
+  it('lets a clip floating in picture in picture play on when the feed moves, and pauses it when it lands', async () => {
+    const { container } = renderFeed();
+    visibility([0.9, 0.1, 0]);
+    const clips = [...container.querySelectorAll('video')];
+    await waitFor(() => expect(clips[0].paused).toBe(false));
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: clips[0],
+    });
+    try {
+      // The viewer scrolls on: the next clip plays, and the floating one with it.
+      visibility([0.1, 0.9, 0]);
+      await waitFor(() => expect(clips[1].paused).toBe(false));
+      expect(clips[0].paused).toBe(false);
+      // Its window closed: it's back in the feed, not the active item, with no
+      // controls of its own — so it stops.
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+      act(() => {
+        clips[0].dispatchEvent(new Event('leavepictureinpicture'));
+      });
+      expect(clips[0].paused).toBe(true);
+      expect(clips[1].paused).toBe(false);
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
   });
 
   it('keeps a manual play control when autoplay is blocked', async () => {
@@ -740,5 +1255,45 @@ describe('MediaFeed', () => {
     expect(attempts[0].element.paused).toBe(true);
     await act(async () => attempts[1].start());
     expect(attempts[1].element.paused).toBe(false);
+  });
+
+  it('lets a clip floated into picture in picture while it was starting play on after the feed moves', async () => {
+    const attempts: { element: HTMLMediaElement; start: () => void }[] = [];
+    play.mockImplementation(function (this: HTMLMediaElement) {
+      return new Promise<void>((resolve) => {
+        attempts.push({
+          element: this,
+          start: () => {
+            Object.defineProperty(this, 'paused', {
+              configurable: true,
+              value: false,
+            });
+            this.dispatchEvent(new Event('play'));
+            resolve();
+          },
+        });
+      });
+    });
+    renderFeed();
+    visibility([0.9, 0.1, 0]);
+    expect(attempts).toHaveLength(1);
+    // Still buffering, it's floated; then the viewer scrolls on.
+    Object.defineProperty(document, 'pictureInPictureElement', {
+      configurable: true,
+      value: attempts[0].element,
+    });
+    try {
+      visibility([0.1, 0.9, 0]);
+      expect(attempts).toHaveLength(2);
+      await act(async () => attempts[0].start());
+      expect(attempts[0].element.paused).toBe(false);
+      await act(async () => attempts[1].start());
+      expect(attempts[1].element.paused).toBe(false);
+    } finally {
+      Object.defineProperty(document, 'pictureInPictureElement', {
+        configurable: true,
+        value: null,
+      });
+    }
   });
 });

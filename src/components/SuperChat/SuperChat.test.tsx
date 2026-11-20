@@ -605,6 +605,30 @@ describe('SuperChat', () => {
     expect(input).toHaveValue('newer draft');
   });
 
+  it('takes a larger file when maxFileSize allows it, per file', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        maxFileSize={(file) =>
+          (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024
+        }
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const video = new File(['x'], 'long.mp4', { type: 'video/mp4' });
+    Object.defineProperty(video, 'size', { value: 400 * 1024 * 1024 });
+    const photo = new File(['x'], 'huge.png', { type: 'image/png' });
+    Object.defineProperty(photo, 'size', { value: 25 * 1024 * 1024 + 1 });
+    await user.upload(fileInput, [video, photo]);
+    await screen.findByLabelText('Remove long.mp4');
+    expect(screen.queryByLabelText('Remove huge.png')).toBeNull();
+  });
+
   it('rejects files over the 25 MiB cap', async () => {
     const { default: userEvent } = await import('@testing-library/user-event');
     const user = userEvent.setup();
@@ -696,11 +720,55 @@ describe('SuperChat', () => {
               name: 'picked.png',
               type: 'image/png',
               dataUrl: expect.stringMatching(/^data:image\/png/),
+              file,
             }),
           ],
         })
       )
     );
+  });
+
+  it('hands over only the file when attachmentDataUrls is off', async () => {
+    const onMessageSent = vi.fn();
+    const readAsDataURL = vi.spyOn(
+      window.FileReader.prototype,
+      'readAsDataURL'
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['fake-bytes'], 'clip.mp4', { type: 'video/mp4' });
+    await user.upload(fileInput, file);
+    await screen.findByLabelText('Remove clip.mp4');
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'clip.mp4',
+              type: 'video/mp4',
+              dataUrl: '',
+              file,
+            }),
+          ],
+        })
+      )
+    );
+    // Never read into memory as base64.
+    expect(readAsDataURL).not.toHaveBeenCalled();
+    readAsDataURL.mockRestore();
   });
 
   it('attaches a non-image file (pdf) with an icon preview', async () => {
@@ -1223,6 +1291,107 @@ describe('SuperChat', () => {
     expect(container.querySelector('code')).toHaveTextContent('const x = 1;');
   });
 
+  it('folds finished tool calls once the reply stops streaming', () => {
+    const toolMessage = (status: 'streaming' | 'complete') => ({
+      id: 'm-tool',
+      participantId: 'a1',
+      time: '2026-06-07T09:01:00Z',
+      status,
+      content: [
+        {
+          type: 'tool_use' as const,
+          toolCall: {
+            id: 't1',
+            toolName: 'list_issues',
+            parameters: [{ name: 'limit', type: 'number', value: 5 }],
+            status: 'success' as const,
+            startedAt: '2026-06-07T09:01:00Z',
+            duration: 800,
+          },
+        },
+      ],
+    });
+    const withTool = (
+      status: 'streaming' | 'complete'
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [...conversation.thread, toolMessage(status)],
+    });
+    const pill = () =>
+      document.querySelector('[data-slot="ai-tool-call"] [aria-expanded]');
+
+    const { rerender } = render(
+      <SuperChat
+        conversation={withTool('streaming')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <SuperChat
+        conversation={withTool('complete')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps a card the user opened while running open and focused when tool and reply finish together', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    const withTool = (
+      messageStatus: 'streaming' | 'complete',
+      toolStatus: 'running' | 'success'
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        ...conversation.thread,
+        {
+          id: 'm-tool',
+          participantId: 'a1',
+          time: '2026-06-07T09:01:00Z',
+          status: messageStatus,
+          content: [
+            {
+              type: 'tool_use' as const,
+              toolCall: {
+                id: 't1',
+                toolName: 'list_issues',
+                parameters: [{ name: 'limit', type: 'number', value: 5 }],
+                status: toolStatus,
+                startedAt: '2026-06-07T09:01:00Z',
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const pill = () =>
+      document.querySelector('[data-slot="ai-tool-call"] [aria-expanded]')!;
+
+    const { rerender } = render(
+      <SuperChat
+        conversation={withTool('streaming', 'running')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toHaveAttribute('aria-expanded', 'false');
+    const toggle = pill() as HTMLElement;
+    toggle.focus();
+    fireEvent.click(toggle);
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <SuperChat
+        conversation={withTool('complete', 'success')}
+        currentParticipantId="u1"
+      />
+    );
+    expect(pill()).toBe(toggle);
+    expect(pill()).toHaveAttribute('aria-expanded', 'true');
+    expect(document.activeElement).toBe(toggle);
+  });
+
   describe('scroll anchoring', () => {
     // jsdom has no layout, so scroll metrics are mocked directly on the
     // thread element and position changes are driven with scroll events.
@@ -1684,6 +1853,135 @@ describe('SuperChatConversations', () => {
     await user.click(screen.getByLabelText('New conversation'));
     expect(onNewConversation).toHaveBeenCalled();
   });
+
+  describe('list header', () => {
+    it('renders exactly as before when no header props are passed', () => {
+      const { container } = render(
+        <SuperChatConversations conversations={conversations} />
+      );
+      expect(screen.getByText('Conversations')).toBeInTheDocument();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-header"]')
+      ).toBeNull();
+    });
+
+    it('replaces the heading with listTitle', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle="Work sessions"
+        />
+      );
+      expect(screen.getByText('Work sessions')).toBeInTheDocument();
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+    });
+
+    it('hides the heading row when listTitle is null and there is no new button', () => {
+      const { container } = render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-title"]')
+      ).toBeNull();
+    });
+
+    it('keeps the new-conversation button when listTitle is null', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+          onNewConversation={() => {}}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('New conversation')).toBeInTheDocument();
+    });
+
+    it('renders listHeader content above the list', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listHeader={<button type="button">Group by: Day</button>}
+        />
+      );
+      const filter = screen.getByRole('button', { name: 'Group by: Day' });
+      const list = screen.getByRole('list');
+      expect(
+        filter.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('renders a labelled search box that reports each change', async () => {
+      const onChange = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ value: '', onChange }}
+        />
+      );
+      const box = screen.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      expect(box).toHaveAttribute('placeholder', 'Search…');
+      await user.type(box, 'a');
+      expect(onChange).toHaveBeenCalledWith('a');
+    });
+
+    it('uses the host labels for the search box', () => {
+      render(
+        <SuperChatConversations
+          conversations={[]}
+          search={{
+            value: 'zzz',
+            onChange: () => {},
+            label: 'Search posts',
+            placeholder: 'Search posts, people…',
+            noResultsLabel: 'No matching posts',
+          }}
+        />
+      );
+      expect(
+        screen.getByRole('searchbox', { name: 'Search posts' })
+      ).toHaveAttribute('placeholder', 'Search posts, people…');
+      expect(screen.getByRole('status')).toHaveTextContent('No matching posts');
+    });
+
+    it('announces no results only when a query matches nothing', () => {
+      const search = { value: '', onChange: () => {} };
+      const { rerender } = render(
+        <SuperChatConversations conversations={[]} search={search} />
+      );
+      // An empty query with an empty list is not a "no results" state.
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ ...search, value: 'Intake' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={[]}
+          search={{ ...search, value: 'nothing' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'No matching conversations'
+      );
+    });
+  });
 });
 
 describe('SuperChatInbox', () => {
@@ -1736,6 +2034,79 @@ describe('SuperChatInbox', () => {
     expect(panel).not.toBeNull();
     const thread = within(panel as HTMLElement);
     expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('passes the list header props through to the conversation list', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          listTitle="Days"
+          listHeader={<span>Team: Platform</span>}
+          search={{ value: '', onChange: () => {} }}
+        />
+      </div>
+    );
+    const list = within(
+      container.querySelector(
+        '[data-slot="superchat-conversations"]'
+      ) as HTMLElement
+    );
+    expect(list.getByText('Days')).toBeInTheDocument();
+    expect(list.getByText('Team: Platform')).toBeInTheDocument();
+    expect(
+      list.getByRole('searchbox', { name: 'Search conversations' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the open conversation and its draft when a search empties the list', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const inbox = (
+      query: string,
+      listConversations?: SuperChatConversation[]
+    ) => (
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={listConversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          search={{ value: query, onChange: () => {} }}
+        />
+      </div>
+    );
+    const { container, rerender } = render(inbox(''));
+    await user.type(screen.getByLabelText('Message'), 'unsent reply');
+
+    rerender(inbox('nothing', []));
+
+    const panel = within(
+      container.querySelector('[data-slot="superchat"]') as HTMLElement
+    );
+    expect(panel.getByText('first conversation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveValue('unsent reply');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'No matching conversations'
+    );
+  });
+
+  it('highlights no row when the open conversation is filtered out of the list', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={conversations.filter((c) => c.id === 'c2')}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const list = screen.getByRole('list');
+    expect(within(list).getByText('Follow-up')).toBeInTheDocument();
+    expect(within(list).queryByText('Intake')).not.toBeInTheDocument();
+    expect(list.querySelector('[aria-current="true"]')).not.toBeInTheDocument();
   });
 
   it('switches the active panel when another conversation is opened', async () => {

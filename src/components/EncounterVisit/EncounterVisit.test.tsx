@@ -1,0 +1,412 @@
+import * as React from 'react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
+import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
+import { getEncounterFieldId } from './definition';
+import type { EncounterVisitSnapshot } from './types';
+import { CodeLookupProvider } from '../CodeLookup/context';
+
+// ProseMirror resists jsdom simulation; narrative fields run on the legacy
+// engine, which shares the TextAreaRichProps contract (see the stub).
+vi.mock(
+  '../../components/TextAreaRich/TextAreaRichKerebron',
+  () => import('../../test/textAreaRichKerebronStub')
+);
+
+const form = {
+  id: 'test-visit',
+  title: 'Anonymous exam',
+  pages: [
+    {
+      id: 'test-visit:visit',
+      title: 'Anonymous exam',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Exam narrative',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+            {
+              id: 'encounter:exam:observation:back',
+              question: 'Back examination',
+              width: 'full',
+              fieldType: 'encounterNarrative',
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+} as unknown as FormDefinition;
+
+const PLAN_SECTION = {
+  id: 'encounter:plan:section',
+  fieldType: 'section',
+  title: 'Plan',
+  sectionCollapse: 'expanded',
+  width: 'full',
+  _sourceData: {
+    encounterKind: 'narrative',
+  },
+  fields: [
+    {
+      id: 'encounter:plan:narrative',
+      fieldType: 'encounterNarrative',
+      question: 'Plan',
+      width: 'full',
+      _sourceData: {
+        encounterHideLabel: true,
+      },
+    },
+  ],
+} as unknown as NonNullable<FormDefinition['pages'][number]['fields']>[number];
+
+describe('EncounterVisit with the real eSheet renderer', () => {
+  it('translates shell labels and counters without resetting the native visit', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const messages = {
+      labels: {
+        'Anonymous patient': 'Patient anonyme',
+        'Visit mode': 'Mode de visite',
+        View: 'Aperçu',
+        '{count} of {total} sections documented':
+          '{count} sur {total} sections documentées',
+        '{count} observations documented': '{count} observations documentées',
+      },
+    };
+    const { rerender } = render(
+      <EncounterVisit ref={ref} form={form} messages={messages} />
+    );
+    const hpi = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(hpi, { target: { innerHTML: 'Draft retained' } });
+    expect(
+      screen.getByRole('combobox', { name: 'Mode de visite' })
+    ).toBeInTheDocument();
+    expect(screen.getByText('Patient anonyme')).toBeInTheDocument();
+    expect(
+      screen.getByText('1 sur 3 sections documentées')
+    ).toBeInTheDocument();
+    expect(screen.getByText('1 observations documentées')).toHaveAttribute(
+      'role',
+      'status'
+    );
+    rerender(<EncounterVisit ref={ref} form={form} />);
+    expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(hpi);
+    expect(hpi).toHaveTextContent('Draft retained');
+    expect(
+      ref.current!.getSnapshot().responses[getEncounterFieldId('hpi')].answer
+    ).toBe('Draft retained');
+  });
+
+  it('retains the native draft when terminology wiring appears, changes or is removed', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const Lookup = () => <div data-testid="terminology-lookup" />;
+    const { rerender } = render(
+      <CodeLookupProvider component={Lookup} indexUrl="/ambient">
+        <EncounterVisit ref={ref} form={form} />
+      </CodeLookupProvider>
+    );
+    const input = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(input, { target: { innerHTML: '<b>Draft retained</b>' } });
+    const tools = ref.current!.getTools();
+    for (const codeLookup of [
+      { component: Lookup, indexUrl: '/explicit' },
+      { component: Lookup, indexUrl: '/changed' },
+      undefined,
+    ]) {
+      rerender(
+        <CodeLookupProvider component={Lookup} indexUrl="/ambient">
+          <EncounterVisit ref={ref} form={form} codeLookup={codeLookup} />
+        </CodeLookupProvider>
+      );
+      expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(input);
+      expect(input.querySelector('b')).toHaveTextContent('Draft retained');
+      expect(ref.current!.getTools()).toBe(tools);
+      expect(
+        ref.current!.getSnapshot().responses[getEncounterFieldId('hpi')].answer
+      ).toBe('Draft retained');
+    }
+  });
+
+  it('keeps unfinished numeric drafts visible to Save and MCP validation', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const onSubmit = vi.fn();
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
+    await screen.findByRole('textbox', { name: 'HPI' });
+    act(() => {
+      ref.current!.getTools().upsertVitals('vitals', { id: 'one', pulse: 76 });
+    });
+    fireEvent.change(screen.getByLabelText('Pulse'), {
+      target: { value: 'unfinished' },
+    });
+    expect(
+      ref
+        .current!.getSnapshot()
+        .observations.some((observation) => observation.label === 'Pulse')
+    ).toBe(false);
+    expect(ref.current!.getTools().validateVisit()).toMatchObject({
+      success: true,
+      data: { valid: false },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('Pulse')).toHaveValue('unfinished');
+    fireEvent.change(screen.getByLabelText('Pulse'), {
+      target: { value: '78' },
+    });
+    expect(ref.current!.getTools().validateVisit()).toMatchObject({
+      success: true,
+      data: { valid: true },
+    });
+  });
+
+  it('edits one narrative observation and exports the same native answer and note', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const onChange = vi.fn();
+    render(
+      <EncounterVisit
+        ref={ref}
+        form={form}
+        patientContext="45 yo male with back pain"
+        onChange={onChange}
+      />
+    );
+    const input = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(input, {
+      target: {
+        innerHTML: '45 yo male with pre-diabetes, back pain and hypertension.',
+      },
+    });
+    const snapshot = ref.current!.getSnapshot();
+    expect(snapshot.responses[getEncounterFieldId('hpi')].answer).toContain(
+      'back pain'
+    );
+    expect(snapshot.observations).toHaveLength(1);
+    expect(onChange.mock.lastCall?.[0].responses).toEqual(snapshot.responses);
+    fireEvent.click(screen.getByRole('combobox', { name: 'Visit mode' }));
+    fireEvent.click(screen.getByRole('option', { name: 'View' }));
+    await waitFor(() =>
+      expect(
+        screen.getByRole('region', { name: 'Visit note preview' })
+      ).toHaveTextContent('hypertension')
+    );
+    expect(
+      screen.queryByRole('textbox', { name: /patient name/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps draft input through callback-driven host renders and inline config objects', async () => {
+    function Host() {
+      const [saved, setSaved] = React.useState<EncounterVisitSnapshot | null>(
+        null
+      );
+      return (
+        <EncounterVisit
+          form={globalThis.structuredClone(form)}
+          initialResponses={saved?.responses ?? {}}
+          onChange={setSaved}
+        />
+      );
+    }
+    render(<Host />);
+    const input = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(input, { target: { innerHTML: 'Draft retained' } });
+    fireEvent.input(input, {
+      target: { innerHTML: 'Draft retained after another edit' },
+    });
+    expect(input).toHaveTextContent('Draft retained after another edit');
+  });
+
+  it('MCP writes update visible fields and user edits return through the same tools', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const { rerender } = render(<EncounterVisit ref={ref} form={form} />);
+    await screen.findByRole('textbox', { name: 'HPI' });
+    let result;
+    act(() => {
+      result = ref
+        .current!.getTools()
+        .upsertVitals('vitals', { id: 'first', systolic: 142, diastolic: 88 });
+    });
+    expect(result).toMatchObject({ success: true });
+    expect(screen.getByLabelText('Systolic')).toHaveValue('142');
+    expect(screen.getByLabelText('Diastolic')).toHaveValue('88');
+    fireEvent.change(screen.getByLabelText('Pulse'), {
+      target: { value: '76' },
+    });
+    const snapshot = ref.current!.getTools().getVisit();
+    expect(
+      snapshot.success &&
+        snapshot.data.observations.find((item) => item.label === 'Pulse')?.value
+    ).toBe(76);
+    rerender(<EncounterVisit ref={ref} form={form} readOnly />);
+    expect(
+      ref.current!.getTools().setNarrative('hpi', 'blocked')
+    ).toMatchObject({ success: false, error: { code: 'READ_ONLY' } });
+    expect(screen.getByLabelText('Systolic')).toHaveAttribute('readonly');
+  });
+
+  it('retains formatting in the native draft and replaces it when MCP changes the text', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    render(<EncounterVisit ref={ref} form={form} />);
+    const narrative = await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.input(narrative, {
+      target: {
+        innerHTML: '<b>Back pain</b><div>History supplied by patient</div>',
+      },
+    });
+    const snapshot = ref.current!.getSnapshot();
+    expect(snapshot.responses[getEncounterFieldId('hpi')]).toMatchObject({
+      answer: 'Back pain\nHistory supplied by patient',
+      attributes: {
+        encounterNarrativeHtml:
+          '<b>Back pain</b><div>History supplied by patient</div>',
+      },
+    });
+    expect(snapshot.note).not.toContain('<b>');
+    expect(narrative.querySelector('b')).toHaveTextContent('Back pain');
+    act(() => {
+      ref.current!.getTools().setNarrative('hpi', 'Revised by MCP');
+    });
+    expect(narrative).toHaveTextContent('Revised by MCP');
+    expect(narrative.querySelector('b')).toBeNull();
+  });
+
+  it('blocks save for partial BP and keeps a rejected save draft', async () => {
+    const onSubmit = vi.fn().mockRejectedValue(new Error('Storage is offline'));
+    render(<EncounterVisit form={form} onSubmit={onSubmit} />);
+    await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
+    fireEvent.change(screen.getByLabelText('Systolic'), {
+      target: { value: '142' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText('Diastolic'), {
+      target: { value: '88' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
+    await screen.findByText('Storage is offline');
+    expect(onSubmit).toHaveBeenCalledOnce();
+    expect(screen.getByLabelText('Systolic')).toHaveValue('142');
+    expect(screen.getByRole('button', { name: 'Save visit' })).toBeEnabled();
+  });
+
+  it('preserves answers when sections change without publishing intermediate empty drafts', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <EncounterVisit ref={ref} form={form} onChange={onChange} />
+    );
+    fireEvent.input(await screen.findByRole('textbox', { name: 'HPI' }), {
+      target: { innerHTML: 'Preserved narrative' },
+    });
+    onChange.mockClear();
+    const next = {
+      ...form,
+      pages: [
+        {
+          ...form.pages[0],
+          fields: [...(form.pages[0].fields ?? []), PLAN_SECTION],
+        },
+      ],
+    };
+    rerender(<EncounterVisit ref={ref} form={next} onChange={onChange} />);
+    await screen.findByRole('textbox', { name: 'Plan' });
+    expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
+      'Preserved narrative'
+    );
+    expect(onChange.mock.calls.length).toBeGreaterThan(0);
+    for (const [visit] of onChange.mock.calls)
+      expect(visit.responses[getEncounterFieldId('hpi')].answer).toBe(
+        'Preserved narrative'
+      );
+    rerender(<EncounterVisit ref={ref} form={{ ...next, id: 'new-visit' }} />);
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: 'HPI' })).toBeEmptyDOMElement()
+    );
+  });
+
+  it('freezes UI and tools while an asynchronous save is pending', async () => {
+    const ref = React.createRef<EncounterVisitHandle>();
+    let resolveSave: (() => void) | undefined;
+    const onSubmit = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
+    await screen.findByRole('textbox', { name: 'HPI' });
+    fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
+    expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled();
+    expect(
+      ref.current!.getTools().setNarrative('hpi', 'late edit')
+    ).toMatchObject({ success: false, error: { code: 'READ_ONLY' } });
+    await act(async () => {
+      resolveSave?.();
+    });
+    expect(screen.getByText('Visit saved.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save visit' })).toBeEnabled();
+  });
+});

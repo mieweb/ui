@@ -5,14 +5,10 @@ import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
 import './preview.css';
-// eSheet compiled CSS must load in a deterministic order: both files define
-// identical plain utilities (e.g. .ms\:hidden) but only the builder file has
-// the responsive display overrides (.ms\:lg\:flex etc.). If the renderer CSS
-// loads after the builder CSS (which depends on story visit order when each
-// story imports its own), the renderer's plain .ms\:hidden wins the cascade
-// and the builder's side panels stay hidden at every viewport width.
-import '../packages/esheet/packages/renderer/src/index.output.css';
-import '../packages/esheet/packages/builder/src/index.output.css';
+// eSheet styling is no longer imported here: @esheet/builder and
+// @esheet/renderer both `import '@esheet/styles'`, whose built dist/index.js
+// self-injects a single shared stylesheet (a #esheet-styles <style> tag) the
+// first time either package loads.
 import { bluehiveBrand } from '../src/brands/bluehive';
 import { ccmeBrand } from '../src/brands/ccme';
 import { defaultBrand } from '../src/brands/default';
@@ -29,6 +25,7 @@ import {
 } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
 import { CatalogDocsPage } from './CatalogDocsPage';
+import { githubSourceUrl, repoRelativeStoryPath } from './github-source';
 import { withMobilePreview } from './MobilePreview';
 import { mobilePreviewMode } from './mobile-preview';
 
@@ -209,18 +206,19 @@ const withGitHubSource: Decorator = (Story, context) => {
   const rawFileName = context.parameters?.fileName as string | undefined;
   // Normalize Windows backslashes to forward slashes before any path operations
   const fileName = rawFileName ? rawFileName.replace(/\\/g, '/') : undefined;
-  const srcIndex = fileName ? fileName.indexOf('/src/') : -1;
+  const relPath = fileName ? repoRelativeStoryPath(fileName) : null;
 
   const githubUrl = (() => {
-    if (srcIndex < 0 || !fileName) return null;
-    const relPath = fileName.slice(srcIndex + 1);
+    if (!relPath) return null;
+    // Submodule stories have no sibling component file; link the story itself.
+    if (!relPath.startsWith('src/')) return githubSourceUrl(relPath);
     const basename = relPath.split('/').pop() ?? '';
     // Only strip `.stories` when the basename is strictly `Name.stories.(ts|tsx|js|jsx)`
     // (no extra dot-segments before `.stories`). Otherwise link to the stories file itself.
     const stripped = /^[^.]+\.stories\.(tsx?|jsx?)$/.test(basename)
       ? relPath.replace(/\.stories(\.[^.]+)$/, '$1')
       : relPath;
-    return `https://github.com/mieweb/ui/blob/main/${stripped}`;
+    return githubSourceUrl(stripped);
   })();
 
   // Full-height stories (parameters.githubSourceFooter === false) fill the

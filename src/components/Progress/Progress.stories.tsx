@@ -12,7 +12,7 @@ const meta: Meta<typeof Progress> = {
       description: {
         component: `### What it's for
 
-Determinate progress. \`Progress\` is a linear bar (\`value\`/\`max\`, \`label\`, \`showValue\`, \`formatValue\`, four \`size\`s, \`striped\`/\`animated\` fills) and \`CircularProgress\` is the ring form for tight spaces. Both expose \`role="progressbar"\` with \`aria-valuenow/min/max\`, and share the \`default\` / \`success\` / \`warning\` / \`danger\` variants.
+Determinate progress. \`Progress\` is a linear bar (\`value\`/\`max\`, \`label\`, \`showValue\`, \`formatValue\`, four \`size\`s, \`striped\`/\`animated\` fills) and \`CircularProgress\` is the ring form for tight spaces. Both expose \`role="progressbar"\` with \`aria-valuenow/min/max\`, and share the \`default\` / \`success\` / \`warning\` / \`danger\` variants. For composition, \`srLabel\` names the bar when no visible \`label\` is rendered, \`valueText\` sets a human-readable \`aria-valuetext\`, and \`fillClassName\` lets the host tone the fill (\`CompletenessMeter\` colours it by completion band).
 
 ### Use it when
 
@@ -57,6 +57,11 @@ Determinate progress. \`Progress\` is a linear bar (\`value\`/\`max\`, \`label\`
           type: 'alternative to',
           target: 'navigation-readingprogressbar',
           why: 'Progress is a determinate, labelled progressbar for a value the host owns; ReadingProgressBar binds to window scroll and is decorative.',
+        },
+        {
+          type: 'composes with',
+          target: 'record-details-completenessmeter',
+          why: 'CompletenessMeter renders its bar with Progress, toning the fill by completion band through fillClassName.',
         },
       ],
     },
