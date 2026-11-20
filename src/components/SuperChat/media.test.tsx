@@ -1144,12 +1144,14 @@ describe('SuperChat media view', () => {
   });
 
   it('makes the links in a media item’s caption tappable', () => {
+    // The caption falls back to the message's text, Markdown and all: the
+    // bold around the address stays out of its link.
     const linked: SuperChatConversation = {
       ...conversation,
       thread: [
         {
           ...conversation.thread[0],
-          text: 'Notes at https://example.dev/notes and [the board](https://example.dev/board)',
+          text: 'Notes at **https://example.dev/notes** and [the board](https://example.dev/board)',
           media: [conversation.thread[0].media![0]],
         },
       ],

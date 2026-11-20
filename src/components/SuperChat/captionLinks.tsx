@@ -16,8 +16,13 @@ export const parenGroup = (excluded = '') => String.raw`\([^()${excluded}]*\)`;
 const DELIMITERS = String.raw`<>\x60`;
 /** One piece of a web address: a character, or a parenthesised group. */
 const URL_PIECE = String.raw`[^\s()${DELIMITERS}]|${parenGroup(String.raw`\s${DELIMITERS}`)}`;
-/** A bare address's last piece: not closing punctuation. */
-const URL_END = String.raw`[^\s()${DELIMITERS}.,;:!?\]'"]|${parenGroup(String.raw`\s${DELIMITERS}`)}`;
+/**
+ * A bare address's last piece: not closing punctuation, nor `*`, `_` or `~`,
+ * which close Markdown emphasis (`**https://…**`). Those can sit inside an
+ * address (`/~user/a_b`) but never end one, as in GFM's autolinks, so the
+ * caption links what the thread does.
+ */
+const URL_END = String.raw`[^\s()${DELIMITERS}.,;:!?\]'"*_~]|${parenGroup(String.raw`\s${DELIMITERS}`)}`;
 
 /**
  * A Markdown link's optional title after its address (`"…"`, `'…'` or `(…)`,
