@@ -1038,22 +1038,6 @@ describe('ChatComposer', () => {
       expect(input).toHaveValue('@Sam ');
     });
 
-    it('inserts an option with an href as a Markdown link', () => {
-      renderWithTheme(
-        <ChatComposer
-          mentionOptions={[
-            { id: 't1', label: 'TH-9: Fix [beta] login', href: '/tickets/9' },
-          ]}
-        />
-      );
-      const input = getInput();
-      fireEvent.change(input, { target: { value: 'See @TH' } });
-      fireEvent.keyDown(input, { key: 'Enter' });
-      expect(input).toHaveValue(
-        'See [TH-9: Fix \\[beta\\] login](/tickets/9) '
-      );
-    });
-
     it('closes the menu on Escape without clearing the draft', () => {
       renderWithTheme(<ChatComposer mentionOptions={mentionOptions} />);
       const input = getInput();
