@@ -51,7 +51,7 @@ The host owns the records: what a kind means, how candidates are found, and chec
 - The label takes its own direction (\`dir="auto"\`), so \`@Ann Lee\` reads correctly in a right-to-left page.
 - Long labels truncate with an ellipsis inside the chip; the full text stays the accessible name. Logical spacing only, so it mirrors in RTL.
 - The label is what was saved: the chip does not look up a newer name or status.
-- \`referencesIn\` reads standard inline links; reference-style links (\`[text][id]\`) are not recognised.`,
+- \`referencesIn\` reads inline links and reference-style links (\`[text][id]\` with an \`[id]: /href\` definition) alike; a reference-style link with no matching definition is plain text, not a reference.`,
       },
     },
     catalog: {
