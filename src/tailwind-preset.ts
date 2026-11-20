@@ -339,11 +339,16 @@ export const miewebUISafelist = [
   'sm:w-[var(--superchat-sidebar-width)]',
   '[&_a]:text-current',
   '[&_a:hover]:text-current',
+  '-mx-1',
+  'inset-y-0',
+  'w-0.5',
+  'cursor-col-resize',
   'start-[3px]',
   'group-hover:bg-primary-500',
   'group-focus-visible:bg-primary-600',
   // AIMessage pending (scheduled) bubble
   'border-neutral-400',
+  'text-neutral-900',
   'dark:border-neutral-500',
   'dark:bg-transparent',
   'h-[22px]',
@@ -1404,7 +1409,6 @@ export const miewebUISafelist = [
   'sr-only',
   // ChatComposer responsive grid: stacked cells below md, single-row pill
   // (md: overrides) above, plus the card surface
-  'grid-cols-[auto_minmax(0,1fr)_auto]',
   'col-span-3',
   'col-start-1',
   'col-start-3',
