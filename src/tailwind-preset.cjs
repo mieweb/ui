@@ -579,6 +579,9 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // ReferenceChip: sits on the text baseline, underlined only on hover
+    'align-baseline',
+    'no-underline',
     // Kbd / KeyboardShortcutsOverlay — key chips and shortcut rows
     'px-1.5',
     'font-mono',
