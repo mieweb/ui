@@ -9,9 +9,15 @@ import {
   createImagePlugin,
   createNitroTablePlugin,
   createAttachmentPlugin,
+  createReferencesPlugin,
   attachmentMarkdown,
   attachmentCache,
 } from './plugins';
+import {
+  PersonIcon,
+  samplePeople,
+  sampleTriggers,
+} from '../ReferenceChip/storyData';
 import type { SuperChatConversation } from './index';
 import { conversation, richConversation, registry } from './storyData';
 import { markdownShowcaseConversation } from './storyData';
@@ -150,7 +156,7 @@ const meta: Meta<typeof SuperChat> = {
       description: {
         component: `### What it's for
 
-**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\`.
+**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\` — among them \`createReferencesPlugin({ triggers })\`, which draws links to people and tickets as \`ReferenceChip\`s (see the **References** story).
 
 ### Use it when
 
@@ -631,6 +637,81 @@ export const MarkdownShowcase: Story = {
       initial={markdownShowcaseConversation}
       renderPlugins={[createCodePlugin()]}
       linkBuilder={(ref) => `#/${ref.refType}/${ref.refId}`}
+    />
+  ),
+};
+
+// ============================================================================
+// References (people and tickets named in a message)
+// ============================================================================
+
+const referencesConversation: SuperChatConversation = {
+  id: 'references',
+  title: 'Daily plan',
+  unread: 0,
+  participants: [
+    { id: 'u1', kind: 'human', name: 'Ann Lee', color: '#0e7490' },
+    { id: 'u2', kind: 'human', name: 'Raj Patel', color: '#9333ea' },
+  ],
+  thread: [
+    {
+      id: 'r1',
+      participantId: 'u2',
+      text: [
+        'Today I’ll take:',
+        '',
+        '- [ ] [TH-12: Fix login on phones](/tickets/t-12)',
+        '- [ ] [TH-15: Quarterly fire-safety check](/tickets/t-15)',
+        '',
+        '[@Ann Lee](/people/u-ann) can you review TH-12 after lunch? Notes are in [the wiki](https://example.com/wiki).',
+      ].join('\n'),
+      time: '2026-06-07T09:01:00Z',
+    },
+    {
+      id: 'r2',
+      participantId: 'u1',
+      text: 'Sure — I’ll pair with [@Sofía Martínez](/people/u-sofia) on [TH-21: Update the catalog page with this year’s paper prices](/tickets/t-21) first.',
+      time: '2026-06-07T09:03:00Z',
+    },
+  ],
+};
+
+const personIcon = (reference: { kind: string; id: string }) => {
+  const person = samplePeople.find((p) => p.id === reference.id);
+  return reference.kind === 'person' && person ? (
+    <PersonIcon name={person.name} />
+  ) : null;
+};
+
+/**
+ * `createReferencesPlugin` draws the links a trigger claims as chips — the
+ * same `ReferenceTrigger`s RichEditor inserts them with — and leaves other
+ * links alone. `onOpen` routes a click in a single-page app.
+ */
+export const References: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story: [
+          'Messages name people and tickets as plain Markdown links;',
+          '`createReferencesPlugin({ triggers, onOpen, icon })` draws each link a',
+          'trigger claims as a `ReferenceChip`. “the wiki” is an ordinary link and',
+          'stays one. Without the plugin the same text shows working links.',
+        ].join('\n'),
+      },
+    },
+  },
+  render: () => (
+    <InteractivePanel
+      initial={referencesConversation}
+      currentParticipantId="u1"
+      renderPlugins={[
+        createReferencesPlugin({
+          triggers: sampleTriggers,
+          icon: personIcon,
+          onOpen: (reference) => console.log('open', reference),
+        }),
+      ]}
     />
   ),
 };
