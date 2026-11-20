@@ -38,6 +38,26 @@ describe('ToolCallDisplay', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps focus on the pill when a call starts awaiting approval', () => {
+    const toolCall = call({
+      status: 'running',
+      description: 'Creates a container.',
+    });
+    const { rerender } = renderWithTheme(
+      <ToolCallDisplay toolCall={toolCall} defaultCollapsed />
+    );
+    const pill = screen.getByRole('button', { name: /create container/i });
+    pill.focus();
+    rerender(
+      <ToolCallDisplay
+        toolCall={{ ...toolCall, status: 'awaiting-approval' }}
+        defaultCollapsed
+      />
+    );
+    expect(document.activeElement).toBe(pill);
+    expect(pill).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('keeps links and rich content on an error result', () => {
     renderWithTheme(
       <ToolCallDisplay

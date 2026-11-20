@@ -861,12 +861,11 @@ export function ToolCallDisplay({
       ) : collapsible ? (
         // Pill click reveals the whole box (result + params) in one go.
         <CollapsiblePill
-          // Remounts on entering approval so the details open even if it was closed.
-          key={isAwaitingApproval ? 'approval' : 'call'}
           label={pillLabel}
           leadingIcon={<ToolStatusIcon status={toolCall.status} />}
           density={compact ? 'condensed' : 'standard'}
-          defaultOpen={!effectiveDefaultCollapsed}
+          // CollapsiblePill re-syncs on change, so entering approval opens it in place.
+          defaultOpen={isAwaitingApproval || !effectiveDefaultCollapsed}
           pillClassName={statusPillClasses[toolCall.status]}
           title="Toggle details"
         >
