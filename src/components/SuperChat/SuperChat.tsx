@@ -27,6 +27,7 @@ import type {
   ChatComposerAgentOption,
   ChatComposerError,
   ChatComposerHandle,
+  ChatComposerProps,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
@@ -131,11 +132,21 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
+   * Whether `onMessageSent`'s attachments carry a base64 `dataUrl`. Set
+   * `false` when the host uploads each attachment's `file` itself: the read is
+   * skipped, so a large video doesn't become a string bigger than a browser —
+   * let alone a phone's WebView — can hold. `dataUrl` is then empty.
+   * @default true
+   */
+  attachmentDataUrls?: boolean;
+  /**
    * Largest file the composer takes, in bytes; a larger one is refused
-   * (reported through `onComposerError`).
+   * (reported through `onComposerError`). A function sets the cap per file,
+   * e.g. a higher one for videos than photos (with
+   * `attachmentDataUrls={false}`, so a large file isn't read as base64).
    * @default 26214400 (25 MB)
    */
-  maxFileSize?: number;
+  maxFileSize?: ChatComposerProps['maxFileSize'];
   /**
    * Called when the composer refuses a file (too large, a type not accepted,
    * over the attachment limit) or a send fails, so the host can say why.
@@ -342,6 +353,7 @@ export function SuperChat({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
   onComposerError,
   order = 'asc',
@@ -1084,7 +1096,8 @@ export function SuperChat({
   const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
-  // SuperChat's host callback (mentions + base64 `data:` URL attachments).
+  // SuperChat's host callback (mentions + attachments: each one's File, and
+  // its base64 `data:` URL unless `attachmentDataUrls` is off).
   const composerRef = React.useRef<ChatComposerHandle>(null);
   // The conversations a send is pending in: SuperChatInbox reuses this panel
   // (and its composer) for every conversation, and only those are busy. Each
@@ -1101,7 +1114,8 @@ export function SuperChat({
         const text = message.content;
         const mentions = detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
-          message.attachments ?? []
+          message.attachments ?? [],
+          { dataUrls: attachmentDataUrls }
         );
         // The declared type is `void` for backward compatibility, but a
         // returned promise (e.g. an async host callback) is awaited so its
@@ -1129,7 +1143,7 @@ export function SuperChat({
         });
       }
     },
-    [conversation, onMessageSent]
+    [conversation, onMessageSent, attachmentDataUrls]
   );
 
   return (

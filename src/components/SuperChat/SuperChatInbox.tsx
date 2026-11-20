@@ -73,6 +73,8 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
+  /** See {@link SuperChatProps.attachmentDataUrls}. @default true */
+  attachmentDataUrls?: boolean;
   /** See {@link SuperChatProps.maxFileSize}. */
   maxFileSize?: SuperChatProps['maxFileSize'];
   /** See {@link SuperChatProps.onComposerError}. */
@@ -151,6 +153,7 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   acceptedFileTypes,
+  attachmentDataUrls,
   maxFileSize,
   onComposerError,
   order,
@@ -234,6 +237,7 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           acceptedFileTypes={acceptedFileTypes}
+          attachmentDataUrls={attachmentDataUrls}
           maxFileSize={maxFileSize}
           onComposerError={onComposerError}
           order={order}
