@@ -1,12 +1,11 @@
-import type { FieldDefinition, FormDefinition } from '@esheet/core';
-import { isEncounterDate } from './date';
+import type { FormDefinition } from '@esheet/core';
 import type {
-  EncounterObservationDefinition,
+  EncounterCode,
   EncounterNarrativeFinding,
+  EncounterObservationDefinition,
   EncounterResponses,
-  EncounterSectionDefinition,
   EncounterSectionKind,
-  EncounterVisitDefinition,
+  EncounterSectionView,
 } from './types';
 
 /** Encode each identifier separately so punctuation cannot collide with delimiters. */
@@ -25,7 +24,7 @@ export function getEncounterSectionFieldId(sectionId: string): string {
 }
 
 export function getEncounterSectionFieldIds(
-  section: EncounterSectionDefinition
+  section: EncounterSectionView
 ): string[] {
   if (section.kind === 'narrative') return [getEncounterFieldId(section.id)];
   if (section.kind !== 'observations') {
@@ -42,6 +41,19 @@ export function getEncounterSectionFieldIds(
   ];
 }
 
+/** Native field types registered by the encounter host, keyed back to section kinds. */
+export const ENCOUNTER_KINDS_BY_FIELD_TYPE: Record<
+  string,
+  EncounterSectionKind
+> = {
+  encounterVitals: 'vitals',
+  encounterMedications: 'medications',
+  encounterAllergies: 'allergies',
+  encounterConditions: 'conditions',
+  encounterPlan: 'plan',
+  encounterAssessment: 'assessment',
+};
+
 const SECTION_KINDS: EncounterSectionKind[] = [
   'narrative',
   'observations',
@@ -53,6 +65,10 @@ const SECTION_KINDS: EncounterSectionKind[] = [
   'assessment',
 ];
 
+function record(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function nonempty(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -62,21 +78,37 @@ function optionalString(value: unknown): boolean {
 }
 
 function invalid(message: string): never {
-  throw new Error(`Invalid encounter definition: ${message}`);
+  throw new Error(`Invalid encounter form: ${message}`);
+}
+
+function safeDecode(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return undefined;
+  }
+}
+
+function validCode(code: unknown): code is EncounterCode {
+  return (
+    record(code) &&
+    nonempty(code.system) &&
+    nonempty(code.code) &&
+    optionalString(code.display)
+  );
 }
 
 function validateFindings(
-  findings: EncounterNarrativeFinding[] | undefined,
+  findings: unknown,
   location: string
-): void {
-  if (findings === undefined) return;
+): EncounterNarrativeFinding[] | undefined {
+  if (findings === undefined) return undefined;
   if (!Array.isArray(findings))
     invalid(`findings must be an array in ${location}`);
   const ids = new Set<string>();
-  for (const finding of findings) {
+  for (const finding of findings as EncounterNarrativeFinding[]) {
     if (
-      !finding ||
-      typeof finding !== 'object' ||
+      !record(finding) ||
       !nonempty(finding.id) ||
       !nonempty(finding.label) ||
       !nonempty(finding.text)
@@ -85,708 +117,285 @@ function validateFindings(
     if (ids.has(finding.id))
       invalid(`duplicate finding id ${finding.id} in ${location}`);
     ids.add(finding.id);
-    if (
-      finding.code !== undefined &&
-      (!finding.code ||
-        typeof finding.code !== 'object' ||
-        !nonempty(finding.code.system) ||
-        !nonempty(finding.code.code) ||
-        !optionalString(finding.code.display))
-    )
+    if (finding.code !== undefined && !validCode(finding.code))
       invalid(`invalid finding code in ${location}`);
   }
+  return findings as EncounterNarrativeFinding[];
 }
 
-/** Reject ambiguous identifiers and invalid configuration before constructing an eSheet. */
-export function validateEncounterDefinition(
-  definition: EncounterVisitDefinition
-): void {
-  if (!definition || typeof definition !== 'object')
-    invalid('expected an object');
-  if (!nonempty(definition.id) || !nonempty(definition.title)) {
-    invalid('id and title must be nonempty strings');
-  }
+const OBSERVATION_FIELD_ID = /^encounter:[^:]+:observation:([^:]+)$/;
+
+/**
+ * Rebuild one observation definition from its native field. Native properties
+ * are authoritative (mieweb/ui#772); `_sourceData` carries only metadata the
+ * native schema cannot express (clinical code, common findings).
+ */
+function observationView(
+  sectionId: string,
+  field: Record<string, unknown>
+): EncounterObservationDefinition {
+  const source = record(field._sourceData) ? field._sourceData : {};
+  const encoded =
+    typeof field.id === 'string' ? OBSERVATION_FIELD_ID.exec(field.id) : null;
+  const id = encoded ? safeDecode(encoded[1]) : undefined;
+  if (!nonempty(id))
+    invalid(
+      `observation field ids use encounter:<section>:observation:<id> in ${sectionId}`
+    );
+  if (field.id !== getEncounterFieldId(sectionId, id))
+    invalid(
+      `observation field ids use the canonical encoded id of their section in ${sectionId}.${id}`
+    );
+  if (nonempty(source.id) && source.id !== id)
+    invalid(`_sourceData.id conflicts with the field id in ${sectionId}.${id}`);
+  const label = nonempty(field.question) ? field.question : undefined;
+  if (!nonempty(label))
+    invalid(`observations in ${sectionId} require an id and label`);
+  // Observation responses persist as text answers (encounterNarrative or
+  // plain text inputs) or dropdown selections; other field types (radio,
+  // checkbox, ...) store shapes that clinical validation, export and MCP
+  // writes cannot read.
   if (
-    definition.encounterDate !== undefined &&
-    !isEncounterDate(definition.encounterDate)
+    field.fieldType !== 'encounterNarrative' &&
+    field.fieldType !== 'text' &&
+    field.fieldType !== 'dropdown'
   )
-    invalid('encounterDate must be a valid YYYY-MM-DD date');
-  if (!Array.isArray(definition.sections) || definition.sections.length === 0) {
-    invalid('at least one section is required');
-  }
-  const sectionIds = new Set<string>();
-  for (const section of definition.sections) {
-    if (!section || typeof section !== 'object')
-      invalid('expected a section object');
-    if (!nonempty(section.id) || !nonempty(section.title)) {
-      invalid('each section requires an id and title');
-    }
-    if (sectionIds.has(section.id))
-      invalid(`duplicate section id ${section.id}`);
-    sectionIds.add(section.id);
-    if (!SECTION_KINDS.includes(section.kind))
-      invalid(`unknown section kind ${section.kind}`);
-    if (!optionalString(section.description))
-      invalid(`invalid description in ${section.id}`);
-    if (
-      section.required !== undefined &&
-      typeof section.required !== 'boolean'
-    ) {
-      invalid(`required must be boolean in ${section.id}`);
-    }
-    if (
-      section.narrative !== undefined &&
-      typeof section.narrative !== 'boolean'
-    ) {
-      invalid(`narrative must be boolean in ${section.id}`);
-    }
-    if (
-      section.observations !== undefined &&
-      !Array.isArray(section.observations)
-    ) {
-      invalid(`observations must be an array in ${section.id}`);
-    }
-    if (section.kind !== 'observations' && section.observations?.length) {
-      invalid(
-        `only observations sections accept individual observations (${section.id})`
-      );
-    }
-    if (
-      section.kind === 'observations' &&
-      !section.narrative &&
-      !section.observations?.length
-    ) {
-      invalid(`observations section ${section.id} has no fields`);
-    }
-    if (
-      section.requireCoding !== undefined &&
-      typeof section.requireCoding !== 'boolean'
-    )
-      invalid(`requireCoding must be boolean in ${section.id}`);
-    validateFindings(section.findings, section.id);
-    if (
-      section.findings?.length &&
-      section.kind !== 'narrative' &&
-      !section.narrative
-    )
-      invalid(`section findings require a narrative in ${section.id}`);
-    const observationIds = new Set<string>();
-    for (const observation of section.observations ?? []) {
+    invalid(
+      `observation fields use encounterNarrative, text or dropdown in ${sectionId}.${id}`
+    );
+  const type =
+    field.fieldType === 'dropdown'
+      ? ('choice' as const)
+      : field.inputType === 'number'
+        ? ('number' as const)
+        : undefined;
+  let options: string[] | undefined;
+  if (type === 'choice') {
+    if (!Array.isArray(field.options) || field.options.length === 0)
+      invalid(`choice observation ${sectionId}.${id} requires options`);
+    options = (field.options as unknown[]).map((option) => {
+      // model.ts validation and MCP writes rely on this option-id convention.
       if (
-        !observation ||
-        typeof observation !== 'object' ||
-        !nonempty(observation.id) ||
-        !nonempty(observation.label)
-      ) {
-        invalid(`observations in ${section.id} require an id and label`);
-      }
-      if (observationIds.has(observation.id))
-        invalid(`duplicate observation id ${observation.id} in ${section.id}`);
-      observationIds.add(observation.id);
-      if (
-        observation.type !== undefined &&
-        !['text', 'number', 'choice'].includes(observation.type)
-      ) {
-        invalid(`unknown observation type in ${section.id}.${observation.id}`);
-      }
-      if (!optionalString(observation.unit))
-        invalid(`invalid unit in ${section.id}.${observation.id}`);
-      if (
-        observation.required !== undefined &&
-        typeof observation.required !== 'boolean'
-      ) {
-        invalid(`required must be boolean in ${section.id}.${observation.id}`);
-      }
-      if (
-        observation.code !== undefined &&
-        (!observation.code ||
-          typeof observation.code !== 'object' ||
-          !nonempty(observation.code.system) ||
-          !nonempty(observation.code.code) ||
-          !optionalString(observation.code.display))
-      ) {
-        invalid(`invalid code in ${section.id}.${observation.id}`);
-      }
-      if (
-        observation.options !== undefined &&
-        (!Array.isArray(observation.options) ||
-          observation.options.some((option) => !nonempty(option)) ||
-          new Set(observation.options).size !== observation.options.length)
-      ) {
-        invalid(
-          `options must be distinct nonempty strings in ${section.id}.${observation.id}`
-        );
-      }
-      validateFindings(observation.findings, `${section.id}.${observation.id}`);
-      if (
-        observation.findings?.length &&
-        observation.type &&
-        observation.type !== 'text'
+        !record(option) ||
+        !nonempty(option.value) ||
+        option.id !== encodeURIComponent(option.value)
       )
         invalid(
-          `findings require a text observation in ${section.id}.${observation.id}`
+          `dropdown options use { id: encodeURIComponent(value), value } in ${sectionId}.${id}`
         );
-      if (observation.type === 'choice' && !observation.options?.length) {
+      return option.value;
+    });
+    if (new Set(options).size !== options.length)
+      invalid(
+        `options must be distinct nonempty strings in ${sectionId}.${id}`
+      );
+  }
+  const unit = nonempty(field.unit) ? field.unit : undefined;
+  if (source.code !== undefined && !validCode(source.code))
+    invalid(`invalid code in ${sectionId}.${id}`);
+  const findings = validateFindings(
+    source.encounterFindings,
+    `${sectionId}.${id}`
+  );
+  if (findings?.length && type !== undefined)
+    invalid(`findings require a text observation in ${sectionId}.${id}`);
+  return {
+    id,
+    label,
+    ...(type === undefined ? {} : { type }),
+    ...(unit === undefined ? {} : { unit }),
+    ...(source.code === undefined
+      ? {}
+      : { code: source.code as EncounterCode }),
+    ...(options === undefined ? {} : { options }),
+    ...(findings === undefined ? {} : { findings }),
+    ...(field.required === true ? { required: true } : {}),
+  };
+}
+
+const SECTION_FIELD_ID = /^encounter:([^:]+):section$/;
+
+/** The shared MDY parser refuses duplicate field ids on reopen; reject them at authoring time. */
+function uniqueFieldId(
+  id: unknown,
+  fieldIds: Set<string>,
+  where: string
+): void {
+  if (typeof id !== 'string') return;
+  if (fieldIds.has(id)) invalid(`duplicate field id ${id} in ${where}`);
+  fieldIds.add(id);
+}
+
+function sectionView(
+  field: Record<string, unknown>,
+  seen: Set<string>,
+  fieldIds: Set<string>
+): EncounterSectionView {
+  const encoded =
+    typeof field.id === 'string' ? SECTION_FIELD_ID.exec(field.id) : null;
+  const id = encoded ? safeDecode(encoded[1]) : undefined;
+  if (id === undefined)
+    invalid(
+      `section field ids use encounter:<id>:section (${String(field.id)})`
+    );
+  if (!nonempty(field.title)) invalid(`each section requires an id and title`);
+  if (seen.has(id)) invalid(`duplicate section id ${id}`);
+  seen.add(id);
+  uniqueFieldId(field.id, fieldIds, id);
+  const title = field.title;
+  const children = Array.isArray(field.fields)
+    ? field.fields.filter(record)
+    : [];
+  let description: string | undefined;
+  let narrativeField: Record<string, unknown> | undefined;
+  let customField: Record<string, unknown> | undefined;
+  let customKind: EncounterSectionKind | undefined;
+  const observations: EncounterObservationDefinition[] = [];
+  const observationIds = new Set<string>();
+  for (const child of children) {
+    uniqueFieldId(child.id, fieldIds, id);
+    const fieldType =
+      typeof child.fieldType === 'string' ? child.fieldType : '';
+    if (fieldType === 'display') {
+      if (description === undefined && nonempty(child.content))
+        description = child.content;
+      continue;
+    }
+    if (child.id === getEncounterFieldId(id)) {
+      // Narrative answers persist as text; a selection control here would
+      // render but never produce a response the clinical model can read.
+      if (fieldType !== 'encounterNarrative')
+        invalid(`the narrative field in ${id} must be an encounterNarrative`);
+      narrativeField = child;
+      continue;
+    }
+    const kind = ENCOUNTER_KINDS_BY_FIELD_TYPE[fieldType];
+    if (kind !== undefined) {
+      if (customField !== undefined)
+        invalid(`multiple structured clinical fields in ${id}`);
+      if (child.id !== getEncounterFieldId(id, 'value'))
         invalid(
-          `choice observation ${section.id}.${observation.id} requires options`
+          `structured clinical fields use encounter:<section>:observation:value (${id})`
         );
-      }
+      customField = child;
+      customKind = kind;
+      continue;
+    }
+    const observation = observationView(id, child);
+    if (observationIds.has(observation.id))
+      invalid(`duplicate observation id ${observation.id} in ${id}`);
+    observationIds.add(observation.id);
+    observations.push(observation);
+  }
+  const source = record(field._sourceData) ? field._sourceData : {};
+  if (
+    source.encounterKind !== undefined &&
+    !SECTION_KINDS.includes(source.encounterKind as EncounterSectionKind)
+  )
+    invalid(`unknown section kind ${String(source.encounterKind)} in ${id}`);
+  // Forms saved before kind stamps existed (#762) infer their kind: a lone
+  // narrative is a narrative section unless titled as a structured companion.
+  const inferredKind: EncounterSectionKind = customKind
+    ? customKind
+    : observations.length ||
+        (narrativeField !== undefined &&
+          narrativeField.question === `${title} narrative`)
+      ? 'observations'
+      : 'narrative';
+  const kind =
+    (source.encounterKind as EncounterSectionKind | undefined) ?? inferredKind;
+  if (customKind !== undefined && kind !== customKind)
+    invalid(
+      `section kind ${kind} conflicts with its ${customKind} field in ${id}`
+    );
+  if (kind === 'narrative' && narrativeField === undefined)
+    invalid(`narrative section ${id} requires its narrative field`);
+  if (kind === 'narrative' && (observations.length || customField))
+    invalid(`narrative section ${id} accepts only its narrative field`);
+  if (kind === 'observations' && customField !== undefined)
+    invalid(`observations section ${id} accepts only individual observations`);
+  if (kind === 'observations' && !observations.length && !narrativeField)
+    invalid(`observations section ${id} has no fields`);
+  if (kind !== 'observations' && observations.length)
+    invalid(
+      `only observations sections accept individual observations (${id})`
+    );
+  if (
+    kind !== 'narrative' &&
+    kind !== 'observations' &&
+    customField === undefined
+  )
+    invalid(`${kind} section ${id} requires its structured clinical field`);
+  const narrativeSource =
+    narrativeField !== undefined && record(narrativeField._sourceData)
+      ? narrativeField._sourceData
+      : {};
+  const customSource =
+    customField !== undefined && record(customField._sourceData)
+      ? customField._sourceData
+      : {};
+  const findings = validateFindings(narrativeSource.encounterFindings, id);
+  const narrative = kind !== 'narrative' && narrativeField !== undefined;
+  const narrativeRequired = narrative && narrativeField?.required === true;
+  const required =
+    kind === 'narrative'
+      ? narrativeField?.required === true
+      : kind === 'observations'
+        ? source.encounterSectionRequired === true
+        : customField?.required === true ||
+          source.encounterSectionRequired === true;
+  return {
+    id,
+    title,
+    kind,
+    ...(description === undefined ? {} : { description }),
+    ...(kind === 'observations' && observations.length ? { observations } : {}),
+    ...(findings === undefined ? {} : { findings }),
+    ...(typeof customSource.encounterRequireCoding === 'boolean'
+      ? { requireCoding: customSource.encounterRequireCoding }
+      : {}),
+    ...(narrative ? { narrative } : {}),
+    ...(narrativeRequired ? { narrativeRequired } : {}),
+    ...(required ? { required } : {}),
+  };
+}
+
+/**
+ * Derive per-section encounter views from the native form — the single
+ * structural source of truth (mieweb/ui#772). Views let clinical validation,
+ * snapshot export and MCP tools keep reasoning in section terms without a
+ * second schema. Throws when the form does not describe a valid encounter.
+ */
+export function getEncounterFormSections(
+  form: FormDefinition
+): EncounterSectionView[] {
+  if (!record(form)) invalid('expected an object');
+  if (!nonempty(form.id) || !nonempty(form.title))
+    invalid('id and title must be nonempty strings');
+  if (!Array.isArray(form.pages) || form.pages.length === 0)
+    invalid('at least one page is required');
+  // The encounter surface renders without page navigation: sections on later
+  // pages would be unreachable yet still gate saving.
+  if (form.pages.length > 1) invalid('exactly one page is required');
+  const sections: EncounterSectionView[] = [];
+  const seen = new Set<string>();
+  const fieldIds = new Set<string>();
+  for (const page of form.pages) {
+    if (!record(page) || !Array.isArray(page.fields)) continue;
+    for (const field of page.fields) {
+      if (!record(field) || field.fieldType !== 'section')
+        invalid('every top-level encounter field must be a section');
+      sections.push(sectionView(field, seen, fieldIds));
     }
   }
+  if (sections.length === 0) invalid('at least one section is required');
+  return sections;
 }
 
-function observationField(
-  sectionId: string,
-  observation: EncounterObservationDefinition
-): FieldDefinition {
-  const base = {
-    id: getEncounterFieldId(sectionId, observation.id),
-    question: observation.label,
-    required: observation.required,
-    width: 'full' as const,
-    _sourceData: { ...observation, encounterFindings: observation.findings },
-  };
-  if (observation.type === 'choice') {
-    return {
-      ...base,
-      fieldType: 'dropdown',
-      options: observation.options?.map((value) => ({
-        id: encodeURIComponent(value),
-        value,
-        text: value,
-      })),
-    };
-  }
-  if (observation.type === 'number') {
-    return {
-      ...base,
-      fieldType: 'text',
-      inputType: 'number',
-      unit: observation.unit,
-      validators: [
-        { type: 'number', message: 'Enter a finite nonnegative number.' },
-      ],
-    };
-  }
-  return {
-    ...base,
-    fieldType: 'encounterNarrative',
-    unit: observation.unit,
-  } as unknown as FieldDefinition;
+/** Reject forms that do not describe a valid encounter before constructing an eSheet. */
+export function validateEncounterForm(form: FormDefinition): void {
+  getEncounterFormSections(form);
 }
-
-const CUSTOM_FIELD_TYPES = {
-  vitals: 'encounterVitals',
-  medications: 'encounterMedications',
-  allergies: 'encounterAllergies',
-  conditions: 'encounterConditions',
-  plan: 'encounterPlan',
-  assessment: 'encounterAssessment',
-} as const;
-
-/** All visit sections remain native eSheet sections with native FieldResponse values. */
-export function createEncounterFormDefinition(
-  definition: EncounterVisitDefinition
-): FormDefinition {
-  validateEncounterDefinition(definition);
-  return {
-    id: definition.id,
-    title: definition.title,
-    pages: [
-      {
-        id: `${definition.id}:visit`,
-        title: definition.title,
-        fields: definition.sections.map((section) => {
-          const fields: FieldDefinition[] = [];
-          if (section.description) {
-            fields.push({
-              id: `${getEncounterSectionFieldId(section.id)}:description`,
-              fieldType: 'display',
-              content: section.description,
-              width: 'full',
-            });
-          }
-          if (section.kind === 'narrative' || section.narrative) {
-            fields.push({
-              id: getEncounterFieldId(section.id),
-              fieldType: 'encounterNarrative',
-              question:
-                section.kind === 'narrative'
-                  ? section.title
-                  : `${section.title} narrative`,
-              required:
-                section.kind === 'narrative' ? section.required : undefined,
-              width: 'full',
-              _sourceData: {
-                encounterHideLabel: true,
-                encounterFindings: section.findings,
-              },
-            } as unknown as FieldDefinition);
-          }
-          if (section.kind === 'observations') {
-            fields.push(
-              ...(section.observations ?? []).map((observation) =>
-                observationField(section.id, observation)
-              )
-            );
-          } else if (section.kind !== 'narrative') {
-            // eSheet deliberately keeps custom types outside its built-in TypeScript union.
-            fields.push({
-              id: getEncounterFieldId(section.id, 'value'),
-              fieldType: CUSTOM_FIELD_TYPES[section.kind],
-              question: section.title,
-              required: section.required,
-              _sourceData: {
-                encounterRequireCoding: section.requireCoding ?? true,
-                encounterDate: definition.encounterDate,
-              },
-              width: 'full',
-            } as unknown as FieldDefinition);
-          }
-          return {
-            id: getEncounterSectionFieldId(section.id),
-            fieldType: 'section' as const,
-            title: section.title,
-            sectionCollapse: 'expanded' as const,
-            width: 'full' as const,
-            fields,
-          };
-        }),
-      },
-    ],
-  };
-}
-
-/** Optional uncoded phrases; answers exist only after an explicit selection. */
-export const DEFAULT_ENCOUNTER_VISIT_DEFINITION: EncounterVisitDefinition = {
-  id: 'anonymous-encounter',
-  title: 'Encounter visit',
-  sections: [
-    {
-      id: 'hpi',
-      title: 'History of present illness',
-      kind: 'narrative',
-      findings: [
-        { id: 'no-fever', label: 'No fever', text: 'Denies fever.' },
-        { id: 'no-trauma', label: 'No trauma', text: 'Denies recent trauma.' },
-        {
-          id: 'no-radiation',
-          label: 'No radiation',
-          text: 'Pain does not radiate.',
-        },
-      ],
-    },
-    {
-      id: 'history',
-      title: 'Patient history',
-      kind: 'observations',
-      narrative: true,
-      findings: [
-        {
-          id: 'patient-source',
-          label: 'Patient provided history',
-          text: 'History provided by the patient.',
-        },
-        {
-          id: 'records-reviewed',
-          label: 'Records reviewed',
-          text: 'History supplemented by available records.',
-        },
-      ],
-      observations: [
-        {
-          id: 'medical',
-          label: 'Medical history',
-          findings: [
-            {
-              id: 'reviewed',
-              label: 'History reviewed',
-              text: 'Medical history reviewed.',
-            },
-            {
-              id: 'no-additional-history',
-              label: 'No additional history',
-              text: 'No additional medical history reported.',
-            },
-          ],
-        },
-        {
-          id: 'surgical',
-          label: 'Surgical history',
-          findings: [
-            {
-              id: 'no-surgeries',
-              label: 'No prior surgery',
-              text: 'No previous surgery reported.',
-            },
-            {
-              id: 'reviewed',
-              label: 'History reviewed',
-              text: 'Surgical history reviewed.',
-            },
-          ],
-        },
-        {
-          id: 'family',
-          label: 'Family history',
-          findings: [
-            {
-              id: 'unknown',
-              label: 'History unknown',
-              text: 'Family history unknown.',
-            },
-            {
-              id: 'noncontributory',
-              label: 'No pertinent history',
-              text: 'No pertinent family history reported.',
-            },
-          ],
-        },
-        {
-          id: 'social',
-          label: 'Social history',
-          findings: [
-            {
-              id: 'never-smoked',
-              label: 'Never smoked',
-              text: 'Never smoked.',
-            },
-            {
-              id: 'no-alcohol',
-              label: 'No alcohol use',
-              text: 'Denies alcohol use.',
-            },
-            {
-              id: 'no-recreational-drugs',
-              label: 'No recreational drug use',
-              text: 'Denies recreational drug use.',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'ros',
-      title: 'Review of systems',
-      kind: 'observations',
-      narrative: true,
-      findings: [
-        {
-          id: 'pertinent-hpi',
-          label: 'Additional symptoms in HPI',
-          text: 'Additional symptoms are documented in the history of present illness.',
-        },
-        {
-          id: 'limited-review',
-          label: 'Limited review',
-          text: 'Review of systems limited by patient condition.',
-        },
-      ],
-      observations: [
-        {
-          id: 'constitutional',
-          label: 'Constitutional',
-          findings: [
-            {
-              id: 'no-fever-chills',
-              label: 'No fever or chills',
-              text: 'Denies fever or chills.',
-            },
-          ],
-        },
-        {
-          id: 'cardiovascular',
-          label: 'Cardiovascular',
-          findings: [
-            {
-              id: 'no-chest-pain',
-              label: 'No chest pain',
-              text: 'Denies chest pain.',
-            },
-          ],
-        },
-        {
-          id: 'respiratory',
-          label: 'Respiratory',
-          findings: [
-            {
-              id: 'no-dyspnea',
-              label: 'No dyspnea',
-              text: 'Denies shortness of breath.',
-            },
-            { id: 'no-cough', label: 'No cough', text: 'Denies cough.' },
-          ],
-        },
-        {
-          id: 'musculoskeletal',
-          label: 'Musculoskeletal',
-          findings: [
-            { id: 'back-pain', label: 'Back pain', text: 'Reports back pain.' },
-            {
-              id: 'no-joint-swelling',
-              label: 'No joint swelling',
-              text: 'Denies joint swelling.',
-            },
-          ],
-        },
-        {
-          id: 'neurological',
-          label: 'Neurological',
-          findings: [
-            {
-              id: 'no-weakness',
-              label: 'No weakness',
-              text: 'Denies weakness.',
-            },
-            {
-              id: 'no-numbness-tingling',
-              label: 'No numbness / tingling',
-              text: 'Denies numbness or tingling.',
-            },
-            {
-              id: 'no-bowel-bladder-changes',
-              label: 'No bowel / bladder changes',
-              text: 'Denies bowel or bladder changes.',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'vitals',
-      title: 'Vitals',
-      kind: 'vitals',
-    },
-    {
-      id: 'exam',
-      title: 'Physical examination',
-      kind: 'observations',
-      narrative: true,
-      findings: [
-        {
-          id: 'focused',
-          label: 'Focused examination',
-          text: 'Focused examination performed.',
-        },
-        {
-          id: 'limited-by-pain',
-          label: 'Limited by pain',
-          text: 'Examination limited by pain.',
-        },
-      ],
-      observations: [
-        {
-          id: 'general',
-          label: 'General appearance',
-          findings: [
-            {
-              id: 'no-distress',
-              label: 'No acute distress',
-              text: 'No acute distress.',
-            },
-            { id: 'alert', label: 'Alert', text: 'Alert and conversant.' },
-          ],
-        },
-        {
-          id: 'head-neck',
-          label: 'Head and neck',
-          findings: [
-            {
-              id: 'no-cervical-nodes',
-              label: 'No cervical lymphadenopathy',
-              text: 'No palpable cervical lymphadenopathy.',
-            },
-            {
-              id: 'no-oral-lesions',
-              label: 'No oral lesions',
-              text: 'No visible oral lesions.',
-            },
-          ],
-        },
-        {
-          id: 'cardiovascular',
-          label: 'Cardiovascular',
-          findings: [
-            {
-              id: 'regular',
-              label: 'Regular rhythm',
-              text: 'Regular rate and rhythm.',
-            },
-          ],
-        },
-        {
-          id: 'respiratory',
-          label: 'Respiratory',
-          findings: [
-            {
-              id: 'clear',
-              label: 'Clear lungs',
-              text: 'Lungs clear to auscultation bilaterally.',
-            },
-            {
-              id: 'nonlabored',
-              label: 'Nonlabored',
-              text: 'Breathing is nonlabored.',
-            },
-          ],
-        },
-        {
-          id: 'abdomen',
-          label: 'Abdomen',
-          findings: [
-            {
-              id: 'soft',
-              label: 'Soft / nontender',
-              text: 'Abdomen soft and nontender.',
-            },
-          ],
-        },
-        {
-          id: 'musculoskeletal',
-          label: 'Musculoskeletal / back',
-          findings: [
-            {
-              id: 'no-midline-tenderness',
-              label: 'No midline tenderness',
-              text: 'No midline spinal tenderness.',
-            },
-            {
-              id: 'paraspinal-tenderness',
-              label: 'Paraspinal tenderness',
-              text: 'Paraspinal tenderness is present.',
-            },
-            {
-              id: 'range-of-motion',
-              label: 'Preserved range of motion',
-              text: 'Spinal range of motion is preserved.',
-            },
-          ],
-        },
-        {
-          id: 'neurological',
-          label: 'Neurological',
-          findings: [
-            {
-              id: 'symmetric-strength',
-              label: 'Symmetric leg strength',
-              text: 'Strength symmetric in both lower extremities.',
-            },
-            {
-              id: 'light-touch',
-              label: 'Intact light touch',
-              text: 'Sensation intact to light touch in both lower extremities.',
-            },
-            {
-              id: 'steady-gait',
-              label: 'Steady gait',
-              text: 'Gait is steady.',
-            },
-          ],
-        },
-        {
-          id: 'skin',
-          label: 'Skin',
-          findings: [
-            { id: 'warm-dry', label: 'Warm / dry', text: 'Skin warm and dry.' },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'conditions',
-      title: 'Conditions',
-      kind: 'conditions',
-      requireCoding: true,
-    },
-    {
-      id: 'medications',
-      title: 'Presenting medications',
-      kind: 'medications',
-      requireCoding: true,
-    },
-    {
-      id: 'allergies',
-      title: 'Allergies and intolerances',
-      kind: 'allergies',
-      requireCoding: true,
-    },
-    {
-      id: 'assessment',
-      title: 'Assessment and orders',
-      kind: 'assessment',
-      requireCoding: true,
-    },
-    {
-      id: 'plan',
-      title: 'Plan',
-      kind: 'plan',
-      narrative: true,
-      requireCoding: true,
-      findings: [
-        {
-          id: 'questions',
-          label: 'Questions answered',
-          text: 'Questions were answered.',
-        },
-        {
-          id: 'understanding',
-          label: 'Understanding confirmed',
-          text: 'Patient verbalized understanding of the plan.',
-        },
-      ],
-    },
-    {
-      id: 'follow-up',
-      title: 'Follow-up and appointments',
-      kind: 'observations',
-      narrative: true,
-      findings: [
-        {
-          id: 'arrangements-reviewed',
-          label: 'Arrangements reviewed',
-          text: 'Follow-up arrangements reviewed with the patient.',
-        },
-        {
-          id: 'patient-to-schedule',
-          label: 'Patient will schedule',
-          text: 'Patient will contact the office to schedule follow-up.',
-        },
-      ],
-      observations: [
-        {
-          id: 'interval',
-          label: 'Return interval',
-          findings: [
-            { id: 'one-week', label: '1 week', text: '1 week' },
-            { id: 'one-month', label: '1 month', text: '1 month' },
-            { id: 'three-months', label: '3 months', text: '3 months' },
-          ],
-        },
-        {
-          id: 'appointment',
-          label: 'Appointment details',
-          findings: [
-            {
-              id: 'scheduled',
-              label: 'Appointment scheduled',
-              text: 'Appointment scheduled.',
-            },
-            {
-              id: 'patient-to-schedule',
-              label: 'Patient to schedule',
-              text: 'Patient to schedule appointment.',
-            },
-            {
-              id: 'scheduling-pending',
-              label: 'Scheduling pending',
-              text: 'Appointment scheduling pending.',
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
 
 /** Only the facts supplied for the anonymous example; no assumed exam or treatment. */
 export const EXAMPLE_ENCOUNTER_VISIT_RESPONSES: EncounterResponses = {

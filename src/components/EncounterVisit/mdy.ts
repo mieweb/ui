@@ -5,19 +5,16 @@ import {
   hasNativeDocumentValue,
   type MdyDocumentDiagnostic,
   type MdyDocumentField,
-  type MdyDocumentMarkdown,
   type ParsedMdyDocument,
 } from '../RichTextEsheet/documentMdy';
 import {
-  createEncounterFormDefinition,
   getEncounterFieldId,
+  getEncounterFormSections,
   getEncounterSectionFieldIds,
-  validateEncounterDefinition,
 } from './definition';
 import type {
   EncounterObservation,
   EncounterResponses,
-  EncounterVisitDefinition,
   EncounterVisitSnapshot,
 } from './types';
 
@@ -26,14 +23,14 @@ export const ENCOUNTER_DOCUMENT_FIELD_ID = '__encounter_document__';
 
 type MdySnapshot = Pick<
   EncounterVisitSnapshot,
-  'definition' | 'responses' | 'observations'
+  'form' | 'responses' | 'observations'
 >;
 
 export type EncounterMdyField = MdyDocumentField;
 
 export type EncounterMdyDiagnostic = MdyDocumentDiagnostic;
 
-export type ParsedEncounterMdy = ParsedMdyDocument<EncounterVisitDefinition>;
+export type ParsedEncounterMdy = ParsedMdyDocument;
 
 function unitDisplay(unit?: string): string | undefined {
   return unit === 'Cel'
@@ -80,8 +77,48 @@ function groupedDisplay(
 export function getEncounterMdyFields(
   snapshot: MdySnapshot
 ): EncounterMdyField[] {
-  return snapshot.definition.sections.flatMap((section) =>
-    getEncounterSectionFieldIds(section).map((fieldId) => {
+  return engine.fields(snapshot);
+}
+
+const engine = createMdyDocumentEngine<MdySnapshot>({
+  documentFieldId: ENCOUNTER_DOCUMENT_FIELD_ID,
+  linkPrefix: 'visit',
+  engineName: 'encounter-mdy-document',
+  missingFrontMatterMessage:
+    'An encounter MDY document requires YAML front matter.',
+  sourceDataProperties: [
+    'id',
+    'label',
+    'type',
+    'unit',
+    'code',
+    'options',
+    'required',
+    'encounterHideLabel',
+    'findings',
+    'encounterFindings',
+    'encounterRequireCoding',
+    'encounterDate',
+    'encounterKind',
+    'encounterSectionRequired',
+  ],
+  // The engine preserves imported front matter on re-save: scrub the
+  // removed pre-#772 schema key so no stale second schema rides along.
+  extraFrontMatter: () => ({ encounterDefinition: undefined }),
+  projectField: (snapshot) => {
+    // Views are rebuilt once per operation from the live form; the field-id
+    // lookup keeps each per-field refinement constant time.
+    const sections = new Map(
+      getEncounterFormSections(snapshot.form).flatMap((section) =>
+        getEncounterSectionFieldIds(section).map(
+          (fieldId) => [fieldId, section] as const
+        )
+      )
+    );
+    return ({ field }) => {
+      const section = sections.get(field.id);
+      if (!section) return undefined;
+      const fieldId = field.id;
       const observations = snapshot.observations.filter(
         (observation) => observation.fieldId === fieldId
       );
@@ -106,79 +143,37 @@ export function getEncounterMdyFields(
         display = fieldDisplay({ ...snapshot.responses[fieldId] });
       }
       return {
-        id: engine.linkId(fieldId),
-        fieldId,
         sectionId: section.id,
         label,
-        display: display.trim() ? display : '—',
+        display,
         empty: structured
           ? observations.length === 0 || !display.trim()
           : !hasNativeDocumentValue(snapshot.responses[fieldId]),
+        narrative: section.kind === 'narrative',
       };
-    })
-  );
-}
-
-function initialBody(
-  snapshot: MdySnapshot,
-  fields: EncounterMdyField[],
-  { markdownText, fieldLink }: MdyDocumentMarkdown
-): string {
-  return [
-    `# ${markdownText(snapshot.definition.title)}`,
-    ...snapshot.definition.sections.map((section) =>
-      [
-        `## ${markdownText(section.title)}`,
-        fields
-          .filter((field) => field.sectionId === section.id)
-          .map((field) =>
-            section.kind === 'narrative'
-              ? fieldLink(field)
-              : `- **${markdownText(field.label)}:** ${fieldLink(field)}`
-          )
-          .join('\n'),
-      ].join('\n\n')
-    ),
-  ].join('\n\n');
-}
-
-const engine = createMdyDocumentEngine<EncounterVisitDefinition, MdySnapshot>({
-  documentFieldId: ENCOUNTER_DOCUMENT_FIELD_ID,
-  linkPrefix: 'visit',
-  definitionKey: 'encounterDefinition',
-  engineName: 'encounter-mdy-document',
-  missingFrontMatterMessage:
-    'An encounter MDY document requires YAML front matter.',
-  invalidDefinitionMessage:
-    'Front matter contains an invalid encounterDefinition.',
-  sourceDataProperties: [
-    'id',
-    'label',
-    'type',
-    'unit',
-    'code',
-    'options',
-    'required',
-    'encounterHideLabel',
-    'findings',
-    'encounterFindings',
-    'encounterRequireCoding',
-    'encounterDate',
-  ],
-  validateDefinition: validateEncounterDefinition,
-  createFormDefinition: (snapshot) =>
-    createEncounterFormDefinition(snapshot.definition),
-  getFields: getEncounterMdyFields,
-  createInitialBody: initialBody,
+    };
+  },
   rebuildSnapshot: async (parsed) => {
     // A portable document may have been edited outside this component. The
     // canonical response wins over cached visit_* values and display strings.
     // Import lazily because snapshot creation itself calls the engine.
+    const form = parsed.form;
+    if (!form || !parsed.response) return null;
     const { createEncounterSnapshot } = await import('./model');
-    return createEncounterSnapshot(parsed.definition!, {
-      ...parsed.response!,
-      [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(parsed.source),
-    });
+    try {
+      return createEncounterSnapshot(form, {
+        ...parsed.response,
+        [ENCOUNTER_DOCUMENT_FIELD_ID]: encounterDocumentResponse(parsed.source),
+      });
+    } catch (error) {
+      parsed.diagnostics.push({
+        severity: 'error',
+        code: 'form',
+        message:
+          error instanceof Error ? error.message : 'Invalid encounter form.',
+      });
+      return null;
+    }
   },
 });
 

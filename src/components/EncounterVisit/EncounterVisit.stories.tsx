@@ -2,9 +2,12 @@ import * as React from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { EncounterVisit, type EncounterVisitProps } from './EncounterVisit';
 import {
-  DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+  ENCOUNTER_KINDS_BY_FIELD_TYPE,
   EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
+  getEncounterFormSections,
 } from './definition';
+import { DEFAULT_ENCOUNTER_FORM } from './defaultForm';
+import type { FieldDefinition, FormDefinition } from '@esheet/core';
 import { executeEncounterVisitToolCall, type EncounterVisitTools } from './mcp';
 import { MotionProvider } from '../../motion/MotionProvider';
 import { Button } from '../Button';
@@ -13,6 +16,40 @@ import { CodeLookup } from '../CodeLookup';
 
 const PATIENT_CONTEXT =
   '45 yo male with pre-diabetes, back pain and hypertension';
+
+/**
+ * Stamp this fictional visit's explicit date on the structured clinical
+ * fields' `_sourceData.encounterDate` — clinical dates never default to the
+ * current clock.
+ */
+const withEncounterDate = (
+  form: FormDefinition,
+  encounterDate: string
+): FormDefinition => ({
+  ...form,
+  pages: form.pages.map((page) => ({
+    ...page,
+    fields: page.fields?.map((section) => ({
+      ...section,
+      fields: section.fields?.map((field) =>
+        (field.fieldType as string) in ENCOUNTER_KINDS_BY_FIELD_TYPE
+          ? ({
+              ...field,
+              _sourceData: {
+                ...(field as { _sourceData?: object })._sourceData,
+                encounterDate,
+              },
+            } as FieldDefinition)
+          : field
+      ),
+    })),
+  })),
+});
+
+const EXAMPLE_VISIT_FORM = withEncounterDate(
+  DEFAULT_ENCOUNTER_FORM,
+  '2026-10-10' // Explicit date for this fictional visit.
+);
 
 const meta: Meta<typeof EncounterVisit> = {
   id: 'encounter-orders-encountervisit',
@@ -65,11 +102,11 @@ The visit reads as a continuous report with small outer insets and no nested sec
 Import from \`@mieweb/ui/esheet\` and load \`@mieweb/ui/styles.css\`. Install matching \`@esheet/core\`, \`@esheet/fields\`, \`@esheet/renderer\` and \`@esheet/builder\` packages (0.0.6-17 or newer; the shared entry re-exports the builder). eSheet supplies its shared CSS automatically. The Kerebron peers documented at \`@mieweb/ui/kerebron\` are required — narrative fields ride the Kerebron \`TextAreaRich\` surface and RichEdit mode uses the full editor: load \`@mieweb/ui/kerebron.css\` and serve \`@kerebron/wasm/assets\` at \`/kerebron-wasm\`. With Kerebron 0.8.12, the host must override the ProseMirror core packages to single versions (\`prosemirror-view\` 1.42.3, \`prosemirror-model\` 1.25.9, \`prosemirror-state\` 1.4.3, \`prosemirror-transform\` 1.10.4); [package-manager setup](https://github.com/mieweb/ui/blob/main/MIGRATION.md#esheet-and-encountervisit) is included in the published package. This repository’s pnpm overrides do not propagate to consumer applications.
 
 \`\`\`tsx
-import { EncounterVisit, DEFAULT_ENCOUNTER_VISIT_DEFINITION } from '@mieweb/ui/esheet';
+import { EncounterVisit, DEFAULT_ENCOUNTER_FORM } from '@mieweb/ui/esheet';
 import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable app bundle
 
 <EncounterVisit
-  definition={{ ...DEFAULT_ENCOUNTER_VISIT_DEFINITION, encounterDate: visit.date }}
+  form={DEFAULT_ENCOUNTER_FORM}
   patientContext="45 yo male with pre-diabetes, back pain and hypertension"
   initialResponses={savedNativeEsheetResponses}
   codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
@@ -79,9 +116,9 @@ import { CodeLookup } from '…/CodeLookup'; // from the host's worker-capable a
 />
 \`\`\`
 
-The host supplies the visit’s explicit \`definition.encounterDate\` (YYYY-MM-DD) or the user enters an assertion date when capturing a condition. Clinical dates never default to the current clock. Provide \`messages={{ labels: { "Save visit": "Guardar visita", "Allergies": "Alergias" } }}\` or \`messages.translate(message, values)\` for built-in interface text, including accessible labels, section controls, clinical dialogs and announcements. English source strings are lookup keys; placeholders such as \`{name}\` retain the actual entered name. Author section titles, prompts and common findings in the application’s language. Catalog display names, codes and entered clinical prose are preserved.
+The visit is configured by a native eSheet \`FormDefinition\` — the only schema (mieweb/ui#772). The removed legacy \`EncounterVisitDefinition\` front matter is no longer read; re-author stored legacy templates as native forms before opening them through \`initialMdy\`. The host supplies the visit’s explicit encounter date (YYYY-MM-DD) on structured clinical fields’ \`_sourceData.encounterDate\`, or the user enters an assertion date when capturing a condition. Clinical dates never default to the current clock. Provide \`messages={{ labels: { "Save visit": "Guardar visita", "Allergies": "Alergias" } }}\` or \`messages.translate(message, values)\` for built-in interface text, including accessible labels, section controls, clinical dialogs and announcements. English source strings are lookup keys; placeholders such as \`{name}\` retain the actual entered name. Author section titles, prompts and common findings in the application’s language. Catalog display names, codes and entered clinical prose are preserved.
 
-Each section has a stable \`id\` and \`kind\`. An \`observations\` section accepts \`narrative: true\` and \`observations: [{ id, label, type?, unit?, code?, options?, required? }]\`. For an exam stored as one observation, choose \`kind: 'narrative'\`. Generated IDs are available through \`getEncounterFieldId\`. Change \`definition.id\` to open another visit; \`initialResponses\` is loaded once per visit. Rebuilding the same definition inline preserves edits. Configuration changes preserve answers; removed fields stay in native responses but are omitted from the current observation export.
+Each section is a native \`section\` field whose id comes from \`getEncounterSectionFieldId\`, with a stable encounter \`kind\` stamped in \`_sourceData\`; \`getEncounterFormSections(form)\` returns the derived per-section views (\`id\`, \`title\`, \`kind\`, \`observations\`, \`findings\`, …). For an exam stored as one observation, use a narrative section. Generated field IDs are available through \`getEncounterFieldId\`. Change \`form.id\` to open another visit; \`initialResponses\` is loaded once per visit. Rebuilding the same form inline preserves edits. Configuration changes preserve answers; removed fields stay in native responses but are omitted from the current observation export.
 
 \`onChange\`, \`ref.getSnapshot()\`, and the MCP tools expose native responses, observations, a plain data note, portable \`mdy\`, and validation errors. Save persists the full MDY; reopen it with \`initialMdy\`, which takes precedence over \`initialResponses\`. \`defaultMode\` accepts \`esheet\`, \`rich\`, \`view\`, or \`export\`. YAML contains the native \`form\` / \`response\`, encounter section configuration, and stable MDY field projections; the Markdown body contains headings, prose, and linked values. Existing YAML comments and host metadata survive edits. Free prose remains separate from coded data, and manual changes to linked display text cannot overwrite clinical answers. BP is one observation with systolic/diastolic components and a stable reading group; repeat readings retain timestamp, position and site.
 
@@ -143,10 +180,7 @@ Export \`ENCOUNTER_VISIT_TOOL_DEFINITIONS\` to the host's tools/list response. R
     },
   },
   args: {
-    definition: {
-      ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
-      encounterDate: '2026-10-10', // Explicit date for this fictional visit.
-    },
+    form: EXAMPLE_VISIT_FORM,
     patientContext: PATIENT_CONTEXT,
     initialResponses: EXAMPLE_ENCOUNTER_VISIT_RESPONSES,
     codeLookup: {
@@ -193,17 +227,36 @@ export const Mobile: Story = {
   ),
 };
 
+/** The exam captured as one narrative section instead of body-system observations. */
+const NARRATIVE_EXAM_SECTION = {
+  id: 'encounter:exam:section',
+  fieldType: 'section',
+  title: 'Physical examination',
+  sectionCollapse: 'expanded',
+  width: 'full',
+  _sourceData: { encounterKind: 'narrative' },
+  fields: [
+    {
+      id: 'encounter:exam:narrative',
+      fieldType: 'encounterNarrative',
+      question: 'Physical examination',
+      width: 'full',
+      _sourceData: { encounterHideLabel: true },
+    },
+  ],
+} as unknown as FieldDefinition;
+
 export const NarrativeExam: Story = {
   args: {
-    definition: {
-      ...DEFAULT_ENCOUNTER_VISIT_DEFINITION,
+    form: {
+      ...EXAMPLE_VISIT_FORM,
       id: 'narrative-exam-visit',
-      encounterDate: '2026-10-10',
-      sections: DEFAULT_ENCOUNTER_VISIT_DEFINITION.sections.map((section) =>
-        section.id === 'exam'
-          ? { id: 'exam', title: 'Physical examination', kind: 'narrative' }
-          : section
-      ),
+      pages: EXAMPLE_VISIT_FORM.pages.map((page) => ({
+        ...page,
+        fields: page.fields?.map((field) =>
+          field.id === 'encounter:exam:section' ? NARRATIVE_EXAM_SECTION : field
+        ),
+      })),
     },
   },
 };
@@ -358,7 +411,7 @@ function McpDemo(args: EncounterVisitProps) {
             value={sectionId}
             onChange={(event) => setSectionId(event.target.value)}
           >
-            {(args.definition ?? DEFAULT_ENCOUNTER_VISIT_DEFINITION).sections
+            {getEncounterFormSections(args.form ?? DEFAULT_ENCOUNTER_FORM)
               .filter((section) =>
                 [
                   'medications',

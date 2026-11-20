@@ -5,9 +5,9 @@ import {
   EncounterMdyEditor,
   type EncounterMdyEditorHandle,
 } from './EncounterMdyEditor';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import type { EncounterVisitDefinition } from './types';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
 // engine, which shares the TextAreaRichProps contract (see the stub).
@@ -138,14 +138,58 @@ describe('EncounterMdyEditor setup failure recovery', () => {
   });
 
   it('allows eSheet and View after an initial failure while retaining recorded answers and codes', async () => {
-    const definition: EncounterVisitDefinition = {
+    const form = {
       id: 'initial-editor-failure',
       title: 'Anonymous visit',
-      sections: [
-        { id: 'hpi', title: 'HPI', kind: 'narrative' },
-        { id: 'vitals', title: 'Vitals', kind: 'vitals' },
+      pages: [
+        {
+          id: 'initial-editor-failure:visit',
+          title: 'Anonymous visit',
+          fields: [
+            {
+              id: 'encounter:hpi:section',
+              fieldType: 'section',
+              title: 'HPI',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'narrative',
+              },
+              fields: [
+                {
+                  id: 'encounter:hpi:narrative',
+                  fieldType: 'encounterNarrative',
+                  question: 'HPI',
+                  width: 'full',
+                  _sourceData: {
+                    encounterHideLabel: true,
+                  },
+                },
+              ],
+            },
+            {
+              id: 'encounter:vitals:section',
+              fieldType: 'section',
+              title: 'Vitals',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              _sourceData: {
+                encounterKind: 'vitals',
+              },
+              fields: [
+                {
+                  id: 'encounter:vitals:observation:value',
+                  fieldType: 'encounterVitals',
+                  question: 'Vitals',
+                  _sourceData: {},
+                  width: 'full',
+                },
+              ],
+            },
+          ],
+        },
       ],
-    };
+    } as unknown as FormDefinition;
     const original = {
       [getEncounterFieldId('hpi')]: { answer: 'Recorded back pain.' },
       [getEncounterFieldId('vitals', 'value')]: {
@@ -158,7 +202,7 @@ describe('EncounterMdyEditor setup failure recovery', () => {
     render(
       <EncounterVisit
         ref={ref}
-        definition={definition}
+        form={form}
         initialResponses={original}
         defaultMode="rich"
       />

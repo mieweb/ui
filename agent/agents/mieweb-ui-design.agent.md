@@ -21,7 +21,9 @@ the default agent for implementation.
 
 Ground every answer in the installed skills — `mieweb-ui-catalog` (inventory,
 entry points, per-family selection guidance and its `selection-guidance.md`
-comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
+comparison tables), `mieweb-ui-icons` (icon aliases and conventions),
+`mieweb-ui-templates` (marketing/landing and report page sections) and
+`mieweb-ui-clinical` (clinical lists, encounter & orders, surveillance):
 
 - **Component selection** — "which component for X?", "Card or Panel?". Read
   the family's policy and "Which one?" table before answering. For any table,
@@ -31,6 +33,19 @@ comparison tables) and `mieweb-ui-icons` (icon aliases and conventions):
 - **Basic usage** — props, variants, sizes, composition slots, import entry
   points.
 - **Icon questions** — which Lucide alias exists, sizing, icon accessibility.
+- **Marketing & landing pages** — which `/templates` section for what,
+  `LandingPage` blocks/presets/`validateLandingPage`, the data-only contract
+  (icon tokens, `components` adapters, Server-Component safety). Read the
+  `mieweb-ui-templates` skill. Report sections with depth belong to the
+  DataVis Agent; interactive tables are still NITRO (Grids Agent).
+- **Clinical components** — which clinical list/header/editor for what
+  (chart vs encounter scope), the data shapes their props demand, CodeLookup
+  wiring. Read the `mieweb-ui-clinical` skill. **UI guidance only**: never
+  advise on FHIR mappings, code selection, or clinical correctness — the
+  components define their own JSON shapes and ship no decision support;
+  defer those questions to the consumer's clinical/EHR owners. Orders
+  grids are NITRO (Grids Agent); `EncounterVisit`/eSheet fields also touch
+  the Grids Agent's eSheet domain.
 - **High-level architecture** — headless modules vs styled components, Tailwind
   preset vs TW4 `@source`, where to find something in the Storybook
   (https://ui.mieweb.org).

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import {
   getRichTextEsheetFieldId,
-  type RichTextEsheetDefinition,
+  withRichTextEsheetParties,
 } from './definition';
 import {
   createRichTextEsheetMdy,
+  getRichTextEsheetMdyFields,
   getRichTextEsheetMdyParties,
   getRichTextEsheetRetiredMdyFields,
   parseRichTextEsheetMdy,
@@ -14,14 +16,57 @@ import {
 } from './mdy';
 import { createRichTextEsheetSnapshot } from './model';
 
-const definition: RichTextEsheetDefinition = {
+const form = {
   id: 'referral-letter',
   title: 'Referral letter',
-  sections: [
-    { id: 'reason', title: 'Reason', required: true },
-    { id: 'closing', title: 'Closing' },
+  pages: [
+    {
+      id: 'referral-letter:document',
+      title: 'Referral letter',
+      fields: [
+        {
+          id: 'richtext:reason:section',
+          fieldType: 'section',
+          title: 'Reason',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:reason:value',
+              fieldType: 'esheetNarrative',
+              question: 'Reason',
+              required: true,
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+        {
+          id: 'richtext:closing:section',
+          fieldType: 'section',
+          title: 'Closing',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          fields: [
+            {
+              id: 'richtext:closing:value',
+              fieldType: 'esheetNarrative',
+              question: 'Closing',
+              width: 'full',
+              _sourceData: {
+                narrativeHideLabel: true,
+                narrativeFindings: [],
+              },
+            },
+          ],
+        },
+      ],
+    },
   ],
-};
+} as unknown as FormDefinition;
 
 const parties = [
   { role: 'Patient', name: 'Jordan Rivera', detail: 'DOB 1979-03-14' },
@@ -31,14 +76,43 @@ const parties = [
 const reasonId = getRichTextEsheetFieldId('reason');
 
 describe('createRichTextEsheetSnapshot', () => {
+  it('serializes in-place form edits in subsequent snapshots', () => {
+    const draft = globalThis.structuredClone(form);
+    // The same input object is reused across calls: nothing may cache views.
+    const input = { form: draft, responses: {} };
+    expect(createRichTextEsheetMdy(input)).toContain('## Reason');
+    (draft.pages[0].fields![0] as { title?: string }).title = 'Chief complaint';
+    expect(createRichTextEsheetMdy(input)).toContain('## Chief complaint');
+    // Projection labels come from the live section views, never a cache.
+    const labels = getRichTextEsheetMdyFields(input).map(
+      (field) => field.label
+    );
+    expect(labels).toContain('Chief complaint');
+    expect(labels).not.toContain('Reason');
+  });
+
+  it('strips stamped party macros from the persisted form', () => {
+    // Pre-#772 native-only saves stamped party macros into the form itself.
+    const stamped = withRichTextEsheetParties(form, parties);
+    const cleared = createRichTextEsheetSnapshot(stamped, {}, []);
+    expect(cleared.mdy).not.toContain('Jordan Rivera');
+    const replaced = createRichTextEsheetSnapshot(stamped, {}, [
+      { role: 'Patient', name: 'Avery Lane' },
+    ]);
+    // The replacement lives in the parties front matter, never in the form.
+    expect(replaced.mdy).not.toContain('Jordan Rivera');
+    expect(replaced.mdy).toContain('name: Avery Lane');
+    expect(replaced.mdy.split('Avery Lane')).toHaveLength(2);
+  });
+
   it('derives progress, required errors and portable MDY with parties', () => {
-    const empty = createRichTextEsheetSnapshot(definition, {}, parties);
+    const empty = createRichTextEsheetSnapshot(form, {}, parties);
     expect(empty.documentedSections).toEqual([]);
     expect(empty.errors).toEqual([
       { sectionId: 'reason', message: 'Reason is required.' },
     ]);
     const filled = createRichTextEsheetSnapshot(
-      definition,
+      form,
       { [reasonId]: { answer: 'Routine evaluation, please.' } },
       parties
     );
@@ -53,18 +127,35 @@ describe('createRichTextEsheetSnapshot', () => {
   });
 
   it('counts native selection responses as documented content', () => {
-    const selectionDefinition: RichTextEsheetDefinition = {
-      ...definition,
-      sections: [
+    const selectionForm = {
+      id: 'referral-letter',
+      title: 'Referral letter',
+      pages: [
         {
-          id: 'reason',
-          title: 'Reason',
-          required: true,
-          fieldType: 'customChoice',
+          id: 'referral-letter:document',
+          title: 'Referral letter',
+          fields: [
+            {
+              id: 'richtext:reason:section',
+              fieldType: 'section',
+              title: 'Reason',
+              sectionCollapse: 'expanded',
+              width: 'full',
+              fields: [
+                {
+                  id: 'richtext:reason:value',
+                  fieldType: 'customChoice',
+                  question: 'Reason',
+                  required: true,
+                  width: 'full',
+                },
+              ],
+            },
+          ],
         },
       ],
-    };
-    const snapshot = createRichTextEsheetSnapshot(selectionDefinition, {
+    } as unknown as FormDefinition;
+    const snapshot = createRichTextEsheetSnapshot(selectionForm, {
       [reasonId]: {
         selected: [{ label: 'Urgency', value: 'Routine' }],
       } as never,
@@ -76,7 +167,7 @@ describe('createRichTextEsheetSnapshot', () => {
 
   it('keeps authored plain text literal in the projected display', () => {
     const snapshot = createRichTextEsheetSnapshot(
-      definition,
+      form,
       {
         [reasonId]: {
           answer: 'Use <input> here & stay *plain*\nSecond paragraph',
@@ -92,19 +183,19 @@ describe('createRichTextEsheetSnapshot', () => {
 
 describe('RichTextEsheet MDY round trip', () => {
   const input = {
-    definition,
+    form,
     responses: {
       [reasonId]: { answer: 'Routine evaluation, please.' },
     },
     parties,
   };
 
-  it('recovers the definition, responses and parties from the document', () => {
+  it('recovers the form, responses and parties from the document', () => {
     const parsed = parseRichTextEsheetMdy(createRichTextEsheetMdy(input));
     expect(
       parsed.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')
     ).toEqual([]);
-    expect(parsed.definition).toEqual(definition);
+    expect(parsed.form).toEqual(form);
     expect(parsed.response?.[reasonId]?.answer).toBe(
       'Routine evaluation, please.'
     );
@@ -134,10 +225,38 @@ describe('RichTextEsheet MDY round trip', () => {
     expect(updated).toContain('Authored note stays.');
   });
 
+  it('scrubs the removed legacy richTextEsheet key on re-save', () => {
+    // A transition-era document may carry the pre-#772 schema key alongside
+    // the native form; the engine otherwise preserves imported front matter.
+    const imported = createRichTextEsheetMdy(input).replace(
+      '---\n',
+      '---\nrichTextEsheet:\n  id: letter\n  title: Legacy\n  sections: []\n'
+    );
+    expect(imported).toContain('richTextEsheet:');
+    const resaved = createRichTextEsheetMdy(input, undefined, imported);
+    expect(resaved).not.toContain('richTextEsheet');
+    expect(parseRichTextEsheetMdy(resaved).form).toEqual(form);
+  });
+
+  it('drops removed field rules instead of resurrecting them on re-save', () => {
+    const ruledForm = globalThis.structuredClone(form);
+    const section = ruledForm.pages[0].fields![0] as unknown as {
+      fields: Record<string, unknown>[];
+    };
+    section.fields[0].rules = [
+      { effect: 'show', condition: { field: 'richtext:reason:value' } },
+    ];
+    const imported = createRichTextEsheetMdy({ ...input, form: ruledForm });
+    expect(imported).toContain('rules:');
+    const resaved = createRichTextEsheetMdy(input, undefined, imported);
+    expect(resaved).not.toContain('rules:');
+    expect(parseRichTextEsheetMdy(resaved).form).toEqual(form);
+  });
+
   it('carries an imported document through the reserved response', () => {
     const imported = createRichTextEsheetMdy(input);
     const snapshot = createRichTextEsheetSnapshot(
-      definition,
+      form,
       {
         ...input.responses,
         [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]:
@@ -157,17 +276,13 @@ describe('RichTextEsheet MDY round trip', () => {
         richTextEsheetDocumentResponse(imported),
     };
     // Every imported link still has its section: nothing is retired.
-    expect(
-      getRichTextEsheetRetiredMdyFields({ definition, responses })
-    ).toEqual([]);
+    expect(getRichTextEsheetRetiredMdyFields({ form, responses })).toEqual([]);
     // A same-id definition that drops a section leaves its imported link
     // behind; editors use this projection to normalize and protect it.
     const retired = getRichTextEsheetRetiredMdyFields({
-      definition: {
-        ...definition,
-        sections: definition.sections.filter(
-          (section) => section.id !== 'reason'
-        ),
+      form: {
+        ...form,
+        pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(1) }],
       },
       responses,
     });
@@ -184,16 +299,14 @@ describe('RichTextEsheet MDY round trip', () => {
     // to index retired links from; they are found in the prose itself.
     const body = parseRichTextEsheetMdy(createRichTextEsheetMdy(input)).body;
     const narrowed = {
-      ...definition,
-      sections: definition.sections.filter(
-        (section) => section.id !== 'reason'
-      ),
+      ...form,
+      pages: [{ ...form.pages[0], fields: form.pages[0].fields!.slice(1) }],
     };
     const responses = {
       [RICHTEXT_ESHEET_DOCUMENT_FIELD_ID]: { answer: body },
     };
     const retired = getRichTextEsheetRetiredMdyFields({
-      definition: narrowed,
+      form: narrowed,
       responses,
     });
     expect(retired).toHaveLength(1);
