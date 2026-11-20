@@ -202,6 +202,15 @@ describe('ReorderableList', () => {
     );
   });
 
+  it('blocks panning on the grip only when it is the drag handle', () => {
+    const grip = () =>
+      document.querySelector('[data-slot="reorderable-list-handle"]');
+    const { rerender } = render(<Harness handle />);
+    expect(grip()).toHaveClass('touch-none');
+    rerender(<Harness />);
+    expect(grip()).not.toHaveClass('touch-none');
+  });
+
   it('takes translated labels', async () => {
     render(
       <Harness
@@ -320,6 +329,14 @@ describe('ReorderableList', () => {
       render(<Harness spy={spy} />);
       drag(rows()[0], 10 + ROW * 2);
       expect(spy).toHaveBeenLastCalledWith(['t2', 't3', 't1', 't4', 't5']);
+    });
+
+    it('announces a pointer drop like a keyboard move', async () => {
+      render(<Harness />);
+      drag(rows()[0], 10 + ROW * 2);
+      expect(
+        await screen.findByText('Moved to position 3 of 5')
+      ).toBeInTheDocument();
     });
 
     it('marks the dragged row and drops nothing when cancelled', () => {
