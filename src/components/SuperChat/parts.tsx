@@ -103,7 +103,10 @@ export function matchMentionTokens(
   entries: { id: string; token: string }[]
 ): string[] {
   const found = new Set<string>();
-  const taken: [number, number][] = [];
+  // Indexed, so each match is checked against its own span only, not every
+  // earlier match: exact spans already taken, and every position they cover.
+  const takenSpans = new Set<string>();
+  const occupied = new Uint8Array(text.length);
   const longestFirst = [...entries].sort(
     (a, b) => b.token.length - a.token.length
   );
@@ -117,9 +120,12 @@ export function matchMentionTokens(
       const end = start + match[0].length;
       // A shorter token inside a longer one's match is rejected, but the same
       // span counts for every entry that inserts that token (two "Alex"es).
-      const sameSpan = taken.some(([s, e]) => s === start && e === end);
-      if (!sameSpan && taken.some(([s, e]) => start < e && s < end)) continue;
-      if (!sameSpan) taken.push([start, end]);
+      const span = `${start}:${end}`;
+      if (!takenSpans.has(span)) {
+        if (occupied.subarray(start, end).includes(1)) continue;
+        takenSpans.add(span);
+        occupied.fill(1, start, end);
+      }
       found.add(id);
     }
   }
