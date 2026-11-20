@@ -689,7 +689,17 @@ function Select(props: SelectProps) {
                   ? 'manual'
                   : undefined
               }
-              style={{ inset: 'auto', margin: 0, padding: 0, ...dropdownStyle }}
+              style={{
+                // Keep unused edges explicitly auto; clearing an edge would
+                // restore the browser's default popover inset of 0.
+                top: 'auto',
+                right: 'auto',
+                bottom: 'auto',
+                left: 'auto',
+                margin: 0,
+                padding: 0,
+                ...dropdownStyle,
+              }}
               className={cn(
                 'border-border bg-card text-card-foreground rounded-lg border shadow-lg',
                 'flex flex-col overflow-hidden',
