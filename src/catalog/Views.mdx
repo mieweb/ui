@@ -26,14 +26,15 @@ Most pages want `ViewSet` and nothing else from this table: it renders the switc
 views, and leaves you the slots. Reach for an individual view when a page draws exactly one
 layout forever.
 
-| Component                                            | Use it when                                                                                      | Not when                                                                                                |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| [ViewSwitcher](?path=/docs/views-viewswitcher--docs) | Users pick between the layouts below; persisted per user or driven by a URL param                | Two unrelated pages, not two views of one collection — [Tabs](?path=/docs/navigation-tabs--docs)        |
-| [ListView](?path=/docs/views-listview--docs)         | A scannable vertical list, optionally grouped by status or group, with a row slot you own        | Rows need sorting, filtering, paging or export — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs) |
-| [BoardView](?path=/docs/views-boardview--docs)       | Items move between named stages and the stage is the primary fact                                | Stages are fixed and items never move — [ListView](?path=/docs/views-listview--docs) grouped by status  |
-| [CalendarView](?path=/docs/views-calendarview--docs) | Items land on, or span, calendar days and the month grid is the point                            | Timed appointments in day/week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs) |
-| [GanttView](?path=/docs/views-ganttview--docs)       | Items have a start and an end and overlap matters across a date range — including as a roadmap   | One record's progress through steps — [Timeline](?path=/docs/data-display-timeline--docs)               |
-| [ViewSet](?path=/docs/views-viewset--docs)           | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots | You render exactly one layout forever — use that view directly                                          |
+| Component                                                  | Use it when                                                                                                                       | Not when                                                                                                                                      |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ViewSwitcher](?path=/docs/views-viewswitcher--docs)       | Users pick between the layouts below; persisted per user or driven by a URL param                                                 | Two unrelated pages, not two views of one collection — [Tabs](?path=/docs/navigation-tabs--docs)                                              |
+| [ListView](?path=/docs/views-listview--docs)               | A scannable vertical list, optionally grouped by status or group, with a row slot you own                                         | Rows need sorting, filtering, paging or export — [DataVis NITRO](?path=/docs/grids-datavis-nitro--docs)                                       |
+| [BoardView](?path=/docs/views-boardview--docs)             | Items move between named stages and the stage is the primary fact                                                                 | Stages are fixed and items never move — [ListView](?path=/docs/views-listview--docs) grouped by status                                        |
+| [CalendarView](?path=/docs/views-calendarview--docs)       | Items land on, or span, calendar days and the month grid is the point                                                             | Timed appointments in day/week slots — [ScheduleCalendar](?path=/docs/date-time-schedulecalendar--docs)                                       |
+| [GanttView](?path=/docs/views-ganttview--docs)             | Items have a start and an end and overlap matters across a date range — including as a roadmap                                    | One record's progress through steps — [Timeline](?path=/docs/data-display-timeline--docs)                                                     |
+| [ViewSet](?path=/docs/views-viewset--docs)                 | A whole page: switcher, the enabled views, and shared filter / overview / detail / toolbar slots                                  | You render exactly one layout forever — use that view directly                                                                                |
+| [ReorderableList](?path=/docs/views-reorderablelist--docs) | A short list whose order the user chooses (priorities, a running order); drag, Alt+↑/↓ and move buttons; reports `onReorder(ids)` | Rows have stages, groups or selection — `ListView`; users sort or filter columns — DataVis NITRO; dashboard widgets — `CustomizableDashboard` |
 
 **A roadmap is not its own component.** It is
 [GanttView](?path=/docs/views-ganttview--docs) at `cadence="month"` or `"quarter"` with
@@ -44,6 +45,13 @@ this family exists to remove. The `roadmap` view id remains, so a switcher can s
 compliance calendar on a marketing page — reach for
 [YearTimeline](?path=/docs/data-display-yeartimeline--docs) instead: it is
 authored a year at a time rather than driven from records through accessors.
+
+**A hand-made order is a list, not a view.**
+[ReorderableList](?path=/docs/views-reorderablelist--docs) takes `items` and reports
+`onReorder(ids)` like the views, but only needs `getId` and a `renderItem` slot, since the
+order the user chose is the whole point and no accessor decides it. A `storageKey` keeps that
+order in the browser; to keep it on a server, save it in `onReorder`. `ViewSwitcher` does not
+offer it; a page that wants a manual order alongside the views renders it directly.
 
 **Tables are not a view here.** A tabular layout of the same collection is
 `DataVisNitroGrid` (see [Grids](?path=/docs/components-grids-overview--docs)); `ViewSet`
