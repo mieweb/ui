@@ -176,7 +176,7 @@ export const InText: Story = {
       </p>
       <ul
         dir="ltr"
-        className="bg-muted text-muted-foreground rounded p-2 font-mono text-xs"
+        className="bg-muted text-foreground rounded p-2 font-mono text-xs"
       >
         {referencesIn(savedPost, sampleTriggers).map(({ kind, id }) => (
           <li key={`${kind}:${id}`}>
