@@ -147,23 +147,36 @@ function mergeSanitizeSchema(
   return out;
 }
 
+/**
+ * The default Markdown link: themed, and opened in a new tab since message
+ * text is external. Exported so a plugin that overrides `a` for some links
+ * (references) renders every other link the same way.
+ */
+export function MarkdownLink({
+  node: _node,
+  children,
+  ...props
+}: React.ComponentProps<'a'> & { node?: unknown }) {
+  return (
+    <a
+      {...props}
+      className={cn(
+        'text-primary-800 hover:text-primary-900 dark:text-primary-300 underline underline-offset-2',
+        props.className
+      )}
+      // External model output: open links safely.
+      target={props.target ?? '_blank'}
+      rel={props.rel ?? 'noopener noreferrer'}
+    >
+      {children}
+    </a>
+  );
+}
+
 /** Default node components, themed with `--mieweb-*` tokens via Tailwind. */
 function baseComponents(): Components {
   return {
-    a: ({ node: _node, children, ...props }) => (
-      <a
-        {...props}
-        className={cn(
-          'text-primary-800 hover:text-primary-900 dark:text-primary-300 underline underline-offset-2',
-          props.className
-        )}
-        // External model output: open links safely.
-        target={props.target ?? '_blank'}
-        rel={props.rel ?? 'noopener noreferrer'}
-      >
-        {children}
-      </a>
-    ),
+    a: MarkdownLink,
     pre: ({ node: _node, ...props }) => (
       <pre
         {...props}
