@@ -58,6 +58,11 @@ The host owns the records: what a kind means, how candidates are found, and chec
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'composes with',
+          target: 'editors-richeditor',
+          why: 'RichEditor `triggers` let people insert references while writing; ReferenceChip shows them elsewhere.',
+        },
+        {
           type: 'uses',
           target: 'data-display-badge',
           why: 'Borrows badgeVariants for its look; Badge is the chip for a status or tag with no record behind it.',

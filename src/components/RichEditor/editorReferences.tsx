@@ -1,0 +1,524 @@
+'use client';
+
+import * as React from 'react';
+import {
+  Extension,
+  Node as EditorNode,
+  type CoreEditor,
+  type EditorKit,
+} from '@kerebron/editor';
+import type { NodeSpec, Node as PmNode } from 'prosemirror-model';
+import {
+  Plugin,
+  TextSelection,
+  type EditorState,
+  type Transaction,
+} from 'prosemirror-state';
+import type { EditorView } from 'prosemirror-view';
+
+import { badgeVariants } from '../Badge/Badge';
+import type { MentionMenuState } from '../Messaging/useMentionAutocomplete';
+import {
+  matchReference,
+  type ReferenceOption,
+  type ReferenceTrigger,
+} from '../ReferenceChip/references';
+import { cn } from '../../utils/cn';
+
+/** Name of the editor node a picked reference is held in. */
+export const REFERENCE_NODE = 'reference';
+
+// The chip's look in the editor — ReferenceChip's, applied through toDOM.
+const CHIP_CLASS = cn(
+  badgeVariants({ variant: 'secondary', size: 'sm' }),
+  'align-baseline no-underline'
+);
+
+/**
+ * A picked reference: one atomic inline node, so the caret steps over it and
+ * Backspace removes it whole. Drawn as a link chip; read back from one when
+ * pasted between editors. `leafText` is its label, for anything that reads
+ * the editor as plain text.
+ */
+class ReferenceNode extends EditorNode {
+  override name = REFERENCE_NODE;
+  override getNodeSpec(): NodeSpec {
+    return {
+      inline: true,
+      group: 'inline',
+      atom: true,
+      selectable: true,
+      draggable: false,
+      attrs: {
+        kind: { default: '' },
+        id: { default: '' },
+        label: { default: '' },
+        href: { default: '' },
+      },
+      leafText: (node) => node.attrs.label,
+      toDOM: (node) => [
+        'a',
+        {
+          href: node.attrs.href,
+          class: CHIP_CLASS,
+          dir: 'auto',
+          'data-slot': 'reference-chip',
+          'data-reference-kind': node.attrs.kind,
+          'data-reference-id': node.attrs.id,
+        },
+        node.attrs.label,
+      ],
+      parseDOM: [
+        {
+          tag: 'a[data-reference-kind][data-reference-id]',
+          getAttrs: (dom) => ({
+            kind: dom.getAttribute('data-reference-kind'),
+            id: dom.getAttribute('data-reference-id'),
+            label: dom.textContent ?? '',
+            href: dom.getAttribute('href') ?? '',
+          }),
+        },
+      ],
+    };
+  }
+}
+
+type MarkdownHook = (
+  state: EditorState,
+  dispatch?: (tr: Transaction) => void
+) => boolean;
+
+/**
+ * After Markdown is read: every link a trigger claims becomes a reference
+ * node (its label the link's text). Other links stay links.
+ */
+export function linksToReferences(
+  triggers: () => readonly ReferenceTrigger[]
+): MarkdownHook {
+  return (state, dispatch) => {
+    const { schema, doc } = state;
+    const type = schema.nodes[REFERENCE_NODE];
+    const link = schema.marks.link;
+    if (!type || !link) return true;
+    const spans: { from: number; to: number; href: string; label: string }[] =
+      [];
+    doc.descendants((node, pos) => {
+      if (!node.isText) return;
+      const mark = node.marks.find((m) => m.type === link);
+      if (!mark) return;
+      const last = spans[spans.length - 1];
+      // One link split over several text nodes (bold inside it) is one span.
+      if (last && last.to === pos && last.href === mark.attrs.href) {
+        last.to = pos + node.nodeSize;
+        last.label += node.text;
+        return;
+      }
+      spans.push({
+        from: pos,
+        to: pos + node.nodeSize,
+        href: mark.attrs.href,
+        label: node.text ?? '',
+      });
+    });
+    const tr = state.tr;
+    for (const span of spans.reverse()) {
+      const match = matchReference(span.href, triggers());
+      if (!match) continue;
+      tr.replaceWith(
+        span.from,
+        span.to,
+        type.create({ ...match, label: span.label, href: span.href })
+      );
+    }
+    if (tr.docChanged) dispatch?.(tr);
+    return true;
+  };
+}
+
+/** Before Markdown is written: every reference node becomes its link again. */
+export const referencesToLinks: MarkdownHook = (state, dispatch) => {
+  const { schema, doc } = state;
+  const type = schema.nodes[REFERENCE_NODE];
+  const link = schema.marks.link;
+  if (!type || !link) return true;
+  const found: { pos: number; node: PmNode }[] = [];
+  doc.descendants((node, pos) => {
+    if (node.type === type) found.push({ pos, node });
+  });
+  const tr = state.tr;
+  for (const { pos, node } of found.reverse()) {
+    const { label, href } = node.attrs;
+    tr.replaceWith(
+      pos,
+      pos + node.nodeSize,
+      schema.text(label || href, [link.create({ href })])
+    );
+  }
+  if (tr.docChanged) dispatch?.(tr);
+  return true;
+};
+
+/** Adds `hook` to the Markdown converter's hooks of `type`, after any set. */
+function addMarkdownHook(
+  editor: CoreEditor,
+  type: 'md2pm.post' | 'pm2md.pre',
+  hook: MarkdownHook
+) {
+  const run = editor.run;
+  if (!run.getMarkdownHooks || !run.setMarkdownHooks) return;
+  let existing: MarkdownHook[] = [];
+  run.getMarkdownHooks(type, (hooks?: MarkdownHook[]) => {
+    existing = hooks ?? [];
+  });
+  run.setMarkdownHooks(type, [...existing, hook]);
+}
+
+/** The trigger query before the caret: which trigger, what's typed, and its range (trigger character included). */
+export interface ReferenceQuery {
+  trigger: ReferenceTrigger;
+  query: string;
+  from: number;
+  to: number;
+}
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+
+/**
+ * The trigger query immediately before the caret, if any: a trigger
+ * character at the start of the text or after whitespace, then no spaces.
+ * So `ann@example.com` doesn't open a list. Null when text is selected.
+ */
+export function referenceQueryAt(
+  state: EditorState,
+  triggers: readonly ReferenceTrigger[]
+): ReferenceQuery | null {
+  const { selection } = state;
+  if (!triggers.length || !selection.empty) return null;
+  const $from = selection.$from;
+  if (!$from.parent.isTextblock) return null;
+  const before = $from.parent.textBetween(
+    0,
+    $from.parentOffset,
+    undefined,
+    '\ufffc'
+  );
+  const chars = triggers.map((t) => escapeRegExp(t.char)).join('');
+  const match = new RegExp(`(^|\\s)([${chars}])([^\\s${chars}]*)$`).exec(
+    before
+  );
+  if (!match) return null;
+  const trigger = triggers.find((t) => t.char === match[2]);
+  if (!trigger) return null;
+  const query = match[3];
+  return { trigger, query, from: $from.pos - query.length - 1, to: $from.pos };
+}
+
+/**
+ * Replaces the query `range` with a reference to `option` and a space, caret
+ * after them — one transaction, so one undo puts the typed query back.
+ */
+export function insertReference(
+  state: EditorState,
+  range: ReferenceQuery,
+  option: ReferenceOption
+): Transaction {
+  const { schema } = state;
+  const node = schema.nodes[REFERENCE_NODE].create({
+    kind: option.kind,
+    id: option.id,
+    label: option.label,
+    href: range.trigger.toHref(option.id),
+  });
+  const tr = state.tr.replaceWith(range.from, range.to, [
+    node,
+    schema.text(' '),
+  ]);
+  const caret = range.from + node.nodeSize + 1;
+  return tr.setSelection(TextSelection.create(tr.doc, caret)).scrollIntoView();
+}
+
+/**
+ * Backspace or Delete beside a chip removes it in one transaction. Left to
+ * the browser, deleting a non-editable inline element is a DOM edit
+ * ProseMirror reads back, which can drop the space after it.
+ */
+export function deleteAdjacentReference(
+  state: EditorState,
+  direction: 'backward' | 'forward'
+): Transaction | null {
+  const { selection } = state;
+  if (!selection.empty) return null;
+  const $pos = selection.$from;
+  const node = direction === 'backward' ? $pos.nodeBefore : $pos.nodeAfter;
+  if (node?.type.name !== REFERENCE_NODE) return null;
+  const from = direction === 'backward' ? $pos.pos - node.nodeSize : $pos.pos;
+  return state.tr.delete(from, from + node.nodeSize).scrollIntoView();
+}
+
+interface ReferenceHandlers {
+  update: (view: EditorView) => void;
+  keyDown: (view: EditorView, event: KeyboardEvent) => boolean;
+  blur: () => void;
+}
+
+/** Wires the editor's caret moves, keys and the Markdown hooks to {@link useEditorReferences}. */
+class ReferencesExtension extends Extension {
+  override name = 'references';
+  constructor(
+    private readonly handlers: { current: ReferenceHandlers },
+    private readonly triggers: () => readonly ReferenceTrigger[]
+  ) {
+    super({});
+  }
+  override created() {
+    const editor = this.editor as CoreEditor;
+    // The hooks are set through a command, which needs the view; 'ready'
+    // fires once it and the plugins exist, before `create` returns.
+    editor.addEventListener(
+      'ready',
+      () => {
+        addMarkdownHook(editor, 'md2pm.post', linksToReferences(this.triggers));
+        addMarkdownHook(editor, 'pm2md.pre', referencesToLinks);
+      },
+      { once: true }
+    );
+  }
+  override getProseMirrorPlugins(): Plugin[] {
+    const handlers = this.handlers;
+    return [
+      new Plugin({
+        props: {
+          handleKeyDown: (view, event) => {
+            if (handlers.current.keyDown(view, event)) return true;
+            if (event.key !== 'Backspace' && event.key !== 'Delete')
+              return false;
+            const tr = deleteAdjacentReference(
+              view.state,
+              event.key === 'Backspace' ? 'backward' : 'forward'
+            );
+            if (!tr) return false;
+            view.dispatch(tr);
+            return true;
+          },
+          handleDOMEvents: {
+            blur: () => {
+              handlers.current.blur();
+              return false;
+            },
+          },
+        },
+        view: (view) => {
+          handlers.current.update(view);
+          return { update: (next) => handlers.current.update(next) };
+        },
+      }),
+    ];
+  }
+}
+
+const NO_HANDLERS: ReferenceHandlers = {
+  update: () => undefined,
+  keyDown: () => false,
+  blur: () => undefined,
+};
+
+/**
+ * The editor kit for references: the chip node and the Markdown hooks that
+ * turn claimed links into chips on load and back into links on save.
+ * {@link useEditorReferences} adds the suggestion list on top.
+ */
+export function createReferencesKit(
+  triggers: () => readonly ReferenceTrigger[],
+  handlers: { current: ReferenceHandlers } = { current: NO_HANDLERS }
+): EditorKit {
+  return {
+    getExtensions: () => [
+      new ReferenceNode(),
+      new ReferencesExtension(handlers, triggers),
+    ],
+  };
+}
+
+/** Room the list needs below the caret before it opens above it instead. */
+const MENU_MAX_HEIGHT = 224;
+/** Gap kept between the list and the viewport's edge. */
+const VIEWPORT_MARGIN = 8;
+
+/**
+ * Inline references for a Kerebron editor: the kit to install, and the list
+ * state {@link MentionMenu} renders. Typing a trigger's character searches
+ * its records; arrows move, Enter or Tab inserts a chip, Escape closes the
+ * list for that spot. `triggers` is read on every use, so its search
+ * functions may change between renders.
+ */
+export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
+  kit: EditorKit;
+  menu: MentionMenuState<ReferenceOption>;
+  /** The open list's trigger, for its accessible name. */
+  activeTrigger: ReferenceTrigger | null;
+} {
+  const [range, setRange] = React.useState<ReferenceQuery | null>(null);
+  const [results, setResults] = React.useState<ReferenceOption[]>([]);
+  const [highlight, setHighlight] = React.useState(0);
+  const [anchor, setAnchor] = React.useState<{
+    left: number;
+    top: number;
+    bottom: number;
+  } | null>(null);
+  // The query start Escape closed the list at; it stays closed there.
+  const dismissedAt = React.useRef<number | null>(null);
+  const viewRef = React.useRef<EditorView | null>(null);
+  const floatingRef = React.useRef<HTMLUListElement | null>(null);
+  const triggersRef = React.useRef(triggers);
+  triggersRef.current = triggers;
+  const listId = React.useId();
+  const optionId = React.useCallback(
+    (index: number) => `${listId}-option-${index}`,
+    [listId]
+  );
+
+  // Search as the query changes; only the latest search's answer is shown.
+  const searchSeq = React.useRef(0);
+  const kind = range?.trigger.kind;
+  const query = range?.query;
+  React.useEffect(() => {
+    const seq = ++searchSeq.current;
+    const trigger = triggersRef.current.find((t) => t.kind === kind);
+    if (!trigger || query === undefined) {
+      setResults([]);
+      return;
+    }
+    Promise.resolve()
+      .then(() => trigger.search(query))
+      .then(
+        (found) => {
+          if (seq === searchSeq.current) setResults(found);
+        },
+        () => {
+          if (seq === searchSeq.current) setResults([]);
+        }
+      );
+  }, [kind, query]);
+
+  const menuOpen = range !== null && results.length > 0 && !!anchor;
+  const clamped = menuOpen ? Math.min(highlight, results.length - 1) : -1;
+
+  const insert = (option: ReferenceOption) => {
+    const view = viewRef.current;
+    if (!view || !range) return;
+    view.dispatch(insertReference(view.state, range, option));
+    setRange(null);
+    view.focus();
+  };
+
+  // Read through a ref so the plugin, created once with the editor, always
+  // sees this render's triggers, results and range.
+  const handlers = React.useRef<ReferenceHandlers>(NO_HANDLERS);
+  handlers.current = {
+    update: (view) => {
+      viewRef.current = view;
+      let next = view.hasFocus()
+        ? referenceQueryAt(view.state, triggersRef.current)
+        : null;
+      if (next?.from !== dismissedAt.current) dismissedAt.current = null;
+      else next = null;
+      setRange((prev) =>
+        prev?.from === next?.from &&
+        prev?.query === next?.query &&
+        prev?.trigger === next?.trigger
+          ? prev
+          : next
+      );
+      if (!next) return;
+      const { left, top, bottom } = view.coordsAtPos(next.from);
+      setAnchor({ left, top, bottom });
+    },
+    keyDown: (_view, event) => {
+      if (!menuOpen || !range) return false;
+      const count = results.length;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        setHighlight((h) => (Math.min(h, count - 1) + step + count) % count);
+        return true;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        insert(results[clamped]);
+        return true;
+      }
+      if (event.key === 'Escape') {
+        dismissedAt.current = range.from;
+        setRange(null);
+        return true;
+      }
+      return false;
+    },
+    blur: () => setRange(null),
+  };
+
+  // A new query starts at the first match.
+  React.useEffect(() => setHighlight(0), [range?.from, range?.query]);
+
+  // The editor is the combobox; point it at the open list for screen readers.
+  React.useEffect(() => {
+    const dom = viewRef.current?.dom;
+    if (!dom || !triggersRef.current.length) return;
+    dom.setAttribute('aria-autocomplete', 'list');
+    if (menuOpen) {
+      dom.setAttribute('aria-controls', listId);
+      dom.setAttribute('aria-activedescendant', optionId(clamped));
+    } else {
+      dom.removeAttribute('aria-controls');
+      dom.removeAttribute('aria-activedescendant');
+    }
+  }, [menuOpen, clamped, listId, optionId]);
+
+  // Measured once the list renders, before paint, so it never shows clipped.
+  const [menuWidth, setMenuWidth] = React.useState(0);
+  React.useLayoutEffect(() => {
+    if (menuOpen && floatingRef.current) {
+      setMenuWidth(floatingRef.current.offsetWidth);
+    }
+  }, [menuOpen, results]);
+
+  const kit = React.useMemo(
+    () => createReferencesKit(() => triggersRef.current, handlers),
+    []
+  );
+
+  // Below the caret, or above it where the viewport has no room below; kept
+  // inside the viewport sideways (a caret near the end of a line).
+  const below =
+    !anchor ||
+    typeof window === 'undefined' ||
+    anchor.bottom + MENU_MAX_HEIGHT + VIEWPORT_MARGIN <= window.innerHeight;
+  const menuStyle: React.CSSProperties = anchor
+    ? {
+        position: 'fixed',
+        zIndex: 50,
+        left: Math.max(
+          VIEWPORT_MARGIN,
+          Math.min(anchor.left, window.innerWidth - menuWidth - VIEWPORT_MARGIN)
+        ),
+        maxHeight: MENU_MAX_HEIGHT,
+        ...(below
+          ? { top: anchor.bottom + 4 }
+          : { bottom: window.innerHeight - anchor.top + 4 }),
+      }
+    : {};
+
+  return {
+    kit,
+    activeTrigger: range?.trigger ?? null,
+    menu: {
+      menuOpen,
+      suggestions: results,
+      highlight: clamped,
+      listId,
+      optionId,
+      floatingRef,
+      menuStyle,
+      insert,
+      setHighlight,
+    },
+  };
+}
