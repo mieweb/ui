@@ -24,3 +24,9 @@ packages/codify/
 .adaptive-codegraph/
 .fastembed_cache/
 .vscode/
+
+# weighbridge (package weight gate) local outputs
+weighbridge-report.json
+weighbridge-baseline.json
+weighbridge-summary.md
+weigh-ins.jsonl

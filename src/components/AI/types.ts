@@ -160,7 +160,8 @@ export interface AIMessageContent {
     | 'image'
     | 'file'
     | 'audio'
-    | 'video';
+    | 'video'
+    | 'custom';
   /** Text content (also used as the label for `audio` and `video` blocks) */
   text?: string;
   /** Tool call reference */
@@ -185,6 +186,11 @@ export interface AIMessageContent {
   videoUrl?: string;
   /** Duration in seconds for `audio` blocks */
   duration?: number;
+  /**
+   * Host-defined payload for `custom` blocks, passed as-is to
+   * `renderCustomContent`. The library never renders or inspects it.
+   */
+  data?: unknown;
 }
 
 /**
@@ -217,7 +223,7 @@ export interface AIMessage {
 // Render Customization Types
 // ============================================================================
 
-/** Context passed to a custom text content renderer. */
+/** Context passed to `renderTextContent` and `renderCustomContent`. */
 export interface AITextRenderContext {
   /** id of the parent message (useful as a render cache key) */
   messageId: string;
@@ -233,6 +239,16 @@ export interface AITextRenderContext {
  */
 export type AIRenderTextContent = (
   text: string,
+  ctx: AITextRenderContext
+) => React.ReactNode;
+
+/**
+ * Render-prop for `custom` content blocks. Receives the block's `data` so the
+ * host can render a typed payload without encoding it as text. The result is
+ * mounted without the `prose` wrapper used for text.
+ */
+export type AIRenderCustomContent = (
+  data: unknown,
   ctx: AITextRenderContext
 ) => React.ReactNode;
 

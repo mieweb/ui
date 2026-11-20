@@ -1,7 +1,9 @@
 # Evals — Component selection / catalog
 
 Primary agent: **MIE UI Design Agent** (owns selection via the
-`mieweb-ui-catalog` skill and its selection guidance). See
+`mieweb-ui-catalog` skill and its selection guidance, marketing/landing
+pages via the `mieweb-ui-templates` skill, and clinical components via the
+`mieweb-ui-clinical` skill). See
 [README.md](./README.md) for format and scoring.
 
 ### SEL-1 — Table or NITRO
@@ -112,8 +114,10 @@ Primary agent: **MIE UI Design Agent** (owns selection via the
 - **Expect:** Pass both `onOpen` (client-side routing on left-click) and
   `getHref` (real anchors so middle-click/copy-link work); `onOpen` alone
   degrades links to buttons.
-- **Agent:** MIE UI Install Agent (posed to the orchestrator — correct
-  behavior is delegation via its headless-wiring routing row)
+- **Agent:** MIE UI Views Agent (posed to the orchestrator — correct
+  behavior is delegation via its views & layout routing row; the
+  headless-wiring row that once pointed at the Install Agent moved to the
+  SuperChat Agent in #609)
 - **Source:** lessons/wiring-headless-modules.md; agent/agents/mieweb-ui-design.agent.md — routing table
 
 ### SEL-13 — Danger styling
@@ -210,3 +214,119 @@ Primary agent: **MIE UI Design Agent** (owns selection via the
   Storybook but is not in the public API, so don't recommend or import it.
 - **Agent:** MIE UI Design Agent
 - **Source:** agent/skills/mieweb-ui-catalog/SKILL.md — inventory ("not exported yet" annotations)
+
+### SEL-23 — Marketing landing page
+
+- **Ask:** "We're building a marketing landing page for a new service line —
+  what should I build it from?"
+- **Expect:** `@mieweb/ui/templates` sections rendered by `LandingPage` from a
+  plain-data `blocks` array; pick a `landingPresets` archetype (here
+  `service-detail`) and check the page with `validateLandingPage` in a build
+  step or test. Sections are experimental-maturity but shipped in production.
+  Not hand-rolled divs, and not app-shell components.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md; src/catalog/Pages.mdx
+
+### SEL-24 — Templates data-only trap
+
+- **Ask:** "How do I pass my own icon component and an `onClick` handler to
+  `FeatureGridSection`?"
+- **Expect:** You don't — template sections take plain-data props only. Icons
+  are string tokens resolved against a `TemplateIconRegistry` (the `icons`
+  prop on `LandingPage` or the section); there are no event handlers — links
+  are real anchors and `trackingId` renders as `data-track` for analytics. A
+  genuinely interactive section is site-owned: build it with `SectionShell`
+  and register it in `LandingPage`'s `custom` map.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md — the contract;
+  src/templates/MAINTAINERS.md
+
+### SEL-25 — Templates in Server Components
+
+- **Ask:** "Can I render `HeroSection` and `LandingPage` inside a Next.js
+  Server Component, and how do I get `next/image`?"
+- **Expect:** Yes — the whole `/templates` entry is Server Component safe
+  (no client hooks, CI-verified under `react-server`), with no extra peer
+  deps. Pass `next/image`/`next/link` adapters via the `components` prop on
+  `LandingPage` (or a section) — adapters are site code, never block data.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md;
+  scripts/check-templates-rsc.mjs
+
+### SEL-26 — Report section vs grid
+
+- **Ask:** "I'm using `BenchmarkTableSection` but users now want to sort and
+  filter the columns."
+- **Expect:** Report template sections are static and server-safe by design —
+  no sorting/filtering/export. That requirement makes it a grid:
+  `DataVisNitroGrid` (Grids domain). Keep the report sections for the static
+  narrative around it.
+- **Agent:** MIE UI Grids Agent (via the Design Agent's redirect; report
+  sections themselves are DataVis-domain)
+- **Source:** agent/skills/mieweb-ui-templates/SKILL.md — troubleshooting;
+  agent/skills/mieweb-ui-charts/SKILL.md
+
+### SEL-27 — Chart vs encounter scope
+
+- **Ask:** "I need to show the patient's problems on the visit note — do I use
+  `ProblemList`?"
+- **Expect:** Depends on scope: the chart owns problems as durable records;
+  an encounter only references them. Chart-scope problem list →
+  `ProblemList`; marking which chart problems this visit addressed
+  (Addressed / Relevant Hx / Noted) → `PresentingProblems`. Writing a new or
+  refined problem → `ConditionEditor`.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — "Which component?";
+  src/catalog pages (Clinical lists)
+
+### SEL-28 — Presentational list vs manager
+
+- **Ask:** "`MedicationList` renders my meds but there's no edit dialog when I
+  click a row action — is it broken?"
+- **Expect:** Not broken — `MedicationList` is presentational: it emits
+  `onAction` and you own the dialogs. If you want the built-in NCPDP
+  `MedicationEditor`, dialogs and inline quick-add, use
+  `MedicationReconciliation` (same split: `AllergyList` vs `AllergyManager`).
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — inventory +
+  troubleshooting
+
+### SEL-29 — CodeLookup not exported
+
+- **Ask:** "`import { CodeLookup } from '@mieweb/ui'` fails — where is it?"
+- **Expect:** The `CodeLookup` component is deliberately not exported (it's a
+  module-Worker component needing `@mieweb/codify` shards at `indexUrl`);
+  apps bundle it themselves. The main entry ships `CodeLookupProvider`,
+  `useCodeLookupConfig` and the types; clinical components take coded picks
+  via `codeLookup` config, the ambient provider, or `addSearch`/
+  `renderCodeSearch` slots.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — troubleshooting;
+  src/index.ts
+
+### SEL-30 — FHIR mapping out of scope
+
+- **Ask:** "Which FHIR AllergyIntolerance fields map to the `Allergy` prop, and
+  will the component warn on drug–allergy conflicts?"
+- **Expect:** Both out of scope for the library: components define their own
+  JSON shapes (not FHIR) and the consumer projects their backend model at the
+  boundary, and there is no clinical decision support by design (no
+  interaction/conflict/dose checks) — that's host-application logic. The
+  agent should state the `Allergy` shape and decline to author the FHIR
+  projection or clinical-correctness rules.
+- **Agent:** MIE UI Design Agent
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — scope section
+
+### SEL-31 — Orders table entry point
+
+- **Ask:** "I want a sortable orders grid for the chart — `Assessment` isn't a
+  table. What do I import?"
+- **Expect:** `ChartOrdersGrid` / `EncounterOrdersGrid` from
+  `@mieweb/ui/datavis` — NITRO-backed; `@mieweb/datavis` is bundled into
+  that entry, so no separate install. The pure row builders
+  (`buildChartOrderRows`, `buildEncounterOrderRows`) are in the main entry.
+  Grid configuration/debugging depth belongs to the Grids Agent.
+- **Agent:** MIE UI Design Agent (selection is always the orchestrator's,
+  even for grids; depth routes to Grids)
+- **Source:** agent/skills/mieweb-ui-clinical/SKILL.md — troubleshooting;
+  agent/skills/mieweb-ui-datavis-api/SKILL.md

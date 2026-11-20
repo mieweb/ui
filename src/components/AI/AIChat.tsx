@@ -16,6 +16,7 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderCustomContent,
   AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
@@ -335,6 +336,11 @@ export interface AIChatProps
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /**
+   * Optional renderer for `custom` content blocks. Called per custom block with
+   * its `data` and `{ messageId, streaming, role }`.
+   */
+  renderCustomContent?: AIRenderCustomContent;
   /** Optional per-message footer rendered below each bubble (e.g. actions). */
   renderMessageFooter?: AIRenderMessageFooter;
   /**
@@ -377,6 +383,7 @@ export function AIChat({
   onClear,
   onClose,
   renderTextContent,
+  renderCustomContent,
   renderMessageFooter,
   toolCallGroup,
 }: AIChatProps) {
@@ -541,6 +548,7 @@ export function AIChat({
       showTimestamp={showTimestamps}
       onLinkClick={handleLinkClick}
       renderTextContent={renderTextContent}
+      renderCustomContent={renderCustomContent}
       renderMessageFooter={renderMessageFooter}
       toolCallGroup={toolCallGroup}
     />

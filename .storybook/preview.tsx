@@ -25,6 +25,7 @@ import {
 } from '../src/components/CodeLookup/context';
 import { isRtlLocale } from '../src/hooks/useDirection';
 import { CatalogDocsPage } from './CatalogDocsPage';
+import { githubSourceUrl, repoRelativeStoryPath } from './github-source';
 import { withMobilePreview } from './MobilePreview';
 import { mobilePreviewMode } from './mobile-preview';
 
@@ -205,18 +206,19 @@ const withGitHubSource: Decorator = (Story, context) => {
   const rawFileName = context.parameters?.fileName as string | undefined;
   // Normalize Windows backslashes to forward slashes before any path operations
   const fileName = rawFileName ? rawFileName.replace(/\\/g, '/') : undefined;
-  const srcIndex = fileName ? fileName.indexOf('/src/') : -1;
+  const relPath = fileName ? repoRelativeStoryPath(fileName) : null;
 
   const githubUrl = (() => {
-    if (srcIndex < 0 || !fileName) return null;
-    const relPath = fileName.slice(srcIndex + 1);
+    if (!relPath) return null;
+    // Submodule stories have no sibling component file; link the story itself.
+    if (!relPath.startsWith('src/')) return githubSourceUrl(relPath);
     const basename = relPath.split('/').pop() ?? '';
     // Only strip `.stories` when the basename is strictly `Name.stories.(ts|tsx|js|jsx)`
     // (no extra dot-segments before `.stories`). Otherwise link to the stories file itself.
     const stripped = /^[^.]+\.stories\.(tsx?|jsx?)$/.test(basename)
       ? relPath.replace(/\.stories(\.[^.]+)$/, '$1')
       : relPath;
-    return `https://github.com/mieweb/ui/blob/main/${stripped}`;
+    return githubSourceUrl(stripped);
   })();
 
   // Full-height stories (parameters.githubSourceFooter === false) fill the
