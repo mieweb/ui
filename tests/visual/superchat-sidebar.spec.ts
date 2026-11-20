@@ -54,6 +54,21 @@ function expectFlush(actual: number, edge: number) {
   expect(Math.abs(actual - edge)).toBeLessThanOrEqual(2);
 }
 
+/**
+ * Screenshots the inbox with the thread masked: resizing reflows the messages
+ * (diagrams, tables) and where the scroll settles depends on timing. These
+ * shots are about the list, divider and panel edges, not the thread.
+ */
+async function expectInboxScreenshot(page: Page, inbox: Locator, name: string) {
+  await expect(inbox).toHaveScreenshot(name, {
+    animations: 'disabled',
+    mask: [
+      inbox.locator('[data-slot="superchat-thread"]'),
+      page.locator('[data-slot="superchat-jump-to-bottom"]'),
+    ],
+  });
+}
+
 async function expectListWidth(list: Locator, width: number) {
   await expect
     .poll(async () => Math.round((await box(list)).width))
@@ -95,7 +110,7 @@ test.describe('SuperChat - resizable sidebar', () => {
 
     await dragDivider(page, divider, 64);
     await expectListWidth(list, DEFAULT_WIDTH + 64);
-    await expect(inbox).toHaveScreenshot('superchat-sidebar-resized.png');
+    await expectInboxScreenshot(page, inbox, 'superchat-sidebar-resized.png');
   });
 
   test('rtl: the list sits on the right and left widens it', async ({
@@ -127,7 +142,11 @@ test.describe('SuperChat - resizable sidebar', () => {
     const resized = await box(list);
     // rtl-ignore -- physical geometry is the point of this check
     expectFlush(resized.x + resized.width, inboxBox.x + inboxBox.width);
-    await expect(inbox).toHaveScreenshot('superchat-sidebar-resized-rtl.png');
+    await expectInboxScreenshot(
+      page,
+      inbox,
+      'superchat-sidebar-resized-rtl.png'
+    );
   });
 
   test('a narrow inbox keeps the panel at least 240px', async ({ page }) => {
@@ -155,7 +174,7 @@ test.describe('SuperChat - resizable sidebar', () => {
         )
       )
       .toBe(true);
-    await expect(inbox).toHaveScreenshot('superchat-sidebar-narrow.png');
+    await expectInboxScreenshot(page, inbox, 'superchat-sidebar-narrow.png');
   });
 
   test('phone: one pane at a time and no divider', async ({ page }) => {
