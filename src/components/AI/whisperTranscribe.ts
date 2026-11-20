@@ -453,7 +453,7 @@ function downmixToMono(audio: AudioBuffer): Float32Array {
 
 // Linear-resample mono audio to 16 kHz (what Whisper wants). Shared by the blob + raw-samples paths. Always
 // returns a fresh, standalone Float32Array (safe to transfer to the worker).
-function resampleTo16kMono(
+export function resampleTo16kMono(
   src: Float32Array,
   sampleRate: number
 ): Float32Array {
@@ -528,10 +528,14 @@ function encodeWav16kMono(samples: Float32Array): Blob {
  * Without a hint, it walks back from the end to the last natural pause (energy only). Capped so it never
  * removes too much. Returns a trimmed WAV blob (or the original on failure / nothing sensible to cut). Only
  * call on a PHRASE-triggered stop — not a manual button stop, where there's no phrase to remove.
+ *
+ * `afterPhraseSec` is audio recorded after the phrase ended (e.g. while the speaker was being verified).
+ * It is dropped first, outside the ~2.2 s phrase cap, so a slow check can't leave the phrase in the clip.
  */
 export async function trimTrailingStopPhrase(
   blob: Blob,
-  phraseHintSec = 0
+  phraseHintSec = 0,
+  afterPhraseSec = 0
 ): Promise<Blob> {
   let samples: Float32Array;
   try {
@@ -540,8 +544,15 @@ export async function trimTrailingStopPhrase(
     return blob;
   }
   const SR = 16000;
+  const after = Math.min(
+    samples.length,
+    Math.max(0, Math.round(afterPhraseSec * SR))
+  );
+  if (after > 0) samples = samples.subarray(0, samples.length - after);
+  // Nothing sensible to cut below: still drop the post-phrase audio when there was some.
+  const untrimmed = () => (after > 0 ? encodeWav16kMono(samples) : blob);
   const n = samples.length;
-  if (n < SR * 0.8) return blob; // too short to safely trim
+  if (n < SR * 0.8) return untrimmed(); // too short to safely trim
 
   // Short-time energy (RMS) per 30 ms frame.
   const fr = Math.round(SR * 0.03);
@@ -604,7 +615,7 @@ export async function trimTrailingStopPhrase(
   }
   cutFrame = Math.max(cutFrame, floor); // enforce the max-trim cap
   const cutSample = Math.min(n, cutFrame * fr);
-  if (cutSample < SR * 0.2) return blob; // would leave almost nothing — bail (text-strip covers it)
+  if (cutSample < SR * 0.2) return untrimmed(); // would leave almost nothing — bail (text-strip covers it)
   return encodeWav16kMono(samples.subarray(0, cutSample));
 }
 

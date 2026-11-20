@@ -27,6 +27,9 @@ export interface TranscriptPlayerLabels {
   searchTranscript: string;
   searchPlaceholder: string;
   showSpeakers: string;
+  /** The `collapsibleLanes` button. */
+  showSpeakerLanes: string;
+  hideSpeakerLanes: string;
   allSpeakers: string;
   someSpeakers: string;
   noTranscript: string;
@@ -89,6 +92,8 @@ export const DEFAULT_TRANSCRIPT_PLAYER_LABELS: TranscriptPlayerLabels = {
   searchTranscript: 'Search transcript',
   searchPlaceholder: 'Search transcript…',
   showSpeakers: 'Show speakers',
+  showSpeakerLanes: 'Show speakers',
+  hideSpeakerLanes: 'Hide speakers',
   allSpeakers: 'All speakers',
   someSpeakers: 'Some speakers',
   noTranscript: 'No transcript for this recording.',

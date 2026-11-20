@@ -79,3 +79,18 @@ test('referral letter mirrors the document shell in RTL', async ({ page }) => {
     .boundingBox();
   expect(progress!.x + progress!.width).toBeLessThan(title!.x);
 });
+
+test('support ticket mirrors the mode switcher in RTL', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`${ticket}&globals=direction:rtl`);
+  const modeSwitch = page.getByRole('combobox', { name: 'Document mode' });
+  await expect(modeSwitch).toBeVisible();
+  await expect(page).toHaveScreenshot('richtext-esheet-ticket-rtl.png');
+  const shell = page.locator('[data-slot=richtext-esheet]');
+  await expect(shell).toHaveCSS('direction', 'rtl');
+  // The switcher's sticky overlay uses logical placement (justify-start +
+  // ms-1), so it docks at the inline start — the right edge in RTL.
+  const shellBox = await shell.boundingBox();
+  const switchBox = await modeSwitch.boundingBox();
+  expect(switchBox!.x).toBeGreaterThan(shellBox!.x + shellBox!.width / 2);
+});

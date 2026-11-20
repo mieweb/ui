@@ -105,6 +105,7 @@ export const miewebUISafelist = [
   'gap-x-3',
   'gap-y-3',
   'max-h-48',
+  'mb-3',
   'mb-4',
   'mt-6',
   'overflow-visible',
@@ -223,12 +224,24 @@ export const miewebUISafelist = [
   '[&_[data-slot=button-label]]:whitespace-normal',
   '[&>[data-slot=dropdown-item-label]]:min-w-0',
   '[&>[data-slot=dropdown-item-label]]:flex-1',
-  // TranscriptPlayer: timeline grid, transcript/panel layout, overview window and playhead.
-  'grid-cols-[6.5rem_minmax(0,1fr)]',
+  // TranscriptPlayer: timeline grid, transcript/panel layout, overview window and playhead,
+  // plus the narrow-host container queries (these need Tailwind 4.1).
+  'grid-cols-[var(--tp-label,6.5rem)_minmax(0,1fr)]',
+  '[--tp-label:0px]',
+  '[--tp-label:4.5rem]',
+  '@md:[--tp-label:6.5rem]',
+  '@md:basis-0',
+  '@md:block',
+  '@md:flex-nowrap',
+  '@md:inline',
+  '@md:p-4',
+  '@md:ps-0',
+  '@sm:inline',
+  '@sm:me-1.5',
   'lg:grid-cols-[minmax(0,1fr)_18rem]',
   '-top-5',
   'min-w-40',
-  'h-80',
+  'max-h-80',
   'dark:bg-primary-950/40',
   'ring-inset',
   'ring-foreground',
@@ -946,6 +959,8 @@ export const miewebUISafelist = [
   // injected <svg> so the diagram sizes naturally instead of collapsing.
   '[&_svg]:h-auto',
   '[&_svg]:max-w-none',
+  // FileViewer — fenced code stays LTR inside dir="auto" Markdown.
+  '[&_pre]:[direction:ltr]',
   // AI pills — CollapsiblePill / MCPToolCall arbitrary utilities
   'rounded-[8px]',
   'rounded-[10px]',
@@ -1394,6 +1409,19 @@ export const miewebUISafelist = [
   // tap-to-focus card cursor (text-base is safelisted above)
   'sm:text-sm',
   'cursor-text',
+  // RichMediaCaptureEditor capture ribbon (mieweb/ui#733) — docked toolbar
+  // frame, compact buttons, and the red recording state
+  'mx-4',
+  '-mb-px',
+  'rounded-t-xl',
+  'bg-neutral-50',
+  'min-w-7',
+  'bg-red-100',
+  'text-red-800',
+  'dark:bg-red-900/40',
+  'dark:text-red-300',
+  'text-neutral-700',
+  'hover:bg-neutral-200',
   'md:col-span-1',
   'md:col-start-2',
   'md:row-start-1',
@@ -1787,6 +1815,23 @@ export const miewebUISafelist = [
   '[&_blockquote]:border-border',
   '[&_blockquote]:ps-3',
   '[&_blockquote]:text-muted-foreground',
+  // MCPToolCallGroup rows and the awaiting-approval tool status
+  '[[data-state=open]>&]:rotate-180',
+  'hover:bg-neutral-100',
+  'dark:hover:bg-neutral-800',
+  'dark:hover:text-neutral-200',
+  'dark:bg-neutral-900',
+  'max-h-40',
+  'max-h-60',
+  'space-y-2',
+  'text-red-600',
+  'bg-amber-50',
+  'border-amber-200',
+  'text-amber-600',
+  'dark:bg-amber-900/20',
+  'dark:bg-amber-900/50',
+  'dark:border-amber-800',
+  'dark:text-amber-400',
 ];
 
 export interface MiewebUIPreset {

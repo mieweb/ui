@@ -82,6 +82,16 @@ export interface RichTextEditorBlockMenuLabels {
   showToolbar?: string;
   /** Toolbar toggle item while the toolbar is visible. */
   hideToolbar?: string;
+  /**
+   * Capture-bar toggle item while the bar is hidden (Kerebron surface,
+   * shown when `mediaCapture` is enabled).
+   */
+  showCaptureBar?: string;
+  /**
+   * Capture-bar toggle item while the bar is visible (Kerebron surface,
+   * shown when `mediaCapture` is enabled).
+   */
+  hideCaptureBar?: string;
 }
 
 export interface RichTextEditorProps {

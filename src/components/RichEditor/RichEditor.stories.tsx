@@ -28,6 +28,7 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 - The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
+- Users mostly **read** a file and only occasionally fix it in place — [FileDocument](?path=/docs/files-filedocument--docs) shows it rendered, with a plain-text Edit mode and Save/Cancel, without the Kerebron peers or WASM.
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
 
 ### Example
@@ -70,7 +71,7 @@ Images and videos can be pasted or dropped straight onto the surface. **Set \`me
 />
 \`\`\`
 
-The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters. The handle's \`insertFiles(files)\` runs the same pipeline programmatically — host UI (a capture ribbon, a picker) inserts image/video nodes at the cursor and gets \`{ inserted, skipped }\` back; [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) is the packaged version of exactly that.
 
 \`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 
@@ -121,6 +122,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           type: 'alternative to',
           target: 'editors-emaileditor',
           why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
+        },
+        {
+          type: 'alternative to',
+          target: 'files-filedocument',
+          why: 'RichEditor for formatted or collaborative Markdown editing; FileDocument when a file is mostly read and only occasionally edited as plain text.',
         },
       ],
     },

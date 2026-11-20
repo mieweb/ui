@@ -36,6 +36,10 @@ import {
 } from '../RichTextEditor';
 import type { TextAreaRichProps } from './TextAreaRich';
 import { getSpeechRecognition, type SpeechRecognitionLike } from './speech';
+import {
+  CaptureDock,
+  type MediaCaptureOptions,
+} from '../RichMediaCaptureEditor';
 
 /**
  * Kerebron-backed TextAreaRich surface: ProseMirror underneath, the stock
@@ -203,6 +207,25 @@ export interface TextAreaRichKerebronProps extends TextAreaRichProps {
    * {@link RichEditorProps.omitExtensions}.
    */
   omitExtensions?: readonly string[];
+  /**
+   * Docks the capture ribbon (Capture image, Capture screen, Attach file,
+   * Scan document) above the field; captures land in the document through
+   * the editor's media pipeline, so set `mediaUpload.uploadHandler` or every
+   * image embeds as a base64 `data:` URL. Pass `true` for the defaults or a
+   * {@link MediaCaptureOptions} object. Default **off**: when absent the
+   * field renders exactly as before. The block (`+`) menu gains a "Hide/Show
+   * capture bar" toggle so users can reclaim the space. Treat as mount-time
+   * static: toggling between off and on swaps the field's root element,
+   * remounting the editor (selection and undo history reset). Kerebron
+   * surface only — same contract as `RichMediaCaptureEditor` (mieweb/ui#734).
+   */
+  mediaCapture?: boolean | MediaCaptureOptions;
+  /**
+   * Whether the capture bar starts visible when `mediaCapture` is enabled;
+   * the block (`+`) menu toggle reveals or hides it either way. Mount-time
+   * static, like `mediaCapture` itself. Default `true`.
+   */
+  defaultCaptureBarVisible?: boolean;
 }
 
 const TextAreaRichKerebron = React.forwardRef<
@@ -236,6 +259,8 @@ const TextAreaRichKerebron = React.forwardRef<
       editorStyle,
       mediaUpload,
       omitExtensions,
+      mediaCapture,
+      defaultCaptureBarVisible = true,
       'aria-label': ariaLabel,
       'aria-labelledby': ariaLabelledBy,
       'aria-describedby': ariaDescribedBy,
@@ -269,6 +294,12 @@ const TextAreaRichKerebron = React.forwardRef<
     const [uncontrolledToolbar, setUncontrolledToolbar] =
       React.useState(defaultToolbar);
     const toolbarVisible = (toolbar ?? uncontrolledToolbar) === 'visible';
+    // The mediaCapture ribbon defaults visible (the host opted in) unless the
+    // host starts it hidden; the block menu lets users toggle the space,
+    // mirroring the toolbar toggle.
+    const [captureBarVisible, setCaptureBarVisible] = React.useState(
+      defaultCaptureBarVisible
+    );
     const [isListening, setIsListening] = React.useState(false);
     const [speechSupported, setSpeechSupported] = React.useState(false);
     const [isEmpty, setIsEmpty] = React.useState(true);
@@ -1203,7 +1234,10 @@ const TextAreaRichKerebron = React.forwardRef<
       return () => observer.disconnect();
     }, [ready, toolbarVisible]);
 
-    return (
+    // The field itself — built unconditionally so a `mediaCapture`-less
+    // render returns this exact tree, byte-for-byte what it was before the
+    // opt-in existed (mieweb/ui#734).
+    const field = (
       <div
         ref={wrapperRef}
         data-slot="textarea-rich"
@@ -1374,6 +1408,21 @@ const TextAreaRichKerebron = React.forwardRef<
                       ? (blockMenuLabels?.hideToolbar ?? 'Hide toolbar')
                       : (blockMenuLabels?.showToolbar ?? 'Show toolbar')}
                   </DropdownItem>
+                  {!!mediaCapture && (
+                    <DropdownItem
+                      onClick={() => {
+                        setBlockMenuOpen(false);
+                        setCaptureBarVisible((visible) => !visible);
+                        focusEditor();
+                      }}
+                    >
+                      {captureBarVisible
+                        ? (blockMenuLabels?.hideCaptureBar ??
+                          'Hide capture bar')
+                        : (blockMenuLabels?.showCaptureBar ??
+                          'Show capture bar')}
+                    </DropdownItem>
+                  )}
                 </Dropdown>
               </div>
             )}
@@ -1522,6 +1571,26 @@ const TextAreaRichKerebron = React.forwardRef<
           )}
         </div>
       </div>
+    );
+
+    if (!mediaCapture) return field;
+    const captureOptions = mediaCapture === true ? {} : mediaCapture;
+    return (
+      <CaptureDock
+        locked={inert || !captureBarVisible}
+        insertFiles={(files) => editorHandleRef.current?.insertFiles?.(files)}
+        replaceImage={(src, file, occurrence) =>
+          editorHandleRef.current?.replaceImage?.(src, file, occurrence)
+        }
+        // Inside the sliding-gutter hover scope: a sibling button would
+        // collapse the gutter (and shift the layout) when hovered.
+        annotateAnchorRef={gutterWrapperRef}
+        scanDocument={captureOptions.scanDocument}
+        extraCaptures={captureOptions.extraCaptures}
+        confirmScreenCapture={captureOptions.confirmScreenCapture}
+      >
+        {field}
+      </CaptureDock>
     );
   }
 );

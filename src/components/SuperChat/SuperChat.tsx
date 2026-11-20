@@ -28,6 +28,7 @@ import type {
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import { DictationButton, type DictationButtonProps } from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
@@ -150,11 +151,20 @@ export interface SuperChatProps {
   agentSelectorLabel?: string;
   /** Props for the composer's model selector (shown when provided). */
   modelSelectorProps?: ComposerModelSelectorProps;
+  /** Extra controls at the end of the composer's agent/model row (e.g. a display setting). */
+  composerSelectorsEndSlot?: React.ReactNode;
   /** While true, the send button becomes a stop button (requires `onStop`). */
   isStreaming?: boolean;
   onStop?: () => void;
   /** Localized accessible label for the icon-only stop button. */
   stopLabel?: string;
+  /**
+   * Show a dictation (voice typing) button in the composer. The transcript is
+   * appended to the editable draft and never sent automatically. `true` uses
+   * on-device Whisper (large first-use download); pass `{ transcribe }` to use
+   * a server provider. See the `Dictation` story and `DictationButton`.
+   */
+  dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -223,9 +233,11 @@ export function SuperChat({
   onAgentChange,
   agentSelectorLabel,
   modelSelectorProps,
+  composerSelectorsEndSlot,
   isStreaming,
   onStop,
   stopLabel,
+  dictation,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -758,6 +770,13 @@ export function SuperChat({
     draftEpochRef.current += 1;
     setDraft(value);
   }, []);
+  const appendDictation = React.useCallback((text: string) => {
+    draftEpochRef.current += 1;
+    setDraft((current) =>
+      !current || /\s$/.test(current) ? current + text : `${current} ${text}`
+    );
+  }, []);
+  const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + attachments: each one's File, and
@@ -1032,9 +1051,23 @@ export function SuperChat({
         agentSelectorLabel={agentSelectorLabel}
         showModelSelector={!!modelSelectorProps}
         modelSelectorProps={modelSelectorProps}
+        selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
+        micSlot={
+          dictation && !readOnly ? (
+            // Keyed by conversation so switching drops any in-flight take.
+            <DictationButton
+              key={conversation.id}
+              showStatus
+              // Pulse rings overflow the composer row; the caption shows it's live.
+              showPulse={false}
+              {...dictationProps}
+              onText={appendDictation}
+            />
+          ) : undefined
+        }
       />
     </section>
   );

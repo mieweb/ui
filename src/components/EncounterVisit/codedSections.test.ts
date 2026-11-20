@@ -7,72 +7,197 @@ import {
 } from './mcp';
 import { parseEncounterMdy, renderEncounterMdy } from './mdy';
 import { getEncounterNarrativeFindings } from './narrativeFindings';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import type { FormDefinition } from '@esheet/core';
+import type { EncounterResponses } from './types';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'coded-visit',
   title: 'Coded visit',
-  sections: [
+  pages: [
     {
-      id: 'hpi',
-      title: 'HPI',
-      kind: 'narrative',
-      findings: [{ id: 'no-fever', label: 'No fever', text: 'Denies fever.' }],
-    },
-    {
-      id: 'exam',
-      title: 'Exam',
-      kind: 'observations',
-      observations: [
+      id: 'coded-visit:visit',
+      title: 'Coded visit',
+      fields: [
         {
-          id: 'general',
-          label: 'General',
-          findings: [
-            { id: 'alert', label: 'Alert', text: 'Alert and conversant.' },
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+                encounterFindings: [
+                  {
+                    id: 'no-fever',
+                    label: 'No fever',
+                    text: 'Denies fever.',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:observation:general',
+              question: 'General',
+              width: 'full',
+              _sourceData: {
+                encounterFindings: [
+                  {
+                    id: 'alert',
+                    label: 'Alert',
+                    text: 'Alert and conversant.',
+                  },
+                ],
+              },
+              fieldType: 'encounterNarrative',
+            },
+          ],
+        },
+        {
+          id: 'encounter:conditions:section',
+          fieldType: 'section',
+          title: 'Conditions',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'conditions',
+          },
+          fields: [
+            {
+              id: 'encounter:conditions:observation:value',
+              fieldType: 'encounterConditions',
+              question: 'Conditions',
+              _sourceData: {
+                encounterRequireCoding: true,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:medications:section',
+          fieldType: 'section',
+          title: 'Medications',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'medications',
+          },
+          fields: [
+            {
+              id: 'encounter:medications:observation:value',
+              fieldType: 'encounterMedications',
+              question: 'Medications',
+              _sourceData: {
+                encounterRequireCoding: true,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:allergies:section',
+          fieldType: 'section',
+          title: 'Allergies',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'allergies',
+          },
+          fields: [
+            {
+              id: 'encounter:allergies:observation:value',
+              fieldType: 'encounterAllergies',
+              question: 'Allergies',
+              _sourceData: {
+                encounterRequireCoding: true,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:assessment:section',
+          fieldType: 'section',
+          title: 'Assessment',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'assessment',
+          },
+          fields: [
+            {
+              id: 'encounter:assessment:observation:value',
+              fieldType: 'encounterAssessment',
+              question: 'Assessment',
+              _sourceData: {
+                encounterRequireCoding: true,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:plan:section',
+          fieldType: 'section',
+          title: 'Plan',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'plan',
+          },
+          fields: [
+            {
+              id: 'encounter:plan:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Plan narrative',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+                encounterFindings: [
+                  {
+                    id: 'questions',
+                    label: 'Questions answered',
+                    text: 'Questions were answered.',
+                  },
+                ],
+              },
+            },
+            {
+              id: 'encounter:plan:observation:value',
+              fieldType: 'encounterPlan',
+              question: 'Plan',
+              _sourceData: {
+                encounterRequireCoding: true,
+              },
+              width: 'full',
+            },
           ],
         },
       ],
     },
-    {
-      id: 'conditions',
-      title: 'Conditions',
-      kind: 'conditions',
-      requireCoding: true,
-    },
-    {
-      id: 'medications',
-      title: 'Medications',
-      kind: 'medications',
-      requireCoding: true,
-    },
-    {
-      id: 'allergies',
-      title: 'Allergies',
-      kind: 'allergies',
-      requireCoding: true,
-    },
-    {
-      id: 'assessment',
-      title: 'Assessment',
-      kind: 'assessment',
-      requireCoding: true,
-    },
-    {
-      id: 'plan',
-      title: 'Plan',
-      kind: 'plan',
-      narrative: true,
-      requireCoding: true,
-      findings: [
-        {
-          id: 'questions',
-          label: 'Questions answered',
-          text: 'Questions were answered.',
-        },
-      ],
-    },
   ],
-};
+} as unknown as FormDefinition;
 const condition = {
   concernId: 'condition-1',
   clinicalStatus: 'active',
@@ -123,7 +248,7 @@ function fixture(initial: EncounterResponses = {}) {
   let responses = initial;
   let readOnly = false;
   const tools = createEncounterVisitTools({
-    getDefinition: () => definition,
+    getForm: () => form,
     getResponses: () => responses,
     setResponses: (next) => {
       responses = next;
@@ -142,7 +267,7 @@ function fixture(initial: EncounterResponses = {}) {
 describe('coded clinical sections and explicit narrative findings', () => {
   it('roundtrips native clinical codes, external condition references and supplemental plan prose through MDY', async () => {
     const original = recorded();
-    const snapshot = createEncounterSnapshot(definition, original);
+    const snapshot = createEncounterSnapshot(form, original);
     expect(snapshot.errors).toEqual([]);
     for (const sectionId of [
       'conditions',
@@ -224,7 +349,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
         ...recorded(),
         [id(sectionId as string)]: response(value),
       };
-      const snapshot = createEncounterSnapshot(definition, initial);
+      const snapshot = createEncounterSnapshot(form, initial);
       expect(
         snapshot.errors.some(
           (issue) =>
@@ -252,9 +377,9 @@ describe('coded clinical sections and explicit narrative findings', () => {
   );
 
   it('codes only an explicitly recorded no-known-allergies flag', () => {
-    const absent = createEncounterSnapshot(definition, {});
+    const absent = createEncounterSnapshot(form, {});
     expect(absent.observations).toEqual([]);
-    const explicit = createEncounterSnapshot(definition, {
+    const explicit = createEncounterSnapshot(form, {
       [id('allergies')]: response({ allergies: [], noKnownAllergies: true }),
     });
     expect(explicit.errors).toEqual([]);
@@ -271,7 +396,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       [id('plan')]: response({ orders: [{ ...order, concernId: 'missing' }] }),
     };
     expect(
-      validateEncounterResponses(definition, invalid).some(
+      validateEncounterResponses(form, invalid).some(
         (issue) => issue.path === 'orders.0.concernId'
       )
     ).toBe(true);
@@ -305,7 +430,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
         },
       ],
     });
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     expect(snapshot.errors).toEqual([]);
     expect(
       snapshot.observations.find((item) => item.sectionId === 'conditions')
@@ -337,7 +462,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       }),
     };
     const f = fixture(responses);
-    expect(createEncounterSnapshot(definition, responses).errors).toEqual([]);
+    expect(createEncounterSnapshot(form, responses).errors).toEqual([]);
     expect(f.tools.updateSection('conditions', { concerns: [] }).success).toBe(
       false
     );
@@ -346,7 +471,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
 
   it('keeps clinical record IDs in native data while omitting them from readable reports', async () => {
     const responses = recorded();
-    const snapshot = createEncounterSnapshot(definition, responses);
+    const snapshot = createEncounterSnapshot(form, responses);
     const rendered = await renderEncounterMdy(snapshot.mdy);
     for (const internalId of [
       condition.concernId,
@@ -385,7 +510,7 @@ describe('coded clinical sections and explicit narrative findings', () => {
       [id('conditions')]: response({ concerns }),
     };
     const f = fixture(responses);
-    expect(createEncounterSnapshot(definition, responses).errors).toEqual([]);
+    expect(createEncounterSnapshot(form, responses).errors).toEqual([]);
     const replacement = concerns.map((concern) => ({
       ...concern,
       assertions: concern.assertions.map((assertion) =>
@@ -471,9 +596,8 @@ describe('coded clinical sections and explicit narrative findings', () => {
       )
     ).toEqual([]);
     expect(
-      parseEncounterMdy(
-        createEncounterSnapshot(definition, f.getResponses()).mdy
-      ).response
+      parseEncounterMdy(createEncounterSnapshot(form, f.getResponses()).mdy)
+        .response
     ).toEqual(f.getResponses());
   });
 
@@ -508,6 +632,51 @@ describe('coded clinical sections and explicit narrative findings', () => {
     expect(f.getResponses()).toEqual(recorded());
   });
 });
+
+const CODED_FIELD_TYPES = {
+  conditions: 'encounterConditions',
+  medications: 'encounterMedications',
+  allergies: 'encounterAllergies',
+  assessment: 'encounterAssessment',
+  plan: 'encounterPlan',
+} as const;
+
+const policyForm = (
+  kind: keyof typeof CODED_FIELD_TYPES,
+  requireCoding: boolean | undefined
+) =>
+  ({
+    id: 'policy',
+    title: 'Policy',
+    pages: [
+      {
+        id: 'policy:visit',
+        title: 'Policy',
+        fields: [
+          {
+            id: `encounter:${kind}:section`,
+            fieldType: 'section',
+            title: kind,
+            sectionCollapse: 'expanded',
+            width: 'full',
+            _sourceData: { encounterKind: kind },
+            fields: [
+              {
+                id: `encounter:${kind}:observation:value`,
+                fieldType: CODED_FIELD_TYPES[kind],
+                question: kind,
+                width: 'full',
+                _sourceData:
+                  requireCoding === undefined
+                    ? {}
+                    : { encounterRequireCoding: requireCoding },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  }) as unknown as FormDefinition;
 
 describe('default and explicit clinical coding policy', () => {
   it.each([
@@ -555,17 +724,13 @@ describe('default and explicit clinical coding policy', () => {
     'uses the same omitted/true/false coding policy for $kind validation and MCP writes',
     ({ kind, value }) => {
       for (const requireCoding of [undefined, true, false]) {
-        const custom: EncounterVisitDefinition = {
-          id: 'policy',
-          title: 'Policy',
-          sections: [{ id: kind, title: kind, kind, requireCoding }],
-        };
         const responses = { [id(kind)]: response(value) };
-        expect(validateEncounterResponses(custom, responses).length > 0).toBe(
-          requireCoding !== false
-        );
+        const customForm = policyForm(kind, requireCoding);
+        expect(
+          validateEncounterResponses(customForm, responses).length > 0
+        ).toBe(requireCoding !== false);
         const tools = createEncounterVisitTools({
-          getDefinition: () => custom,
+          getForm: () => customForm,
           getResponses: () => ({}),
           setResponses: () => {},
         });

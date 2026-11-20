@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { getEncounterFieldId } from './definition';
+import type { FormDefinition } from '@esheet/core';
+import { getEncounterFieldId, getEncounterFormSections } from './definition';
 import {
   ENCOUNTER_DOCUMENT_FIELD_ID,
   encounterDocumentResponse,
@@ -11,66 +12,195 @@ import {
   executeEncounterVisitToolCall,
   type EncounterVisitToolResult,
 } from './mcp';
-import type { EncounterResponses, EncounterVisitDefinition } from './types';
+import type { EncounterResponses } from './types';
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'anonymous-visit',
   title: 'Visit',
-  sections: [
-    { id: 'hpi', title: 'HPI', kind: 'narrative', required: true },
+  pages: [
     {
-      id: 'exam',
-      title: 'Physical exam',
-      kind: 'observations',
-      narrative: true,
-      observations: [
-        { id: 'back', label: 'Back' },
+      id: 'anonymous-visit:visit',
+      title: 'Visit',
+      fields: [
         {
-          id: 'motion',
-          label: 'Range of motion',
-          type: 'number',
-          unit: 'degrees',
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+            encounterSectionRequired: true,
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              required: true,
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
         },
         {
-          id: 'gait',
-          label: 'Gait',
-          type: 'choice',
-          options: ['Not assessed', 'Steady'],
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Physical exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Physical exam narrative',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+            {
+              id: 'encounter:exam:observation:back',
+              question: 'Back',
+              width: 'full',
+              fieldType: 'encounterNarrative',
+            },
+            {
+              id: 'encounter:exam:observation:motion',
+              question: 'Range of motion',
+              unit: 'degrees',
+              width: 'full',
+              fieldType: 'text',
+              inputType: 'number',
+              validators: [
+                {
+                  type: 'number',
+                  message: 'Enter a finite nonnegative number.',
+                },
+              ],
+            },
+            {
+              id: 'encounter:exam:observation:gait',
+              question: 'Gait',
+              width: 'full',
+              fieldType: 'dropdown',
+              options: [
+                {
+                  id: 'Not%20assessed',
+                  value: 'Not assessed',
+                  text: 'Not assessed',
+                },
+                {
+                  id: 'Steady',
+                  value: 'Steady',
+                  text: 'Steady',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:medications:section',
+          fieldType: 'section',
+          title: 'Medications',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'medications',
+          },
+          fields: [
+            {
+              id: 'encounter:medications:observation:value',
+              fieldType: 'encounterMedications',
+              question: 'Medications',
+              _sourceData: {
+                encounterRequireCoding: false,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:allergies:section',
+          fieldType: 'section',
+          title: 'Allergies',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'allergies',
+          },
+          fields: [
+            {
+              id: 'encounter:allergies:observation:value',
+              fieldType: 'encounterAllergies',
+              question: 'Allergies',
+              _sourceData: {
+                encounterRequireCoding: false,
+              },
+              width: 'full',
+            },
+          ],
+        },
+        {
+          id: 'encounter:assessment:section',
+          fieldType: 'section',
+          title: 'Assessment',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'assessment',
+          },
+          fields: [
+            {
+              id: 'encounter:assessment:observation:value',
+              fieldType: 'encounterAssessment',
+              question: 'Assessment',
+              _sourceData: {
+                encounterRequireCoding: false,
+              },
+              width: 'full',
+            },
+          ],
         },
       ],
     },
-    { id: 'vitals', title: 'Vitals', kind: 'vitals' },
-    {
-      id: 'medications',
-      title: 'Medications',
-      kind: 'medications',
-      requireCoding: false,
-    },
-    {
-      id: 'allergies',
-      title: 'Allergies',
-      kind: 'allergies',
-      requireCoding: false,
-    },
-    {
-      id: 'assessment',
-      title: 'Assessment',
-      kind: 'assessment',
-      requireCoding: false,
-    },
   ],
-};
+} as unknown as FormDefinition;
 
 function fixture(initial: EncounterResponses = {}) {
   let responses = initial;
   let readOnly = false;
-  let currentDefinition = definition;
+  let currentForm = form;
   const navigate = vi.fn();
   const setResponses = vi.fn((next: EncounterResponses) => {
     responses = next;
   });
   const tools = createEncounterVisitTools({
-    getDefinition: () => currentDefinition,
+    getForm: () => currentForm,
     getResponses: () => responses,
     setResponses,
     isReadOnly: () => readOnly,
@@ -84,8 +214,8 @@ function fixture(initial: EncounterResponses = {}) {
     setReadOnly: (value: boolean) => {
       readOnly = value;
     },
-    setDefinition: (value: EncounterVisitDefinition) => {
-      currentDefinition = value;
+    setForm: (value: FormDefinition) => {
+      currentForm = value;
     },
   };
 }
@@ -120,12 +250,12 @@ describe('EncounterVisit in-process tools', () => {
     const result = ctx.tools.listSections();
     if (!result.success) throw new Error('Expected sections');
     result.data[0].title = 'Changed outside the controller';
-    expect(definition.sections[0].title).toBe('HPI');
-    ctx.setDefinition({ ...definition, title: 'Updated visit' });
+    expect(getEncounterFormSections(form)[0].title).toBe('HPI');
+    ctx.setForm({ ...form, title: 'Updated visit' });
     ctx.tools.setNarrative('hpi', 'Supplied history');
     const visit = ctx.tools.getVisit();
     if (!visit.success) throw new Error('Expected visit');
-    expect(visit.data.definition.title).toBe('Updated visit');
+    expect(visit.data.form.title).toBe('Updated visit');
     visit.data.responses[getEncounterFieldId('hpi')].answer =
       'Mutated snapshot';
     expect(ctx.responses()[getEncounterFieldId('hpi')].answer).toBe(
@@ -191,6 +321,17 @@ describe('EncounterVisit in-process tools', () => {
     expect(getEncounterDocumentBody(original)).toBe('Old prose.');
     expect(ctx.tools.setDocumentBody('').success).toBe(true);
     expect(getEncounterDocumentBody(ctx.responses())).toBe('');
+  });
+
+  it('rejects an invalid host form without mutating the draft', () => {
+    const ctx = fixture();
+    ctx.setForm({
+      ...form,
+      pages: [{ ...form.pages[0], fields: [] }],
+    } as unknown as FormDefinition);
+    const result = ctx.tools.setDocumentBody('# Visit\n\nProse.');
+    expect(errorCode(result)).toBe('INTERNAL_ERROR');
+    expect(ctx.setResponses).not.toHaveBeenCalled();
   });
 
   it.each([null, undefined, 45, {}, []])(
@@ -590,7 +731,7 @@ describe('EncounterVisit in-process tools', () => {
 
   it('returns a structured unavailable error when navigation is not provided', () => {
     const tools = createEncounterVisitTools({
-      getDefinition: () => definition,
+      getForm: () => form,
       getResponses: () => ({}),
       setResponses: vi.fn(),
     });
@@ -692,7 +833,7 @@ describe('EncounterVisit MCP tools/call adapter', () => {
 
   it('returns an MCP error when a host callback fails', () => {
     const tools = createEncounterVisitTools({
-      getDefinition: () => definition,
+      getForm: () => form,
       getResponses: () => ({}),
       setResponses: () => {
         throw new Error('Host rejected update');
