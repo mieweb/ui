@@ -205,6 +205,8 @@ export const miewebUISafelist = [
   'dark:bg-violet-950',
   'text-blue-700',
   'text-violet-700',
+  // The document list's text.
+  'text-neutral-900',
   'dark:text-blue-300',
   'dark:text-violet-300',
   'dark:text-neutral-200',

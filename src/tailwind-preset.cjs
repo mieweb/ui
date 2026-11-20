@@ -160,6 +160,9 @@ module.exports = {
     // The 'Couldn't load' tile: light text on a dark tile in either theme.
     'bg-neutral-800',
     'text-neutral-300',
+    // A media tile's backdrop, and the document list's text.
+    'bg-neutral-900',
+    'text-neutral-900',
     'object-cover',
     'size-8',
     'size-9',
@@ -178,8 +181,12 @@ module.exports = {
     'dark:bg-green-950',
     'dark:bg-amber-950',
     'dark:bg-violet-950',
+    'text-red-700',
     'text-blue-700',
+    'text-green-700',
+    'text-amber-700',
     'text-violet-700',
+    'dark:text-green-300',
     'dark:text-blue-300',
     'dark:text-violet-300',
     'dark:text-neutral-200',
