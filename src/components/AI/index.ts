@@ -29,15 +29,25 @@ export {
 // Collapsible Pill (shared primitive for thinking + tool display)
 export { CollapsiblePill, type CollapsiblePillProps } from './CollapsiblePill';
 
-// MCP Tool Call Display
+// Tool Call Display (MCP tools, built-in tools and skills)
 export {
+  ToolCallDisplay,
   MCPToolCallDisplay,
   ResourceLink,
   ToolStatusIcon,
   getToolIcon,
+  type ToolCallDisplayProps,
   type MCPToolCallDisplayProps,
   type ResourceLinkProps,
 } from './MCPToolCall';
+
+export {
+  ToolCallResultContent,
+  defaultToolCallResultLabels,
+  isSafeHref,
+  type ToolCallResultContentProps,
+  type ToolCallResultLabels,
+} from './ToolCallResultContent';
 
 // MCP Tool Call Group — a run of calls as compact rows under one header
 export {
