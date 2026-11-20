@@ -255,18 +255,22 @@ test.describe('Visual Regression Tests - Core Components', () => {
   // leaving the caret at the document start (the heading) — and headings drop
   // images in markdown serialization, so the round-trip silently loses the
   // capture on slow CI runners. Retry until the caret really sits in the
-  // target paragraph.
+  // target paragraph — and stays there through a settle beat, because the
+  // story's async document load can replace the doc right after a verified
+  // click and yank the selection back to the start.
   async function placeCaretInParagraph(page: Page, text: string) {
     const paragraph = page.locator('.ProseMirror p', { hasText: text });
+    const caretParagraphText = () =>
+      page.evaluate(() => {
+        const node = window.getSelection()?.anchorNode;
+        const element = node instanceof Element ? node : node?.parentElement;
+        return element?.closest('p')?.textContent ?? '';
+      });
     await expect(async () => {
       await paragraph.click();
-      expect(
-        await page.evaluate(() => {
-          const node = window.getSelection()?.anchorNode;
-          const element = node instanceof Element ? node : node?.parentElement;
-          return element?.closest('p')?.textContent ?? '';
-        })
-      ).toContain(text);
+      expect(await caretParagraphText()).toContain(text);
+      await page.waitForTimeout(150);
+      expect(await caretParagraphText()).toContain(text);
     }).toPass();
   }
 
