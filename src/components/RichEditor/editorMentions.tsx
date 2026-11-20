@@ -101,8 +101,6 @@ class EditorMentionsExtension extends Extension {
 
 /** Room the list needs below the caret before it opens above it instead. */
 const MENU_MAX_HEIGHT = 224;
-/** Gap kept between the list and the viewport's edge. */
-const VIEWPORT_MARGIN = 8;
 
 /**
  * `@mention` autocomplete for a Kerebron editor: the kit to install, and the
@@ -197,33 +195,21 @@ export function useEditorMentions(options: MentionOption[] | undefined): {
     }
   }, [menuOpen, clamped, listId, optionId, options]);
 
-  // Measured once the list renders, before paint, so it never shows clipped.
-  const [menuWidth, setMenuWidth] = React.useState(0);
-  React.useLayoutEffect(() => {
-    if (menuOpen && floatingRef.current) {
-      setMenuWidth(floatingRef.current.offsetWidth);
-    }
-  }, [menuOpen, suggestions]);
-
   const kit = React.useMemo<EditorKit>(
     () => ({ getExtensions: () => [new EditorMentionsExtension(handlers)] }),
     []
   );
 
-  // Below the caret, or above it where the viewport has no room below; kept
-  // inside the viewport sideways (a caret near the end of a line).
+  // Below the caret, or above it where the viewport has no room below.
   const below =
     !anchor ||
     typeof window === 'undefined' ||
-    anchor.bottom + MENU_MAX_HEIGHT + VIEWPORT_MARGIN <= window.innerHeight;
+    anchor.bottom + MENU_MAX_HEIGHT + 8 <= window.innerHeight;
   const menuStyle: React.CSSProperties = anchor
     ? {
         position: 'fixed',
         zIndex: 50,
-        left: Math.max(
-          VIEWPORT_MARGIN,
-          Math.min(anchor.left, window.innerWidth - menuWidth - VIEWPORT_MARGIN)
-        ),
+        left: anchor.left,
         maxHeight: MENU_MAX_HEIGHT,
         ...(below
           ? { top: anchor.bottom + 4 }
