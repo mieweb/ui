@@ -52,6 +52,9 @@ const transactionHandler = () =>
 const coreEditorCreate = vi.fn((_opts: unknown) => editorMock);
 vi.mock('@kerebron/editor', () => ({
   CoreEditor: { create: (opts: unknown) => coreEditorCreate(opts) },
+  // Base classes the references kit extends (editorReferences.tsx).
+  Extension: class {},
+  Node: class {},
 }));
 // A stand-in for the real kit's extension list: enough of it to observe which
 // extensions the wrapper drops and which it replaces.

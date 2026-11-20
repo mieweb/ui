@@ -155,6 +155,16 @@
 }
 
 /*
+ * ProseMirror needs \`white-space: pre-wrap\` on the editable element, or the
+ * browser collapses a trailing space and the next keystroke replaces it —
+ * typing after an inline chip ("[chip] with") lost the space. Kerebron sets it
+ * on \`.kb-editor\`, which the custom-menu editor (RichEditor) doesn't carry.
+ */
+.kb-component .ProseMirror {
+  white-space: pre-wrap;
+}
+
+/*
  * Kerebron's base.css paints inline shortcode pills green without setting a
  * text color, so the inherited foreground fails WCAG AA contrast. Pin an
  * explicit white-on-green pairing (≈5.1:1) that holds in both themes.

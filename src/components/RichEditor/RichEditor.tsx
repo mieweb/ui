@@ -14,6 +14,9 @@ import { CoreEditor, type AssetLoad, type EditorKit } from '@kerebron/editor';
 import { createAssetLoad } from '@kerebron/wasm/web';
 
 import { useIsDarkMode } from '../../hooks/useIsDarkMode';
+import { MentionMenu } from '../Messaging/useMentionAutocomplete';
+import type { ReferenceTrigger } from '../ReferenceChip/references';
+import { useEditorReferences } from './editorReferences';
 import { MDY_PROJECTION_META } from './mdyTransaction';
 import {
   createEditorKits,
@@ -30,6 +33,7 @@ export type {
 } from './editorKits';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
+const NO_TRIGGERS: ReferenceTrigger[] = [];
 
 /**
  * The markdown converter's tree-sitter WASM init is not concurrency-safe, so
@@ -114,6 +118,15 @@ export interface RichEditorProps {
   /** Additional editor kits, installed once when the editor mounts. */
   editorKits?: EditorKit[];
   /**
+   * Inline references: one trigger per kind, e.g. `@` for people and `#` for
+   * tickets. Typing a trigger's character searches its records; a pick is an
+   * atomic chip, saved in `value` as a Markdown link (`[label](href)`), and
+   * links a trigger claims load back as chips. Whether references are on is
+   * read once, when the editor mounts; the triggers themselves (their
+   * `search`) are read on every use.
+   */
+  triggers?: ReferenceTrigger[];
+  /**
    * Reshape the stock toolbar before it renders: receives the menu's item
    * groups and returns the groups to render — append custom controls (a
    * macros toggle, dictation) or drop stock ones. Read once, when the editor
@@ -173,6 +186,7 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       assetLoad,
       mediaUpload,
       editorKits: additionalEditorKits,
+      triggers,
       modifyMenu,
       valueType = MARKDOWN_TYPE,
       strictValue = false,
@@ -180,6 +194,9 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
     ref
   ) {
     const isDark = useIsDarkMode();
+    const references = useEditorReferences(triggers ?? NO_TRIGGERS);
+    // Installed once, with the editor, like the other kits.
+    const referencesKitRef = useRef(triggers?.length ? references.kit : null);
     const hostRef = useRef<HTMLDivElement>(null);
     const editorInstance = useRef<CoreEditor | null>(null);
     const onChangeRef = useRef(onChange);
@@ -454,7 +471,11 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
           element: mount,
           uri: 'file:///untitled.md',
           assetLoad: assetLoad ?? createAssetLoad('/kerebron-wasm'),
-          editorKits: [...editorKits, ...(additionalEditorKits ?? [])],
+          editorKits: [
+            ...editorKits,
+            ...(referencesKitRef.current ? [referencesKitRef.current] : []),
+            ...(additionalEditorKits ?? []),
+          ],
           readOnly: disabledRef.current || readOnlyRef.current,
         });
 
@@ -621,6 +642,12 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
             }}
           />
         </div>
+
+        <MentionMenu
+          mention={references.menu}
+          label={references.activeTrigger?.label}
+          dataSlot="rich-editor-reference-list"
+        />
 
         {showPreview && (
           <div>

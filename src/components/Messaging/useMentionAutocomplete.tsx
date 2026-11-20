@@ -235,9 +235,25 @@ export function useMentionAutocomplete({
   };
 }
 
-export interface MentionMenuProps {
-  /** State returned by {@link useMentionAutocomplete}. */
-  mention: MentionAutocomplete;
+/**
+ * What {@link MentionMenu} draws: the open list and how to pick from it.
+ * {@link MentionAutocomplete} is one; RichEditor's references list is another.
+ */
+export interface MentionMenuState<T extends MentionOption = MentionOption> {
+  menuOpen: boolean;
+  suggestions: T[];
+  highlight: number;
+  listId: string;
+  optionId: (index: number) => string;
+  floatingRef: React.RefObject<HTMLUListElement | null>;
+  menuStyle: React.CSSProperties;
+  insert: (option: T) => void;
+  setHighlight: (index: number) => void;
+}
+
+export interface MentionMenuProps<T extends MentionOption = MentionOption> {
+  /** State returned by {@link useMentionAutocomplete}, or any {@link MentionMenuState}. */
+  mention: MentionMenuState<T>;
   /** Accessible label for the listbox. @default 'Mention' */
   label?: string;
   /** `data-slot` for the listbox. @default 'composer-mention-list' */
@@ -248,11 +264,11 @@ export interface MentionMenuProps {
  * The floating `@mention` suggestion listbox. Rendered in a portal so it
  * escapes overflow-hidden ancestors; renders nothing while closed.
  */
-export function MentionMenu({
+export function MentionMenu<T extends MentionOption = MentionOption>({
   mention,
   label = 'Mention',
   dataSlot = 'composer-mention-list',
-}: MentionMenuProps) {
+}: MentionMenuProps<T>) {
   if (!mention.menuOpen) return null;
   return createPortal(
     <ul

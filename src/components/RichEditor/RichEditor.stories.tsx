@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RichEditor, type RichEditorHandle } from './RichEditor';
 import { CodeEditor } from './CodeEditor';
+import { sampleTriggers } from '../ReferenceChip/storyData';
 
 const meta: Meta<typeof RichEditor> = {
   id: 'editors-richeditor',
@@ -56,6 +57,10 @@ async function save() {
 <Button onClick={save} disabled={saving}>Save</Button>
 \`\`\`
 
+### Inline references
+
+\`triggers\` turns on inline references: one \`ReferenceTrigger\` per kind (\`@\` people, \`#\` tickets, …). Typing a trigger's character calls its \`search\`; arrows move, Enter or Tab inserts the pick as an **atomic chip** (the caret steps over it, Backspace removes it whole), Escape closes the list for that spot. The chip is saved in \`value\` as a plain Markdown link (\`[@Ann Lee](/people/u-ann)\`) and links a trigger claims load back as chips, so the stored text needs no new syntax; read the ids back with \`referencesIn\`. The editor is the combobox (\`aria-autocomplete\`, \`aria-controls\`, \`aria-activedescendant\`) and the list a \`listbox\` named by the trigger's \`label\`. See \`ReferenceChip\` (\`editors-referencechip\`) for the trigger contract.
+
 ### Pasted and dropped files
 
 Images and videos can be pasted or dropped straight onto the surface. **Set \`mediaUpload.uploadHandler\` if the document is persisted anywhere** — without it the file is embedded in the document itself, an image as a base64 \`data:\` URL and a video as an object URL. A 4 MB screenshot becomes roughly 5.8 MB of Markdown, which most APIs will refuse, and an object URL is dead as soon as the page reloads.
@@ -87,6 +92,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
       entry: '@mieweb/ui/kerebron',
       peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'editors-referencechip',
+          why: 'RichEditor `triggers` insert references as chips; ReferenceChip defines the trigger contract and shows the same references outside the editor.',
+        },
         {
           type: 'composes with',
           target: 'editors-textarearich-kerebron',
@@ -139,6 +149,28 @@ function BasicExample() {
     </div>
   );
 }
+
+function ReferencesExample() {
+  const [value, setValue] = useState(
+    'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login on phones](/tickets/t-12). Type @ for people or # for tickets.'
+  );
+  return (
+    <div className="max-w-2xl">
+      <RichEditor
+        value={value}
+        onChange={setValue}
+        triggers={sampleTriggers}
+        aria-label="Plan"
+        showPreview
+      />
+    </div>
+  );
+}
+
+/** `@` for people and `#` for tickets: picks are chips, saved as Markdown links. */
+export const References: Story = {
+  render: () => <ReferencesExample />,
+};
 
 export const Basic: Story = {
   render: () => <BasicExample />,
