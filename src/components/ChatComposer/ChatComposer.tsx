@@ -483,6 +483,8 @@ export const ChatComposer = React.forwardRef<
   const handleSendMenuKeyDown = (event: React.KeyboardEvent) => {
     if (event.key === 'Escape') {
       event.preventDefault();
+      // Keep Escape from also reaching a surrounding Modal's document listener.
+      event.stopPropagation();
       setSendMenuOpen(false);
       sendMenuTriggerRef.current?.focus();
       return;

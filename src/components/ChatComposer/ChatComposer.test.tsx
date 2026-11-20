@@ -303,6 +303,29 @@ describe('ChatComposer', () => {
       expect(trigger).toHaveFocus();
       expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
     });
+
+    it('keeps Escape in the options menu from reaching a document listener', async () => {
+      // A surrounding Modal closes on a document-level Escape listener.
+      const onDocumentKeyDown = vi.fn();
+      document.addEventListener('keydown', onDocumentKeyDown);
+      try {
+        renderWithTheme(
+          <ChatComposer onSend={vi.fn()} sendOptions={sendOptions} />
+        );
+        fireEvent.change(getInput(), { target: { value: 'Later' } });
+        fireEvent.click(
+          screen.getByRole('button', { name: 'More send options' })
+        );
+        const later = screen.getByRole('menuitem', { name: 'Send later…' });
+        await vi.waitFor(() => expect(later).toHaveFocus());
+
+        fireEvent.keyDown(later, { key: 'Escape' });
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+        expect(onDocumentKeyDown).not.toHaveBeenCalled();
+      } finally {
+        document.removeEventListener('keydown', onDocumentKeyDown);
+      }
+    });
   });
 
   it('supports controlled value', () => {
