@@ -291,3 +291,38 @@ the internal `ChatComposer`). Legacy `MessageComposerProps`-era keys —
 `inputTrailing`, `onSend`, controlled `value` / `onValueChange` — are still
 accepted and mapped for compatibility, but new code should use the
 `ChatComposerProps` names directly.
+
+## SuperChat attachments and the media view (0.12.0)
+
+SuperChat now lays a message's attachments out as in a messaging app, and its
+media view can fill a phone. Hosts that only pass messages need no code
+changes; check the points below if you style SuperChat's DOM, extend its
+types, or rely on what the composer accepts.
+
+- **Attachments sit after the bubble, not inside it.** The text keeps its
+  bubble and each attachment follows as its own tile; two or more pictures
+  share one gallery tile. A message's actions (⋯) moved to the avatar's
+  column. CSS that targeted `superchat-message-media` inside the bubble needs
+  a fresh look; the current `data-slot` names are in the
+  [SuperChat README](src/components/SuperChat/README.md).
+- **The composer accepts fewer picture formats.** `image/*` became JPEG, PNG,
+  GIF, WebP and AVIF, the formats every browser can show. Anything else, a
+  HEIC from an iPhone for example, is refused with a reason through
+  `onComposerError` instead of being sent as a tile that can't load. Convert
+  such files before they reach the composer if you need them.
+- **`AttachmentKind` gains `'document'`.** An exhaustive `switch` over it
+  needs a new case.
+- **`SuperChatMediaLabels` gains required keys** (`openMediaNamed`,
+  `playMediaNamed`, `moreMedia`, `gallery`, `sending`, `sendingProgress`,
+  `mediaUnavailable`, `editAttachments`, `removeAttachment`,
+  `attachmentName`, `attachmentsPreview`). A partial `mediaLabels` override
+  keeps working; a full object needs them.
+- **`onMessageEdited` can receive `''`** as the text, when the author clears
+  it and attachments remain.
+- **One send at a time per conversation.** `isSending` blocks a second send
+  in the same conversation until the first settles.
+- **Escape leaves the media view on every screen** and stops there, so a
+  `Modal` or `Sheet` around SuperChat stays open.
+- **`Dropdown` closes when a scroll carries its trigger out of view.**
+  Scrolling inside the menu, the page itself, or the on-screen keyboard's own
+  scroll leaves it open.

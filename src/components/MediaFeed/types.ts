@@ -6,6 +6,12 @@ export interface MediaFeedMedia {
   src: string;
   poster?: string;
   alt?: string;
+  /**
+   * Its size in pixels (or any width and height in proportion), when the host
+   * knows it, so a thread's tile keeps its space before the picture loads.
+   */
+  width?: number;
+  height?: number;
 }
 
 export interface MediaFeedAuthor {

@@ -3,3 +3,4 @@ export * from './html';
 export * from './phone';
 export * from './date';
 export * from './environment';
+export * from './fileSize';

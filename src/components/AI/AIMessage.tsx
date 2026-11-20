@@ -24,6 +24,7 @@ import {
 import { SparklesIcon } from './icons';
 import { CollapsiblePill } from './CollapsiblePill';
 import { AudioPlayer } from '../AudioPlayer';
+import { formatFileSize } from '../../utils/fileSize';
 
 // ============================================================================
 // Avatar Component
@@ -419,13 +420,6 @@ function ContentBlock({
   }
 
   return null;
-}
-
-/** Human-readable file size (e.g. "1.2 MB"). */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ============================================================================

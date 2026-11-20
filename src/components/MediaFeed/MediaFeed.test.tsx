@@ -416,6 +416,21 @@ describe('MediaFeed', () => {
     }
   });
 
+  it("hands focus from an overlay item's ▶ to its player's Play when focus makes it active", () => {
+    renderFeed({ layout: 'overlay', autoPlay: false });
+    visibility([0.9, 0.1, 0]);
+    const second = screen.getByRole('article', { name: 'Second update' });
+    const badge = within(second).getByRole('button', { name: 'Play' });
+    expect(second.querySelector('[data-slot="media-controls-bar"]')).toBeNull();
+    // Shift+Tab or Tab lands on its ▶; the feed scrolls to it, and it's active.
+    act(() => badge.focus());
+    visibility([0.1, 0.9, 0]);
+    expect(badge).not.toBeInTheDocument();
+    const bar = second.querySelector('[data-slot="media-controls-bar"]');
+    expect(bar).not.toBeNull();
+    expect(bar!.contains(document.activeElement)).toBe(true);
+  });
+
   it('pauses the inline player for fullscreen and restores trigger focus on Escape', async () => {
     const { container } = renderFeed();
     visibility([0.9, 0.1, 0]);
