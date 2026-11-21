@@ -364,9 +364,16 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page.getByRole('status')).toHaveText('Attached', {
       timeout: 15000,
     });
-    // The story echoes the field's HTML: the image carries the uploaded URL
+    // The editor image carries the uploaded URL
     // (the mock returns an object URL), not a base64 embed.
-    await expect(page.getByTestId('html-output')).toContainText('src="blob:');
+    await expect(
+      page.locator('.ProseMirror img[alt="note-photo.png"]')
+    ).toHaveAttribute('src', /^blob:/);
+    // The wrapper exposes host state without displaying raw HTML in the demo.
+    await expect(page.getByTestId('media-capture-example')).toHaveAttribute(
+      'data-html',
+      /src="blob:/
+    );
   });
 
   // Image annotation (mieweb/ui#735): hover a document image, draw on it in
@@ -423,8 +430,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     const srcAfter = await docImage.getAttribute('src');
     expect(srcAfter).toMatch(/^blob:/);
     expect(srcAfter).not.toBe(srcBefore);
-    await expect(page.getByTestId('html-output')).toContainText(
-      'alt="evidence.png"'
+    await expect(page.getByTestId('media-capture-example')).toHaveAttribute(
+      'data-html',
+      expect.stringContaining(`src="${srcAfter}"`)
     );
   });
 

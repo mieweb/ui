@@ -242,7 +242,11 @@ const mockUploadHandler = async (file: File) => {
 function WithMediaCaptureExample() {
   const [value, setValue] = useState('<p>Attach evidence below.</p>');
   return (
-    <div className="flex max-w-2xl flex-col gap-2">
+    <div
+      className="max-w-2xl"
+      data-testid="media-capture-example"
+      data-html={value}
+    >
       <TextAreaRich
         value={value}
         onChange={setValue}
@@ -250,12 +254,6 @@ function WithMediaCaptureExample() {
         mediaUpload={{ uploadHandler: mockUploadHandler }}
         aria-label="Comment with media capture"
       />
-      <pre
-        data-testid="html-output"
-        className="max-h-40 overflow-auto text-xs whitespace-pre-wrap"
-      >
-        {value}
-      </pre>
     </div>
   );
 }
@@ -267,7 +265,7 @@ export const WithMediaCapture: Story = {
     docs: {
       description: {
         story:
-          'The `mediaCapture` opt-in docks the capture ribbon above the field; captures land at the caret as image/video nodes through the editor’s `mediaUpload` pipeline (here a mock `uploadHandler` — the `<pre>` echoes the HTML the field emits). Unavailable captures are hidden, and the ribbon disappears entirely while the field is `disabled`/`readOnly`. Hover a document image (or arrow the caret next to it) and a pencil button opens the annotate dialog: pen strokes and text notes are flattened into a new PNG that replaces the image through the same upload pipeline (mieweb/ui#735).',
+          'The `mediaCapture` opt-in docks the capture ribbon above the field; captures land at the caret as image/video nodes through the editor’s `mediaUpload` pipeline (here a mock `uploadHandler`). Unavailable captures are hidden, and the ribbon disappears entirely while the field is `disabled`/`readOnly`. Hover a document image (or arrow the caret next to it) and a pencil button opens the annotate dialog: pen strokes and text notes are flattened into a new PNG that replaces the image through the same upload pipeline (mieweb/ui#735).',
       },
     },
   },
