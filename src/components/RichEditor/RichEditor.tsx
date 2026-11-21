@@ -276,6 +276,14 @@ const RichEditor = forwardRef<RichEditorHandle, RichEditorProps>(
       () =>
         ariaLabel || ariaLabelledBy
           ? {
+              // setProps REPLACES the attributes createView installed, so
+              // Kerebron's own `class: 'kb-editor'` must be restated or the
+              // surface loses every `.kb-editor` rule — kerebron.css restores
+              // the heading/list styles Tailwind preflight strips, so without
+              // this, "## " and the Heading menu still convert blocks but
+              // h1–h6 render identically to body text (mieweb/ui#796). Same
+              // move as the TextAreaRich adapter's own setProps.
+              class: 'kb-editor',
               role: 'textbox',
               'aria-multiline': 'true',
               ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
