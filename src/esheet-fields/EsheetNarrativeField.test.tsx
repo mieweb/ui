@@ -102,6 +102,84 @@ describe('EsheetNarrativeField', () => {
   });
 });
 
+describe('sanitizeNarrativeHtml passes the full toolbar vocabulary', () => {
+  // The field renders the standard Kerebron toolbar and echoes sanitized HTML
+  // back into a strictValue editor: any byte the sanitizer changes triggers a
+  // document reload that reverts the user's formatting (and, before the
+  // extension-menu probe guard, corrupted the document mid-reload). Editor
+  // output must round-trip unchanged.
+  it.each([
+    [
+      'highlight',
+      '<p><mark style="background-color: yellow; color: inherit;">x</mark></p>',
+    ],
+    ['strikethrough', '<p><strike>x</strike></p>'],
+    ['code font', '<p><code>x</code></p>'],
+    ['super/subscript', '<p><sup>1</sup><sub>2</sub></p>'],
+    ['link', '<p><a href="https://a.example/b" title="b">x</a></p>'],
+    ['alignment', '<p style="text-align: center;">x</p>'],
+    ['heading 4-6', '<h4>a</h4><h5>b</h5><h6>c</h6>'],
+    ['code block', '<pre lang="js"><code>x</code></pre>'],
+    ['horizontal rule', '<p>a</p><hr><p>b</p>'],
+    [
+      'table',
+      '<table><tbody><tr><th>h</th><td colspan="2">c</td></tr></tbody></table>',
+    ],
+    [
+      'task list',
+      '<ul data-type="task_list"><li data-type="task_item" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>t</p></div></li></ul>',
+    ],
+  ])('round-trips %s byte-for-byte', (_name, html) => {
+    expect(sanitizeNarrativeHtml(html)).toBe(html);
+  });
+
+  it('still strips scripts, handlers, and unknown URL schemes', () => {
+    expect(sanitizeNarrativeHtml('<p>a<script>x()</script></p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(
+      sanitizeNarrativeHtml(
+        '<p><a href="javascript:x()" onclick="x()">a</a></p>'
+      )
+    ).toBe('<p><a>a</a></p>');
+    expect(
+      sanitizeNarrativeHtml('<p><iframe src="https://x"></iframe>a</p>')
+    ).toBe('<p>a</p>');
+  });
+
+  it('only the task-list checkbox may ride an input', () => {
+    expect(sanitizeNarrativeHtml('<p><input type="text" value="x">a</p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(sanitizeNarrativeHtml('<p><input type="submit">a</p>')).toBe(
+      '<p>a</p>'
+    );
+  });
+
+  it('scrubs style values to the props the editor writes', () => {
+    // Foreign props go; the editor's own survive.
+    expect(
+      sanitizeNarrativeHtml(
+        '<p style="position: fixed; text-align: right;">a</p>'
+      )
+    ).toBe('<p style="text-align: right;">a</p>');
+    // An all-foreign style loses the attribute entirely.
+    expect(
+      sanitizeNarrativeHtml(
+        '<p style="background-image: url(https://x/y)">a</p>'
+      )
+    ).toBe('<p>a</p>');
+  });
+
+  it('narrativeText breaks lines at the new block tags', () => {
+    expect(
+      narrativeText(
+        '<h4>Head</h4><table><tbody><tr><td>one</td></tr><tr><td>two</td></tr></tbody></table>'
+      )
+    ).toBe('Head\none\ntwo');
+  });
+});
+
 describe('sanitizeNarrativeHtml media opt-in (mieweb/ui#736)', () => {
   const img = (src: string) => `<p>Note</p><img src="${src}" alt="scan">`;
 

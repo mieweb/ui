@@ -50,23 +50,91 @@ export interface NarrativeSanitizeOptions {
   media?: boolean;
 }
 
+/**
+ * Every tag the stock Kerebron toolbar can emit. The field renders the full
+ * standard toolbar (same as TextAreaRich everywhere else), and `value` echoes
+ * the sanitized HTML back into a `strictValue` editor — so the sanitizer must
+ * pass the editor's own output byte-for-byte or every edit triggers a reload
+ * that reverts the formatting. It is an XSS barrier, not a formatting policy.
+ */
 const NARRATIVE_TAGS = [
+  // blocks
   'p',
   'div',
   'br',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'blockquote',
+  'ul',
+  'ol',
+  'li',
+  'pre',
+  'hr',
+  // marks
   'strong',
   'b',
   'em',
   'i',
   'u',
-  'h1',
-  'h2',
-  'h3',
-  'blockquote',
-  'ul',
-  'ol',
-  'li',
+  's',
+  'strike',
+  'del',
+  'mark',
+  'code',
+  'sup',
+  'sub',
+  'a',
+  // tables
+  'table',
+  'thead',
+  'tbody',
+  'tfoot',
+  'tr',
+  'td',
+  'th',
+  'caption',
+  // task-list item chrome (li > label > input[type=checkbox] + span + div)
+  'label',
+  'input',
+  'span',
 ];
+
+/**
+ * Attributes those tags carry when Kerebron serializes: link target/tooltip,
+ * code-block language, table spans, task-list state, and the `style` strings
+ * the paragraph (text-align) and highlight (background-color) nodes write.
+ * `style` values are scrubbed to {@link NARRATIVE_STYLE_PROPS} below.
+ */
+const NARRATIVE_ATTRS = [
+  'href',
+  'title',
+  'style',
+  'lang',
+  'colspan',
+  'rowspan',
+  'data-colwidth',
+  'data-type',
+  'data-checked',
+  'type',
+  'checked',
+];
+
+/** The only CSS the editor writes: alignment and highlight colors. */
+const NARRATIVE_STYLE_PROPS = ['text-align', 'background-color', 'color'];
+
+// An isolated DOMPurify instance (renderEmailMjml precedent): hooks registered
+// on the shared default instance elsewhere in the app (useMarkdown decorates
+// every anchor with target/rel) must not rewrite narrative HTML — any byte
+// they change breaks the editor echo round trip and triggers a reload.
+let narrativePurifier: ReturnType<typeof DOMPurify> | undefined;
+
+function getNarrativePurifier(): ReturnType<typeof DOMPurify> {
+  return (narrativePurifier ??= DOMPurify(window));
+}
 
 /** Only uploaded URLs may render in a narrative: https, or this origin. */
 function allowedNarrativeImageSrc(src: string): boolean {
@@ -90,47 +158,67 @@ function allowedNarrativeImageSrc(src: string): boolean {
 }
 
 /**
- * Keep document formatting small: no links, styles, or imported document
- * chrome. Every block format the editor's block menu and markdown shortcuts
- * offer (headings 1–3, quote, lists) is allowed, so published formatting
- * survives reopening the field. Media stays out unless the host opts in —
- * see {@link NarrativeSanitizeOptions.media}.
+ * Block XSS and document chrome, keep the editor's own vocabulary: every
+ * format the standard toolbar offers (marks, headings, lists, tables, task
+ * lists, alignment, highlight) survives the publish round trip, so the field
+ * behaves exactly like TextAreaRich. Scripts, event handlers, foreign
+ * styles/attributes, and non-checkbox inputs are stripped. Media stays out
+ * unless the host opts in — see {@link NarrativeSanitizeOptions.media}.
  */
 export function sanitizeNarrativeHtml(
   html: string,
   options?: NarrativeSanitizeOptions
 ): string {
-  if (!options?.media) {
-    return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS: NARRATIVE_TAGS,
-      ALLOWED_ATTR: [],
-      ALLOW_DATA_ATTR: false,
-      ALLOW_ARIA_ATTR: false,
-    });
-  }
-  const sanitized = DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [...NARRATIVE_TAGS, 'img'],
-    ALLOWED_ATTR: ['src', 'alt'],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
-    // DOMPurify's default URI policy admits data: images and rejects blob:
-    // outright — the opposite of ours. Mirror its shape with http(s)/blob as
-    // the scheme list (relative URLs ride the schemeless branches); the
-    // authoritative uploaded-URL-only check is the pass below.
-    ALLOWED_URI_REGEXP:
-      // eslint-disable-next-line no-useless-escape -- mirrors DOMPurify's default regexp character-for-character outside the scheme list
-      /^(?:(?:https?|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  const sanitized = options?.media
+    ? getNarrativePurifier().sanitize(html, {
+        ALLOWED_TAGS: [...NARRATIVE_TAGS, 'img'],
+        ALLOWED_ATTR: [...NARRATIVE_ATTRS, 'src', 'alt'],
+        ALLOW_DATA_ATTR: false,
+        ALLOW_ARIA_ATTR: false,
+        // DOMPurify's default URI policy admits data: images and rejects blob:
+        // outright — the opposite of ours. Mirror its shape with http(s)/blob as
+        // the scheme list (relative URLs ride the schemeless branches); the
+        // authoritative uploaded-URL-only check is the pass below.
+        ALLOWED_URI_REGEXP:
+          // eslint-disable-next-line no-useless-escape -- mirrors DOMPurify's default regexp character-for-character outside the scheme list
+          /^(?:(?:https?|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+      })
+    : getNarrativePurifier().sanitize(html, {
+        ALLOWED_TAGS: NARRATIVE_TAGS,
+        ALLOWED_ATTR: NARRATIVE_ATTRS,
+        ALLOW_DATA_ATTR: false,
+        ALLOW_ARIA_ATTR: false,
+      });
+  const root = document.createElement('div');
+  root.innerHTML = sanitized;
+  // Only the task-list checkbox may ride an `input` — anything else (text,
+  // image, submit…) is injected chrome, not editor output.
+  root.querySelectorAll('input').forEach((input) => {
+    if (input.getAttribute('type') !== 'checkbox') input.remove();
+  });
+  // Scrub style values to the props the editor writes. When every declared
+  // prop is allowed the attribute is left untouched — rewriting it would
+  // change the string the editor serialized and re-trigger the reload this
+  // sanitizer exists to avoid.
+  root.querySelectorAll('[style]').forEach((element) => {
+    const { style } = element as HTMLElement;
+    const disallowed = Array.from(style).filter(
+      (prop) => !NARRATIVE_STYLE_PROPS.includes(prop)
+    );
+    if (!disallowed.length) return;
+    disallowed.forEach((prop) => style.removeProperty(prop));
+    if (!style.length) element.removeAttribute('style');
   });
   // Enforce uploaded-URL-only in a dedicated pass: https anywhere, or this
   // origin (a blob: URL carries its creator's origin, so same-origin object
   // URLs pass; they are session-scoped — persistence is the uploadHandler's
   // job).
-  const root = document.createElement('div');
-  root.innerHTML = sanitized;
-  root.querySelectorAll('img').forEach((img) => {
-    const src = img.getAttribute('src');
-    if (!src || !allowedNarrativeImageSrc(src)) img.remove();
-  });
+  if (options?.media) {
+    root.querySelectorAll('img').forEach((img) => {
+      const src = img.getAttribute('src');
+      if (!src || !allowedNarrativeImageSrc(src)) img.remove();
+    });
+  }
   return root.innerHTML;
 }
 
@@ -172,10 +260,16 @@ export function narrativeText(html: string): string {
       'H1',
       'H2',
       'H3',
+      'H4',
+      'H5',
+      'H6',
       'BLOCKQUOTE',
       'UL',
       'OL',
       'LI',
+      'PRE',
+      'TABLE',
+      'TR',
     ].includes(node.tagName);
     if (isBlock) lineBreak();
     if (node.tagName === 'LI') {
