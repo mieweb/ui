@@ -41,6 +41,10 @@ import {
   reorderIds,
 } from '../../hooks/useDragReorder';
 import { useLiveAnnouncement } from '../../hooks/useLiveAnnouncement';
+import type {
+  UncodedMedicationType,
+  CompoundIngredient,
+} from '../MedicationList';
 import {
   useCodeLookupConfig,
   type CodeLookupProviderConfig,
@@ -86,6 +90,12 @@ export interface AssessmentOrder {
   bodySite?: string;
   /** Referral: target specialty or provider */
   referTo?: string;
+  /** Medication, uncoded: what it is — 'CP' compound or 'SP' supply */
+  uncodedType?: UncodedMedicationType;
+  /** Medication, compound: structured ingredients (drug, form, strength,
+   * quantity, unit) — round-trips through `OrderEditor` so a compound
+   * medication order doesn't lose them. */
+  compoundIngredients?: CompoundIngredient[];
 }
 
 /** A code picked from a lookup (structurally matches CodifyResult). */

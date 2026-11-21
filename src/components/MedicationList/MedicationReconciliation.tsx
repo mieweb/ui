@@ -35,6 +35,7 @@ import {
   MedicationEditor,
   lookupToMedicationFields,
   type CodeLookupConfig,
+  type MedicationEditorOptions,
 } from './MedicationEditor';
 import { useCodeLookupConfig } from '../CodeLookup/context';
 
@@ -81,6 +82,11 @@ export interface MedicationReconciliationProps {
   codeLookup?: CodeLookupConfig | false;
   /** Require a catalog selection for new medications; existing uncoded records remain editable. */
   requireCode?: boolean;
+  /**
+   * Medication editor (Correct / Add Medication) options — directions
+   * presets, days-supply presets, and the prescriber list.
+   */
+  editorOptions?: MedicationEditorOptions;
   /**
    * Render an inline CodeLookup search bar in the add-medication section
    * (requires `codeLookup`). Picks add immediately as Unreconciled — the
@@ -216,6 +222,7 @@ export function MedicationReconciliation({
   onAction,
   codeLookup,
   requireCode = false,
+  editorOptions,
   inlineAddSearch = false,
   readOnly = false,
   reconciledMessage,
@@ -394,6 +401,7 @@ export function MedicationReconciliation({
           medication={editorTarget}
           codeLookup={codeLookup === false ? false : effectiveCodeLookup}
           requireCode={requireCode}
+          {...editorOptions}
           onClose={() => setDialog(null)}
           onSave={handleEditorSave}
         />

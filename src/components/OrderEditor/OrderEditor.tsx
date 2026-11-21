@@ -110,6 +110,13 @@ export interface OrderEditorProps {
    * `CodeLookupProvider`; pass `false` to force a plain name input.
    */
   codeLookup?: OrderCodeLookupConfig | false;
+  /**
+   * Medication orders only: show a structured ingredients sub-form
+   * (drug, form, strength, quantity, unit) when the order is marked
+   * Compound. Passed straight through to `MedicationEditor`; ignored for
+   * every other order type.
+   */
+  collectCompoundIngredients?: boolean;
   /** Called when the editor is dismissed without saving */
   onClose: () => void;
   /** Called with the complete order on save */
@@ -132,6 +139,8 @@ export function orderToMedication(order: AssessmentOrder): Medication {
     status: 'unreconciled',
     indication: order.indication,
     pharmacyNotes: order.notes,
+    uncodedType: order.uncodedType,
+    compoundIngredients: order.compoundIngredients,
     ...labelToMedicationFields(order.display),
     ...(sig && {
       route: sig.route,
@@ -159,6 +168,8 @@ export function medicationToOrder(
     detail: med.sig || undefined,
     indication: med.indication || undefined,
     notes: med.pharmacyNotes || undefined,
+    uncodedType: med.uncodedType,
+    compoundIngredients: med.compoundIngredients,
     code: med.code
       ? // keep the original fullid when the code is unchanged
         base.code?.codetype === med.code.system &&
@@ -397,6 +408,7 @@ function BaseOrderEditor({
               <Label htmlFor="ord-detail">Instructions</Label>
               <Textarea
                 id="ord-detail"
+                richText={false}
                 value={draft.detail ?? ''}
                 onChange={(e) => patch({ detail: e.target.value || undefined })}
                 rows={2}
@@ -420,6 +432,7 @@ function BaseOrderEditor({
               </Label>
               <Textarea
                 id="ord-notes"
+                richText={false}
                 value={draft.notes ?? ''}
                 onChange={(e) => patch({ notes: e.target.value || undefined })}
                 rows={2}
@@ -485,6 +498,7 @@ export function OrderEditor({
   order,
   defaultType = 'procedure',
   codeLookup,
+  collectCompoundIngredients,
   onClose,
   onSave,
 }: OrderEditorProps): React.JSX.Element | null {
@@ -515,6 +529,7 @@ export function OrderEditor({
         }
         onClose={onClose}
         onSave={(med) => onSave(medicationToOrder(med, base))}
+        collectCompoundIngredients={collectCompoundIngredients}
       />
     );
   }

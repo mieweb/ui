@@ -8,6 +8,7 @@ import {
   type MedicationStatus,
 } from './MedicationList';
 import { MedicationReconciliation } from './MedicationReconciliation';
+import type { MedicationEditorOptions } from './MedicationEditor';
 import { CodeLookup } from '../CodeLookup';
 
 const meta: Meta<typeof MedicationList> = {
@@ -28,7 +29,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 | \`MedicationList\` | You need full control of the data flow and will supply your own dialogs / editor. Presentational and controlled: \`medications\` in, \`onStatusChange\` / \`onAction\` / \`onReorder\` / \`onQuickAdd\` / \`onAddOther\` out | **Headless**, **Default** and the variant stories |
 | \`registerMedicationListFieldType()\` | The list is a question inside an eSheet form | [MedicationListField (eSheet)](?path=/docs/clinical-lists-medicationlistfield-esheet--docs) |
 
-**Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, pharmacy notes) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit) and \`parseSig\` (route / frequency / PRN from the sig text). Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
+**Start with \`MedicationReconciliation\` unless you have a reason not to.** \`MedicationEditor\` (the NCPDP SCRIPT NewRx \`MedicationPrescribed\` field set — drug, code, strength, dose form, quantity, days supply, refills, DAW, sig, dates, indication, prescriber, pharmacy notes) is exported on its own too, as are the parsers it uses: \`parseMedicationLabel\` ("lisinopril 20 mg tablet" → strength / dose form / quantity unit), \`expandSig\` (practitioner shorthand "1 tab po bid" → patient sig) and \`parseSig\` (route / frequency / PRN from the sig text). Directions presets, days-supply presets and the prescriber list go through \`editorOptions\`. Drug coding is dependency-injected: \`codeLookup={{ component: CodeLookup, indexUrl }}\` (or an ambient \`CodeLookupProvider\`); omit it and the editor falls back to a plain name input. \`actions\` trims the row toolbar (\`open · correct · refill · add-task · note · remove · move-up · move-down\`); host-specific \`open\` / \`refill\` are reported through \`onAction\`, never handled.
 
 ### Use it when
 
@@ -142,6 +143,18 @@ const sampleMedications: Medication[] = [
   },
 ];
 
+const sampleEditorOptions: MedicationEditorOptions = {
+  sigPresets: [
+    { label: 'Once a day', sig: 'qd' },
+    { label: 'Twice a day with food', sig: 'bid with food' },
+    { label: 'Twice a day as needed', sig: 'bid prn' },
+  ],
+  prescribers: [
+    { value: 'dr-ruiz', label: 'Dr. Elena Ruiz' },
+    { value: 'dr-hart', label: 'Dr. Samuel Hart' },
+  ],
+};
+
 /**
  * The full reconciliation experience — `MedicationReconciliation` with the
  * NCPDP MedicationEditor and offline RxNorm/FDB coding. Correct / Add open
@@ -160,6 +173,7 @@ function InteractiveTemplate() {
           'metformin 500 mg tablet',
         ]}
         codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+        editorOptions={sampleEditorOptions}
         onChange={(meds) =>
           setLog((prev) => [
             `onChange — ${meds.length} medications`,
@@ -192,6 +206,13 @@ Everything works without writing any handler code:
 - **Correct** and the **Add** pill open the NCPDP \`MedicationEditor\`; the drug
   search codes against RxNorm/FDB offline (try typing "lisinopril 20") and
   auto-fills strength, dose form, and quantity unit
+- In the editor, the **directions presets** and the practitioner sig
+  shorthand ("1 tab po bid") expand into the patient sig; **30d / 90d**
+  fill days supply, refills step with −/+, and the prescriber is picked
+  from \`editorOptions.prescribers\`
+- **Quantity** is calculated from the sig × days supply when you leave a
+  changed field (try a 30d preset on a tablet), or with the calculator
+  button; non-countable forms explain why they can't be calculated
 - **Notes / Add Task** open small dialogs; their text appears under the row
 - **Drag** a row by its grip to reorder within its status group (same
   interaction as Assessment); Alt+↑/↓ is the keyboard equivalent
@@ -464,6 +485,85 @@ search degrades to a plain medication name input; everything else (NCPDP
 fields, sig parsing, dialogs, reordering) works identically. Uncontrolled
 here via \`defaultMedications\`; changes surface in the browser console
 through \`onChange\`.
+        `,
+      },
+    },
+  },
+};
+
+const compoundMedications: Medication[] = [
+  ...sampleMedications,
+  {
+    id: '7',
+    name: 'hormone troche',
+    uncodedType: 'CP',
+    status: 'unreconciled',
+    doseForm: 'troche',
+    sig: '1 troche sublingually bid',
+    compoundIngredients: [
+      {
+        name: 'estradiol',
+        doseForm: 'powder',
+        strength: '0.5 mg',
+        quantity: '1',
+        quantityUnit: 'gram',
+      },
+      {
+        name: 'progesterone',
+        doseForm: 'powder',
+        strength: '100 mg',
+        quantity: '1',
+        quantityUnit: 'gram',
+      },
+    ],
+  },
+];
+
+/**
+ * Compound medications with structured ingredients — `editorOptions`'
+ * `collectCompoundIngredients: true` turns on a repeatable ingredients
+ * sub-form (drug, form, strength, quantity, unit) whenever a medication is
+ * marked **Compound**.
+ */
+export const CompoundIngredients: StoryObj<typeof MedicationReconciliation> = {
+  render: () => (
+    <MedicationReconciliation
+      defaultMedications={compoundMedications}
+      codeLookup={{ component: CodeLookup, indexUrl: '/codify' }}
+      editorOptions={{
+        ...sampleEditorOptions,
+        collectCompoundIngredients: true,
+      }}
+      onChange={(meds) => console.log('medications changed', meds)}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: `
+**Compound medications with structured ingredients.** Passing
+\`collectCompoundIngredients: true\` through \`editorOptions\` (or directly
+to \`MedicationEditor\`) adds an ingredients sub-form — Drug, Form,
+Strength, Quantity, and a quantity-unit dropdown per row — below Strength /
+Dose form whenever the medication is marked **Compound**:
+
+- **"hormone troche"** (first row) already has two ingredients; hit
+  **Correct** to see them pre-filled, add a third with **+ Add
+  ingredient**, or remove one with the trash button
+- **Other…** → type a name, press Enter for free text, then click
+  **Compound** to reveal the **Ingredients** sub-form with its first row
+  already there to fill in — **Supply**, or leaving it uncoded, hides it
+- Each ingredient's Drug field uses the same injected CodeLookup as the
+  main medication search; Form and Strength are the same autocomplete
+  fields; the quantity unit defaults from the dose form and can be
+  overridden from the dropdown, same as the medication's own Quantity
+- Rows left blank are dropped on save; ingredients are stored on the
+  medication as \`compoundIngredients: CompoundIngredient[]\` and cleared
+  if it's no longer a compound
+
+Omit \`collectCompoundIngredients\` (see **Interactive**) to hide the
+sub-form entirely — Compound / Supply still work as a plain classification
+toggle.
         `,
       },
     },
