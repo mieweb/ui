@@ -18,6 +18,10 @@ const exclusiveOverlays: ExclusiveOverlay[] = [];
  * root or flushSync) unregisters the inner owner while the event is still
  * dispatching; without this freeze a later listener on the same event would
  * recompute "topmost" and dismiss its own layer too — one Escape, two closes.
+ *
+ * Cleared in a microtask after the dispatch so the cache never retains the
+ * event (and, through its target, a detached dialog subtree) once the
+ * keypress is over — and a redispatched event re-resolves ownership fresh.
  */
 let frozenOwner: {
   event: globalThis.KeyboardEvent;
@@ -29,6 +33,9 @@ function ownerFor(
 ): ExclusiveOverlay | undefined {
   if (frozenOwner?.event !== event) {
     frozenOwner = { event, owner: topmostOverlay() };
+    queueMicrotask(() => {
+      frozenOwner = null;
+    });
   }
   return frozenOwner.owner;
 }
