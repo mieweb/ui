@@ -224,6 +224,21 @@ describe('RichTextEsheet mode synchronization', () => {
     for (const dialog of pageDialogs.splice(0)) dialog.remove();
   });
 
+  // Resolver closes have timed out at waitFor's default on slow CI runners
+  // (first on the page-dialog test, then on the Modal-host test). Every
+  // close wait shares this generous budget, and the tests that use it take
+  // a matching overall timeout — vitest's 5s default could expire before
+  // the wait does.
+  const RESOLVER_CLOSE_TEST_TIMEOUT = 15000;
+  const expectResolverClosed = () =>
+    waitFor(
+      () =>
+        expect(
+          screen.queryByRole('dialog', { name: 'Details' })
+        ).not.toBeInTheDocument(),
+      { timeout: 5000 }
+    );
+
   it('opens a native eSheet MDY from its own form and validates a supplied form', () => {
     const original = parseRichTextEsheetMdy(
       createRichTextEsheetSnapshot(form, {}).mdy
@@ -328,168 +343,169 @@ describe('RichTextEsheet mode synchronization', () => {
     expect(document.activeElement).toBe(confirm);
   });
 
-  it('ignores Escape in the resolver while a capture confirmation is open', async () => {
-    const { container } = render(<RichTextEsheet form={form} />);
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    await screen.findByRole('dialog', { name: 'Details' });
-    // AlertDialog ignores Escape by design, so the key falls through to the
-    // resolver's document listener. Closing the resolver underneath would
-    // desync Modal's scroll lock and leave the page unscrollable. The
-    // confirmation renders inline inside the component root.
-    const modal = document.createElement('div');
-    modal.setAttribute('role', 'alertdialog');
-    container.firstElementChild!.appendChild(modal);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
-    modal.remove();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
+  it(
+    'ignores Escape in the resolver while a capture confirmation is open',
+    async () => {
+      const { container } = render(<RichTextEsheet form={form} />);
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      await screen.findByRole('dialog', { name: 'Details' });
+      // AlertDialog ignores Escape by design, so the key falls through to the
+      // resolver's document listener. Closing the resolver underneath would
+      // desync Modal's scroll lock and leave the page unscrollable. The
+      // confirmation renders inline inside the component root.
+      const modal = document.createElement('div');
+      modal.setAttribute('role', 'alertdialog');
+      container.firstElementChild!.appendChild(modal);
+      fireEvent.keyDown(document, { key: 'Escape' });
       expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-  });
+        screen.getByRole('dialog', { name: 'Details' })
+      ).toBeInTheDocument();
+      modal.remove();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
-  it('ignores Escape and keeps focus while an annotation dialog is open', async () => {
-    const { container } = render(<RichTextEsheet form={form} />);
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    await screen.findByRole('dialog', { name: 'Details' });
-    // The annotate-image Modal is a plain role="dialog" rendered inline
-    // inside the component root but outside the trap, refusing dismissal
-    // while its upload is saving — Escape falls through to the resolver's
-    // document listener, and the trap's focusin listener sees focus outside
-    // the resolver.
-    const modal = document.createElement('div');
-    modal.setAttribute('role', 'dialog');
-    const save = document.createElement('button');
-    save.textContent = 'Save annotation';
-    modal.appendChild(save);
-    container.firstElementChild!.appendChild(modal);
-    act(() => save.focus());
-    expect(document.activeElement).toBe(save);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
-    modal.remove();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
+  it(
+    'ignores Escape and keeps focus while an annotation dialog is open',
+    async () => {
+      const { container } = render(<RichTextEsheet form={form} />);
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      await screen.findByRole('dialog', { name: 'Details' });
+      // The annotate-image Modal is a plain role="dialog" rendered inline
+      // inside the component root but outside the trap, refusing dismissal
+      // while its upload is saving — Escape falls through to the resolver's
+      // document listener, and the trap's focusin listener sees focus outside
+      // the resolver.
+      const modal = document.createElement('div');
+      modal.setAttribute('role', 'dialog');
+      const save = document.createElement('button');
+      save.textContent = 'Save annotation';
+      modal.appendChild(save);
+      container.firstElementChild!.appendChild(modal);
+      act(() => save.focus());
+      expect(document.activeElement).toBe(save);
+      fireEvent.keyDown(document, { key: 'Escape' });
       expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-  });
+        screen.getByRole('dialog', { name: 'Details' })
+      ).toBeInTheDocument();
+      modal.remove();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
-  it('ignores Escape from an annotation dialog nested inside the resolver', async () => {
-    render(<RichTextEsheet form={form} />);
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    const resolver = await screen.findByRole('dialog', { name: 'Details' });
-    // Modal renders inline (no portal): annotating a capture taken inside
-    // the resolver mounts its dialog as a descendant of the trap.
-    const modal = document.createElement('div');
-    modal.setAttribute('role', 'dialog');
-    resolver.appendChild(modal);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(screen.getByRole('dialog', { name: 'Details' })).toBeInTheDocument();
-    modal.remove();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
+  it(
+    'ignores Escape from an annotation dialog nested inside the resolver',
+    async () => {
+      render(<RichTextEsheet form={form} />);
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      const resolver = await screen.findByRole('dialog', { name: 'Details' });
+      // Modal renders inline (no portal): annotating a capture taken inside
+      // the resolver mounts its dialog as a descendant of the trap.
+      const modal = document.createElement('div');
+      modal.setAttribute('role', 'dialog');
+      resolver.appendChild(modal);
+      fireEvent.keyDown(document, { key: 'Escape' });
       expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-  });
+        screen.getByRole('dialog', { name: 'Details' })
+      ).toBeInTheDocument();
+      modal.remove();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
-  it('closes the resolver with Escape despite an unrelated page dialog', async () => {
-    render(<RichTextEsheet form={form} />);
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    await screen.findByRole('dialog', { name: 'Details' });
-    // A non-modal page-level dialog (e.g. a cookie-consent banner) is not
-    // nested in this component and must not swallow the resolver's Escape.
-    // Cleanup lives in an afterEach: a runner timeout abandons this test
-    // body mid-await, so inline cleanup (even in a finally) is not
-    // guaranteed to run before later tests query dialogs (CI cascade on
-    // the v0.12.0 release PR).
-    const banner = document.createElement('div');
-    banner.setAttribute('role', 'dialog');
-    banner.setAttribute('aria-label', 'Cookie consent');
-    pageDialogs.push(banner);
-    document.body.appendChild(banner);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    // Generous timeout: this close has timed out at waitFor's default on
-    // slow CI runners. The test timeout budgets for the setup above plus
-    // this wait — vitest's 5s default could expire before the wait does.
-    await waitFor(
-      () =>
-        expect(
-          screen.queryByRole('dialog', { name: 'Details' })
-        ).not.toBeInTheDocument(),
-      { timeout: 5000 }
-    );
-  }, 15000);
+  it(
+    'closes the resolver with Escape despite an unrelated page dialog',
+    async () => {
+      render(<RichTextEsheet form={form} />);
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      await screen.findByRole('dialog', { name: 'Details' });
+      // A non-modal page-level dialog (e.g. a cookie-consent banner) is not
+      // nested in this component and must not swallow the resolver's Escape.
+      // Cleanup lives in an afterEach: a runner timeout abandons this test
+      // body mid-await, so inline cleanup (even in a finally) is not
+      // guaranteed to run before later tests query dialogs (CI cascade on
+      // the v0.12.0 release PR).
+      const banner = document.createElement('div');
+      banner.setAttribute('role', 'dialog');
+      banner.setAttribute('aria-label', 'Cookie consent');
+      pageDialogs.push(banner);
+      document.body.appendChild(banner);
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
-  it('closes the resolver with Escape inside an enclosing host dialog', async () => {
-    // Hosts may embed the whole component in their own modal; an ancestor
-    // dialog is not a nested one and must not swallow the resolver's Escape.
-    render(
-      <div role="dialog" aria-label="Host modal">
-        <RichTextEsheet form={form} />
-      </div>
-    );
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    await screen.findByRole('dialog', { name: 'Details' });
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-  });
+  it(
+    'closes the resolver with Escape inside an enclosing host dialog',
+    async () => {
+      // Hosts may embed the whole component in their own modal; an ancestor
+      // dialog is not a nested one and must not swallow the resolver's Escape.
+      render(
+        <div role="dialog" aria-label="Host modal">
+          <RichTextEsheet form={form} />
+        </div>
+      );
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      await screen.findByRole('dialog', { name: 'Details' });
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
-  it('dismisses one overlay layer per Escape inside a library Modal host', async () => {
-    // Modal and the resolver both listen for Escape on document; exclusive
-    // ownership makes only the topmost layer act per keypress — the host
-    // must not close together with the resolver.
-    const onOpenChange = vi.fn();
-    render(
-      <Modal open onOpenChange={onOpenChange} aria-label="Host modal">
-        <RichTextEsheet form={form} />
-      </Modal>
-    );
-    await screen.findByRole('textbox', { name: /Summary/ });
-    selectMode('RichEdit');
-    fireEvent.click(
-      await screen.findByRole('button', { name: 'Edit linked section' })
-    );
-    await screen.findByRole('dialog', { name: 'Details' });
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-    expect(onOpenChange).not.toHaveBeenCalled();
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-  });
+  it(
+    'dismisses one overlay layer per Escape inside a library Modal host',
+    async () => {
+      // Modal and the resolver both listen for Escape on document; exclusive
+      // ownership makes only the topmost layer act per keypress — the host
+      // must not close together with the resolver.
+      const onOpenChange = vi.fn();
+      render(
+        <Modal open onOpenChange={onOpenChange} aria-label="Host modal">
+          <RichTextEsheet form={form} />
+        </Modal>
+      );
+      await screen.findByRole('textbox', { name: /Summary/ });
+      selectMode('RichEdit');
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Edit linked section' })
+      );
+      await screen.findByRole('dialog', { name: 'Details' });
+      fireEvent.keyDown(document, { key: 'Escape' });
+      await expectResolverClosed();
+      expect(onOpenChange).not.toHaveBeenCalled();
+      fireEvent.keyDown(document, { key: 'Escape' });
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    },
+    RESOLVER_CLOSE_TEST_TIMEOUT
+  );
 
   it('does not reload the rich editor for answer-only eSheet edits', async () => {
     render(<RichTextEsheet form={form} />);
