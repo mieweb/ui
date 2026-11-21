@@ -416,13 +416,22 @@ describe('RichTextEsheet mode synchronization', () => {
     banner.setAttribute('role', 'dialog');
     banner.setAttribute('aria-label', 'Cookie consent');
     document.body.appendChild(banner);
-    fireEvent.keyDown(document, { key: 'Escape' });
-    await waitFor(() =>
-      expect(
-        screen.queryByRole('dialog', { name: 'Details' })
-      ).not.toBeInTheDocument()
-    );
-    banner.remove();
+    try {
+      fireEvent.keyDown(document, { key: 'Escape' });
+      // Generous timeout: this close has timed out at waitFor's default on
+      // slow CI runners.
+      await waitFor(
+        () =>
+          expect(
+            screen.queryByRole('dialog', { name: 'Details' })
+          ).not.toBeInTheDocument(),
+        { timeout: 5000 }
+      );
+    } finally {
+      // Always remove the banner: a failed waitFor must not leak it into
+      // later tests' dialog queries (CI cascade on the v0.12.0 release PR).
+      banner.remove();
+    }
   });
 
   it('closes the resolver with Escape inside an enclosing host dialog', async () => {
