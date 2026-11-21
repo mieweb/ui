@@ -322,10 +322,10 @@ describe('RichTextEsheet mode synchronization', () => {
     const confirm = document.createElement('button');
     confirm.textContent = 'Capture screen';
     modal.appendChild(confirm);
+    pageDialogs.push(modal);
     document.body.appendChild(modal);
     act(() => confirm.focus());
     expect(document.activeElement).toBe(confirm);
-    modal.remove();
   });
 
   it('ignores Escape in the resolver while a capture confirmation is open', async () => {
