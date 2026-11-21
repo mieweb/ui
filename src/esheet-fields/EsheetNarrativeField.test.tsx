@@ -129,8 +129,20 @@ describe('sanitizeNarrativeHtml passes the full toolbar vocabulary', () => {
       'task list',
       '<ul data-type="task_list"><li data-type="task_item" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>t</p></div></li></ul>',
     ],
+    [
+      'merge token (fixShortcodeRoundTrip)',
+      '<p><span class="kb-shortcode-inline">{{patient_name}}</span></p>',
+    ],
   ])('round-trips %s byte-for-byte', (_name, html) => {
     expect(sanitizeNarrativeHtml(html)).toBe(html);
+  });
+
+  it.each([
+    ['mailto link', '<p><a href="mailto:dr@clinic.example">mail</a></p>'],
+    ['tel link', '<p><a href="tel:+15555550100">call</a></p>'],
+  ])('round-trips a %s under the media URI policy too', (_name, html) => {
+    expect(sanitizeNarrativeHtml(html)).toBe(html);
+    expect(sanitizeNarrativeHtml(html, { media: true })).toBe(html);
   });
 
   it('still strips scripts, handlers, and unknown URL schemes', () => {
@@ -171,12 +183,31 @@ describe('sanitizeNarrativeHtml passes the full toolbar vocabulary', () => {
     ).toBe('<p>a</p>');
   });
 
+  it('scrubs class lists to the one class the editor writes', () => {
+    // Host/imported classes go; the merge-token class survives alone.
+    expect(sanitizeNarrativeHtml('<p class="overlay sticky">a</p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(
+      sanitizeNarrativeHtml(
+        '<p><span class="fancy kb-shortcode-inline">{{t}}</span></p>'
+      )
+    ).toBe('<p><span class="kb-shortcode-inline">{{t}}</span></p>');
+  });
+
   it('narrativeText breaks lines at the new block tags', () => {
     expect(
       narrativeText(
         '<h4>Head</h4><table><tbody><tr><td>one</td></tr><tr><td>two</td></tr></tbody></table>'
       )
     ).toBe('Head\none\ntwo');
+    // Adjacent cells are text boundaries — their contents must not fuse into
+    // one word in the plain answer.
+    expect(
+      narrativeText(
+        '<table><tbody><tr><th>Weight</th><td>80 kg</td></tr></tbody></table>'
+      )
+    ).toBe('Weight\n80 kg');
   });
 });
 

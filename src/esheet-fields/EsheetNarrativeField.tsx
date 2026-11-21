@@ -113,6 +113,7 @@ const NARRATIVE_ATTRS = [
   'href',
   'title',
   'style',
+  'class',
   'lang',
   'colspan',
   'rowspan',
@@ -125,6 +126,15 @@ const NARRATIVE_ATTRS = [
 
 /** The only CSS the editor writes: alignment and highlight colors. */
 const NARRATIVE_STYLE_PROPS = ['text-align', 'background-color', 'color'];
+
+/**
+ * The only class the editor serializes: fixShortcodeRoundTrip (editorKits)
+ * marks merge tokens with `span.kb-shortcode-inline`, and its parse rule
+ * requires that class — dropping it would both change the echoed HTML and
+ * dissolve the atomic token node on the resulting reload. Host/imported
+ * classes are stripped.
+ */
+const NARRATIVE_CLASSES = ['kb-shortcode-inline'];
 
 // An isolated DOMPurify instance (renderEmailMjml precedent): hooks registered
 // on the shared default instance elsewhere in the app (useMarkdown decorates
@@ -176,12 +186,13 @@ export function sanitizeNarrativeHtml(
         ALLOW_DATA_ATTR: false,
         ALLOW_ARIA_ATTR: false,
         // DOMPurify's default URI policy admits data: images and rejects blob:
-        // outright — the opposite of ours. Mirror its shape with http(s)/blob as
-        // the scheme list (relative URLs ride the schemeless branches); the
-        // authoritative uploaded-URL-only check is the pass below.
+        // outright — the opposite of ours. Keep its safe link schemes (mailto,
+        // tel, …) so ordinary link hrefs survive, add http(s)/blob for images
+        // (relative URLs ride the schemeless branches); the authoritative
+        // uploaded-URL-only check is the pass below.
         ALLOWED_URI_REGEXP:
           // eslint-disable-next-line no-useless-escape -- mirrors DOMPurify's default regexp character-for-character outside the scheme list
-          /^(?:(?:https?|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+          /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
       })
     : getNarrativePurifier().sanitize(html, {
         ALLOWED_TAGS: NARRATIVE_TAGS,
@@ -208,6 +219,16 @@ export function sanitizeNarrativeHtml(
     if (!disallowed.length) return;
     disallowed.forEach((prop) => style.removeProperty(prop));
     if (!style.length) element.removeAttribute('style');
+  });
+  // Scrub class lists the same way: keep only the classes the editor writes,
+  // leaving the attribute byte-identical when nothing was removed.
+  root.querySelectorAll('[class]').forEach((element) => {
+    const kept = Array.from(element.classList).filter((name) =>
+      NARRATIVE_CLASSES.includes(name)
+    );
+    if (kept.length === element.classList.length) return;
+    if (kept.length) element.setAttribute('class', kept.join(' '));
+    else element.removeAttribute('class');
   });
   // Enforce uploaded-URL-only in a dedicated pass: https anywhere, or this
   // origin (a blob: URL carries its creator's origin, so same-origin object
@@ -270,6 +291,8 @@ export function narrativeText(html: string): string {
       'PRE',
       'TABLE',
       'TR',
+      'TD',
+      'TH',
     ].includes(node.tagName);
     if (isBlock) lineBreak();
     if (node.tagName === 'LI') {
