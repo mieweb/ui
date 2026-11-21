@@ -6,7 +6,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Document } from 'yaml';
 import { Modal } from '../Modal/Modal';
 import { RichTextEsheet, type RichTextEsheetHandle } from './RichTextEsheet';
@@ -216,6 +216,14 @@ const selectMode = (label: 'eSheet' | 'RichEdit' | 'View' | 'Export') => {
 };
 
 describe('RichTextEsheet mode synchronization', () => {
+  // Page-level dialogs tests mount outside the component tree. Removed in
+  // afterEach so even a timed-out test cannot leak one into later tests'
+  // dialog queries.
+  const pageDialogs: HTMLElement[] = [];
+  afterEach(() => {
+    for (const dialog of pageDialogs.splice(0)) dialog.remove();
+  });
+
   it('opens a native eSheet MDY from its own form and validates a supplied form', () => {
     const original = parseRichTextEsheetMdy(
       createRichTextEsheetSnapshot(form, {}).mdy
@@ -412,27 +420,27 @@ describe('RichTextEsheet mode synchronization', () => {
     await screen.findByRole('dialog', { name: 'Details' });
     // A non-modal page-level dialog (e.g. a cookie-consent banner) is not
     // nested in this component and must not swallow the resolver's Escape.
+    // Cleanup lives in an afterEach: a runner timeout abandons this test
+    // body mid-await, so inline cleanup (even in a finally) is not
+    // guaranteed to run before later tests query dialogs (CI cascade on
+    // the v0.12.0 release PR).
     const banner = document.createElement('div');
     banner.setAttribute('role', 'dialog');
     banner.setAttribute('aria-label', 'Cookie consent');
+    pageDialogs.push(banner);
     document.body.appendChild(banner);
-    try {
-      fireEvent.keyDown(document, { key: 'Escape' });
-      // Generous timeout: this close has timed out at waitFor's default on
-      // slow CI runners.
-      await waitFor(
-        () =>
-          expect(
-            screen.queryByRole('dialog', { name: 'Details' })
-          ).not.toBeInTheDocument(),
-        { timeout: 5000 }
-      );
-    } finally {
-      // Always remove the banner: a failed waitFor must not leak it into
-      // later tests' dialog queries (CI cascade on the v0.12.0 release PR).
-      banner.remove();
-    }
-  });
+    fireEvent.keyDown(document, { key: 'Escape' });
+    // Generous timeout: this close has timed out at waitFor's default on
+    // slow CI runners. The test timeout budgets for the setup above plus
+    // this wait — vitest's 5s default could expire before the wait does.
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByRole('dialog', { name: 'Details' })
+        ).not.toBeInTheDocument(),
+      { timeout: 5000 }
+    );
+  }, 15000);
 
   it('closes the resolver with Escape inside an enclosing host dialog', async () => {
     // Hosts may embed the whole component in their own modal; an ancestor
