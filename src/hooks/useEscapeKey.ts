@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useLayoutEffect, useRef, type RefObject } from 'react';
 
 interface ExclusiveOverlay {
   element: () => Element | null;
@@ -66,7 +66,11 @@ export function useEscapeKey(
   const latest = useRef(callback);
   latest.current = callback;
 
-  useEffect(() => {
+  // Layout effect, not passive: the listener attaches in the same commit that
+  // puts the overlay on screen. A passive effect runs after paint, leaving a
+  // window where the dialog is visible but Escape goes nowhere — a keypress
+  // in that window is silently lost (seen as CI-only test timeouts).
+  useLayoutEffect(() => {
     if (!enabled) return;
     const entry: ExclusiveOverlay = {
       element: () => (typeof exclusive === 'object' ? exclusive.current : null),
