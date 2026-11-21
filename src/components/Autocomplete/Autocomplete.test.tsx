@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { Autocomplete } from './Autocomplete';
+import { Modal } from '../Modal';
 
 interface Person {
   id: string;
@@ -106,6 +107,23 @@ describe('Autocomplete', () => {
     expect(input).toHaveAttribute('aria-expanded', 'true');
     fireEvent.keyDown(input, { key: 'Escape' });
     expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('consumes Escape while open so an enclosing Modal stays open', () => {
+    const onOpenChange = vi.fn();
+    renderWithTheme(
+      <Modal open onOpenChange={onOpenChange} aria-label="Dialog">
+        <Autocomplete {...baseProps} onSelect={vi.fn()} />
+      </Modal>
+    );
+    const input = screen.getByRole('combobox');
+    fireEvent.change(input, { target: { value: 'sa' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(onOpenChange).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 });
 
