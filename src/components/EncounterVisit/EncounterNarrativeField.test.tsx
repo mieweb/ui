@@ -199,8 +199,11 @@ describe('EncounterNarrativeField', () => {
       },
     };
     renderWithTheme(<EncounterNarrativeField {...props({ response })} />);
+    // The sanitizer is an XSS barrier, not a formatting policy: the link
+    // survives with its javascript: href removed; class, style, handlers,
+    // media and scripts are stripped.
     expect(screen.getByRole('textbox').innerHTML).toBe(
-      '<p><b>Back pain</b></p>'
+      '<p><a><b>Back pain</b></a></p>'
     );
   });
 
@@ -254,12 +257,13 @@ describe('EncounterNarrativeField', () => {
     ).toHaveClass('sr-only');
   });
 
-  it('limits rich formatting to lightweight narrative markup', () => {
-    expect(
-      sanitizeEncounterNarrativeHtml(
-        '<p style="text-align:center"><i>Text</i><span> detail</span></p>'
-      )
-    ).toBe('<p><i>Text</i> detail</p>');
+  it('passes the full toolbar vocabulary through unchanged', () => {
+    // Alignment and spans are part of the stock Kerebron toolbar's output;
+    // stripping them would make the strictValue echo fight the editor and
+    // revert the clinician's formatting on the next keystroke.
+    const toolbarHtml =
+      '<p style="text-align:center"><i>Text</i><span> detail</span></p>';
+    expect(sanitizeEncounterNarrativeHtml(toolbarHtml)).toBe(toolbarHtml);
   });
 
   it('keeps every block format the editor menu offers through save and reopen', () => {
