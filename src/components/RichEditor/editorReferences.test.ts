@@ -236,7 +236,12 @@ describe('menuPlacement', () => {
   it('opens below the caret with its full height when it fits', () => {
     expect(
       menuPlacement({ left: 40, top: 120, bottom: 140 }, 200, screen(800))
-    ).toMatchObject({ top: 144, maxHeight: 224 });
+    ).toMatchObject({
+      position: 'fixed',
+      zIndex: 9999,
+      top: 144,
+      maxHeight: 224,
+    });
   });
 
   it('takes the roomier side and caps its height when neither fits', () => {

@@ -55,6 +55,10 @@ test.describe('Visual Regression Tests - RichEditor references', () => {
     test(`RichEditor - References picker${name}`, async ({ page }) => {
       await openStory(page, name, globals);
 
+      // The editor announces its autocomplete before anything is typed (the
+      // view is created asynchronously, after the hook first runs).
+      await expect(surface(page)).toHaveAttribute('aria-autocomplete', 'list');
+
       await surface(page).click();
       await page.keyboard.press('ControlOrMeta+End');
       await page.keyboard.type(' @ann');

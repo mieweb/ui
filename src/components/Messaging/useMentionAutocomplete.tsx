@@ -269,7 +269,18 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
   label = 'Mention',
   dataSlot = 'composer-mention-list',
 }: MentionMenuProps<T>) {
-  if (!mention.menuOpen) return null;
+  // Keep the highlighted option visible as arrows move it, so a pick is
+  // never made off screen (ArrowUp from the first wraps to the last). Focus
+  // stays in the input; only the list scrolls.
+  const { menuOpen, highlight, optionId } = mention;
+  React.useEffect(() => {
+    if (!menuOpen || highlight < 0) return;
+    document
+      .getElementById(optionId(highlight))
+      ?.scrollIntoView?.({ block: 'nearest' });
+  }, [menuOpen, highlight, optionId]);
+
+  if (!menuOpen) return null;
   return createPortal(
     <ul
       ref={mention.floatingRef}

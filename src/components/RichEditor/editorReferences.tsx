@@ -426,7 +426,9 @@ export function menuPlacement(
   const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
   return {
     position: 'fixed',
-    zIndex: 50,
+    // The floating-panel layer (as useAnchoredPosition), above elevated
+    // modal hosts, so the list stays usable inside dialogs.
+    zIndex: 9999,
     left: Math.max(
       VIEWPORT_MARGIN,
       Math.min(anchor.left, viewport.width - menuWidth - VIEWPORT_MARGIN)
@@ -506,6 +508,9 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   // The query start Escape closed the list at; it stays closed there.
   const dismissedAt = React.useRef<number | null>(null);
   const viewRef = React.useRef<EditorView | null>(null);
+  // The editor's surface, as state: RichEditor creates the view
+  // asynchronously, so the ARIA effect below must re-run once it exists.
+  const [surface, setSurface] = React.useState<HTMLElement | null>(null);
   const floatingRef = React.useRef<HTMLUListElement | null>(null);
   const triggersRef = React.useRef(triggers);
   triggersRef.current = triggers;
@@ -561,6 +566,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   handlers.current = {
     update: (view) => {
       viewRef.current = view;
+      setSurface(view.dom);
       let next =
         view.editable && view.hasFocus()
           ? referenceQueryAt(view.state, triggersRef.current)
@@ -640,7 +646,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   // its highlighted option, which a textbox supports. An unlabeled surface
   // gets the textbox role here, since RichEditor sets it only with a label.
   React.useEffect(() => {
-    const dom = viewRef.current?.dom;
+    const dom = surface;
     if (!dom || !triggersRef.current.length) return;
     if (!dom.hasAttribute('role')) {
       dom.setAttribute('role', 'textbox');
@@ -654,7 +660,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       dom.removeAttribute('aria-controls');
       dom.removeAttribute('aria-activedescendant');
     }
-  }, [menuOpen, clamped, listId, optionId]);
+  }, [surface, menuOpen, clamped, listId, optionId]);
 
   // Measured once the list renders, before paint, so it never shows clipped.
   const [menuWidth, setMenuWidth] = React.useState(0);
