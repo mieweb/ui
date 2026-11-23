@@ -40,14 +40,24 @@ export interface ReferencesPluginOptions {
 
 interface HastNode {
   type?: string;
+  tagName?: string;
   value?: string;
+  properties?: { alt?: unknown };
   children?: HastNode[];
 }
 
-/** The plain text of a rendered link, its label. */
+/**
+ * The plain text of a rendered link, its label. An image counts by its alt
+ * text, as a screen reader reads it: `[![@Ann Lee](/a.png)](/people/u-ann)`
+ * is named "@Ann Lee", not left an empty chip.
+ */
 function textOf(node: HastNode | undefined): string {
   if (!node) return '';
   if (node.type === 'text') return node.value ?? '';
+  if (node.tagName === 'img') {
+    const alt = node.properties?.alt;
+    return typeof alt === 'string' ? alt : '';
+  }
   return (node.children ?? []).map(textOf).join('');
 }
 
@@ -75,7 +85,16 @@ export function createReferencesPlugin({
         onClick={
           onOpen
             ? (event) => {
-                if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+                // A modified click keeps the browser's own link action
+                // (new tab, new window, download).
+                if (
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
                 event.preventDefault();
                 onOpen(reference);
               }
