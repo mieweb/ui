@@ -77,7 +77,13 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => editor?.destroy());
+afterAll(async () => {
+  // Kerebron's debounced Markdown snapshot (800ms, not cancelled by
+  // destroy()) would fire after jsdom is torn down; let it flush first, as
+  // markdownRoundTrip.test.ts does.
+  await new Promise((resolve) => setTimeout(resolve, 850));
+  editor?.destroy();
+});
 
 describe('references in RichEditor', () => {
   it('loads claimed links as chips and saves them back as the same links', async () => {
