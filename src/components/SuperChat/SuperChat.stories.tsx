@@ -221,6 +221,11 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
       peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
       relationships: [
         {
+          type: 'composes with',
+          target: 'editors-referencechip',
+          why: '`createReferencesPlugin({ triggers })` goes in `renderPlugins` and draws the links a trigger claims in message text as ReferenceChips; use ReferenceChip directly to show a reference outside a message.',
+        },
+        {
           type: 'alternative to',
           target: 'chat-aichat',
           why: 'AIChat is one user ↔ one assistant with plain text by default; SuperChat is multi-participant with a Markdown plugin pipeline.',
@@ -695,8 +700,10 @@ export const References: Story = {
         story: [
           'Messages name people and tickets as plain Markdown links;',
           '`createReferencesPlugin({ triggers, onOpen, icon })` draws each link a',
-          'trigger claims as a `ReferenceChip`. “the wiki” is an ordinary link and',
-          'stays one. Without the plugin the same text shows working links.',
+          'trigger claims as a [`ReferenceChip`](?path=/docs/editors-referencechip--docs).',
+          '“the wiki” is an ordinary link and stays one. Without the plugin the same',
+          'text shows working links. The plugin belongs in `renderPlugins`; to show a',
+          'reference outside a message, render `ReferenceChip` directly.',
         ].join('\n'),
       },
     },

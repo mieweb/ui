@@ -72,6 +72,11 @@ The host owns the records: what a kind means, how candidates are found, and chec
           target: 'text-inputs-tageditor',
           why: 'TagEditor edits a list of removable tags in a form; ReferenceChip shows a record named inline in text.',
         },
+        {
+          type: 'composes with',
+          target: 'superchat-superchat-panel',
+          why: 'In a SuperChat thread, pass `createReferencesPlugin({ triggers })` in `renderPlugins` and the links a trigger claims in message text render as ReferenceChips; render ReferenceChip directly anywhere else a reference is shown.',
+        },
       ],
     },
   },
