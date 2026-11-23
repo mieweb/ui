@@ -280,6 +280,21 @@ async function ensureLocoRuntimeLoaded(
   return ((window as any).Loco as LocoRuntime | undefined) ?? null;
 }
 
+// The runtime caches translations per language in IndexedDB, merged across pack sources,
+// and prefers that cache on init — so a live pack could leak into package mode. Always load
+// the selected pack fresh (both are cheap: a static file or the local dev proxy).
+function clearLocoTranslationCache(): Promise<void> {
+  return new Promise((resolve) => {
+    try {
+      const request = window.indexedDB.deleteDatabase('loco');
+      // A blocked delete still runs before any later open() of the same database.
+      request.onsuccess = request.onerror = request.onblocked = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
 async function ensureLocoInitialized(
   mode: 'package' | 'live',
 ): Promise<LocoRuntime | null> {
@@ -299,6 +314,7 @@ async function ensureLocoInitialized(
     const file = mode === 'package' ? LOCO_PACK_URL : `${LOCO_PROXY_BASE}/pack.json`;
     // The toolbar owns the locale; stop init() from auto-applying the runtime's remembered one.
     window.localStorage.removeItem('loco-lang');
+    await clearLocoTranslationCache();
     await Promise.resolve(runtime.init({ file }));
     // languages() resolves once the pack is loaded — a readiness barrier before the first apply().
     if (runtime.languages) {
