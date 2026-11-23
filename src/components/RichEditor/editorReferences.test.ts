@@ -14,6 +14,7 @@ import {
   createReferencesKit,
   deleteAdjacentReference,
   insertReference,
+  menuPlacement,
   referenceQueryAt,
   referencesToLinks,
 } from './editorReferences';
@@ -149,6 +150,40 @@ describe('references in RichEditor', () => {
     expect(referenceQueryAt(editor.state, triggers)).toBeNull();
   });
 
+  it('opens no list inside a code block, which takes text alone', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, '```\n@an\n```');
+    caretAtEnd();
+    expect(referenceQueryAt(editor.state, triggers)).toBeNull();
+  });
+
+  it('keeps the formatting being typed with on the chip and after it', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, '**Ask @an**');
+    caretAtEnd();
+    const query = referenceQueryAt(editor.state, triggers)!;
+    editor.view.dispatch(
+      insertReference(editor.state, query, {
+        kind: 'person',
+        id: 'u-ann',
+        label: '@Ann Lee',
+      })
+    );
+    const markNames = (marks: readonly { type: { name: string } }[]) =>
+      marks.map((m) => m.type.name);
+    const { $from } = editor.state.selection;
+    const chip = $from.doc.resolve($from.pos - 1).nodeBefore!;
+    expect(chip.type.name).toBe(REFERENCE_NODE);
+    expect(markNames(chip.marks)).toEqual(['strong']);
+    expect(markNames($from.nodeBefore!.marks)).toEqual(['strong']);
+    expect(markNames(editor.state.storedMarks ?? [])).toEqual(['strong']);
+  });
+
+  it('keeps a claimed link with a break in its text as one chip', async () => {
+    const markdown = '[@Ann<br>Lee](/people/u-ann)';
+    await editor.loadDocumentText(MARKDOWN_TYPE, markdown);
+    expect(references()).toHaveLength(1);
+    expect(await save()).toBe(markdown);
+  });
+
   it('inserts a pick as one chip that Backspace removes whole', async () => {
     await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask @an');
     caretAtEnd();
@@ -187,5 +222,29 @@ describe('references in RichEditor', () => {
     }
     expect(backspace()).toBe(true);
     expect(references()).toEqual([]);
+  });
+});
+
+describe('menuPlacement', () => {
+  it('opens below the caret with its full height when it fits', () => {
+    expect(
+      menuPlacement({ left: 40, top: 120, bottom: 140 }, 200, 1000, 800)
+    ).toMatchObject({ top: 144, maxHeight: 224 });
+  });
+
+  it('takes the roomier side and caps its height when neither fits', () => {
+    // 300px viewport: 148px below the caret, 108px above.
+    expect(
+      menuPlacement({ left: 40, top: 120, bottom: 140 }, 200, 1000, 300)
+    ).toMatchObject({ top: 144, maxHeight: 148 });
+    // Lower caret: 68px below, 188px above.
+    const above = menuPlacement(
+      { left: 40, top: 200, bottom: 220 },
+      200,
+      1000,
+      300
+    );
+    expect(above).toMatchObject({ bottom: 104, maxHeight: 188 });
+    expect(above).not.toHaveProperty('top');
   });
 });

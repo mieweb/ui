@@ -219,11 +219,15 @@ export function referenceQueryAt(
   const { selection } = state;
   if (!triggers.length || !selection.empty) return null;
   const $from = selection.$from;
-  if (!$from.parent.isTextblock) return null;
+  // Only where a chip can go: a code block takes text alone, so `@ann` typed
+  // there stays text.
+  const type = state.schema.nodes[REFERENCE_NODE];
+  const index = $from.index();
+  if (!type || !$from.parent.canReplaceWith(index, index, type)) return null;
   // One character per inline leaf, so offsets from the caret stay exact: a
   // hard break reads as a newline (whitespace, so a trigger may follow it),
-  // any other leaf (a chip, an image) as U+FFFC, which a query never spans \u2014
-  // picking a result can't replace the leaf.
+  // any other leaf (a chip, an image) as U+FFFC, which a query never spans,
+  // so picking a result can't replace the leaf.
   const before = $from.parent.textBetween(
     0,
     $from.parentOffset,
@@ -243,7 +247,9 @@ export function referenceQueryAt(
 
 /**
  * Replaces the query `range` with a reference to `option` and a space, caret
- * after them — one transaction, so one undo puts the typed query back.
+ * after them — one transaction, so one undo puts the typed query back. The
+ * formatting being typed with (bold, italic; not a link) carries onto both,
+ * and typing after them continues in it.
  */
 export function insertReference(
   state: EditorState,
@@ -251,18 +257,28 @@ export function insertReference(
   option: ReferenceOption
 ): Transaction {
   const { schema } = state;
-  const node = schema.nodes[REFERENCE_NODE].create({
-    kind: option.kind,
-    id: option.id,
-    label: option.label,
-    href: range.trigger.toHref(option.id),
-  });
+  const marks = (
+    state.storedMarks ?? state.doc.resolve(range.to).marks()
+  ).filter((mark) => mark.type !== schema.marks.link);
+  const node = schema.nodes[REFERENCE_NODE].create(
+    {
+      kind: option.kind,
+      id: option.id,
+      label: option.label,
+      href: range.trigger.toHref(option.id),
+    },
+    null,
+    marks
+  );
   const tr = state.tr.replaceWith(range.from, range.to, [
     node,
-    schema.text(' '),
+    schema.text(' ', marks),
   ]);
   const caret = range.from + node.nodeSize + 1;
-  return tr.setSelection(TextSelection.create(tr.doc, caret)).scrollIntoView();
+  return tr
+    .setSelection(TextSelection.create(tr.doc, caret))
+    .setStoredMarks(marks)
+    .scrollIntoView();
 }
 
 /**
@@ -375,6 +391,42 @@ const NO_OPTIONS: ReferenceOption[] = [];
 const MENU_MAX_HEIGHT = 224;
 /** Gap kept between the list and the viewport's edge. */
 const VIEWPORT_MARGIN = 8;
+/** Gap between the caret's line and the list. */
+const CARET_GAP = 4;
+
+/**
+ * Where the fixed list goes for a caret at `anchor`: below it when the list
+ * fits there or below has at least as much room, otherwise above, with its
+ * height capped to the room on that side so its first options are never off
+ * screen (as useAnchoredPosition does). Kept inside the viewport sideways
+ * (a caret near the end of a line).
+ */
+export function menuPlacement(
+  anchor: { left: number; top: number; bottom: number },
+  menuWidth: number,
+  viewportWidth: number,
+  viewportHeight: number
+): React.CSSProperties {
+  const spaceBelow =
+    viewportHeight - anchor.bottom - CARET_GAP - VIEWPORT_MARGIN;
+  const spaceAbove = anchor.top - CARET_GAP - VIEWPORT_MARGIN;
+  const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
+  return {
+    position: 'fixed',
+    zIndex: 50,
+    left: Math.max(
+      VIEWPORT_MARGIN,
+      Math.min(anchor.left, viewportWidth - menuWidth - VIEWPORT_MARGIN)
+    ),
+    maxHeight: Math.max(
+      0,
+      Math.min(MENU_MAX_HEIGHT, below ? spaceBelow : spaceAbove)
+    ),
+    ...(below
+      ? { top: anchor.bottom + CARET_GAP }
+      : { bottom: viewportHeight - anchor.top + CARET_GAP }),
+  };
+}
 
 /**
  * Inline references for a Kerebron editor: the kit to install, and the list
@@ -561,26 +613,10 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     []
   );
 
-  // Below the caret, or above it where the viewport has no room below; kept
-  // inside the viewport sideways (a caret near the end of a line).
-  const below =
-    !anchor ||
-    typeof window === 'undefined' ||
-    anchor.bottom + MENU_MAX_HEIGHT + VIEWPORT_MARGIN <= window.innerHeight;
-  const menuStyle: React.CSSProperties = anchor
-    ? {
-        position: 'fixed',
-        zIndex: 50,
-        left: Math.max(
-          VIEWPORT_MARGIN,
-          Math.min(anchor.left, window.innerWidth - menuWidth - VIEWPORT_MARGIN)
-        ),
-        maxHeight: MENU_MAX_HEIGHT,
-        ...(below
-          ? { top: anchor.bottom + 4 }
-          : { bottom: window.innerHeight - anchor.top + 4 }),
-      }
-    : {};
+  const menuStyle: React.CSSProperties =
+    anchor && typeof window !== 'undefined'
+      ? menuPlacement(anchor, menuWidth, window.innerWidth, window.innerHeight)
+      : {};
 
   return {
     kit,
