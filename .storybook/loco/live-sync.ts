@@ -96,14 +96,44 @@ function isSafeContext(context: string, getProtected: () => ProtectedContent): b
   });
 }
 
-/** A phrase as discovered by the Loco runtime (`Loco.scan()`). */
+/** A phrase as discovered by the Loco runtime (`Loco.textnodes()`). */
 export type LocoTextnode = {
   key: string;
   context?: string;
   element?: Element | null;
-  /** Set by Loco.scan() when apply() would drop inline content (e.g. <code>) from the element. */
-  lossy?: boolean;
 };
+
+// The runtime's default inline tags: their text becomes `{{text:N}}` slots of a mixed phrase.
+// Any other child element is left out of the phrase and lost when apply() rebuilds it.
+const INLINE_SLOT_TAGS = new Set([
+  'VAR', 'STRONG', 'EM', 'B', 'I', 'SPAN', 'A', 'ABBR', 'MARK', 'SMALL', 'SUB', 'SUP', 'U', 'S', 'TIME', 'LABEL',
+]);
+const SLOT_PLACEHOLDER = /\{\{(?:text|number|decimal|date):\d+\}\}/;
+
+/**
+ * Mixed phrases (`Click {{text:0}} to continue`): drops those whose rebuild would delete a
+ * non-inline child such as `<code>`, and adds each inline child's text as its own phrase,
+ * which apply() also looks up, tied to its own element for the privacy filters.
+ */
+function expandMixedPhrases(nodes: LocoTextnode[]): LocoTextnode[] {
+  const expanded: LocoTextnode[] = [];
+  for (const node of nodes) {
+    const element = node.element;
+    if (!element || !SLOT_PLACEHOLDER.test(node.key)) {
+      expanded.push(node);
+      continue;
+    }
+    const children = Array.from(element.children);
+    if (children.some((child) => !INLINE_SLOT_TAGS.has(child.tagName))) continue;
+    expanded.push(node);
+    for (const child of children) {
+      if (child.tagName === 'TIME' && child.hasAttribute('datetime')) continue;
+      const text = normalizeText(child.textContent ?? '');
+      if (text) expanded.push({ key: text, context: '', element: child });
+    }
+  }
+  return expanded;
+}
 
 /**
  * Keeps runtime-discovered phrases that sit inside one of `roots` and outside ignored or
@@ -121,7 +151,7 @@ export function filterLocoTextnodes(
   let protectedContent: ProtectedContent | undefined;
   const getProtected = () =>
     (protectedContent ??= collectProtectedContent(scanRoots[0]?.ownerDocument ?? document));
-  for (const { key, context = '', element, lossy } of nodes) {
+  for (const { key, context = '', element } of expandMixedPhrases(nodes)) {
     if (
       !element ||
       !scanRoots.some((root) => root.contains(element)) ||
@@ -130,8 +160,6 @@ export function filterLocoTextnodes(
       continue;
     }
     if (!isUsefulPhrase(key)) continue;
-    // Translating these would delete the dropped inline content, so leave them in English.
-    if (lossy) continue;
     // The runtime joins inline children into one phrase, so a protected descendant's text
     // can end up inside the key ("Patient: <span translate=no>Jane Doe</span>").
     if (containsProtectedText(element, key)) continue;

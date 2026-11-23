@@ -67,7 +67,29 @@ type LocoLanguageInfo = {
   dir?: 'ltr' | 'rtl';
 };
 
-function getCurrentLocoModeFromUrl(): 'package' | 'live' | 'disable' {
+type LocoMode = 'package' | 'live' | 'disable';
+
+// Locale toolbar items are built once at load, but the preview iframe's URL can keep stale
+// globals across our reloads (docs-only pages keep `globals=` empty). So every Loco reload
+// records the mode it reloads into, and the next load uses that before the URL.
+const LOCO_RELOAD_MODE_KEY = 'mieweb:loco:reload-mode';
+
+function reloadPreviewInMode(mode: string) {
+  window.sessionStorage.setItem(LOCO_RELOAD_MODE_KEY, mode);
+  window.location.reload();
+}
+
+function getInitialLocoMode(): LocoMode {
+  if (typeof window === 'undefined') return 'disable';
+  const reloadedInto = window.sessionStorage.getItem(LOCO_RELOAD_MODE_KEY);
+  window.sessionStorage.removeItem(LOCO_RELOAD_MODE_KEY);
+  if (reloadedInto === 'live' || reloadedInto === 'package' || reloadedInto === 'disable') {
+    return reloadedInto;
+  }
+  return getCurrentLocoModeFromUrl();
+}
+
+function getCurrentLocoModeFromUrl(): LocoMode {
   if (typeof window === 'undefined') return 'disable';
   try {
     const params = new URLSearchParams(window.location.search);
@@ -137,10 +159,14 @@ const pinnedLocaleItems: LocaleToolbarItem[] = [
   { value: 'ar', title: '🇸🇦', right: 'العربية (RTL)' },
 ];
 
-// Live mode lists the server's languages; package/disable list the committed pack's.
+// Live mode lists the server's languages and package mode the committed pack's; with Loco
+// disabled (the default) there is nothing to translate, so only English is offered.
 function buildLocaleToolbarItems(
   mode: 'package' | 'live' | 'disable'
 ): LocaleToolbarItem[] {
+  if (mode === 'disable') {
+    return pinnedLocaleItems.filter((item) => item.value === DEFAULT_LOCALE);
+  }
   const liveLanguages = mode === 'live' ? parseCachedLiveLanguages() : [];
   const available = new Map<string, string | undefined>(
     liveLanguages.length > 0
@@ -163,7 +189,7 @@ function buildLocaleToolbarItems(
   return [...pinned, ...others];
 }
 
-const localeToolbarItems = buildLocaleToolbarItems(getCurrentLocoModeFromUrl());
+const localeToolbarItems = buildLocaleToolbarItems(getInitialLocoMode());
 
 async function fetchLiveLocoLanguages(): Promise<LocoLanguageInfo[]> {
   const response = await fetch(`${LOCO_PROXY_BASE}/api/languages`);
@@ -188,10 +214,8 @@ type LocoRuntime = {
   apply?: (lang: string) => Promise<unknown> | unknown;
   restore?: () => Promise<unknown> | unknown;
   languages?: () => Promise<unknown> | unknown;
-  // Local patches to the vendored runtime: read-only scan, same keys/contexts apply() uses,
-  // and a registry rebuild from the current DOM (see .storybook/loco/README.md).
-  scan?: (root: Element) => Promise<LocoTextnode[]>;
-  refresh?: () => Promise<void>;
+  rescan?: () => Promise<unknown>;
+  textnodes?: () => LocoTextnode[];
 };
 
 // The runtime drops apply() calls made while one is in flight, so every runtime
@@ -209,8 +233,9 @@ function runLocoExclusive<T>(task: () => Promise<T>): Promise<T> {
 
 // Skip locale changes that a newer request has superseded.
 let locoLatestRequest = 0;
-// The locale the DOM currently shows; null while it shows the English source.
-let locoAppliedLocale: string | null = null;
+// The runtime keeps translations loaded after restore(), and its only scan, rescan(),
+// re-applies them; so rescan() is read-only only until the first apply() in this page.
+let locoTranslationsLoaded = false;
 
 // Callers that await initialization first should reserve their request number up front,
 // so a slow older request can't be queued after a newer one.
@@ -222,27 +247,35 @@ function queueLocoLocale(
   return runLocoExclusive(async () => {
     if (request !== locoLatestRequest) return;
     if (locale) {
-      // apply() writes its stored originals back before translating, and only rescans when
-      // none of them are still on the page. Rebuild them from the current English DOM so
-      // edits and newly rendered copy made while English was showing are translated.
-      if (!locoAppliedLocale) await runtime.refresh?.();
+      locoTranslationsLoaded = true;
       await Promise.resolve(runtime.apply?.(locale));
     } else {
       await Promise.resolve(runtime.restore?.());
     }
-    locoAppliedLocale = locale;
   }).catch((error) => {
     console.warn(`[loco] Unable to ${locale ? `apply "${locale}"` : 'restore English'}.`, error);
   });
 }
 
-// Scans never touch the DOM; queue them so they don't read a half-applied locale.
-function scanLocoRoots(runtime: LocoRuntime, roots: Element[]): Promise<LocoTextnode[]> {
+// Reads the runtime's own phrases (same keys/contexts apply() uses). Only called while no
+// translations are loaded, when rescan() doesn't write to the DOM; queued so it never reads
+// a half-applied locale.
+function scanLocoPhrases(runtime: LocoRuntime): Promise<LocoTextnode[]> {
   return runLocoExclusive(async () => {
-    const nodes: LocoTextnode[] = [];
-    for (const root of roots) nodes.push(...((await runtime.scan?.(root)) ?? []));
-    return nodes;
+    await runtime.rescan?.();
+    return runtime.textnodes?.() ?? [];
   });
+}
+
+// Live mode harvests English, so after a translation was shown it reloads to get pristine
+// English (and a runtime with no translations loaded) back. Guarded against reload loops.
+const LOCO_LIVE_RESTORE_RELOAD_KEY = 'mieweb:loco:live-restore-reload';
+function reloadForPristineEnglish(): boolean {
+  const last = Number(window.sessionStorage.getItem(LOCO_LIVE_RESTORE_RELOAD_KEY) || 0);
+  if (Date.now() - last < 5000) return false;
+  window.sessionStorage.setItem(LOCO_LIVE_RESTORE_RELOAD_KEY, String(Date.now()));
+  reloadPreviewInMode('live');
+  return true;
 }
 
 const LOCO_SCAN_ROOT_SELECTOR = '[data-loco-scan-root="true"]';
@@ -360,7 +393,7 @@ async function ensureLocoInitialized(
   // Runtime already initialized in a different mode — reload the preview iframe
   // so the singleton starts fresh in the requested mode.
   if (locoInitializedMode && locoInitializedMode !== mode) {
-    window.location.reload();
+    reloadPreviewInMode(mode);
     return null;
   }
 
@@ -735,9 +768,11 @@ function startLocoHarvest(
   // Reuse the runtime's own scanner so posted keys/contexts match what apply() looks up.
   const harvest = async () => {
     const runtime = await ensureLocoInitialized('live');
-    if (!runtime?.scan || cancelled) return;
+    if (!runtime?.rescan || !runtime.textnodes || cancelled) return;
+    // A translation was shown: the page reloads to pristine English (see syncLocoLocale).
+    if (locoTranslationsLoaded) return;
     const roots = [root, ...(ownsPortals() ? locoPortalRoots() : [])];
-    const textnodes = await scanLocoRoots(runtime, roots);
+    const textnodes = await scanLocoPhrases(runtime);
     if (cancelled) return;
 
     const keys = filterLocoTextnodes(textnodes, roots);
@@ -791,7 +826,7 @@ function syncLocoToolbarMode(locoMode: string) {
   if (typeof window === 'undefined') return;
   const previousMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
   window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
-  if (previousMode && previousMode !== locoMode) window.location.reload();
+  if (previousMode && previousMode !== locoMode) reloadPreviewInMode(locoMode);
 }
 
 // Caches the live server's languages and reloads once per new set: toolbar items are static.
@@ -814,7 +849,7 @@ function syncLiveLocoLanguages(isCancelled: () => boolean) {
       .join(',');
     if (toolbarSignature !== languageSignature && reloadedFor !== languageSignature) {
       window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, languageSignature);
-      window.location.reload();
+      reloadPreviewInMode('live');
     }
   })().catch((error) => {
     console.warn('[loco-live] Unable to fetch live language list.', error);
@@ -854,6 +889,9 @@ async function syncLocoLocale(
 
     // Nothing to undo yet — don't load the runtime just to restore originals.
     if (shouldRestore && !(window as any).Loco) return;
+    if (mode === 'live' && shouldRestore && locoTranslationsLoaded && reloadForPristineEnglish()) {
+      return;
+    }
 
     const runtime = await ensureLocoInitialized(mode);
     if (!runtime || isCancelled()) return;

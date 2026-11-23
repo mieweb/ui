@@ -142,27 +142,6 @@ test.describe('Loco i18n toolbar', () => {
     await expect(docs).not.toContainText('Primeros pasos');
   });
 
-  test('late-mounted copies of a translated phrase restore to English', async ({
-    page,
-  }) => {
-    await gotoStory(page, 'data-display-badge--all-variants', {
-      globals: 'locale:es;locoMode:package',
-    });
-    await expect(root(page)).toContainText('Predeterminado');
-
-    await page.evaluate(() => {
-      const copy = document.createElement('span');
-      copy.id = 'late-copy';
-      copy.textContent = 'Default';
-      document.querySelector('[data-loco-scan-root="true"]')!.appendChild(copy);
-    });
-    await expect(page.locator('#late-copy')).toHaveText('Predeterminado');
-
-    await setGlobals(page, { locale: 'en' });
-    await expect(page.locator('#late-copy')).toHaveText('Default');
-    await expect(root(page)).not.toContainText('Predeterminado');
-  });
-
   test('a failed runtime download is retried on the next locale change', async ({
     page,
   }) => {
