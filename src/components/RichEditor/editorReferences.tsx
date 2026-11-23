@@ -343,6 +343,92 @@ export function createReferencesKit(
 const MENU_MAX_HEIGHT = 224;
 /** Gap kept between the list and the viewport's edge. */
 const VIEWPORT_MARGIN = 8;
+/** Gap between the caret's line and the list. */
+const CARET_GAP = 4;
+
+/**
+ * The screen the list can use, in the layout viewport's coordinates (where
+ * `coordsAtPos` and `position: fixed` both measure from).
+ */
+export interface MenuViewport {
+  width: number;
+  /** The layout viewport's height, which a fixed `bottom` is measured from. */
+  height: number;
+  /** The visible area's top and bottom: below the status bar, above the keyboard. */
+  visibleTop: number;
+  visibleBottom: number;
+}
+
+/**
+ * Where the fixed list goes for a caret at `anchor`: below it when the list
+ * fits there or below has at least as much room, otherwise above, with its
+ * height capped to the room on that side so its first options are never off
+ * screen (as useAnchoredPosition does). Kept inside the viewport sideways
+ * (a caret near the end of a line).
+ */
+export function menuPlacement(
+  anchor: { left: number; top: number; bottom: number },
+  menuWidth: number,
+  viewport: MenuViewport
+): React.CSSProperties {
+  const spaceBelow =
+    viewport.visibleBottom - anchor.bottom - CARET_GAP - VIEWPORT_MARGIN;
+  const spaceAbove =
+    anchor.top - CARET_GAP - VIEWPORT_MARGIN - viewport.visibleTop;
+  const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
+  return {
+    position: 'fixed',
+    zIndex: 50,
+    left: Math.max(
+      VIEWPORT_MARGIN,
+      Math.min(anchor.left, viewport.width - menuWidth - VIEWPORT_MARGIN)
+    ),
+    maxHeight: Math.max(
+      0,
+      Math.min(MENU_MAX_HEIGHT, below ? spaceBelow : spaceAbove)
+    ),
+    ...(below
+      ? { top: anchor.bottom + CARET_GAP }
+      : { bottom: viewport.height - anchor.top + CARET_GAP }),
+  };
+}
+
+let safeAreaProbe: HTMLDivElement | null = null;
+
+/** The page's safe-area insets (status bar, home indicator); 0 where there are none. */
+function safeAreaInsets(): { top: number; bottom: number } {
+  if (!safeAreaProbe) {
+    safeAreaProbe = document.createElement('div');
+    safeAreaProbe.setAttribute('aria-hidden', 'true');
+    safeAreaProbe.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+    document.body.appendChild(safeAreaProbe);
+  }
+  const style = getComputedStyle(safeAreaProbe);
+  return {
+    top: parseFloat(style.paddingTop) || 0,
+    bottom: parseFloat(style.paddingBottom) || 0,
+  };
+}
+
+/**
+ * The screen as the list sees it now. An on-screen keyboard shrinks only the
+ * visual viewport (iOS doesn't resize the layout one, and its `innerHeight`
+ * may follow either), so the visible area comes from `visualViewport`.
+ */
+function currentMenuViewport(): MenuViewport {
+  const visual = window.visualViewport;
+  const height = document.documentElement.clientHeight || window.innerHeight;
+  const insets = safeAreaInsets();
+  const top = visual?.offsetTop ?? 0;
+  return {
+    width: window.innerWidth,
+    height,
+    visibleTop: top + insets.top,
+    visibleBottom: (visual ? top + visual.height : height) - insets.bottom,
+  };
+}
 
 /**
  * Inline references for a Kerebron editor: the kit to install, and the list
@@ -458,6 +544,31 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   // A new query starts at the first match.
   React.useEffect(() => setHighlight(0), [range?.from, range?.query]);
 
+  // The list is fixed to the viewport, so it follows the caret when the page
+  // or an editor ancestor scrolls, the window resizes, or an on-screen
+  // keyboard opens (the visual viewport shrinks and pans) — none of which
+  // changes the editor's state, so `update` doesn't run.
+  const rangeFrom = range?.from;
+  React.useEffect(() => {
+    const view = viewRef.current;
+    if (rangeFrom === undefined || !view) return;
+    const measure = () => {
+      const { left, top, bottom } = view.coordsAtPos(rangeFrom);
+      setAnchor({ left, top, bottom });
+    };
+    const visual = window.visualViewport;
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    visual?.addEventListener('resize', measure);
+    visual?.addEventListener('scroll', measure);
+    return () => {
+      window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', measure);
+      visual?.removeEventListener('resize', measure);
+      visual?.removeEventListener('scroll', measure);
+    };
+  }, [rangeFrom]);
+
   // The editor is the combobox; point it at the open list for screen readers.
   React.useEffect(() => {
     const dom = viewRef.current?.dom;
@@ -485,26 +596,10 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     []
   );
 
-  // Below the caret, or above it where the viewport has no room below; kept
-  // inside the viewport sideways (a caret near the end of a line).
-  const below =
-    !anchor ||
-    typeof window === 'undefined' ||
-    anchor.bottom + MENU_MAX_HEIGHT + VIEWPORT_MARGIN <= window.innerHeight;
-  const menuStyle: React.CSSProperties = anchor
-    ? {
-        position: 'fixed',
-        zIndex: 50,
-        left: Math.max(
-          VIEWPORT_MARGIN,
-          Math.min(anchor.left, window.innerWidth - menuWidth - VIEWPORT_MARGIN)
-        ),
-        maxHeight: MENU_MAX_HEIGHT,
-        ...(below
-          ? { top: anchor.bottom + 4 }
-          : { bottom: window.innerHeight - anchor.top + 4 }),
-      }
-    : {};
+  const menuStyle: React.CSSProperties =
+    anchor && typeof window !== 'undefined'
+      ? menuPlacement(anchor, menuWidth, currentMenuViewport())
+      : {};
 
   return {
     kit,
