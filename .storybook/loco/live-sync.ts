@@ -66,26 +66,27 @@ export type LocoTextnode = {
 };
 
 /**
- * Keeps runtime-discovered phrases that sit inside `root` and outside ignored or
+ * Keeps runtime-discovered phrases that sit inside one of `roots` and outside ignored or
  * sensitive regions, and whose context carries no protected or sensitive text. Keys/contexts are passed through unchanged so they match
  * what `Loco.apply()` looks up (including `{{text:N}}` placeholders).
  */
 export function filterLocoTextnodes(
   nodes: LocoTextnode[],
-  root: Element
+  roots: Element | Element[]
 ): LocoKeyEntry[] {
+  const scanRoots = Array.isArray(roots) ? roots : [roots];
   const seen = new Set<string>();
   const entries: LocoKeyEntry[] = [];
   let protectedTexts: string[] | undefined;
   const getProtectedTexts = () =>
     (protectedTexts ??= Array.from(
-      root.ownerDocument.querySelectorAll(PROTECTED_SELECTOR),
+      (scanRoots[0]?.ownerDocument ?? document).querySelectorAll(PROTECTED_SELECTOR),
       (element) => normalizeText(element.textContent ?? '')
     ).filter(Boolean));
   for (const { key, context = '', element } of nodes) {
     if (
       !element ||
-      !root.contains(element) ||
+      !scanRoots.some((root) => root.contains(element)) ||
       element.closest(IGNORE_SELECTOR)
     ) {
       continue;

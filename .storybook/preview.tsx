@@ -188,8 +188,8 @@ type LocoRuntime = {
   apply?: (lang: string) => Promise<unknown> | unknown;
   restore?: () => Promise<unknown> | unknown;
   languages?: () => Promise<unknown> | unknown;
-  rescan?: () => Promise<unknown>;
-  textnodes?: () => LocoTextnode[];
+  // Local patch to the vendored runtime: read-only scan, same keys/contexts apply() uses.
+  scan?: (root: Element) => Promise<LocoTextnode[]>;
 };
 
 // The runtime drops apply() calls made while one is in flight, so every runtime
@@ -219,24 +219,61 @@ function queueLocoLocale(runtime: LocoRuntime, locale: string | null): Promise<v
   });
 }
 
-// Harvest observers ignore the DOM churn caused by their own rescan/restore.
-const locoHarvestObservers = new Set<MutationObserver>();
-let locoScanning = false;
-
-// rescan() re-applies already-loaded translations, so restore afterwards: the DOM stays
-// English and the discovered keys are always source text.
-function scanLocoSourceText(runtime: LocoRuntime): Promise<LocoTextnode[]> {
+// Scans never touch the DOM; queue them so they don't read a half-applied locale.
+function scanLocoRoots(runtime: LocoRuntime, roots: Element[]): Promise<LocoTextnode[]> {
   return runLocoExclusive(async () => {
-    locoScanning = true;
-    try {
-      await runtime.rescan?.();
-      await Promise.resolve(runtime.restore?.());
-      return runtime.textnodes?.() ?? [];
-    } finally {
-      locoHarvestObservers.forEach((observer) => observer.takeRecords());
-      locoScanning = false;
-    }
+    const nodes: LocoTextnode[] = [];
+    for (const root of roots) nodes.push(...((await runtime.scan?.(root)) ?? []));
+    return nodes;
   });
+}
+
+const LOCO_SCAN_ROOT_SELECTOR = '[data-loco-scan-root="true"]';
+// Storybook's own <body> children; anything else at the top level is a story portal.
+const STORYBOOK_CHROME_SELECTOR =
+  '[id^="storybook-"], [class^="sb-"], [class*=" sb-"], #loco-lang-widget, script, style, link, noscript, template';
+
+// Menus, tooltips and dialogs portal into <body>, outside every decorator root.
+function locoPortalRoots(): Element[] {
+  return Array.from(document.body.children).filter(
+    (element) => !element.matches(STORYBOOK_CHROME_SELECTOR)
+  );
+}
+
+function isInLocoPortal(node: Node): boolean {
+  if (node === document.body) return true;
+  let top: Node | null = node;
+  while (top && top.parentNode !== document.body) top = top.parentNode;
+  return top instanceof Element && !top.matches(STORYBOOK_CHROME_SELECTOR);
+}
+
+// Autodocs renders many stories on one page; portals belong to the one last interacted with.
+let locoActiveScanRoot: Element | null = null;
+const trackLocoActiveScanRoot = (event: Event) => {
+  const root = (event.target as Element | null)?.closest?.(LOCO_SCAN_ROOT_SELECTOR);
+  if (root) locoActiveScanRoot = root;
+};
+const locoInteractionEvents = ['pointerdown', 'pointerover', 'focusin'] as const;
+locoInteractionEvents.forEach((type) =>
+  document.addEventListener(type, trackLocoActiveScanRoot, true)
+);
+import.meta.hot?.dispose(() => {
+  locoInteractionEvents.forEach((type) =>
+    document.removeEventListener(type, trackLocoActiveScanRoot, true)
+  );
+});
+
+// Pack fetch failures (e.g. the proxy's 502) never settle the runtime's readiness promise.
+const LOCO_READY_TIMEOUT_MS = 15000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: number | undefined;
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      timer = window.setTimeout(() => reject(new Error(message)), ms);
+    }),
+  ]).finally(() => window.clearTimeout(timer));
 }
 
 // The runtime singleton holds one pack (committed or live) — switching modes reloads the iframe.
@@ -312,13 +349,20 @@ async function ensureLocoInitialized(
     if (!runtime?.init) return runtime ?? null;
 
     const file = mode === 'package' ? LOCO_PACK_URL : `${LOCO_PROXY_BASE}/pack.json`;
+    // Fail (and allow a retry on the next locale change) before init() can hang on a bad pack.
+    const preflight = await fetch(file, { cache: 'no-store' });
+    if (!preflight.ok) throw new Error(`Loco pack ${file} failed (${preflight.status})`);
     // The toolbar owns the locale; stop init() from auto-applying the runtime's remembered one.
     window.localStorage.removeItem('loco-lang');
     await clearLocoTranslationCache();
     await Promise.resolve(runtime.init({ file }));
     // languages() resolves once the pack is loaded — a readiness barrier before the first apply().
     if (runtime.languages) {
-      await Promise.resolve(runtime.languages()).catch(() => undefined);
+      await withTimeout(
+        Promise.resolve(runtime.languages()),
+        LOCO_READY_TIMEOUT_MS,
+        `Loco pack ${file} did not load`
+      );
     }
 
     locoInitializedMode = mode;
@@ -735,16 +779,18 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     let cancelled = false;
     let timer: number | undefined;
 
-    // Reuse the runtime's own scan so posted keys/contexts match what apply() looks up.
+    const ownsPortals = () =>
+      context.viewMode === 'story' || locoActiveScanRoot === root;
+
+    // Reuse the runtime's own scanner so posted keys/contexts match what apply() looks up.
     const harvest = async () => {
       const runtime = await ensureLocoInitialized('live');
-      if (!runtime?.textnodes || cancelled) return;
-      const textnodes = await scanLocoSourceText(runtime);
-      // restore() resets <html lang/dir>; the toolbar owns them.
-      applyDocumentLocale(context.globals);
+      if (!runtime?.scan || cancelled) return;
+      const roots = [root, ...(ownsPortals() ? locoPortalRoots() : [])];
+      const textnodes = await scanLocoRoots(runtime, roots);
       if (cancelled) return;
 
-      const keys = filterLocoTextnodes(textnodes, root);
+      const keys = filterLocoTextnodes(textnodes, roots);
       if (keys.length === 0) return;
 
       const signature = `${context.id}:${keys
@@ -757,7 +803,8 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       await postLocoTextnodes({
         serverUrl: LOCO_PROXY_BASE,
         keys,
-        pageUrl: window.location.href,
+        // Origin, path and story id only: query args can carry story control values.
+        pageUrl: `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(context.id)}`,
       }).catch((error) => {
         postedLiveSyncSignatures.delete(signature);
         console.warn(
@@ -775,19 +822,20 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       }, 500);
     };
     schedule();
-    const observer = new MutationObserver(() => {
-      if (!locoScanning) schedule();
+    const observer = new MutationObserver((records) => {
+      const relevant = records.some(
+        ({ target }) => root.contains(target) || (ownsPortals() && isInLocoPortal(target))
+      );
+      if (relevant) schedule();
     });
-    observer.observe(root, { childList: true, subtree: true, characterData: true });
-    locoHarvestObservers.add(observer);
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     return () => {
       cancelled = true;
-      locoHarvestObservers.delete(observer);
       observer.disconnect();
       window.clearTimeout(timer);
     };
-  }, [locoMode, locale, context.id]);
+  }, [locoMode, locale, context.id, context.viewMode]);
 
   useEffect(() => {
     let cancelled = false;
