@@ -202,6 +202,9 @@ export interface ReferenceQuery {
   to: number;
 }
 
+/** Stands for an inline leaf other than a hard break in the text before the caret. */
+const LEAF = '￼';
+
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
 
 /**
@@ -217,14 +220,18 @@ export function referenceQueryAt(
   if (!triggers.length || !selection.empty) return null;
   const $from = selection.$from;
   if (!$from.parent.isTextblock) return null;
+  // One character per inline leaf, so offsets from the caret stay exact: a
+  // hard break reads as a newline (whitespace, so a trigger may follow it),
+  // any other leaf (a chip, an image) as U+FFFC, which a query never spans \u2014
+  // picking a result can't replace the leaf.
   const before = $from.parent.textBetween(
     0,
     $from.parentOffset,
     undefined,
-    '\ufffc'
+    (leaf) => (leaf.type.spec.linebreakReplacement ? '\n' : LEAF)
   );
   const chars = triggers.map((t) => escapeRegExp(t.char)).join('');
-  const match = new RegExp(`(^|\\s)([${chars}])([^\\s${chars}]*)$`).exec(
+  const match = new RegExp(`(^|\\s)([${chars}])([^\\s${LEAF}${chars}]*)$`).exec(
     before
   );
   if (!match) return null;

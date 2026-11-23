@@ -130,6 +130,19 @@ describe('references in RichEditor', () => {
     expect(referenceQueryAt(editor.state, triggers)).toBeNull();
   });
 
+  it('opens after a hard break, and never spans a chip', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask\\\n@an');
+    caretAtEnd();
+    const query = referenceQueryAt(editor.state, triggers)!;
+    expect(query.query).toBe('an');
+    expect(editor.state.doc.textBetween(query.from, query.to)).toBe('@an');
+
+    // `@` then a chip: the chip isn't query text, so picking can't replace it.
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask @[@Ann](/people/u-ann)');
+    caretAtEnd();
+    expect(referenceQueryAt(editor.state, triggers)).toBeNull();
+  });
+
   it('inserts a pick as one chip that Backspace removes whole', async () => {
     await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask @an');
     caretAtEnd();
