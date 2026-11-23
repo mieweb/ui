@@ -137,6 +137,20 @@ describe('referencesIn', () => {
     expect(ids('[@Ann](/people/u&#45;ann)')).toEqual(['u-ann']);
   });
 
+  it('never mistakes U+E000 in the text, literal or encoded, for an escaped ampersand', () => {
+    const ids = (text: string) => referencesIn(text, triggers).map((r) => r.id);
+    // Encoded U+E000 decodes to itself, not to `&`.
+    expect(ids('[Ann](/people/u&#xE000;ann)')).toEqual(['u\uE000ann']);
+    expect(
+      ids('[Ann](/people/u&#xE000;ann) [Raj](/people/u\\&#45;raj)')
+    ).toEqual(['u\uE000ann', 'u&#45;raj']);
+    // A literal U+E000 elsewhere doesn't switch masking off for the post.
+    expect(ids('\uE000 [Ann](/people/u\\&#45;ann)')).toEqual(['u&#45;ann']);
+    expect(ids('[Ann](/people/u\uE000ann) [Raj](/people/u\\&#45;raj)')).toEqual(
+      ['u\uE000ann', 'u&#45;raj']
+    );
+  });
+
   it('keeps an escaped ampersand literal in a label, and in code as written', () => {
     const label = (text: string) =>
       referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
