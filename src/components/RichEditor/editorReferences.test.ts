@@ -7,6 +7,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CoreEditor } from '@kerebron/editor';
 import { TextSelection } from 'prosemirror-state';
+import type { EditorView } from 'prosemirror-view';
 import { createEditorKits } from './editorKits';
 import {
   REFERENCE_NODE,
@@ -14,6 +15,7 @@ import {
   deleteAdjacentReference,
   insertReference,
   referenceQueryAt,
+  referencesToLinks,
 } from './editorReferences';
 import type { ReferenceTrigger } from '../ReferenceChip/references';
 
@@ -89,6 +91,28 @@ describe('references in RichEditor', () => {
     expect(await save()).toBe(markdown);
   });
 
+  it('carries formatting around a claimed link onto the chip and back', async () => {
+    const marksOf = (type: string) => {
+      const found: string[] = [];
+      editor.state.doc.descendants((node) => {
+        if (
+          node.type.name === type ||
+          node.marks.some((m) => m.type.name === 'link')
+        )
+          found.push(...node.marks.map((m) => m.type.name));
+      });
+      return found.sort();
+    };
+    await editor.loadDocumentText(
+      MARKDOWN_TYPE,
+      'Ask **[@Ann Lee](/people/u-ann)** today.'
+    );
+    expect(marksOf(REFERENCE_NODE)).toEqual(['strong']);
+
+    referencesToLinks(editor.state, (tr) => editor.view.dispatch(tr));
+    expect(marksOf(REFERENCE_NODE)).toEqual(['link', 'strong']);
+  });
+
   it('leaves links no trigger claims as ordinary links', async () => {
     await editor.loadDocumentText(MARKDOWN_TYPE, '[docs](https://example.com)');
     expect(references()).toEqual([]);
@@ -125,5 +149,24 @@ describe('references in RichEditor', () => {
     editor.view.dispatch(deleteAdjacentReference(editor.state, 'backward')!);
     expect(references()).toEqual([]);
     expect(await save()).toBe('Ask');
+  });
+
+  it('leaves chips alone on Backspace when the editor is read-only', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask [@Ann](/people/u-ann)');
+    caretAtEnd();
+    const view = editor.view as EditorView;
+    const backspace = () =>
+      view.someProp('handleKeyDown', (handle) =>
+        handle(view, new KeyboardEvent('keydown', { key: 'Backspace' }))
+      );
+    editor.view.setProps({ editable: () => false });
+    try {
+      expect(backspace()).toBeFalsy();
+      expect(references()).toHaveLength(1);
+    } finally {
+      editor.view.setProps({ editable: () => true });
+    }
+    expect(backspace()).toBe(true);
+    expect(references()).toEqual([]);
   });
 });

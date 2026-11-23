@@ -7,7 +7,7 @@ import {
   type CoreEditor,
   type EditorKit,
 } from '@kerebron/editor';
-import type { NodeSpec, Node as PmNode } from 'prosemirror-model';
+import { Mark, type NodeSpec, type Node as PmNode } from 'prosemirror-model';
 import {
   Plugin,
   TextSelection,
@@ -90,7 +90,10 @@ type MarkdownHook = (
 
 /**
  * After Markdown is read: every link a trigger claims becomes a reference
- * node (its label the link's text). Other links stay links.
+ * node (its label the link's text). Formatting around the whole link (bold,
+ * italic) moves onto the chip. A link that can't round-trip as a chip —
+ * formatting on part of its text, or a title — stays a link, as do links no
+ * trigger claims.
  */
 export function linksToReferences(
   triggers: () => readonly ReferenceTrigger[]
@@ -100,34 +103,49 @@ export function linksToReferences(
     const type = schema.nodes[REFERENCE_NODE];
     const link = schema.marks.link;
     if (!type || !link) return true;
-    const spans: { from: number; to: number; href: string; label: string }[] =
-      [];
+    const spans: {
+      from: number;
+      to: number;
+      link: Mark;
+      marks: readonly Mark[];
+      label: string;
+      uniform: boolean;
+    }[] = [];
     doc.descendants((node, pos) => {
       if (!node.isText) return;
       const mark = node.marks.find((m) => m.type === link);
       if (!mark) return;
       const last = spans[spans.length - 1];
       // One link split over several text nodes (bold inside it) is one span.
-      if (last && last.to === pos && last.href === mark.attrs.href) {
+      if (last && last.to === pos && last.link.eq(mark)) {
         last.to = pos + node.nodeSize;
         last.label += node.text;
+        last.uniform &&= Mark.sameSet(last.marks, node.marks);
         return;
       }
       spans.push({
         from: pos,
         to: pos + node.nodeSize,
-        href: mark.attrs.href,
+        link: mark,
+        marks: node.marks,
         label: node.text ?? '',
+        uniform: true,
       });
     });
     const tr = state.tr;
     for (const span of spans.reverse()) {
-      const match = matchReference(span.href, triggers());
+      if (!span.uniform || span.link.attrs.title) continue;
+      const { href } = span.link.attrs;
+      const match = matchReference(href, triggers());
       if (!match) continue;
       tr.replaceWith(
         span.from,
         span.to,
-        type.create({ ...match, label: span.label, href: span.href })
+        type.create(
+          { ...match, label: span.label, href },
+          null,
+          span.link.removeFromSet(span.marks)
+        )
       );
     }
     if (tr.docChanged) dispatch?.(tr);
@@ -135,7 +153,10 @@ export function linksToReferences(
   };
 }
 
-/** Before Markdown is written: every reference node becomes its link again. */
+/**
+ * Before Markdown is written: every reference node becomes its link again,
+ * keeping the chip's formatting.
+ */
 export const referencesToLinks: MarkdownHook = (state, dispatch) => {
   const { schema, doc } = state;
   const type = schema.nodes[REFERENCE_NODE];
@@ -151,7 +172,7 @@ export const referencesToLinks: MarkdownHook = (state, dispatch) => {
     tr.replaceWith(
       pos,
       pos + node.nodeSize,
-      schema.text(label || href, [link.create({ href })])
+      schema.text(label || href, link.create({ href }).addToSet(node.marks))
     );
   }
   if (tr.docChanged) dispatch?.(tr);
@@ -289,6 +310,8 @@ class ReferencesExtension extends Extension {
       new Plugin({
         props: {
           handleKeyDown: (view, event) => {
+            // A read-only or disabled editor takes no reference edits.
+            if (!view.editable) return false;
             if (handlers.current.keyDown(view, event)) return true;
             if (event.key !== 'Backspace' && event.key !== 'Delete')
               return false;
@@ -339,6 +362,8 @@ export function createReferencesKit(
   };
 }
 
+const NO_OPTIONS: ReferenceOption[] = [];
+
 /** Room the list needs below the caret before it opens above it instead. */
 const MENU_MAX_HEIGHT = 224;
 /** Gap kept between the list and the viewport's edge. */
@@ -358,7 +383,11 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   activeTrigger: ReferenceTrigger | null;
 } {
   const [range, setRange] = React.useState<ReferenceQuery | null>(null);
-  const [results, setResults] = React.useState<ReferenceOption[]>([]);
+  const [answer, setAnswer] = React.useState<{
+    kind: string;
+    query: string;
+    options: ReferenceOption[];
+  } | null>(null);
   const [highlight, setHighlight] = React.useState(0);
   const [anchor, setAnchor] = React.useState<{
     left: number;
@@ -377,37 +406,43 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     [listId]
   );
 
-  // Search as the query changes; only the latest search's answer is shown.
+  // Search as the query changes; only the latest search's answer is kept.
   const searchSeq = React.useRef(0);
   const kind = range?.trigger.kind;
   const query = range?.query;
   React.useEffect(() => {
     const seq = ++searchSeq.current;
     const trigger = triggersRef.current.find((t) => t.kind === kind);
-    if (!trigger || query === undefined) {
-      setResults([]);
+    if (!trigger || kind === undefined || query === undefined) {
+      setAnswer(null);
       return;
     }
+    const settle = (options: ReferenceOption[]) => {
+      if (seq === searchSeq.current) setAnswer({ kind, query, options });
+    };
     Promise.resolve()
       .then(() => trigger.search(query))
-      .then(
-        (found) => {
-          if (seq === searchSeq.current) setResults(found);
-        },
-        () => {
-          if (seq === searchSeq.current) setResults([]);
-        }
-      );
+      .then(settle, () => settle([]));
   }, [kind, query]);
 
-  const menuOpen = range !== null && results.length > 0 && !!anchor;
+  // An answer shows only for the query it was asked for: while the next
+  // search is pending, the previous one's options are neither shown nor
+  // insertable (they may belong to another trigger).
+  const answered =
+    range !== null &&
+    answer?.kind === range.trigger.kind &&
+    answer.query === range.query;
+  const results = answered ? answer.options : NO_OPTIONS;
+  const menuOpen = answered && results.length > 0 && !!anchor;
   const clamped = menuOpen ? Math.min(highlight, results.length - 1) : -1;
 
   const insert = (option: ReferenceOption) => {
     const view = viewRef.current;
-    if (!view || !range) return;
-    view.dispatch(insertReference(view.state, range, option));
+    if (!view || !range || !answered) return;
     setRange(null);
+    // The host may have locked the editor while the list was open.
+    if (!view.editable) return;
+    view.dispatch(insertReference(view.state, range, option));
     view.focus();
   };
 
@@ -417,9 +452,10 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   handlers.current = {
     update: (view) => {
       viewRef.current = view;
-      let next = view.hasFocus()
-        ? referenceQueryAt(view.state, triggersRef.current)
-        : null;
+      let next =
+        view.editable && view.hasFocus()
+          ? referenceQueryAt(view.state, triggersRef.current)
+          : null;
       if (next?.from !== dismissedAt.current) dismissedAt.current = null;
       else next = null;
       setRange((prev) =>
@@ -434,7 +470,16 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       setAnchor({ left, top, bottom });
     },
     keyDown: (_view, event) => {
-      if (!menuOpen || !range) return false;
+      if (!range) return false;
+      // Escape closes the spot even before the list appears, so a pending
+      // search's answer doesn't open it afterwards. Once a search came back
+      // empty there is nothing to close, and Escape is left to the host.
+      if (event.key === 'Escape' && (menuOpen || !answered)) {
+        dismissedAt.current = range.from;
+        setRange(null);
+        return true;
+      }
+      if (!menuOpen) return false;
       const count = results.length;
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         const step = event.key === 'ArrowDown' ? 1 : -1;
@@ -445,11 +490,6 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
         insert(results[clamped]);
         return true;
       }
-      if (event.key === 'Escape') {
-        dismissedAt.current = range.from;
-        setRange(null);
-        return true;
-      }
       return false;
     },
     blur: () => setRange(null),
@@ -458,10 +498,36 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   // A new query starts at the first match.
   React.useEffect(() => setHighlight(0), [range?.from, range?.query]);
 
-  // The editor is the combobox; point it at the open list for screen readers.
+  // The list is fixed to the viewport, so it follows the caret when the page
+  // or an editor ancestor scrolls, or the window resizes — neither changes
+  // the editor's state, so `update` doesn't run.
+  const rangeFrom = range?.from;
+  React.useEffect(() => {
+    const view = viewRef.current;
+    if (rangeFrom === undefined || !view) return;
+    const measure = () => {
+      const { left, top, bottom } = view.coordsAtPos(rangeFrom);
+      setAnchor({ left, top, bottom });
+    };
+    window.addEventListener('scroll', measure, true);
+    window.addEventListener('resize', measure);
+    return () => {
+      window.removeEventListener('scroll', measure, true);
+      window.removeEventListener('resize', measure);
+    };
+  }, [rangeFrom]);
+
+  // The editor stays a multi-line textbox (a combobox role would misdescribe
+  // the whole document); while the list is open it points at the list and
+  // its highlighted option, which a textbox supports. An unlabeled surface
+  // gets the textbox role here, since RichEditor sets it only with a label.
   React.useEffect(() => {
     const dom = viewRef.current?.dom;
     if (!dom || !triggersRef.current.length) return;
+    if (!dom.hasAttribute('role')) {
+      dom.setAttribute('role', 'textbox');
+      dom.setAttribute('aria-multiline', 'true');
+    }
     dom.setAttribute('aria-autocomplete', 'list');
     if (menuOpen) {
       dom.setAttribute('aria-controls', listId);
