@@ -204,4 +204,13 @@ describe('createReferencesPlugin', () => {
   it('exports MarkdownLink from the SuperChat entry for other link plugins', () => {
     expect(superChat.MarkdownLink).toBe(MarkdownLink);
   });
+  it('names a chip with a line break in its label as one line', () => {
+    const renderText = createMarkdownRenderer({
+      plugins: [createReferencesPlugin({ triggers })],
+    });
+    render(<>{renderText('[Ann  \nLee](/people/u-ann)', CONTEXT)}</>);
+    const chip = screen.getByRole('link', { name: 'Ann Lee' });
+    expect(chip).toHaveAttribute('data-reference-kind', 'person');
+    expect(chip).toHaveTextContent('Ann Lee');
+  });
 });

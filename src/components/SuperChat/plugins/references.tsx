@@ -60,6 +60,8 @@ function textOf(node: HastNode | undefined): string {
   const hidden = node.properties?.ariaHidden;
   if (hidden === true || hidden === 'true') return '';
   if (node.tagName === 'annotation') return '';
+  // A hard line break reads as a space, as `referencesIn` reads it.
+  if (node.tagName === 'br') return ' ';
   if (node.tagName === 'img') {
     const alt = node.properties?.alt;
     return typeof alt === 'string' ? alt : '';
