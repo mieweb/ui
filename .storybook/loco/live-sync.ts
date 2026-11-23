@@ -30,6 +30,9 @@ const SENSITIVE_PATTERNS = [
   /\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/,
 ];
 
+// Matches the runtime's own limit: anything longer is never translated anyway.
+const MAX_PHRASE_LENGTH = 1000;
+
 const isSensitive = (value: string) =>
   SENSITIVE_PATTERNS.some((pattern) => pattern.test(value));
 
@@ -37,7 +40,7 @@ const normalizeText = (value: string) => value.replace(/\s+/g, ' ').trim();
 
 function isUsefulPhrase(value: string): boolean {
   if (!value) return false;
-  if (value.length < 2 || value.length > 180) return false;
+  if (value.length < 2 || value.length > MAX_PHRASE_LENGTH) return false;
   if (/^[\d\s.,:%+-/()]+$/.test(value)) return false;
   return !isSensitive(value);
 }

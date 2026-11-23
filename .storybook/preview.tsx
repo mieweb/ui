@@ -712,6 +712,70 @@ const withCodeLookup: Decorator = (Story, context) => {
   );
 };
 
+// Harvests source-language copy under `root` (plus owned portals) into Loco now and whenever
+// it changes later (async data, interactions). Returns a stop function.
+function startLocoHarvest(
+  root: Element,
+  pageId: string,
+  ownsPortals: () => boolean
+): () => void {
+  let cancelled = false;
+  let timer: number | undefined;
+
+  // Reuse the runtime's own scanner so posted keys/contexts match what apply() looks up.
+  const harvest = async () => {
+    const runtime = await ensureLocoInitialized('live');
+    if (!runtime?.scan || cancelled) return;
+    const roots = [root, ...(ownsPortals() ? locoPortalRoots() : [])];
+    const textnodes = await scanLocoRoots(runtime, roots);
+    if (cancelled) return;
+
+    const keys = filterLocoTextnodes(textnodes, roots);
+    if (keys.length === 0) return;
+
+    const signature = `${pageId}:${keys
+      .map((entry) => `${entry.key}\u0000${entry.context}`)
+      .sort()
+      .join('|')}`;
+    if (postedLiveSyncSignatures.has(signature)) return;
+    postedLiveSyncSignatures.add(signature);
+
+    await postLocoTextnodes({
+      serverUrl: LOCO_PROXY_BASE,
+      keys,
+      // Origin, path and story id only: query args can carry story control values.
+      pageUrl: `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(pageId)}`,
+    }).catch((error) => {
+      postedLiveSyncSignatures.delete(signature);
+      console.warn(
+        '[loco-live-sync] Unable to post phrases to Loco. Check LOCO_SERVER_URL and LOCO_API_KEY.',
+        error,
+      );
+    });
+  };
+
+  const schedule = () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      void harvest().catch((error) => console.warn('[loco-live-sync] Harvest failed.', error));
+    }, 500);
+  };
+  schedule();
+  const observer = new MutationObserver((records) => {
+    const relevant = records.some(
+      ({ target }) => root.contains(target) || (ownsPortals() && isInLocoPortal(target))
+    );
+    if (relevant) schedule();
+  });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+  return () => {
+    cancelled = true;
+    observer.disconnect();
+    window.clearTimeout(timer);
+  };
+}
+
 function resolveLocoMode(globals: Record<string, unknown>): string {
   const requestedMode = String(globals?.locoMode || 'disable');
   return requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
@@ -761,16 +825,38 @@ let locoDocsGlobals: Record<string, unknown> = {};
 // Only set once Storybook reports a rendered docs page without stories, so story pages
 // never race their decorator with a second apply.
 let locoDocsOnlyPage = false;
-const syncLocoDocsPage = () => {
+let locoDocsId = '';
+let stopLocoDocsHarvest: (() => void) | null = null;
+
+// Live mode harvests docs-only pages too, from the English source only.
+function updateLocoDocsHarvest() {
+  stopLocoDocsHarvest?.();
+  stopLocoDocsHarvest = null;
+  const docsRoot = document.getElementById('storybook-docs');
+  const harvesting =
+    locoDocsOnlyPage &&
+    docsRoot &&
+    !isLocoDisabled &&
+    resolveLocoMode(locoDocsGlobals) === 'live' &&
+    String(locoDocsGlobals.locale || DEFAULT_LOCALE) === DEFAULT_LOCALE;
+  if (harvesting) stopLocoDocsHarvest = startLocoHarvest(docsRoot, locoDocsId, () => true);
+}
+
+const syncLocoDocsPage = (id?: unknown) => {
+  if (typeof id === 'string') locoDocsId = id;
   locoDocsOnlyPage = !document.querySelector(LOCO_SCAN_ROOT_SELECTOR);
   if (locoDocsOnlyPage) void syncLocoLocale(locoDocsGlobals);
+  updateLocoDocsHarvest();
 };
 const leaveLocoDocsPage = () => {
   locoDocsOnlyPage = false;
+  updateLocoDocsHarvest();
 };
 const handleLocoGlobals = ({ globals }: { globals: Record<string, unknown> }) => {
   locoDocsGlobals = globals;
-  if (locoDocsOnlyPage) void syncLocoLocale(globals);
+  if (!locoDocsOnlyPage) return;
+  void syncLocoLocale(globals);
+  updateLocoDocsHarvest();
 };
 try {
   const globalsParam = new URLSearchParams(window.location.search).get('globals') || '';
@@ -871,66 +957,11 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     // Autodocs renders one decorator per story, so each harvests only its own root.
     const root = scanRootRef.current;
     if (!root) return;
-
-    let cancelled = false;
-    let timer: number | undefined;
-
-    const ownsPortals = () =>
-      context.viewMode === 'story' || locoActiveScanRoot === root;
-
-    // Reuse the runtime's own scanner so posted keys/contexts match what apply() looks up.
-    const harvest = async () => {
-      const runtime = await ensureLocoInitialized('live');
-      if (!runtime?.scan || cancelled) return;
-      const roots = [root, ...(ownsPortals() ? locoPortalRoots() : [])];
-      const textnodes = await scanLocoRoots(runtime, roots);
-      if (cancelled) return;
-
-      const keys = filterLocoTextnodes(textnodes, roots);
-      if (keys.length === 0) return;
-
-      const signature = `${context.id}:${keys
-        .map((entry) => `${entry.key}\u0000${entry.context}`)
-        .sort()
-        .join('|')}`;
-      if (postedLiveSyncSignatures.has(signature)) return;
-      postedLiveSyncSignatures.add(signature);
-
-      await postLocoTextnodes({
-        serverUrl: LOCO_PROXY_BASE,
-        keys,
-        // Origin, path and story id only: query args can carry story control values.
-        pageUrl: `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(context.id)}`,
-      }).catch((error) => {
-        postedLiveSyncSignatures.delete(signature);
-        console.warn(
-          '[loco-live-sync] Unable to post phrases to Loco. Check LOCO_SERVER_URL and LOCO_API_KEY.',
-          error,
-        );
-      });
-    };
-
-    // Re-harvest when the story renders more text later (async data, interactions).
-    const schedule = () => {
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => {
-        void harvest().catch((error) => console.warn('[loco-live-sync] Harvest failed.', error));
-      }, 500);
-    };
-    schedule();
-    const observer = new MutationObserver((records) => {
-      const relevant = records.some(
-        ({ target }) => root.contains(target) || (ownsPortals() && isInLocoPortal(target))
-      );
-      if (relevant) schedule();
-    });
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
-
-    return () => {
-      cancelled = true;
-      observer.disconnect();
-      window.clearTimeout(timer);
-    };
+    return startLocoHarvest(
+      root,
+      context.id,
+      () => context.viewMode === 'story' || locoActiveScanRoot === root
+    );
   }, [locoMode, locale, context.id, context.viewMode]);
 
   useEffect(() => {

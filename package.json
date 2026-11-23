@@ -310,7 +310,7 @@
     "test:watch": "vitest",
     "prestorybook": "npm run build:esheet && npm run build:datavis",
     "storybook": "node scripts/build-ozwell-docs.mjs && storybook dev -p 6006",
-    "loco:pack:sync": "node scripts/sync-loco-pack.mjs",
+    "loco:pack:sync": "node scripts/sync-loco-pack.mjs --languages=ar,es,zh-Hans",
     "build-storybook": "npm run build:esheet && npm run build:datavis && node scripts/build-ozwell-docs.mjs && NODE_OPTIONS=--max-old-space-size=6144 storybook build && npm run catalog:manifest && npm run agent:web",
     "test:coverage": "vitest run --coverage",
     "playwright:install": "playwright install --with-deps",

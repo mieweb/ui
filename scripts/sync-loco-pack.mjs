@@ -34,6 +34,39 @@ function parseArgs(argv) {
   return options;
 }
 
+// Keeps only the requested languages in every per-language section of the export.
+function keepLanguages(payload, languagesArg) {
+  if (!languagesArg || languagesArg === 'true') return payload;
+  const wanted = new Set(
+    languagesArg
+      .split(',')
+      .map((code) => code.trim())
+      .filter(Boolean)
+  );
+  const missing = [...wanted].filter(
+    (code) => !(payload.translations && code in payload.translations)
+  );
+  if (missing.length > 0) {
+    throw new Error(
+      `Loco export has no translations for: ${missing.join(', ')}`
+    );
+  }
+  const pick = (section) =>
+    section && typeof section === 'object' && !Array.isArray(section)
+      ? Object.fromEntries(
+          Object.entries(section).filter(([code]) => wanted.has(code))
+        )
+      : section;
+  return {
+    ...payload,
+    languages: (payload.languages ?? []).filter((code) => wanted.has(code)),
+    languageNames: pick(payload.languageNames),
+    languageDirections: pick(payload.languageDirections),
+    translations: pick(payload.translations),
+    glossary: pick(payload.glossary),
+  };
+}
+
 function printHelp() {
   console.log(`Usage: node scripts/sync-loco-pack.mjs [options]
 
@@ -44,6 +77,7 @@ Options:
   --format=<name>        Export format (default: loco — consumable by both the
                          Loco runtime file mode and createLocoTranslator)
   --contextMode=<mode>   Context mode (default: ignore)
+  --languages=<codes>    Comma-separated languages to keep (default: all exported)
   --help                 Show this message
 
 Environment variables (also read from .env.local; shell env wins):
@@ -85,7 +119,7 @@ async function main() {
     throw new Error(`Loco export failed (${response.status}): ${body}`);
   }
 
-  const payload = await response.json();
+  const payload = keepLanguages(await response.json(), args.languages);
   const output = `${JSON.stringify(payload, null, 2)}\n`;
   const absoluteOut = path.resolve(process.cwd(), outPath);
   await writeFile(absoluteOut, output, 'utf8');
