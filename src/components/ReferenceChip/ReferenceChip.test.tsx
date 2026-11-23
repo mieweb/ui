@@ -91,6 +91,21 @@ describe('referencesIn', () => {
     ).toBe('TH-1: Fix *beta* now');
   });
 
+  it('decodes character references in the label, but not escaped or in code', () => {
+    expect(
+      referencesIn(
+        '[TH-3: R&amp;D &#169; &#x41; &copy; \\&amp; `&amp;`](/tickets/t-3)',
+        triggers
+      )[0].label
+    ).toBe('TH-3: R&D © A © &amp; &amp;');
+  });
+
+  it('drops inline HTML tags from the label, keeping their text', () => {
+    expect(
+      referencesIn('[<em>@Ann</em> Lee](/people/u-ann)', triggers)[0].label
+    ).toBe('@Ann Lee');
+  });
+
   it('keeps code-span contents literal in the label', () => {
     expect(
       referencesIn('[TH-2: Rename `a\\*b`](/tickets/t-2)', triggers)[0].label

@@ -92,15 +92,48 @@ function* linksIn(tokens: readonly Nested[]): Generator<Tokens.Link> {
   }
 }
 
-// The text a reader sees in inline `tokens`: escapes resolved, emphasis
-// marks dropped, code-span contents kept literal.
+// Named character references decoded in labels; others stay as written.
+const NAMED_REFERENCES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  copy: '©',
+  reg: '®',
+  trade: '™',
+  hellip: '…',
+  ndash: '–',
+  mdash: '—',
+};
+
+// Marked keeps character references (`&amp;`, `&#169;`) as written in text
+// tokens; a reader sees the characters.
+function decodeReferences(text: string): string {
+  return text.replace(
+    /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g,
+    (match, dec?: string, hex?: string, name?: string) => {
+      if (name) return NAMED_REFERENCES[name] ?? match;
+      const code = dec ? Number(dec) : parseInt(hex!, 16);
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
+    }
+  );
+}
+
+// The text a reader sees in inline `tokens`: escapes and character
+// references resolved, emphasis marks and inline HTML tags dropped,
+// code-span contents kept literal.
 function plainText(tokens: readonly Nested[]): string {
   return tokens
-    .map((token) =>
-      token.type !== 'codespan' && token.tokens
-        ? plainText(token.tokens)
-        : (token.text ?? '')
-    )
+    .map((token) => {
+      if (token.type === 'html') return '';
+      if (token.type === 'codespan') return token.text ?? '';
+      if (token.tokens) return plainText(token.tokens);
+      return token.type === 'text'
+        ? decodeReferences(token.text ?? '')
+        : (token.text ?? '');
+    })
     .join('');
 }
 
