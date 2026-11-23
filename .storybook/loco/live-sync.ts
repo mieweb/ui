@@ -17,7 +17,8 @@ const EDITABLE_SELECTOR =
   'input, textarea, select, option, [contenteditable]:not([contenteditable="false"]), [role="textbox"]';
 
 // translate="no" excludes text from sync; data-notranslate alone only stops runtime DOM rewrites.
-const IGNORE_SELECTOR = `${SKIP_SELECTOR}, ${EDITABLE_SELECTOR}, [data-loco-ignore="true"], [translate="no"], [data-loco-translated]`;
+const PROTECTED_SELECTOR = `${EDITABLE_SELECTOR}, [data-loco-ignore="true"], [translate="no"]`;
+const IGNORE_SELECTOR = `${SKIP_SELECTOR}, ${PROTECTED_SELECTOR}, [data-loco-translated]`;
 
 // Best-effort net only, not a PII boundary: live sync is a dev-server opt-in for curated
 // demo content, so stories must mark realistic personal/clinical data translate="no".
@@ -29,11 +30,29 @@ const SENSITIVE_PATTERNS = [
   /\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/,
 ];
 
+const isSensitive = (value: string) =>
+  SENSITIVE_PATTERNS.some((pattern) => pattern.test(value));
+
+const normalizeText = (value: string) => value.replace(/\s+/g, ' ').trim();
+
 function isUsefulPhrase(value: string): boolean {
   if (!value) return false;
   if (value.length < 2 || value.length > 180) return false;
   if (/^[\d\s.,:%+-/()]+$/.test(value)) return false;
-  return !SENSITIVE_PATTERNS.some((pattern) => pattern.test(value));
+  return !isSensitive(value);
+}
+
+// The runtime builds context from nearby headings/labels ("Section > Field"), which can
+// sit inside a protected region even when the phrase itself does not.
+function isSafeContext(context: string, protectedTexts: () => string[]): boolean {
+  return context.split(' > ').every((segment) => {
+    const text = normalizeText(segment);
+    return (
+      !text ||
+      (!isSensitive(text) &&
+        !protectedTexts().some((protectedText) => protectedText.includes(text)))
+    );
+  });
 }
 
 /** A phrase as discovered by the Loco runtime (`Loco.textnodes()`). */
@@ -45,7 +64,7 @@ export type LocoTextnode = {
 
 /**
  * Keeps runtime-discovered phrases that sit inside `root` and outside ignored or
- * sensitive regions. Keys/contexts are passed through unchanged so they match
+ * sensitive regions, and whose context carries no protected or sensitive text. Keys/contexts are passed through unchanged so they match
  * what `Loco.apply()` looks up (including `{{text:N}}` placeholders).
  */
 export function filterLocoTextnodes(
@@ -54,6 +73,12 @@ export function filterLocoTextnodes(
 ): LocoKeyEntry[] {
   const seen = new Set<string>();
   const entries: LocoKeyEntry[] = [];
+  let protectedTexts: string[] | undefined;
+  const getProtectedTexts = () =>
+    (protectedTexts ??= Array.from(
+      root.ownerDocument.querySelectorAll(PROTECTED_SELECTOR),
+      (element) => normalizeText(element.textContent ?? '')
+    ).filter(Boolean));
   for (const { key, context = '', element } of nodes) {
     if (
       !element ||
@@ -63,6 +88,8 @@ export function filterLocoTextnodes(
       continue;
     }
     if (!isUsefulPhrase(key)) continue;
+    // Drop rather than blank an unsafe context: apply() looks up the exact key/context pair.
+    if (context && !isSafeContext(context, getProtectedTexts)) continue;
     const id = `${key}\0${context}`;
     if (seen.has(id)) continue;
     seen.add(id);

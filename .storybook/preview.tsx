@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import type { Preview, Decorator } from '@storybook/react-vite';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { addons } from 'storybook/preview-api';
 import '../src/styles/base.css';
 import '../src/styles/kerebron.css';
@@ -51,6 +51,8 @@ const locoPackLanguages: string[] = Array.isArray((locoI18nPack as { languages?:
   : [];
 const locoPackLanguageNames =
   (locoI18nPack as { languageNames?: Record<string, string> }).languageNames || {};
+const locoPackDirections =
+  (locoI18nPack as { languageDirections?: Record<string, string> }).languageDirections || {};
 
 const localeNameFallbacks: Record<string, string> = {
   en: 'English',
@@ -190,26 +192,51 @@ type LocoRuntime = {
   textnodes?: () => LocoTextnode[];
 };
 
-// The runtime drops apply() calls made while one is in flight, so run locale changes
-// one at a time and skip any that a newer request has superseded.
-let locoLatestRequest = 0;
+// The runtime drops apply() calls made while one is in flight, so every runtime
+// operation (locale change or harvest scan) runs one at a time.
 let locoQueue: Promise<void> = Promise.resolve();
-// rescan() re-applies the last loaded translations (restore() keeps them), so only rescan before any apply.
-let locoHasApplied = false;
+
+function runLocoExclusive<T>(task: () => Promise<T>): Promise<T> {
+  const run = locoQueue.then(task);
+  locoQueue = run.then(
+    () => undefined,
+    () => undefined
+  );
+  return run;
+}
+
+// Skip locale changes that a newer request has superseded.
+let locoLatestRequest = 0;
 
 function queueLocoLocale(runtime: LocoRuntime, locale: string | null): Promise<void> {
   const request = ++locoLatestRequest;
-  if (locale) locoHasApplied = true;
-  locoQueue = locoQueue
-    .then(async () => {
-      if (request !== locoLatestRequest) return;
-      if (locale) await Promise.resolve(runtime.apply?.(locale));
-      else await Promise.resolve(runtime.restore?.());
-    })
-    .catch((error) => {
-      console.warn(`[loco] Unable to ${locale ? `apply "${locale}"` : 'restore English'}.`, error);
-    });
-  return locoQueue;
+  return runLocoExclusive(async () => {
+    if (request !== locoLatestRequest) return;
+    if (locale) await Promise.resolve(runtime.apply?.(locale));
+    else await Promise.resolve(runtime.restore?.());
+  }).catch((error) => {
+    console.warn(`[loco] Unable to ${locale ? `apply "${locale}"` : 'restore English'}.`, error);
+  });
+}
+
+// Harvest observers ignore the DOM churn caused by their own rescan/restore.
+const locoHarvestObservers = new Set<MutationObserver>();
+let locoScanning = false;
+
+// rescan() re-applies already-loaded translations, so restore afterwards: the DOM stays
+// English and the discovered keys are always source text.
+function scanLocoSourceText(runtime: LocoRuntime): Promise<LocoTextnode[]> {
+  return runLocoExclusive(async () => {
+    locoScanning = true;
+    try {
+      await runtime.rescan?.();
+      await Promise.resolve(runtime.restore?.());
+      return runtime.textnodes?.() ?? [];
+    } finally {
+      locoHarvestObservers.forEach((observer) => observer.takeRecords());
+      locoScanning = false;
+    }
+  });
 }
 
 // The runtime singleton holds one pack (committed or live) — switching modes reloads the iframe.
@@ -302,16 +329,25 @@ const brands: Record<string, BrandConfig> = {
   webchart: webchartBrand,
 };
 
+// Loco language metadata can mark locales RTL that isRtlLocale() doesn't know (e.g. ps, dv).
+function isLocoRtlLocale(globals: Record<string, unknown>, locale: string): boolean {
+  if (globals?.locoMode === 'live') {
+    return parseCachedLiveLanguages().some((lang) => lang.code === locale && lang.dir === 'rtl');
+  }
+  return globals?.locoMode === 'package' && locoPackDirections[locale] === 'rtl';
+}
+
 /*
  * Resolve the effective text direction from the direction/locale globals.
- * 'auto' derives it from the locale (rtl for ar/he/fa/ur).
+ * 'auto' derives it from the locale (rtl for ar/he/fa/ur, or as declared by Loco).
  */
 function resolveGlobalDirection(
   globals: Record<string, unknown>
 ): 'ltr' | 'rtl' {
   const direction = (globals?.direction as string) || 'auto';
   if (direction === 'ltr' || direction === 'rtl') return direction;
-  return isRtlLocale((globals?.locale as string) || 'en') ? 'rtl' : 'ltr';
+  const locale = (globals?.locale as string) || 'en';
+  return isRtlLocale(locale) || isLocoRtlLocale(globals, locale) ? 'rtl' : 'ltr';
 }
 
 // Apply text direction (RTL preview) and language at the document level so CSS logical
@@ -609,6 +645,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   const locoMode =
     requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
   const locale = String(context.globals?.locale || 'en');
+  const scanRootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (requestedMode === 'live' && !isLiveSyncEnabled) {
@@ -675,7 +712,8 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     // Only harvest source-language text; translated DOM would register translations as new keys.
     if (locoMode !== 'live' || isLocoDisabled || locale !== DEFAULT_LOCALE) return;
 
-    const root = document.querySelector('[data-loco-scan-root="true"]') as HTMLElement | null;
+    // Autodocs renders one decorator per story, so each harvests only its own root.
+    const root = scanRootRef.current;
     if (!root) return;
 
     let cancelled = false;
@@ -685,11 +723,12 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     const harvest = async () => {
       const runtime = await ensureLocoInitialized('live');
       if (!runtime?.textnodes || cancelled) return;
-      await locoQueue;
-      if (!locoHasApplied) await runtime.rescan?.();
+      const textnodes = await scanLocoSourceText(runtime);
+      // restore() resets <html lang/dir>; the toolbar owns them.
+      applyDocumentLocale(context.globals);
       if (cancelled) return;
 
-      const keys = filterLocoTextnodes(runtime.textnodes(), root);
+      const keys = filterLocoTextnodes(textnodes, root);
       if (keys.length === 0) return;
 
       const signature = `${context.id}:${keys
@@ -720,11 +759,15 @@ const withLocoLiveSync: Decorator = (Story, context) => {
       }, 500);
     };
     schedule();
-    const observer = new MutationObserver(schedule);
+    const observer = new MutationObserver(() => {
+      if (!locoScanning) schedule();
+    });
     observer.observe(root, { childList: true, subtree: true, characterData: true });
+    locoHarvestObservers.add(observer);
 
     return () => {
       cancelled = true;
+      locoHarvestObservers.delete(observer);
       observer.disconnect();
       window.clearTimeout(timer);
     };
@@ -769,7 +812,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   }, [locoMode, locale, context.id]);
 
   return (
-    <div data-loco-scan-root="true">
+    <div ref={scanRootRef} data-loco-scan-root="true">
       <Story />
     </div>
   );

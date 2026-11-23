@@ -39,7 +39,7 @@ function printHelp() {
 
 Options:
   --server=<url>         Loco server URL (default: https://loco.os.mieweb.org)
-  --apiKey=<key>         Loco API key (or set LOCO_API_KEY / VITE_LOCO_API_KEY)
+  --apiKey=<key>         Loco API key (or set LOCO_API_KEY)
   --out=<path>           Output file path (default: .storybook/loco/static/i18n-translations.json)
   --format=<name>        Export format (default: loco — consumable by both the
                          Loco runtime file mode and createLocoTranslator)
@@ -49,8 +49,6 @@ Options:
 Environment variables (also read from .env.local; shell env wins):
   LOCO_SERVER_URL
   LOCO_API_KEY
-  VITE_LOCO_SERVER_URL
-  VITE_LOCO_API_KEY
 `);
 }
 
@@ -64,14 +62,9 @@ async function main() {
   const server = (
     args.server ||
     process.env.LOCO_SERVER_URL ||
-    process.env.VITE_LOCO_SERVER_URL ||
     'https://loco.os.mieweb.org'
   ).replace(/\/$/, '');
-  const apiKey =
-    args.apiKey ||
-    process.env.LOCO_API_KEY ||
-    process.env.VITE_LOCO_API_KEY ||
-    '';
+  const apiKey = args.apiKey || process.env.LOCO_API_KEY || '';
   const outPath = args.out || '.storybook/loco/static/i18n-translations.json';
   const format = args.format || 'loco';
   const contextMode = args.contextMode || 'ignore';

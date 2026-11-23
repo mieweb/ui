@@ -204,13 +204,13 @@ function ychartGitInfoPlugin(): Plugin {
 const ychartDependencyNames = readDependencyNames('ychart');
 
 // --- Loco live sync: dev-server-only proxy so the API key never reaches the browser bundle ---
-const locoEnv = loadEnv('development', workspaceRoot, ['LOCO_', 'VITE_LOCO_']);
+// LOCO_* only: VITE_* vars are exposed to browser code, and the key must stay server-side.
+const locoEnv = loadEnv('development', workspaceRoot, ['LOCO_']);
 const locoServerUrl = (
   locoEnv.LOCO_SERVER_URL ||
-  locoEnv.VITE_LOCO_SERVER_URL ||
   'https://loco.os.mieweb.org'
 ).replace(/\/$/, '');
-const locoApiKey = locoEnv.LOCO_API_KEY || locoEnv.VITE_LOCO_API_KEY || '';
+const locoApiKey = locoEnv.LOCO_API_KEY || '';
 
 function locoDevProxyPlugin(): Plugin {
   const upstream = (pathAndQuery: string, init: RequestInit = {}) =>

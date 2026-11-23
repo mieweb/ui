@@ -76,6 +76,25 @@ describe('filterLocoTextnodes', () => {
     ).toEqual(['Save']);
   });
 
+  it('drops phrases whose context comes from protected or sensitive text', () => {
+    const { root, nodes } = nodesFrom(
+      [
+        '<h2 translate="no">Jane Doe</h2>',
+        '<button data-key="Save" data-context="Jane Doe"></button>',
+        '<button data-key="Cancel" data-context="Contact > MRN 00482913"></button>',
+        '<button data-key="Delete" data-context="Contact details"></button>',
+      ].join('')
+    );
+    document.body.appendChild(root);
+    try {
+      expect(filterLocoTextnodes(nodes, root)).toEqual([
+        { key: 'Delete', context: 'Contact details' },
+      ]);
+    } finally {
+      root.remove();
+    }
+  });
+
   it('drops phrases outside the scan root and duplicates', () => {
     const { root, nodes } = nodesFrom(
       '<p data-key="Save"></p><p data-key="Save"></p>'
