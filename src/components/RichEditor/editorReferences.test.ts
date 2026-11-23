@@ -6,7 +6,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CoreEditor } from '@kerebron/editor';
-import { TextSelection } from 'prosemirror-state';
+import { DOMParser, DOMSerializer } from 'prosemirror-model';
+import { EditorState, TextSelection } from 'prosemirror-state';
 import type { EditorView } from 'prosemirror-view';
 import { createEditorKits } from './editorKits';
 import {
@@ -14,6 +15,7 @@ import {
   createReferencesKit,
   deleteAdjacentReference,
   insertReference,
+  linksToReferences,
   menuPlacement,
   referenceQueryAt,
   referencesToLinks,
@@ -184,6 +186,71 @@ describe('references in RichEditor', () => {
     expect(await save()).toBe(markdown);
   });
 
+  it('leaves a link split by a break node a link, not chips of its pieces', () => {
+    // Kerebron's inline-HTML parser can import <br> inside a link without
+    // the link mark, so the link reads as two runs of text around it.
+    const { schema } = editor;
+    const link = schema.marks.link.create({ href: '/people/u-ann' });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, [
+        schema.text('@Ann', [link]),
+        schema.nodes.br.create(),
+        schema.text('Lee', [link]),
+        schema.text(' and '),
+        schema.text('@Raj', [
+          schema.marks.link.create({ href: '/people/u-raj' }),
+        ]),
+      ]),
+    ]);
+    let result = EditorState.create({ doc });
+    linksToReferences(() => triggers)(result, (tr) => {
+      result = result.apply(tr);
+    });
+    const kinds: string[] = [];
+    result.doc.descendants((node) => {
+      kinds.push(node.type.name === REFERENCE_NODE ? node.attrs.id : '');
+    });
+    expect(kinds.filter(Boolean)).toEqual(['u-raj']);
+  });
+
+  it('makes a pasted chip only from a link a trigger claims, and never draws an unsafe href', () => {
+    const { schema } = editor;
+    const parse = (html: string) => {
+      const dom = document.createElement('div');
+      dom.innerHTML = html;
+      const found: Record<string, string>[] = [];
+      DOMParser.fromSchema(schema)
+        .parse(dom)
+        .descendants((node) => {
+          if (node.type.name === REFERENCE_NODE) found.push(node.attrs);
+        });
+      return found;
+    };
+    const chip = (href: string) =>
+      `<p><a href="${href}" data-reference-kind="person" data-reference-id="forged">@Ann</a></p>`;
+    expect(parse(chip('javascript:alert(1)'))).toEqual([]);
+    expect(parse(chip('java\tscript:alert(1)'))).toEqual([]);
+    expect(parse(chip('https://example.com/'))).toEqual([]);
+    // Kind and id come from the trigger, not the pasted attributes.
+    expect(parse(chip('/people/u-ann'))).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann', href: '/people/u-ann' },
+    ]);
+
+    const drawn = (href: string) =>
+      (
+        DOMSerializer.fromSchema(schema).serializeNode(
+          schema.nodes[REFERENCE_NODE].create({
+            kind: 'person',
+            id: 'x',
+            label: '@x',
+            href,
+          })
+        ) as HTMLAnchorElement
+      ).getAttribute('href');
+    expect(drawn('javascript:alert(1)')).toBeNull();
+    expect(drawn('/people/u-ann')).toBe('/people/u-ann');
+  });
+
   it('inserts a pick as one chip that Backspace removes whole', async () => {
     await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask @an');
     caretAtEnd();
@@ -257,6 +324,18 @@ describe('menuPlacement', () => {
     );
     expect(above).toMatchObject({ bottom: 104, maxHeight: 188 });
     expect(above).not.toHaveProperty('top');
+  });
+
+  it('is never wider than the screen', () => {
+    const narrow = {
+      width: 240,
+      height: 600,
+      visibleTop: 0,
+      visibleBottom: 600,
+    };
+    expect(
+      menuPlacement({ left: 100, top: 120, bottom: 140 }, 256, narrow)
+    ).toMatchObject({ left: 8, maxWidth: 224 });
   });
 
   it('keeps clear of the status bar and an on-screen keyboard', () => {

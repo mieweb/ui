@@ -99,6 +99,19 @@ test.describe('Visual Regression Tests - RichEditor references', () => {
       const listBox = await list.boundingBox();
       const viewport = page.viewportSize()!;
       expect(listBox!.y).toBeGreaterThanOrEqual(typedBottom);
+      // It starts at the caret, after `@ann`, not under the `@`: a query
+      // that wraps keeps the list under the text being typed.
+      if (name !== '-rtl') {
+        const typedRight = await surface(page)
+          .locator('p')
+          .last()
+          .evaluate((p) => {
+            const range = document.createRange();
+            range.selectNodeContents(p.lastChild!);
+            return range.getBoundingClientRect().right;
+          });
+        expect(Math.abs(listBox!.x - typedRight)).toBeLessThan(2);
+      }
       expect(listBox!.x).toBeGreaterThanOrEqual(0);
       expect(listBox!.x + listBox!.width).toBeLessThanOrEqual(viewport.width);
 

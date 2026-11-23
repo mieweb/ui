@@ -17,6 +17,7 @@ import {
 import type { EditorView } from 'prosemirror-view';
 
 import { badgeVariants } from '../Badge/Badge';
+import { safeHref } from '../../templates/Section';
 import type { MentionMenuState } from '../Messaging/useMentionAutocomplete';
 import {
   matchReference,
@@ -37,12 +38,18 @@ const CHIP_CLASS = cn(
 /**
  * A picked reference: one atomic inline node, so the caret steps over it and
  * Backspace removes it whole. Drawn as a link chip; read back from one when
- * pasted between editors. `leafText` is its label, for anything that reads
- * the editor as plain text.
+ * pasted between editors — only when a trigger claims its link, which also
+ * decides its kind and id, so pasted markup can't make a chip of any other
+ * link. The chip's `href` is drawn only with a safe scheme (no `javascript:`).
+ * `leafText` is its label, for anything that reads the editor as plain text.
  */
 class ReferenceNode extends EditorNode {
   override name = REFERENCE_NODE;
+  constructor(private readonly triggers: () => readonly ReferenceTrigger[]) {
+    super({});
+  }
   override getNodeSpec(): NodeSpec {
+    const triggers = this.triggers;
     return {
       inline: true,
       group: 'inline',
@@ -59,7 +66,7 @@ class ReferenceNode extends EditorNode {
       toDOM: (node) => [
         'a',
         {
-          href: node.attrs.href,
+          href: safeHref(node.attrs.href),
           class: CHIP_CLASS,
           dir: 'auto',
           'data-slot': 'reference-chip',
@@ -71,16 +78,39 @@ class ReferenceNode extends EditorNode {
       parseDOM: [
         {
           tag: 'a[data-reference-kind][data-reference-id]',
-          getAttrs: (dom) => ({
-            kind: dom.getAttribute('data-reference-kind'),
-            id: dom.getAttribute('data-reference-id'),
-            label: dom.textContent ?? '',
-            href: dom.getAttribute('href') ?? '',
-          }),
+          // Ahead of the link mark's `a[href]` (marks' rules are tried
+          // first at equal priority); a link no trigger claims falls
+          // through to it and stays an ordinary link.
+          priority: 60,
+          getAttrs: (dom) => {
+            const href = dom.getAttribute('href') ?? '';
+            const match = safeHref(href) && matchReference(href, triggers());
+            if (!match) return false;
+            return { ...match, label: dom.textContent ?? '', href };
+          },
         },
       ],
     };
   }
+}
+
+/** A hard or soft line break node. */
+function isBreak(node: PmNode): boolean {
+  return (
+    !!node.type.spec.linebreakReplacement ||
+    node.type.name === 'br' ||
+    node.type.name === 'softbreak'
+  );
+}
+
+/** Whether the first node after the breaks at `pos` carries `link`. */
+function sameLinkAfterBreaks(doc: PmNode, pos: number, link: Mark): boolean {
+  let next = doc.nodeAt(pos);
+  while (next && isBreak(next)) {
+    pos += next.nodeSize;
+    next = doc.nodeAt(pos);
+  }
+  return !!next && link.isInSet(next.marks);
 }
 
 type MarkdownHook = (
@@ -112,10 +142,20 @@ export function linksToReferences(
       uniform: boolean;
     }[] = [];
     doc.descendants((node, pos) => {
+      const last = spans[spans.length - 1];
+      // Kerebron reads a <br> inside a link without the link mark, so the
+      // link would look like two. A break between text of the same link
+      // keeps it one span, left a link: a chip's label is one line.
+      if (isBreak(node)) {
+        if (last?.to === pos && sameLinkAfterBreaks(doc, pos, last.link)) {
+          last.to = pos + node.nodeSize;
+          last.uniform = false;
+        }
+        return;
+      }
       if (!node.isText) return;
       const mark = node.marks.find((m) => m.type === link);
       if (!mark) return;
-      const last = spans[spans.length - 1];
       // One link split over several text nodes (bold inside it) is one span.
       if (last && last.to === pos && last.link.eq(mark)) {
         last.to = pos + node.nodeSize;
@@ -379,7 +419,7 @@ export function createReferencesKit(
 ): EditorKit {
   return {
     getExtensions: () => [
-      new ReferenceNode(),
+      new ReferenceNode(triggers),
       new ReferencesExtension(handlers, triggers),
     ],
   };
@@ -424,6 +464,10 @@ export function menuPlacement(
   const spaceAbove =
     anchor.top - CARET_GAP - VIEWPORT_MARGIN - viewport.visibleTop;
   const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
+  // Never wider than the screen (MentionMenu is a fixed w-64), so a narrow
+  // window or a zoomed page still shows the whole list.
+  const maxWidth = Math.max(0, viewport.width - 2 * VIEWPORT_MARGIN);
+  const width = Math.min(menuWidth, maxWidth);
   return {
     position: 'fixed',
     // The floating-panel layer (as useAnchoredPosition), above elevated
@@ -431,8 +475,9 @@ export function menuPlacement(
     zIndex: 9999,
     left: Math.max(
       VIEWPORT_MARGIN,
-      Math.min(anchor.left, viewport.width - menuWidth - VIEWPORT_MARGIN)
+      Math.min(anchor.left, viewport.width - width - VIEWPORT_MARGIN)
     ),
+    maxWidth,
     maxHeight: Math.max(
       0,
       Math.min(MENU_MAX_HEIGHT, below ? spaceBelow : spaceAbove)
@@ -556,7 +601,13 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     setRange(null);
     // The host may have locked the editor while the list was open.
     if (!view.editable) return;
-    view.dispatch(insertReference(view.state, range, option));
+    // This render's trigger, not the one captured with the range: the host
+    // may have changed `toHref`, or removed the trigger, since it opened.
+    const trigger = triggersRef.current.find(
+      (t) => t.kind === range.trigger.kind
+    );
+    if (!trigger) return;
+    view.dispatch(insertReference(view.state, { ...range, trigger }, option));
     view.focus();
   };
 
@@ -581,7 +632,9 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
           : next
       );
       if (!next) return;
-      const { left, top, bottom } = view.coordsAtPos(next.from);
+      // At the caret, not the trigger: a query that wraps onto the next line
+      // keeps the list under the text being typed.
+      const { left, top, bottom } = view.coordsAtPos(next.to);
       setAnchor({ left, top, bottom });
     },
     keyDown: (_view, event) => {
@@ -620,12 +673,12 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   // or an editor ancestor scrolls, the window resizes, or an on-screen
   // keyboard opens (the visual viewport shrinks and pans) — none of which
   // changes the editor's state, so `update` doesn't run.
-  const rangeFrom = range?.from;
+  const rangeTo = range?.to;
   React.useEffect(() => {
     const view = viewRef.current;
-    if (rangeFrom === undefined || !view) return;
+    if (rangeTo === undefined || !view) return;
     const measure = () => {
-      const { left, top, bottom } = view.coordsAtPos(rangeFrom);
+      const { left, top, bottom } = view.coordsAtPos(rangeTo);
       setAnchor({ left, top, bottom });
     };
     const visual = window.visualViewport;
@@ -639,7 +692,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       visual?.removeEventListener('resize', measure);
       visual?.removeEventListener('scroll', measure);
     };
-  }, [rangeFrom]);
+  }, [rangeTo]);
 
   // The editor stays a multi-line textbox (a combobox role would misdescribe
   // the whole document); while the list is open it points at the list and
