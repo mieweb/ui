@@ -4,6 +4,8 @@ export {
   type ChatComposerHandle,
   type ChatComposerError,
   type ChatComposerMenuItem,
+  type ChatComposerSendOption,
+  type ChatComposerSendMeta,
   type ChatComposerAgentOption,
 } from './ChatComposer';
 // Mention candidates live in the shared Messaging mention module;

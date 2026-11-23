@@ -217,6 +217,12 @@ export interface SuperChatMediaLabels {
   unknownAuthor: string;
 }
 
+/** Labels for per-message states in the thread. */
+export interface SuperChatMessageLabels {
+  /** Prefix of a scheduled message's indicator, before its time. */
+  scheduled: string;
+}
+
 /** What an edit changed besides the text: attachments the author removed. */
 export interface SuperChatMessageEdits {
   /** Ids of `media` attachments to take off the message. */
@@ -279,6 +285,12 @@ export interface SuperChatMessage {
   editedAt?: Date | string;
   /** Delivery/generation status. */
   status?: AIMessageStatus;
+  /**
+   * When the message is scheduled to be delivered. While set, the bubble is
+   * drawn as pending (dashed outline) with a "Scheduled · {time}" indicator.
+   * The host owns delivery: clear it once the message has gone out.
+   */
+  scheduledFor?: Date | string;
   /**
    * How far a `pending` message's attachments have uploaded, 0 to 1, shown
    * under them while it sends. Leave it out when the host can't tell.
