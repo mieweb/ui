@@ -69,6 +69,8 @@ export interface VirtualThreadProps {
   /** Localized preview load-error/retry text, forwarded to each row. */
   mediaErrorLabel?: string;
   mediaRetryLabel?: string;
+  /** Prefix of a scheduled message's indicator, forwarded to each row. */
+  scheduledLabel?: string;
   /** The host's card for an attachment, forwarded to each row. */
   renderMessageMedia?: SuperChatRenderMessageMedia;
   /** The attachment cards' box, a CSS length, forwarded to each row. */
@@ -114,6 +116,7 @@ export function VirtualThread({
   attachmentLabels,
   mediaErrorLabel,
   mediaRetryLabel,
+  scheduledLabel,
   renderMessageMedia,
   mediaMaxSize,
   scrollRef,
@@ -197,6 +200,7 @@ export function VirtualThread({
                   attachmentLabels={attachmentLabels}
                   mediaErrorLabel={mediaErrorLabel}
                   mediaRetryLabel={mediaRetryLabel}
+                  scheduledLabel={scheduledLabel}
                   renderMessageMedia={renderMessageMedia}
                   mediaMaxSize={mediaMaxSize}
                 />
