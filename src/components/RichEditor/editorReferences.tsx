@@ -484,6 +484,9 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       if (event.key === 'Escape' && (menuOpen || !answered)) {
         dismissedAt.current = range.from;
         setRange(null);
+        // Handled here only: a host's document-level Escape (a Modal) would
+        // otherwise close too. The next Escape reaches the host.
+        event.stopPropagation();
         return true;
       }
       if (!menuOpen) return false;

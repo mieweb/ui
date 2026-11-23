@@ -92,6 +92,25 @@ test.describe('Visual Regression Tests - RichEditor references', () => {
       await expect(page).toHaveScreenshot(
         `richeditor-references-picker${name}.png`
       );
+
+      // Escape closes only the list: a host's document-level Escape (a
+      // Modal's) doesn't see it. The next Escape reaches the host.
+      await page.evaluate(() => {
+        const w = window as typeof window & { hostEscapes?: number };
+        w.hostEscapes = 0;
+        document.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') w.hostEscapes! += 1;
+        });
+      });
+      const hostEscapes = () =>
+        page.evaluate(
+          () => (window as typeof window & { hostEscapes?: number }).hostEscapes
+        );
+      await page.keyboard.press('Escape');
+      await expect(list).toBeHidden();
+      expect(await hostEscapes()).toBe(0);
+      await page.keyboard.press('Escape');
+      expect(await hostEscapes()).toBe(1);
     });
   }
 });
