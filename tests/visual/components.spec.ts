@@ -1327,6 +1327,32 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('select-default.png');
   });
 
+  test('Select - Opens directly above a trigger near the viewport bottom', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-select--default');
+    const trigger = page.getByRole('combobox').first();
+    await trigger.evaluate((element) => {
+      Object.assign(element.style, {
+        position: 'fixed',
+        bottom: '12px',
+        left: '24px',
+        width: '240px',
+      });
+    });
+    await trigger.click();
+    const popup = page.locator('[data-slot="select-dropdown"]');
+    await expect(popup).toBeVisible();
+    await expect
+      .poll(async () => {
+        const anchor = await trigger.boundingBox();
+        const menu = await popup.boundingBox();
+        if (!anchor || !menu) return Infinity;
+        return Math.abs(anchor.y - (menu.y + menu.height) - 4);
+      })
+      .toBeLessThan(2);
+  });
+
   test('Select - Search stays anchored inside a transformed dialog', async ({
     page,
   }) => {
