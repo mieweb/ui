@@ -1,3 +1,4 @@
+import { decodeNamedCharacterReference } from 'decode-named-character-reference';
 import { Lexer, type Tokens } from 'marked';
 import type { MentionOption } from '../Messaging/useMentionAutocomplete';
 
@@ -104,37 +105,38 @@ function* linksIn(tokens: readonly Nested[]): Generator<Tokens.Link> {
   }
 }
 
-// Named character references decoded in labels; others stay as written.
-const NAMED_REFERENCES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-  nbsp: ' ',
-  copy: '©',
-  reg: '®',
-  trade: '™',
-  hellip: '…',
-  ndash: '–',
-  mdash: '—',
-};
+// A numeric character reference's character, by CommonMark's rules (as
+// micromark, which SuperChat renders with): NUL, controls other than
+// whitespace, surrogates, noncharacters and anything past U+10FFFF read as
+// U+FFFD — so `&#128;` is "\uFFFD", not a C1 control.
+function numericReference(code: number): string {
+  if (
+    code < 9 ||
+    code === 11 ||
+    (code > 13 && code < 32) ||
+    (code > 126 && code < 160) ||
+    (code > 0xd7ff && code < 0xe000) ||
+    (code > 0xfdcf && code < 0xfdf0) ||
+    (code & 0xffff) === 0xffff ||
+    (code & 0xffff) === 0xfffe ||
+    code > 0x10ffff
+  ) {
+    return '\uFFFD';
+  }
+  return String.fromCodePoint(code);
+}
 
-// Marked keeps character references (`&amp;`, `&#169;`) as written in text
-// tokens; a reader sees the characters.
+// Marked keeps character references (`&eacute;`, `&#169;`) as written in text
+// tokens; a reader sees the characters. CommonMark's forms: up to 7 decimal
+// or 6 hex digits, or an HTML5 entity name with its semicolon. An unknown
+// name stays as written (an own-property lookup, so `&constructor;` too).
 function decodeReferences(text: string): string {
   return text.replace(
-    /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g,
-    (match, dec?: string, hex?: string, name?: string) => {
-      // Own keys only: `&constructor;` must not reach Object.prototype.
-      if (name) {
-        return Object.hasOwn(NAMED_REFERENCES, name)
-          ? NAMED_REFERENCES[name]
-          : match;
-      }
-      const code = dec ? Number(dec) : parseInt(hex!, 16);
-      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
-    }
+    /&(?:#(\d{1,7})|#[xX]([0-9a-fA-F]{1,6})|([A-Za-z][A-Za-z0-9]{0,31}));/g,
+    (match, dec?: string, hex?: string, name?: string) =>
+      name
+        ? decodeNamedCharacterReference(name) || match
+        : numericReference(dec ? Number(dec) : parseInt(hex!, 16))
   );
 }
 

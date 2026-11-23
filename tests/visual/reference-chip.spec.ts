@@ -1,11 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 import { gotoStory, expectDocumentDirection } from './helpers';
 
+// Storybook starts on BlueHive, so the unnamed cases are BlueHive and the
+// brand case is another brand — two brands, not the same one twice.
 const variants = [
   ['', ''],
   ['-dark', 'theme:dark'],
   ['-rtl', 'direction:rtl'],
-  ['-bluehive', 'theme:light;brand:bluehive'],
+  ['-enterprise-health', 'theme:light;brand:enterprise-health'],
 ] as const;
 
 const chip = (page: Page, label: string) =>
