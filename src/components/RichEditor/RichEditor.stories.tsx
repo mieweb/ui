@@ -158,7 +158,7 @@ function BasicExample() {
 
 function ReferencesExample() {
   const [value, setValue] = useState(
-    'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login on phones](/tickets/t-12). Type @ for people or # for tickets.'
+    'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login on phones](/tickets/t-12). Type @ for people or # for tickets.\n\nOwner: [@Raj Patel](/people/u-raj)'
   );
   return (
     <div className="max-w-2xl">

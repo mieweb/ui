@@ -302,9 +302,12 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
           >
             {option.icon}
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-medium">{option.label}</span>
+              {/* Own direction, so `@Ann Lee` keeps its `@` in an RTL page. */}
+              <span dir="auto" className="font-medium">
+                {option.label}
+              </span>
               {option.description && (
-                <span className="ms-1 text-xs text-neutral-400">
+                <span dir="auto" className="ms-1 text-xs text-neutral-400">
                   {option.description}
                 </span>
               )}
