@@ -18,6 +18,21 @@ const triggers = [
 ];
 
 describe('referencesIn', () => {
+  it('skips a link a trigger throws on, instead of throwing', () => {
+    const decoding: ReferenceTrigger = {
+      ...triggers[0],
+      fromHref: (href) =>
+        href.startsWith('/people/')
+          ? decodeURIComponent(href.slice('/people/'.length))
+          : null,
+    };
+    expect(
+      referencesIn('[@Ann](/people/%E0%A4) [@Raj](/people/u-raj)', [decoding])
+    ).toEqual([
+      { kind: 'person', id: 'u-raj', label: '@Raj', href: '/people/u-raj' },
+    ]);
+  });
+
   it('reads the links triggers claim, in order and each once', () => {
     const text =
       'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login](/tickets/t-12), ' +

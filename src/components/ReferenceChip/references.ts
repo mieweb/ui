@@ -51,13 +51,23 @@ export interface Reference {
   href: string;
 }
 
-/** The kind and id `href` refers to, by the first trigger that claims it. */
+/**
+ * The kind and id `href` refers to, by the first trigger that claims it. A
+ * trigger that throws on a malformed link (say `decodeURIComponent` on
+ * `/people/%E0%A4`) doesn't claim it, so the link stays an ordinary link
+ * instead of taking the message down.
+ */
 export function matchReference(
   href: string,
   triggers: readonly ReferenceTrigger[]
 ): { kind: string; id: string } | null {
   for (const trigger of triggers) {
-    const id = trigger.fromHref(href);
+    let id: string | null;
+    try {
+      id = trigger.fromHref(href);
+    } catch {
+      continue;
+    }
     if (id) return { kind: trigger.kind, id };
   }
   return null;
