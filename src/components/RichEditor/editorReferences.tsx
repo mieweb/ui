@@ -395,6 +395,19 @@ const VIEWPORT_MARGIN = 8;
 const CARET_GAP = 4;
 
 /**
+ * The screen the list can use, in the layout viewport's coordinates (where
+ * `coordsAtPos` and `position: fixed` both measure from).
+ */
+export interface MenuViewport {
+  width: number;
+  /** The layout viewport's height, which a fixed `bottom` is measured from. */
+  height: number;
+  /** The visible area's top and bottom: below the status bar, above the keyboard. */
+  visibleTop: number;
+  visibleBottom: number;
+}
+
+/**
  * Where the fixed list goes for a caret at `anchor`: below it when the list
  * fits there or below has at least as much room, otherwise above, with its
  * height capped to the room on that side so its first options are never off
@@ -404,19 +417,19 @@ const CARET_GAP = 4;
 export function menuPlacement(
   anchor: { left: number; top: number; bottom: number },
   menuWidth: number,
-  viewportWidth: number,
-  viewportHeight: number
+  viewport: MenuViewport
 ): React.CSSProperties {
   const spaceBelow =
-    viewportHeight - anchor.bottom - CARET_GAP - VIEWPORT_MARGIN;
-  const spaceAbove = anchor.top - CARET_GAP - VIEWPORT_MARGIN;
+    viewport.visibleBottom - anchor.bottom - CARET_GAP - VIEWPORT_MARGIN;
+  const spaceAbove =
+    anchor.top - CARET_GAP - VIEWPORT_MARGIN - viewport.visibleTop;
   const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
   return {
     position: 'fixed',
     zIndex: 50,
     left: Math.max(
       VIEWPORT_MARGIN,
-      Math.min(anchor.left, viewportWidth - menuWidth - VIEWPORT_MARGIN)
+      Math.min(anchor.left, viewport.width - menuWidth - VIEWPORT_MARGIN)
     ),
     maxHeight: Math.max(
       0,
@@ -424,7 +437,44 @@ export function menuPlacement(
     ),
     ...(below
       ? { top: anchor.bottom + CARET_GAP }
-      : { bottom: viewportHeight - anchor.top + CARET_GAP }),
+      : { bottom: viewport.height - anchor.top + CARET_GAP }),
+  };
+}
+
+let safeAreaProbe: HTMLDivElement | null = null;
+
+/** The page's safe-area insets (status bar, home indicator); 0 where there are none. */
+function safeAreaInsets(): { top: number; bottom: number } {
+  if (!safeAreaProbe) {
+    safeAreaProbe = document.createElement('div');
+    safeAreaProbe.setAttribute('aria-hidden', 'true');
+    safeAreaProbe.style.cssText =
+      'position:fixed;visibility:hidden;pointer-events:none;' +
+      'padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)';
+    document.body.appendChild(safeAreaProbe);
+  }
+  const style = getComputedStyle(safeAreaProbe);
+  return {
+    top: parseFloat(style.paddingTop) || 0,
+    bottom: parseFloat(style.paddingBottom) || 0,
+  };
+}
+
+/**
+ * The screen as the list sees it now. An on-screen keyboard shrinks only the
+ * visual viewport (iOS doesn't resize the layout one, and its `innerHeight`
+ * may follow either), so the visible area comes from `visualViewport`.
+ */
+function currentMenuViewport(): MenuViewport {
+  const visual = window.visualViewport;
+  const height = document.documentElement.clientHeight || window.innerHeight;
+  const insets = safeAreaInsets();
+  const top = visual?.offsetTop ?? 0;
+  return {
+    width: window.innerWidth,
+    height,
+    visibleTop: top + insets.top,
+    visibleBottom: (visual ? top + visual.height : height) - insets.bottom,
   };
 }
 
@@ -561,8 +611,9 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   React.useEffect(() => setHighlight(0), [range?.from, range?.query]);
 
   // The list is fixed to the viewport, so it follows the caret when the page
-  // or an editor ancestor scrolls, or the window resizes — neither changes
-  // the editor's state, so `update` doesn't run.
+  // or an editor ancestor scrolls, the window resizes, or an on-screen
+  // keyboard opens (the visual viewport shrinks and pans) — none of which
+  // changes the editor's state, so `update` doesn't run.
   const rangeFrom = range?.from;
   React.useEffect(() => {
     const view = viewRef.current;
@@ -571,11 +622,16 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       const { left, top, bottom } = view.coordsAtPos(rangeFrom);
       setAnchor({ left, top, bottom });
     };
+    const visual = window.visualViewport;
     window.addEventListener('scroll', measure, true);
     window.addEventListener('resize', measure);
+    visual?.addEventListener('resize', measure);
+    visual?.addEventListener('scroll', measure);
     return () => {
       window.removeEventListener('scroll', measure, true);
       window.removeEventListener('resize', measure);
+      visual?.removeEventListener('resize', measure);
+      visual?.removeEventListener('scroll', measure);
     };
   }, [rangeFrom]);
 
@@ -615,7 +671,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
 
   const menuStyle: React.CSSProperties =
     anchor && typeof window !== 'undefined'
-      ? menuPlacement(anchor, menuWidth, window.innerWidth, window.innerHeight)
+      ? menuPlacement(anchor, menuWidth, currentMenuViewport())
       : {};
 
   return {
