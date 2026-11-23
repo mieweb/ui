@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMarkdownRenderer } from '../render/createMarkdownRenderer';
+import {
+  createMarkdownRenderer,
+  MarkdownLink,
+} from '../render/createMarkdownRenderer';
+import * as superChat from '../index';
 import type { ReferenceTrigger } from '../../ReferenceChip/references';
 import { SuperChat } from '../SuperChat';
 import { createMathPlugin } from './math';
@@ -196,5 +200,8 @@ describe('createReferencesPlugin', () => {
     await user.keyboard('{/Control}');
     expect(writeText).toHaveBeenCalledWith('Ask @Ann Lee.');
     vi.unstubAllGlobals();
+  });
+  it('exports MarkdownLink from the SuperChat entry for other link plugins', () => {
+    expect(superChat.MarkdownLink).toBe(MarkdownLink);
   });
 });
