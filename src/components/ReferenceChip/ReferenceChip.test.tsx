@@ -83,6 +83,19 @@ describe('referencesIn', () => {
         .label
     ).toBe('TH-1: Fix [beta] form');
   });
+
+  it('unescapes punctuation and drops emphasis marks in the label', () => {
+    expect(
+      referencesIn('[TH-1: Fix \\*beta\\* **now**](/tickets/t-1)', triggers)[0]
+        .label
+    ).toBe('TH-1: Fix *beta* now');
+  });
+
+  it('keeps code-span contents literal in the label', () => {
+    expect(
+      referencesIn('[TH-2: Rename `a\\*b`](/tickets/t-2)', triggers)[0].label
+    ).toBe('TH-2: Rename a\\*b');
+  });
 });
 
 describe('ReferenceChip', () => {

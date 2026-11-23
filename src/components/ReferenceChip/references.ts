@@ -65,6 +65,7 @@ export function matchReference(
 // nested tokens sit.
 interface Nested {
   type?: string;
+  text?: string;
   tokens?: Nested[];
   items?: Nested[];
   header?: Nested[];
@@ -91,6 +92,18 @@ function* linksIn(tokens: readonly Nested[]): Generator<Tokens.Link> {
   }
 }
 
+// The text a reader sees in inline `tokens`: escapes resolved, emphasis
+// marks dropped, code-span contents kept literal.
+function plainText(tokens: readonly Nested[]): string {
+  return tokens
+    .map((token) =>
+      token.type !== 'codespan' && token.tokens
+        ? plainText(token.tokens)
+        : (token.text ?? '')
+    )
+    .join('');
+}
+
 /**
  * The references in Markdown `text`, in order, each once: every link one of
  * `triggers` claims. Links quoted in code and images don't count. Use it to
@@ -102,9 +115,9 @@ export function referencesIn(
 ): Reference[] {
   const seen = new Set<string>();
   const found: Reference[] = [];
-  for (const { href, text: label } of linksIn(
-    new Lexer().lex(text) as Nested[]
-  )) {
+  for (const link of linksIn(new Lexer().lex(text) as Nested[])) {
+    const { href } = link;
+    const label = plainText(link.tokens as Nested[]);
     const match = matchReference(href, triggers);
     if (!match) continue;
     const key = `${match.kind}\u0000${match.id}`;
