@@ -79,13 +79,22 @@ test.describe('Visual Regression Tests - RichEditor references', () => {
         `${listId}-option-0`
       );
 
-      // The list opens below the line being typed and stays in the viewport.
-      const [listBox, lineBox] = await Promise.all([
-        list.boundingBox(),
-        surface(page).locator('p').last().boundingBox(),
-      ]);
+      // The list opens below the typed `@ann` and stays in the viewport.
+      // Measured against the typed text's own box, which is what the list is
+      // placed from (4px under it): the paragraph's or a chip's box can sit
+      // lower than the glyphs, by an amount that depends on the platform's
+      // fonts.
+      const typedBottom = await surface(page)
+        .locator('p')
+        .last()
+        .evaluate((p) => {
+          const range = document.createRange();
+          range.selectNodeContents(p.lastChild!);
+          return range.getBoundingClientRect().bottom;
+        });
+      const listBox = await list.boundingBox();
       const viewport = page.viewportSize()!;
-      expect(listBox!.y).toBeGreaterThanOrEqual(lineBox!.y + lineBox!.height);
+      expect(listBox!.y).toBeGreaterThanOrEqual(typedBottom);
       expect(listBox!.x).toBeGreaterThanOrEqual(0);
       expect(listBox!.x + listBox!.width).toBeLessThanOrEqual(viewport.width);
 
