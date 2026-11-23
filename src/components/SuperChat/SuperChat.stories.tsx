@@ -156,7 +156,7 @@ const meta: Meta<typeof SuperChat> = {
       description: {
         component: `### What it's for
 
-**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments })\`, \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\` — among them \`createReferencesPlugin({ triggers })\`, which draws links to people and tickets as \`ReferenceChip\`s (see the **References** story).
+**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`scheduledFor\` (a pending, dashed bubble with a "Scheduled · {time}" indicator — prefix via \`messageLabels\`), \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments, sendOption })\` (\`sendOption\`: the id of the \`composerProps.sendOptions\` entry the user sent with), \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\` — among them \`createReferencesPlugin({ triggers })\`, which draws links to people and tickets as \`ReferenceChip\`s (see the **References** story).
 
 ### Use it when
 
@@ -330,6 +330,10 @@ function InteractivePanel(
           participantId: props.currentParticipantId ?? 'u1',
           text: body,
           time: new Date().toISOString(),
+          // The ScheduledMessages story's "Send later…" holds it for an hour.
+          ...(meta.sendOption === 'later'
+            ? { scheduledFor: new Date(Date.now() + 3_600_000).toISOString() }
+            : {}),
         });
         meta.conversation.participants
           .filter((p) => p.kind === 'agent' && meta.mentions.includes(p.id))
@@ -583,6 +587,40 @@ export const Motion: Story = {
       },
     },
   },
+};
+
+// The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
+// in the sample thread intentionally render as raw text here — see the note.
+export const ScheduledMessages: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A message with `scheduledFor` is drawn as pending — a dashed, unfilled bubble with a "Scheduled · {time}" indicator (prefix via `messageLabels.scheduled`). The host owns delivery and clears `scheduledFor` once the message goes out. Here `composerProps.sendOptions` adds a "Send later…" entry beside the send button; `onMessageSent` receives its id as `meta.sendOption`, and this demo schedules such a message an hour ahead.',
+      },
+    },
+  },
+  render: () => (
+    <InteractivePanel
+      initial={{
+        ...conversation,
+        thread: [
+          ...conversation.thread,
+          {
+            id: 'scheduled-1',
+            participantId: 'u1',
+            text: 'Reminder: retro notes are due before standup.',
+            time: new Date().toISOString(),
+            scheduledFor: new Date(Date.now() + 18 * 3_600_000).toISOString(),
+          },
+        ],
+      }}
+      currentParticipantId="u1"
+      composerProps={{
+        sendOptions: [{ id: 'later', label: 'Send later…' }],
+      }}
+    />
+  ),
 };
 
 // The only plugin-less example. Math (`$$ … $$`, `$x$`) and the ```genui``` block
