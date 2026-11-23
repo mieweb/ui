@@ -127,6 +127,18 @@
 }
 
 /*
+ * Kerebron's base.css sets `-webkit-user-modify: read-write` on .kb-editor.
+ * In Chromium that non-standard property makes the element editable even when
+ * ProseMirror renders it with contenteditable="false" — keystrokes bypass the
+ * editor state entirely and splice raw text into the DOM (caught by the
+ * read-only EncounterVisit visual test on mieweb/ui#802). Hand control back
+ * to the contenteditable attribute whenever the view is not editable.
+ */
+.kb-editor[contenteditable='false'] {
+  -webkit-user-modify: read-only;
+}
+
+/*
  * Kerebron leaves headings, lists, links and code to browser defaults, which
  * Tailwind's preflight strips (headings `inherit`, lists `list-style: none`,
  * links `color: inherit`) — so "# " and "- " produced real h1/ul nodes that
