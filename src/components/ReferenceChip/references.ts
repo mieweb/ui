@@ -114,7 +114,12 @@ function decodeReferences(text: string): string {
   return text.replace(
     /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g,
     (match, dec?: string, hex?: string, name?: string) => {
-      if (name) return NAMED_REFERENCES[name] ?? match;
+      // Own keys only: `&constructor;` must not reach Object.prototype.
+      if (name) {
+        return Object.hasOwn(NAMED_REFERENCES, name)
+          ? NAMED_REFERENCES[name]
+          : match;
+      }
       const code = dec ? Number(dec) : parseInt(hex!, 16);
       return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
     }

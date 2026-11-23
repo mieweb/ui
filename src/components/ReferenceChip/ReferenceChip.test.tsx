@@ -100,6 +100,15 @@ describe('referencesIn', () => {
     ).toBe('TH-3: R&D © A © &amp; &amp;');
   });
 
+  it('leaves unknown entity names, including Object built-ins, as written', () => {
+    expect(
+      referencesIn(
+        '[TH-4: &constructor; &toString; &bogus;](/tickets/t-4)',
+        triggers
+      )[0].label
+    ).toBe('TH-4: &constructor; &toString; &bogus;');
+  });
+
   it('drops inline HTML tags from the label, keeping their text', () => {
     expect(
       referencesIn('[<em>@Ann</em> Lee](/people/u-ann)', triggers)[0].label
