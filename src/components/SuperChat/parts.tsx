@@ -247,10 +247,11 @@ export function ParticipantAvatar({
 }
 
 // ============================================================================
-// Reference chip (chat-component `ref` thread items)
+// Ref item card (chat-component `ref` thread items) — a whole-message card for
+// an attached record; not the inline `ReferenceChip` from ../ReferenceChip.
 // ============================================================================
 
-export function ReferenceChip({
+export function RefItemCard({
   reference,
   linkBuilder,
   onReferenceClick,
@@ -1045,7 +1046,7 @@ export const MessageRow = React.memo(function MessageRow({
         data-slot="superchat-reference"
         className={cn('flex', isSelf && 'justify-end')}
       >
-        <ReferenceChip
+        <RefItemCard
           reference={message.ref}
           linkBuilder={linkBuilder}
           onReferenceClick={onReferenceClick}
