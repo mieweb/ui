@@ -248,6 +248,12 @@ describe('references in RichEditor', () => {
         ) as HTMLAnchorElement
       ).getAttribute('href');
     expect(drawn('javascript:alert(1)')).toBeNull();
+    const drawnChip = DOMSerializer.fromSchema(schema).serializeNode(
+      schema.nodes[REFERENCE_NODE].create({ label: '@Ann', href: '/x' })
+    ) as HTMLElement;
+    const label = drawnChip.querySelector('[data-slot="reference-chip-label"]');
+    expect(label?.textContent).toBe('@Ann');
+    expect(label?.getAttribute('dir')).toBe('auto');
     expect(drawn('/people/u-ann')).toBe('/people/u-ann');
   });
 
@@ -294,7 +300,8 @@ describe('references in RichEditor', () => {
 
 describe('menuPlacement', () => {
   const screen = (height: number) => ({
-    width: 1000,
+    visibleLeft: 0,
+    visibleRight: 1000,
     height,
     visibleTop: 0,
     visibleBottom: height,
@@ -328,7 +335,8 @@ describe('menuPlacement', () => {
 
   it('is never wider than the screen', () => {
     const narrow = {
-      width: 240,
+      visibleLeft: 0,
+      visibleRight: 240,
       height: 600,
       visibleTop: 0,
       visibleBottom: 600,
@@ -338,11 +346,26 @@ describe('menuPlacement', () => {
     ).toMatchObject({ left: 8, maxWidth: 224 });
   });
 
+  it('stays inside the visible area of a pinch-zoomed, panned page', () => {
+    // 390px layout viewport zoomed 2×: only x 95–290 shows.
+    const zoomed = {
+      visibleLeft: 95,
+      visibleRight: 290,
+      height: 844,
+      visibleTop: 0,
+      visibleBottom: 400,
+    };
+    expect(
+      menuPlacement({ left: 200, top: 120, bottom: 140 }, 256, zoomed)
+    ).toMatchObject({ left: 103, maxWidth: 179 });
+  });
+
   it('keeps clear of the status bar and an on-screen keyboard', () => {
     // A phone: 844px layout viewport, a 47px status bar, and a keyboard
     // covering everything below 450px. The caret sits at 165–185px.
     const phone = {
-      width: 390,
+      visibleLeft: 0,
+      visibleRight: 390,
       height: 844,
       visibleTop: 47,
       visibleBottom: 450,

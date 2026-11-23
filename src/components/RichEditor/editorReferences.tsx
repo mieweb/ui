@@ -68,12 +68,19 @@ class ReferenceNode extends EditorNode {
         {
           href: safeHref(node.attrs.href),
           class: CHIP_CLASS,
-          dir: 'auto',
           'data-slot': 'reference-chip',
           'data-reference-kind': node.attrs.kind,
           'data-reference-id': node.attrs.id,
         },
-        node.attrs.label,
+        // Its own element, as ReferenceChip's: a long label is cut short with
+        // an ellipsis inside the chip (kerebron.css) instead of spilling out
+        // of it, and keeps its own direction. The full text stays the link's
+        // accessible name.
+        [
+          'span',
+          { dir: 'auto', 'data-slot': 'reference-chip-label' },
+          node.attrs.label,
+        ],
       ],
       parseDOM: [
         {
@@ -439,7 +446,9 @@ const CARET_GAP = 4;
  * `coordsAtPos` and `position: fixed` both measure from).
  */
 export interface MenuViewport {
-  width: number;
+  /** The visible area's left and right: the part of the page a pinch-zoom shows. */
+  visibleLeft: number;
+  visibleRight: number;
   /** The layout viewport's height, which a fixed `bottom` is measured from. */
   height: number;
   /** The visible area's top and bottom: below the status bar, above the keyboard. */
@@ -464,9 +473,13 @@ export function menuPlacement(
   const spaceAbove =
     anchor.top - CARET_GAP - VIEWPORT_MARGIN - viewport.visibleTop;
   const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
-  // Never wider than the screen (MentionMenu is a fixed w-64), so a narrow
-  // window or a zoomed page still shows the whole list.
-  const maxWidth = Math.max(0, viewport.width - 2 * VIEWPORT_MARGIN);
+  // Never wider than the visible area (MentionMenu is a fixed w-64), and
+  // kept inside it sideways, so a narrow window, or a phone zoomed in and
+  // panned, still shows the whole list.
+  const maxWidth = Math.max(
+    0,
+    viewport.visibleRight - viewport.visibleLeft - 2 * VIEWPORT_MARGIN
+  );
   const width = Math.min(menuWidth, maxWidth);
   return {
     position: 'fixed',
@@ -474,8 +487,8 @@ export function menuPlacement(
     // modal hosts, so the list stays usable inside dialogs.
     zIndex: 9999,
     left: Math.max(
-      VIEWPORT_MARGIN,
-      Math.min(anchor.left, viewport.width - width - VIEWPORT_MARGIN)
+      viewport.visibleLeft + VIEWPORT_MARGIN,
+      Math.min(anchor.left, viewport.visibleRight - width - VIEWPORT_MARGIN)
     ),
     maxWidth,
     maxHeight: Math.max(
@@ -517,8 +530,10 @@ function currentMenuViewport(): MenuViewport {
   const height = document.documentElement.clientHeight || window.innerHeight;
   const insets = safeAreaInsets();
   const top = visual?.offsetTop ?? 0;
+  const left = visual?.offsetLeft ?? 0;
   return {
-    width: window.innerWidth,
+    visibleLeft: left,
+    visibleRight: visual ? left + visual.width : window.innerWidth,
     height,
     visibleTop: top + insets.top,
     visibleBottom: (visual ? top + visual.height : height) - insets.bottom,
