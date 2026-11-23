@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
+import { Modal } from '../Modal';
 import {
   ChatComposer,
   type ChatComposerHandle,
@@ -107,6 +108,29 @@ describe('ChatComposer', () => {
     });
   });
 
+  describe('layout', () => {
+    // The `+` cell carries the md+ single-row classes only in the responsive
+    // layout; stacked keeps the input on its own row at every width.
+    function addCell() {
+      return screen
+        .getByRole('button', { name: /add to message/i })
+        .closest('[class*="col-start-1"]') as HTMLElement;
+    }
+
+    it('collapses to one row at md+ by default', () => {
+      renderWithTheme(<ChatComposer onSend={vi.fn()} allowAttachments />);
+      expect(addCell().className).toContain('md:row-start-1');
+    });
+
+    it('keeps the controls under the input when stacked', () => {
+      renderWithTheme(
+        <ChatComposer onSend={vi.fn()} allowAttachments layout="stacked" />
+      );
+      expect(addCell().className).toContain('row-start-2');
+      expect(addCell().className).not.toContain('md:');
+    });
+  });
+
   it('honors autoFocus on fine-pointer devices', () => {
     // eslint-disable-next-line jsx-a11y/no-autofocus
     renderWithTheme(<ChatComposer autoFocus />);
@@ -187,6 +211,166 @@ describe('ChatComposer', () => {
 
     fireEvent.change(getInput(), { target: { value: 'Hi' } });
     expect(sendButton).toBeEnabled();
+  });
+
+  describe('sendOptions', () => {
+    const sendOptions = [
+      { id: 'later', label: 'Send later…' },
+      { id: 'quiet', label: 'Send without notifying' },
+    ];
+
+    it('renders no options trigger without sendOptions', () => {
+      renderWithTheme(<ChatComposer onSend={vi.fn()} />);
+      expect(
+        screen.queryByRole('button', { name: 'More send options' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('sends the draft with the chosen option id', () => {
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer onSend={onSend} sendOptions={sendOptions} />
+      );
+      fireEvent.change(getInput(), { target: { value: 'See you Monday' } });
+      fireEvent.click(
+        screen.getByRole('button', { name: 'More send options' })
+      );
+      fireEvent.click(
+        screen.getByRole('menuitem', { name: 'Send without notifying' })
+      );
+
+      expect(onSend).toHaveBeenCalledWith(
+        { content: 'See you Monday', attachments: [] },
+        { sendOption: 'quiet' }
+      );
+      expect(getInput()).toHaveValue('');
+    });
+
+    it('keeps a plain send free of meta', () => {
+      const onSend = vi.fn();
+      renderWithTheme(
+        <ChatComposer onSend={onSend} sendOptions={sendOptions} />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Now' } });
+      fireEvent.keyDown(getInput(), { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledWith({ content: 'Now', attachments: [] });
+    });
+
+    it('disables the options trigger with nothing to send', () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={sendOptions}
+          sendOptionsLabel="Más opciones de envío"
+        />
+      );
+      expect(
+        screen.getByRole('button', { name: 'Más opciones de envío' })
+      ).toBeDisabled();
+    });
+
+    it('moves through the options from the keyboard and returns focus on Escape', async () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={[
+            ...sendOptions,
+            { id: 'off', label: 'Off', disabled: true },
+          ]}
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Later' } });
+      const trigger = screen.getByRole('button', { name: 'More send options' });
+      fireEvent.click(trigger);
+
+      const later = screen.getByRole('menuitem', { name: 'Send later…' });
+      const quiet = screen.getByRole('menuitem', {
+        name: 'Send without notifying',
+      });
+      // The first option takes focus once the menu opens.
+      await vi.waitFor(() => expect(later).toHaveFocus());
+
+      fireEvent.keyDown(later, { key: 'ArrowDown' });
+      expect(quiet).toHaveFocus();
+      // Skips the disabled option and wraps around.
+      fireEvent.keyDown(quiet, { key: 'ArrowDown' });
+      expect(later).toHaveFocus();
+      fireEvent.keyDown(later, { key: 'End' });
+      expect(quiet).toHaveFocus();
+      fireEvent.keyDown(quiet, { key: 'Home' });
+      expect(later).toHaveFocus();
+
+      fireEvent.keyDown(later, { key: 'Escape' });
+      expect(trigger).toHaveFocus();
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it('keeps Escape in the options menu from reaching a document listener', async () => {
+      // A surrounding Modal closes on a document-level Escape listener.
+      const onDocumentKeyDown = vi.fn();
+      document.addEventListener('keydown', onDocumentKeyDown);
+      try {
+        renderWithTheme(
+          <ChatComposer onSend={vi.fn()} sendOptions={sendOptions} />
+        );
+        fireEvent.change(getInput(), { target: { value: 'Later' } });
+        fireEvent.click(
+          screen.getByRole('button', { name: 'More send options' })
+        );
+        const later = screen.getByRole('menuitem', { name: 'Send later…' });
+        await vi.waitFor(() => expect(later).toHaveFocus());
+
+        fireEvent.keyDown(later, { key: 'Escape' });
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+        expect(onDocumentKeyDown).not.toHaveBeenCalled();
+      } finally {
+        document.removeEventListener('keydown', onDocumentKeyDown);
+      }
+    });
+
+    it('disables the options trigger when every option is disabled', () => {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          sendOptions={[
+            { id: 'later', label: 'Send later…', disabled: true },
+            { id: 'quiet', label: 'Send without notifying', disabled: true },
+          ]}
+        />
+      );
+      fireEvent.change(getInput(), { target: { value: 'Later' } });
+      const trigger = screen.getByRole('button', { name: 'More send options' });
+      expect(trigger).toBeDisabled();
+      fireEvent.click(trigger);
+      expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    });
+
+    it.each([false, true])(
+      'closes the options menu on Tab (shift: %s) and keeps focus inside a Modal',
+      async (shiftKey) => {
+        renderWithTheme(
+          <Modal open onOpenChange={vi.fn()} aria-label="Compose">
+            <ChatComposer onSend={vi.fn()} sendOptions={sendOptions} />
+          </Modal>
+        );
+        fireEvent.change(getInput(), { target: { value: 'Later' } });
+        const trigger = screen.getByRole('button', {
+          name: 'More send options',
+        });
+        fireEvent.click(trigger);
+        const later = screen.getByRole('menuitem', { name: 'Send later…' });
+        await vi.waitFor(() => expect(later).toHaveFocus());
+
+        // The menu is portaled out of the dialog, past its focus trap.
+        expect(screen.getByRole('dialog')).not.toContainElement(later);
+        const tab = fireEvent.keyDown(later, { key: 'Tab', shiftKey });
+
+        expect(tab).toBe(false); // default prevented: no body-order Tab
+        expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+        expect(trigger).toHaveFocus();
+        expect(screen.getByRole('dialog')).toContainElement(trigger);
+      }
+    );
   });
 
   it('supports controlled value', () => {
