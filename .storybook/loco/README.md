@@ -42,18 +42,25 @@ the translated template and drops the code.
 
 Live sync needs a read-only scan, but the runtime only offers `rescan()`, which writes
 originals back with `innerHTML` and re-applies translations over React-owned DOM. The vendored
-file therefore adds two methods next to `textnodes()`:
+file therefore carries three changes:
+
+1. `Loco.scan(root)`: the runtime's own scanner (`pe`), so keys and contexts match what
+   `apply()` looks up. It clears the `te`/`re` context caches first (contexts otherwise go stale
+   when a heading changes in place), returns each text slot (`Click <strong>Save</strong>` →
+   `Save`) as its own entry with its own element so the privacy filters still apply, and flags
+   mixed phrases as `lossy` when `apply()` would drop inline content such as `<code>`. Live sync
+   skips lossy phrases.
+2. `Loco.refresh()`: rebuilds the phrase registry `apply()` reuses from the current English
+   DOM. Without it, `apply()` writes stored originals back over text edited while English was
+   showing, and skips newly rendered copy while any old node is still on the page.
+3. The mutation observer records every instance it translates, not only new keys, so
+   `restore()` also reverts late-mounted copies of a known phrase.
 
 ```js
 refresh:async function(){te=new WeakMap,re=new WeakMap,i.phrases=await pe(document.body)},
-scan:async function(e){te=new WeakMap,re=new WeakMap;return(await pe(e||document.body)).map(function(n){return{key:n.key,context:n.context||"",element:n.element}})},
+scan:async function(e){te=new WeakMap,re=new WeakMap;var o=[];return(await pe(e||document.body)).forEach(function(n){var l=n.element,c=n.slots||[];o.push({key:n.key,context:n.context||"",element:l,lossy:c.length>0&&!!l&&Array.prototype.some.call(l.children,function(f){return!c.some(function(h){return h.node===f})})}),c.forEach(function(f){f.type==="text"&&f.value&&f.value.length>=2&&!S(f.value)&&o.push({key:f.value,context:"",element:f.node||l})})}),o},
+// in the observer (Ee): push every scanned instance, not only unseen keys
+r(d.key)||t.has(y)||(t.add(y),t.add(d.key),o.push(d)),i.phrases.push(d)
 ```
 
-`pe` is the runtime's own scanner, so keys and contexts match what `apply()` looks up. Clearing
-the `te`/`re` context caches stops contexts from going stale when a heading changes in place.
-`refresh()` rebuilds the phrase registry `apply()` reuses from the current English DOM. Without
-it, `apply()` writes its stored originals back over text edited while English was showing, and
-skips newly rendered copy while any old node is still on the page.
-
-Re-apply this patch when updating the runtime, until it ships upstream in Loco.
-
+Re-apply these changes when updating the runtime, until they ship upstream in Loco.

@@ -114,10 +114,72 @@ test.describe('Loco i18n toolbar', () => {
     await expect(docs).toContainText('Primeros pasos', { timeout: 20000 });
     // Paragraphs with inline code are left untranslated so the code survives.
     await expect(docs).toContainText('@mieweb/ui/datavis');
+    await expect(
+      docs.locator('p', { hasText: 'brings that approach' }).locator('code')
+    ).toHaveText('@mieweb/ui');
 
     await setGlobals(page, { locale: 'en' });
     await expect(docs).toContainText('Get Started');
     await expect(docs).not.toContainText('Primeros pasos');
+  });
+
+  test('a newer docs-page locale wins over a pending one', async ({ page }) => {
+    // Slow the runtime download so Spanish is still initializing when English is requested.
+    await page.route('**/i18n/loco.min.js', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await route.continue();
+    });
+    await page.goto(
+      '/iframe.html?id=introduction--docs&viewMode=docs&globals=locale:en;locoMode:package'
+    );
+    const docs = page.locator('#storybook-docs');
+    await expect(docs).toContainText('Get Started', { timeout: 20000 });
+
+    await setGlobals(page, { locale: 'es' });
+    await setGlobals(page, { locale: 'en' });
+    await page.waitForTimeout(3500);
+    await expect(docs).toContainText('Get Started');
+    await expect(docs).not.toContainText('Primeros pasos');
+  });
+
+  test('late-mounted copies of a translated phrase restore to English', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'data-display-badge--all-variants', {
+      globals: 'locale:es;locoMode:package',
+    });
+    await expect(root(page)).toContainText('Predeterminado');
+
+    await page.evaluate(() => {
+      const copy = document.createElement('span');
+      copy.id = 'late-copy';
+      copy.textContent = 'Default';
+      document.querySelector('[data-loco-scan-root="true"]')!.appendChild(copy);
+    });
+    await expect(page.locator('#late-copy')).toHaveText('Predeterminado');
+
+    await setGlobals(page, { locale: 'en' });
+    await expect(page.locator('#late-copy')).toHaveText('Default');
+    await expect(root(page)).not.toContainText('Predeterminado');
+  });
+
+  test('a failed runtime download is retried on the next locale change', async ({
+    page,
+  }) => {
+    let blocked = true;
+    await page.route('**/i18n/loco.min.js', (route) =>
+      blocked ? route.abort() : route.continue()
+    );
+    await gotoStory(page, 'data-display-badge--all-variants', {
+      globals: 'locale:es;locoMode:package',
+    });
+    await page.waitForTimeout(1000);
+    await expect(root(page)).toContainText('Default');
+
+    blocked = false;
+    await setGlobals(page, { locale: 'en' });
+    await setGlobals(page, { locale: 'es' });
+    await expect(root(page)).toContainText('Predeterminado');
   });
 
   test('disable mode never loads the runtime', async ({ page }) => {

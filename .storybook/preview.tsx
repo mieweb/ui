@@ -212,8 +212,13 @@ let locoLatestRequest = 0;
 // The locale the DOM currently shows; null while it shows the English source.
 let locoAppliedLocale: string | null = null;
 
-function queueLocoLocale(runtime: LocoRuntime, locale: string | null): Promise<void> {
-  const request = ++locoLatestRequest;
+// Callers that await initialization first should reserve their request number up front,
+// so a slow older request can't be queued after a newer one.
+function queueLocoLocale(
+  runtime: LocoRuntime,
+  locale: string | null,
+  request: number = ++locoLatestRequest
+): Promise<void> {
   return runLocoExclusive(async () => {
     if (request !== locoLatestRequest) return;
     if (locale) {
@@ -321,6 +326,11 @@ async function ensureLocoRuntimeLoaded(
       script.onload = () => resolve();
       script.onerror = () => reject(new Error(`Unable to load ${script.src}`));
       document.head.appendChild(script);
+    }).catch((error) => {
+      // Don't cache a failed load: drop it so the next attempt requests the script again.
+      locoScriptLoaders.delete(scriptId);
+      document.getElementById(scriptId)?.remove();
+      throw error;
     });
     locoScriptLoaders.set(scriptId, loader);
   }
@@ -776,6 +786,41 @@ function startLocoHarvest(
   };
 }
 
+// The preview reloads when the Loco mode changes: the runtime singleton holds one pack.
+function syncLocoToolbarMode(locoMode: string) {
+  if (typeof window === 'undefined') return;
+  const previousMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
+  window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
+  if (previousMode && previousMode !== locoMode) window.location.reload();
+}
+
+// Caches the live server's languages and reloads once per new set: toolbar items are static.
+function syncLiveLocoLanguages(isCancelled: () => boolean) {
+  if (isLocoDisabled || typeof window === 'undefined') return;
+  void (async () => {
+    const languages = await fetchLiveLocoLanguages();
+    if (isCancelled() || languages.length === 0) return;
+
+    const stableLanguages = [...languages].sort((a, b) => a.code.localeCompare(b.code));
+    const nextCodes = stableLanguages.map((item) => item.code);
+    window.localStorage.setItem(LOCO_LIVE_LANG_CACHE_KEY, JSON.stringify(stableLanguages));
+
+    const languageSignature = nextCodes.join(',');
+    const reloadedFor = window.sessionStorage.getItem(LOCO_LIVE_LANG_RELOAD_FLAG);
+    const toolbarSignature = localeToolbarItems
+      .map((item) => item.value)
+      .filter((code) => code !== DEFAULT_LOCALE || nextCodes.includes(DEFAULT_LOCALE))
+      .sort()
+      .join(',');
+    if (toolbarSignature !== languageSignature && reloadedFor !== languageSignature) {
+      window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, languageSignature);
+      window.location.reload();
+    }
+  })().catch((error) => {
+    console.warn('[loco-live] Unable to fetch live language list.', error);
+  });
+}
+
 function resolveLocoMode(globals: Record<string, unknown>): string {
   const requestedMode = String(globals?.locoMode || 'disable');
   return requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
@@ -788,13 +833,14 @@ async function syncLocoLocale(
 ): Promise<void> {
   const locoMode = resolveLocoMode(globals);
   const locale = String(globals?.locale || 'en');
+  const request = ++locoLatestRequest;
   try {
     // Disabled: undo any runtime translations and do nothing else.
     if (locoMode === 'disable' || isLocoDisabled) {
       const runtime = (window as any).Loco as LocoRuntime | undefined;
       if (runtime) {
         // The runtime rewrites <html lang/dir> on apply/restore; the toolbar owns them.
-        await queueLocoLocale(runtime, null);
+        await queueLocoLocale(runtime, null, request);
         applyDocumentLocale(globals);
       }
       return;
@@ -812,7 +858,7 @@ async function syncLocoLocale(
     const runtime = await ensureLocoInitialized(mode);
     if (!runtime || isCancelled()) return;
 
-    await queueLocoLocale(runtime, shouldRestore ? null : locale);
+    await queueLocoLocale(runtime, shouldRestore ? null : locale, request);
     if (!isCancelled()) applyDocumentLocale(globals);
   } catch (error) {
     console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
@@ -842,21 +888,34 @@ function updateLocoDocsHarvest() {
   if (harvesting) stopLocoDocsHarvest = startLocoHarvest(docsRoot, locoDocsId, () => true);
 }
 
+// Bumped on every docs-page sync and on leaving the page, so superseded syncs stop.
+let locoDocsGeneration = 0;
+
+// Docs-only counterpart of the story decorator's mode, language and locale effects.
+function syncLocoDocsOnlyPage() {
+  const generation = ++locoDocsGeneration;
+  const isStale = () => generation !== locoDocsGeneration;
+  const locoMode = resolveLocoMode(locoDocsGlobals);
+  syncLocoToolbarMode(locoMode);
+  if (locoMode === 'live') syncLiveLocoLanguages(isStale);
+  void syncLocoLocale(locoDocsGlobals, isStale);
+  updateLocoDocsHarvest();
+}
+
 const syncLocoDocsPage = (id?: unknown) => {
   if (typeof id === 'string') locoDocsId = id;
   locoDocsOnlyPage = !document.querySelector(LOCO_SCAN_ROOT_SELECTOR);
-  if (locoDocsOnlyPage) void syncLocoLocale(locoDocsGlobals);
-  updateLocoDocsHarvest();
+  if (locoDocsOnlyPage) syncLocoDocsOnlyPage();
+  else updateLocoDocsHarvest();
 };
 const leaveLocoDocsPage = () => {
   locoDocsOnlyPage = false;
+  locoDocsGeneration++;
   updateLocoDocsHarvest();
 };
 const handleLocoGlobals = ({ globals }: { globals: Record<string, unknown> }) => {
   locoDocsGlobals = globals;
-  if (!locoDocsOnlyPage) return;
-  void syncLocoLocale(globals);
-  updateLocoDocsHarvest();
+  if (locoDocsOnlyPage) syncLocoDocsOnlyPage();
 };
 try {
   const globalsParam = new URLSearchParams(window.location.search).get('globals') || '';
@@ -897,54 +956,12 @@ const withLocoLiveSync: Decorator = (Story, context) => {
     }
   }, [requestedMode]);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const previousMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
-    if (previousMode && previousMode !== locoMode) {
-      window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
-      window.location.reload();
-      return;
-    }
-    window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
-  }, [locoMode]);
+  useEffect(() => syncLocoToolbarMode(locoMode), [locoMode]);
 
   useEffect(() => {
-    if (locoMode !== 'live' || isLocoDisabled || typeof window === 'undefined') {
-      return;
-    }
-
+    if (locoMode !== 'live') return;
     let cancelled = false;
-
-    void (async () => {
-      const languages = await fetchLiveLocoLanguages();
-      if (cancelled || languages.length === 0) return;
-
-      const stableLanguages = [...languages].sort((a, b) =>
-        a.code.localeCompare(b.code)
-      );
-      const nextCodes = stableLanguages.map((item) => item.code);
-
-      window.localStorage.setItem(
-        LOCO_LIVE_LANG_CACHE_KEY,
-        JSON.stringify(stableLanguages)
-      );
-
-      // Toolbar options are static at module load: reload once per distinct server language set.
-      const languageSignature = nextCodes.join(',');
-      const reloadedFor = window.sessionStorage.getItem(LOCO_LIVE_LANG_RELOAD_FLAG);
-      const toolbarSignature = localeToolbarItems
-        .map((item) => item.value)
-        .filter((code) => code !== DEFAULT_LOCALE || nextCodes.includes(DEFAULT_LOCALE))
-        .sort()
-        .join(',');
-      if (toolbarSignature !== languageSignature && reloadedFor !== languageSignature) {
-        window.sessionStorage.setItem(LOCO_LIVE_LANG_RELOAD_FLAG, languageSignature);
-        window.location.reload();
-      }
-    })().catch((error) => {
-      console.warn('[loco-live] Unable to fetch live language list.', error);
-    });
-
+    syncLiveLocoLanguages(() => cancelled);
     return () => {
       cancelled = true;
     };

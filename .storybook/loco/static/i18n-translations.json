@@ -822,16 +822,6 @@
         "value": "boolean"
       },
       {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "",
-        "value": "تنقل هذا النهج إلى واجهة متصفحك عبر عناصر تحكم وتنقل ونماذج وملاحظات وعروض بيانات قابلة لإعادة الاستخدام. توفّر أنماط التفاعل المشتركة الألفة، وتمنحك رموز السمة والعلامة التجارية مساحة لجعل التطبيق خاصًا بك. طُوّرت المكتبة في MIE، وهي متاحة للتطبيقات في أي مجال بموجب {{text:0}}، وليس لمنتجات MIE فقط."
-      },
-      {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "@mieweb/ui",
-        "value": "تنقل هذا النهج إلى واجهة متصفحك عبر عناصر تحكم وتنقل ونماذج وملاحظات وعروض بيانات قابلة لإعادة الاستخدام. توفّر أنماط التفاعل المشتركة الألفة، وتمنحك رموز السمة والعلامة التجارية مساحة لجعل التطبيق خاصًا بك. طُوّرت المكتبة في MIE، وهي متاحة للتطبيقات في أي مجال بموجب {{text:0}}، وليس لمنتجات MIE فقط."
-      },
-      {
         "key": "className",
         "context": "",
         "value": "className"
@@ -2527,16 +2517,6 @@
         "key": "boolean",
         "context": "",
         "value": "boolean"
-      },
-      {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "",
-        "value": "lleva ese enfoque a la interfaz de tu navegador mediante controles, navegación, formularios, mensajes y visualizaciones de datos reutilizables. Los patrones de interacción compartidos aportan familiaridad; los tokens de tema y de marca te dan margen para hacer tuya la aplicación. Desarrollada en MIE, la biblioteca está disponible para aplicaciones de cualquier ámbito bajo su {{text:0}}, no solo para productos de MIE."
-      },
-      {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "@mieweb/ui",
-        "value": "lleva ese enfoque a la interfaz de tu navegador mediante controles, navegación, formularios, mensajes y visualizaciones de datos reutilizables. Los patrones de interacción compartidos aportan familiaridad; los tokens de tema y de marca te dan margen para hacer tuya la aplicación. Desarrollada en MIE, la biblioteca está disponible para aplicaciones de cualquier ámbito bajo su {{text:0}}, no solo para productos de MIE."
       },
       {
         "key": "cancelLabel",
@@ -4431,16 +4411,6 @@
         "value": "布尔值"
       },
       {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "",
-        "value": "通过可复用的控件、导航、表单、反馈和数据展示，把这种理念带到你的浏览器界面中。共享的交互模式带来熟悉感；主题和品牌令牌让你有空间打造属于自己的应用。该库由 MIE 开发，可依据其 {{text:0}} 用于任何领域的应用，而不仅限于 MIE 产品。"
-      },
-      {
-        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
-        "context": "@mieweb/ui",
-        "value": "通过可复用的控件、导航、表单、反馈和数据展示，把这种理念带到你的浏览器界面中。共享的交互模式带来熟悉感；主题和品牌令牌让你有空间打造属于自己的应用。该库由 MIE 开发，可依据其 {{text:0}} 用于任何领域的应用，而不仅限于 MIE 产品。"
-      },
-      {
         "key": "cancelLabel",
         "context": "",
         "value": "“取消”标签"
@@ -4944,5 +4914,5 @@
   },
   "glossary": {},
   "aria": [],
-  "timestamp": 1795471647116
+  "timestamp": 1795472771249
 }

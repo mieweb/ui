@@ -48,6 +48,44 @@ describe('Loco.scan (vendored runtime patch)', () => {
     ).not.toContain('Patient: Jane Doe');
   });
 
+  it('rejects contexts truncated inside a protected heading name', async () => {
+    const root = mount(
+      '<section><h2><span>Visit summary prepared for the attending team:</span> <span translate="no">Jane Doe-Smith</span></h2><button>Save</button></section>'
+    );
+    const nodes = await Loco.scan(root);
+
+    // The runtime cuts contexts at 60 characters, mid-name.
+    expect(nodes.find((node) => node.key === 'Save')?.context).toMatch(/Jane Doe-Smit$/);
+    expect(
+      filterLocoTextnodes(nodes, root).map((entry) => entry.key)
+    ).not.toContain('Save');
+  });
+
+  it('harvests text slots as their own keys, still privacy-filtered', async () => {
+    const root = mount(
+      '<p>Click <strong>Save</strong> to continue</p><p>Hello <strong translate="no">Jane Doe</strong> again</p>'
+    );
+    const keys = filterLocoTextnodes(await Loco.scan(root), root).map(
+      (entry) => entry.key
+    );
+
+    expect(keys).toContain('Click{{text:0}}to continue');
+    expect(keys).toContain('Save');
+    expect(keys).not.toContain('Jane Doe');
+  });
+
+  it('skips mixed phrases whose rebuild would drop inline code', async () => {
+    const root = mount(
+      '<p><code>@mieweb/ui</code> brings that approach under its <a href="#">license terms</a>, not just MIE products.</p>'
+    );
+    const keys = filterLocoTextnodes(await Loco.scan(root), root).map(
+      (entry) => entry.key
+    );
+
+    expect(keys.some((key) => key.startsWith('brings that approach'))).toBe(false);
+    expect(keys).toContain('license terms');
+  });
+
   it('recomputes contexts after a protected heading changes in place', async () => {
     const root = mount(
       '<section><h2 translate="no">Jane Doe</h2><button>Save</button></section>'

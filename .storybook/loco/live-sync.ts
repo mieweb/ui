@@ -53,33 +53,63 @@ function containsProtectedText(element: Element, key: string): boolean {
   });
 }
 
+// Elements the runtime derives contexts from (its domContextSelectors, plus table headers).
+const CONTEXT_SOURCE_SELECTOR = 'h1, h2, h3, h4, h5, h6, label, legend, caption, figcaption, th, form';
+
+type ProtectedContent = {
+  /** Text of each protected element. */
+  texts: string[];
+  /** Full text of every context source that contains protected text. */
+  sources: string[];
+};
+
+function collectProtectedContent(doc: Document): ProtectedContent {
+  const protectedElements = Array.from(doc.querySelectorAll(PROTECTED_SELECTOR));
+  const sources = new Set<string>();
+  for (const element of protectedElements) {
+    for (let source = element.closest(CONTEXT_SOURCE_SELECTOR); source; ) {
+      sources.add(normalizeText(source.textContent ?? ''));
+      source = source.parentElement?.closest(CONTEXT_SOURCE_SELECTOR) ?? null;
+    }
+  }
+  return {
+    texts: protectedElements.map((element) => normalizeText(element.textContent ?? '')).filter(Boolean),
+    sources: [...sources].filter(Boolean),
+  };
+}
+
 // The runtime builds context from nearby headings/labels ("Section > Field"), which can
 // sit inside a protected region even when the phrase itself does not.
-function isSafeContext(context: string, protectedTexts: () => string[]): boolean {
+function isSafeContext(context: string, getProtected: () => ProtectedContent): boolean {
   return context.split(' > ').every((segment) => {
     const text = normalizeText(segment);
+    if (!text) return true;
+    if (isSensitive(text)) return false;
+    const { texts, sources } = getProtected();
     return (
-      !text ||
-      (!isSensitive(text) &&
-        !protectedTexts().some(
-          // Both ways: a heading may be partly protected ("<span translate=no>Jane Doe</span> details").
-          (protectedText) => protectedText.includes(text) || text.includes(protectedText)
-        ))
+      // Both ways: a heading may be partly protected ("<span translate=no>Jane Doe</span> details").
+      !texts.some((protectedText) => protectedText.includes(text) || text.includes(protectedText)) &&
+      // The runtime truncates contexts to 60 characters, which can cut a protected name
+      // ("… Jane Doe-Smi"): reject any prefix of a heading that contains protected text.
+      !sources.some((source) => source.startsWith(text))
     );
   });
 }
 
-/** A phrase as discovered by the Loco runtime (`Loco.textnodes()`). */
+/** A phrase as discovered by the Loco runtime (`Loco.scan()`). */
 export type LocoTextnode = {
   key: string;
   context?: string;
   element?: Element | null;
+  /** Set by Loco.scan() when apply() would drop inline content (e.g. <code>) from the element. */
+  lossy?: boolean;
 };
 
 /**
  * Keeps runtime-discovered phrases that sit inside one of `roots` and outside ignored or
- * sensitive regions, and whose context carries no protected or sensitive text. Keys/contexts are passed through unchanged so they match
- * what `Loco.apply()` looks up (including `{{text:N}}` placeholders).
+ * sensitive regions, and whose context carries no protected or sensitive text. Keys and
+ * contexts pass through unchanged so they match what `Loco.apply()` looks up (including
+ * `{{text:N}}` placeholders).
  */
 export function filterLocoTextnodes(
   nodes: LocoTextnode[],
@@ -88,13 +118,10 @@ export function filterLocoTextnodes(
   const scanRoots = Array.isArray(roots) ? roots : [roots];
   const seen = new Set<string>();
   const entries: LocoKeyEntry[] = [];
-  let protectedTexts: string[] | undefined;
-  const getProtectedTexts = () =>
-    (protectedTexts ??= Array.from(
-      (scanRoots[0]?.ownerDocument ?? document).querySelectorAll(PROTECTED_SELECTOR),
-      (element) => normalizeText(element.textContent ?? '')
-    ).filter(Boolean));
-  for (const { key, context = '', element } of nodes) {
+  let protectedContent: ProtectedContent | undefined;
+  const getProtected = () =>
+    (protectedContent ??= collectProtectedContent(scanRoots[0]?.ownerDocument ?? document));
+  for (const { key, context = '', element, lossy } of nodes) {
     if (
       !element ||
       !scanRoots.some((root) => root.contains(element)) ||
@@ -103,11 +130,13 @@ export function filterLocoTextnodes(
       continue;
     }
     if (!isUsefulPhrase(key)) continue;
+    // Translating these would delete the dropped inline content, so leave them in English.
+    if (lossy) continue;
     // The runtime joins inline children into one phrase, so a protected descendant's text
     // can end up inside the key ("Patient: <span translate=no>Jane Doe</span>").
     if (containsProtectedText(element, key)) continue;
     // Drop rather than blank an unsafe context: apply() looks up the exact key/context pair.
-    if (context && !isSafeContext(context, getProtectedTexts)) continue;
+    if (context && !isSafeContext(context, getProtected)) continue;
     const id = `${key}\0${context}`;
     if (seen.has(id)) continue;
     seen.add(id);
