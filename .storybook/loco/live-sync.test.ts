@@ -81,6 +81,8 @@ describe('filterLocoTextnodes', () => {
       [
         '<h2 translate="no">Jane Doe</h2>',
         '<button data-key="Save" data-context="Jane Doe"></button>',
+        '<h3><span translate="no">Sam Lee</span><span> details</span></h3>',
+        '<button data-key="Edit" data-context="Sam Lee details"></button>',
         '<button data-key="Cancel" data-context="Contact > MRN 00482913"></button>',
         '<button data-key="Delete" data-context="Contact details"></button>',
       ].join('')

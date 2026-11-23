@@ -50,7 +50,10 @@ function isSafeContext(context: string, protectedTexts: () => string[]): boolean
     return (
       !text ||
       (!isSensitive(text) &&
-        !protectedTexts().some((protectedText) => protectedText.includes(text)))
+        !protectedTexts().some(
+          // Both ways: a heading may be partly protected ("<span translate=no>Jane Doe</span> details").
+          (protectedText) => protectedText.includes(text) || text.includes(protectedText)
+        ))
     );
   });
 }
