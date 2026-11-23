@@ -188,8 +188,10 @@ type LocoRuntime = {
   apply?: (lang: string) => Promise<unknown> | unknown;
   restore?: () => Promise<unknown> | unknown;
   languages?: () => Promise<unknown> | unknown;
-  // Local patch to the vendored runtime: read-only scan, same keys/contexts apply() uses.
+  // Local patches to the vendored runtime: read-only scan, same keys/contexts apply() uses,
+  // and a registry rebuild from the current DOM (see .storybook/loco/README.md).
   scan?: (root: Element) => Promise<LocoTextnode[]>;
+  refresh?: () => Promise<void>;
 };
 
 // The runtime drops apply() calls made while one is in flight, so every runtime
@@ -207,13 +209,23 @@ function runLocoExclusive<T>(task: () => Promise<T>): Promise<T> {
 
 // Skip locale changes that a newer request has superseded.
 let locoLatestRequest = 0;
+// The locale the DOM currently shows; null while it shows the English source.
+let locoAppliedLocale: string | null = null;
 
 function queueLocoLocale(runtime: LocoRuntime, locale: string | null): Promise<void> {
   const request = ++locoLatestRequest;
   return runLocoExclusive(async () => {
     if (request !== locoLatestRequest) return;
-    if (locale) await Promise.resolve(runtime.apply?.(locale));
-    else await Promise.resolve(runtime.restore?.());
+    if (locale) {
+      // apply() writes its stored originals back before translating, and only rescans when
+      // none of them are still on the page. Rebuild them from the current English DOM so
+      // edits and newly rendered copy made while English was showing are translated.
+      if (!locoAppliedLocale) await runtime.refresh?.();
+      await Promise.resolve(runtime.apply?.(locale));
+    } else {
+      await Promise.resolve(runtime.restore?.());
+    }
+    locoAppliedLocale = locale;
   }).catch((error) => {
     console.warn(`[loco] Unable to ${locale ? `apply "${locale}"` : 'restore English'}.`, error);
   });
@@ -700,10 +712,94 @@ const withCodeLookup: Decorator = (Story, context) => {
   );
 };
 
+function resolveLocoMode(globals: Record<string, unknown>): string {
+  const requestedMode = String(globals?.locoMode || 'disable');
+  return requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
+}
+
+// Applies (or undoes) the toolbar's Loco mode/locale on the current preview document.
+async function syncLocoLocale(
+  globals: Record<string, unknown>,
+  isCancelled: () => boolean = () => false
+): Promise<void> {
+  const locoMode = resolveLocoMode(globals);
+  const locale = String(globals?.locale || 'en');
+  try {
+    // Disabled: undo any runtime translations and do nothing else.
+    if (locoMode === 'disable' || isLocoDisabled) {
+      const runtime = (window as any).Loco as LocoRuntime | undefined;
+      if (runtime) {
+        // The runtime rewrites <html lang/dir> on apply/restore; the toolbar owns them.
+        await queueLocoLocale(runtime, null);
+        applyDocumentLocale(globals);
+      }
+      return;
+    }
+
+    const mode = locoMode === 'live' ? 'live' : 'package';
+    // In package mode only apply languages present in the exported pack;
+    // English (the source language) means “show originals”.
+    const shouldRestore =
+      locale === 'en' || (mode === 'package' && !locoPackLanguages.includes(locale));
+
+    // Nothing to undo yet — don't load the runtime just to restore originals.
+    if (shouldRestore && !(window as any).Loco) return;
+
+    const runtime = await ensureLocoInitialized(mode);
+    if (!runtime || isCancelled()) return;
+
+    await queueLocoLocale(runtime, shouldRestore ? null : locale);
+    if (!isCancelled()) applyDocumentLocale(globals);
+  } catch (error) {
+    console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
+  }
+}
+
+// Docs-only MDX pages (e.g. Introduction) render no story, so no decorator runs there;
+// translate them from the channel instead.
+let locoDocsGlobals: Record<string, unknown> = {};
+// Only set once Storybook reports a rendered docs page without stories, so story pages
+// never race their decorator with a second apply.
+let locoDocsOnlyPage = false;
+const syncLocoDocsPage = () => {
+  locoDocsOnlyPage = !document.querySelector(LOCO_SCAN_ROOT_SELECTOR);
+  if (locoDocsOnlyPage) void syncLocoLocale(locoDocsGlobals);
+};
+const leaveLocoDocsPage = () => {
+  locoDocsOnlyPage = false;
+};
+const handleLocoGlobals = ({ globals }: { globals: Record<string, unknown> }) => {
+  locoDocsGlobals = globals;
+  if (locoDocsOnlyPage) void syncLocoLocale(globals);
+};
+try {
+  const globalsParam = new URLSearchParams(window.location.search).get('globals') || '';
+  locoDocsGlobals = Object.fromEntries(
+    globalsParam
+      .split(';')
+      .map((pair) => pair.split(':'))
+      .filter(([key, value]) => key && value)
+  );
+} catch {
+  // Ignore URL parsing errors.
+}
+for (const event of ['setGlobals', 'globalsUpdated']) {
+  channel.off(event, handleLocoGlobals);
+  channel.on(event, handleLocoGlobals);
+}
+channel.off('docsRendered', syncLocoDocsPage);
+channel.on('docsRendered', syncLocoDocsPage);
+channel.off('storyRendered', leaveLocoDocsPage);
+channel.on('storyRendered', leaveLocoDocsPage);
+import.meta.hot?.dispose(() => {
+  ['setGlobals', 'globalsUpdated'].forEach((event) => channel.off(event, handleLocoGlobals));
+  channel.off('docsRendered', syncLocoDocsPage);
+  channel.off('storyRendered', leaveLocoDocsPage);
+});
+
 const withLocoLiveSync: Decorator = (Story, context) => {
   const requestedMode = String(context.globals?.locoMode || 'disable');
-  const locoMode =
-    requestedMode === 'live' && !isLiveSyncEnabled ? 'package' : requestedMode;
+  const locoMode = resolveLocoMode(context.globals);
   const locale = String(context.globals?.locale || 'en');
   const scanRootRef = useRef<HTMLDivElement>(null);
 
@@ -839,37 +935,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
 
   useEffect(() => {
     let cancelled = false;
-
-    // Disabled: undo any runtime translations and do nothing else.
-    if (locoMode === 'disable' || isLocoDisabled) {
-      const runtime = (window as any).Loco as LocoRuntime | undefined;
-      if (runtime) {
-        // The runtime rewrites <html lang/dir> on apply/restore; the toolbar owns them.
-        void queueLocoLocale(runtime, null).then(() => applyDocumentLocale(context.globals));
-      }
-      return;
-    }
-
-    void (async () => {
-      const mode = locoMode === 'live' ? 'live' : 'package';
-
-      // In package mode only apply languages present in the exported pack;
-      // English (the source language) means “show originals”.
-      const shouldRestore =
-        locale === 'en' || (mode === 'package' && !locoPackLanguages.includes(locale));
-
-      // Nothing to undo yet — don't load the runtime just to restore originals.
-      if (shouldRestore && !(window as any).Loco) return;
-
-      const runtime = await ensureLocoInitialized(mode);
-      if (!runtime || cancelled) return;
-
-      await queueLocoLocale(runtime, shouldRestore ? null : locale);
-      if (!cancelled) applyDocumentLocale(context.globals);
-    })().catch((error) => {
-      console.warn(`[loco] Unable to apply locale "${locale}" in ${locoMode} mode.`, error);
-    });
-
+    void syncLocoLocale(context.globals, () => cancelled);
     return () => {
       cancelled = true;
     };

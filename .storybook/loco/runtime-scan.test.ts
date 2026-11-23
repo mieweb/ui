@@ -36,6 +36,18 @@ describe('Loco.scan (vendored runtime patch)', () => {
     expect(asterisk?.isConnected).toBe(true);
   });
 
+  it('never keeps a phrase that embeds a nested protected name', async () => {
+    const root = mount(
+      '<p>👤 <span>Patient: <span translate="no">Jane Doe</span></span></p>'
+    );
+    const nodes = await Loco.scan(root);
+
+    expect(nodes.map((node) => node.key)).toContain('Patient: Jane Doe');
+    expect(
+      filterLocoTextnodes(nodes, root).map((entry) => entry.key)
+    ).not.toContain('Patient: Jane Doe');
+  });
+
   it('recomputes contexts after a protected heading changes in place', async () => {
     const root = mount(
       '<section><h2 translate="no">Jane Doe</h2><button>Save</button></section>'

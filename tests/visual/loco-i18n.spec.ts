@@ -104,6 +104,22 @@ test.describe('Loco i18n toolbar', () => {
     });
   }
 
+  test('package mode translates docs-only MDX pages (Introduction)', async ({
+    page,
+  }) => {
+    await page.goto(
+      '/iframe.html?id=introduction--docs&viewMode=docs&globals=locale:es;locoMode:package'
+    );
+    const docs = page.locator('#storybook-docs');
+    await expect(docs).toContainText('Primeros pasos', { timeout: 20000 });
+    // Paragraphs with inline code are left untranslated so the code survives.
+    await expect(docs).toContainText('@mieweb/ui/datavis');
+
+    await setGlobals(page, { locale: 'en' });
+    await expect(docs).toContainText('Get Started');
+    await expect(docs).not.toContainText('Primeros pasos');
+  });
+
   test('disable mode never loads the runtime', async ({ page }) => {
     await gotoStory(page, 'data-display-badge--all-variants', {
       globals: 'locale:zh-Hans;locoMode:disable',

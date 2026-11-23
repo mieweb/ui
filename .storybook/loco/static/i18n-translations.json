@@ -1037,6 +1037,321 @@
         "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
         "context": "",
         "value": "{{text:0}}: Tu Storybook puede requerir variables de entorno específicas para funcionar como se espera. Puedes configurar variables de entorno personalizadas como se describe en la {{text:1}}."
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "",
+        "value": "Crea aplicaciones que resulten familiares desde la primera interacción."
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "",
+        "value": "Las personas no deberían tener que volver a aprender a navegar, completar un formulario o recuperarse de un error cada vez que abren otra aplicación. Las interfaces limpias y coherentes permiten trasladar lo que ya se sabe de una tarea a la siguiente. Los controles predecibles y una respuesta clara reducen la duda y dejan más atención para el trabajo que importa."
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "",
+        "value": "Esa coherencia debe ir más allá de la apariencia. Una experiencia coherente se adapta del móvil al escritorio, sigue siendo legible en modo claro y oscuro, admite distintos idiomas y diseños de derecha a izquierda, y da soporte a quienes usan el teclado o tecnologías de asistencia. El diseño adaptable, la internacionalización (i18n) y la accesibilidad (a11y) forman parte de la base, no de una lista de comprobación final."
+      },
+      {
+        "key": "brings that approach to your browser interface through reusable controls, navigation, forms, feedback, and data displays. Shared interaction patterns provide familiarity; theme and brand tokens give you room to make the application your own. Developed at MIE, the library is available for applications in any domain under its{{text:0}}, not just MIE products.",
+        "context": "",
+        "value": "lleva ese enfoque a la interfaz de tu navegador mediante controles, navegación, formularios, mensajes y visualizaciones de datos reutilizables. Los patrones de interacción compartidos aportan familiaridad; los tokens de tema y de marca te dan margen para hacer tuya la aplicación. Desarrollada en MIE, la biblioteca está disponible para aplicaciones de cualquier ámbito bajo su {{text:0}}, no solo para productos de MIE."
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "",
+        "value": "Los componentes están hechos con React, pero tu aplicación no tiene por qué estarlo. Úsalos en toda una aplicación React o intégralos en zonas concretas de páginas basadas en Bootstrap, renderizadas en el servidor u otras páginas sin React. Adopta un componente o un flujo de trabajo cada vez, sin reescribir el resto de tu interfaz."
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "",
+        "value": "Parte de una base común y dedica más tiempo a lo que hace valiosa tu aplicación. Los componentes favorecen el diseño inclusivo; no traducen automáticamente tu contenido ni garantizan la accesibilidad. Valida su composición, su idioma y su comportamiento con las personas y los dispositivos a los que sirve tu aplicación."
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "",
+        "value": "{{text:0}}, donde puedes explorar esos componentes sin crear antes una aplicación. Esta introducción se comparte en GitHub, npm y Storybook."
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "",
+        "value": "{{text:0}}, sin necesidad de instalar nada."
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "",
+        "value": "{{text:0}}, con o sin un agente de programación con IA."
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "",
+        "value": "Explorar y combinar componentes"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "",
+        "value": "Contribuir o ejecutar en local"
+      },
+      {
+        "key": "See It In Action",
+        "context": "",
+        "value": "Míralo en acción"
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "",
+        "value": "{{text:0}} para ver la navegación, los encabezados, las tarjetas y las visualizaciones de datos funcionando juntos en el diseño de una aplicación. Prueba los selectores de marca y de tema para ver cómo se adaptan los mismos componentes. No hace falta instalar nada."
+      },
+      {
+        "key": "Get Started",
+        "context": "",
+        "value": "Primeros pasos"
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "",
+        "value": "Instalación en tu aplicación"
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "",
+        "value": "Los componentes necesitan React 18+ y React DOM 18+ para renderizarse, también cuando se integran en una página sin React. Si tu proyecto ya tiene esas dependencias:"
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "",
+        "value": "Si tu proyecto usa npm o yarn, ejecuta"
+      },
+      {
+        "key": "or",
+        "context": "",
+        "value": "o"
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "",
+        "value": ". No necesitas clonar este repositorio ni ejecutar Storybook para usar la biblioteca."
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "",
+        "value": "Para un proyecto sin React, instala las dependencias de renderizado:"
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "",
+        "value": "¿Usas un agente de programación con IA? {{text:0}} y {{text:1}} antes de pedirle que añada componentes a tu aplicación."
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "",
+        "value": "Monta los componentes en un elemento DOM dedicado con la función de React DOM"
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "",
+        "value": ", dejando el resto de la página bajo el control de su framework actual. Desmonta la raíz de React cuando la página anfitriona elimine esa zona. Esto requiere una compilación de JavaScript compatible con React; los componentes no son widgets HTML independientes de cualquier framework."
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "",
+        "value": "Al integrarlos junto a Bootstrap u otras hojas de estilo, revisa los resets de CSS, los selectores globales y los estilos de tema por si hay conflictos. Montarlos en un elemento DOM aparte no aísla el CSS."
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "",
+        "value": "Configura tu agente de programación con IA"
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "",
+        "value": "Desde la raíz del repositorio de tu aplicación, ejecuta:"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "",
+        "value": "Esto instala reglas de selección de componentes, composición, temas y accesibilidad para que tu agente parta de los componentes existentes de la biblioteca. Escribe"
+      },
+      {
+        "key": "in",
+        "context": "",
+        "value": "en"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "",
+        "value": "para VS Code Copilot y actualiza un bloque gestionado en"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "",
+        "value": "para los agentes que leen ese archivo. Vuelve a ejecutarlo después de actualizar"
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "",
+        "value": "para refrescar las reglas."
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "",
+        "value": "Consulta {{text:0}}. Son instrucciones para agentes de programación, no un revisor automático de PR ni un control de fusión. El desarrollo asistido por agentes y el manual usan la misma biblioteca y la configuración que sigue."
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "",
+        "value": "Renderiza tu primer componente"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "",
+        "value": "Importa la hoja de estilos precompilada una sola vez en el punto de entrada o el layout raíz de tu aplicación. Importa después una hoja de estilos de marca si quieres los tokens de esa marca:"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "",
+        "value": "Esta vía de CSS no requiere Tailwind en tu aplicación. Como primer ejemplo interactivo, renderiza un selector de tema dentro del proveedor:"
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "",
+        "value": "En producción, proporciona las etiquetas traducidas mediante el sistema de i18n de tu aplicación. En el App Router de Next.js, coloca este ejemplo interactivo en un componente de cliente e importa los estilos globales desde el layout raíz."
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "",
+        "value": "Añade capacidades especializadas cuando las necesites"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "",
+        "value": "Las integraciones pesadas usan puntos de entrada separados y dependencias peer opcionales, así que solo instalas lo que necesitas:"
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "",
+        "value": "Revisa las dependencias de la integración elegida antes de importar su punto de entrada. AGGrid está obsoleto para trabajo nuevo; para datos tabulares, empieza con DataVis NITRO."
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "",
+        "value": "Explora y combina componentes"
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "",
+        "value": "Abre {{text:0}}. Storybook es el envoltorio de los ejemplos: su barra lateral selecciona componentes, una {{text:1}} muestra una configuración concreta y {{text:2}} presenta la guía y la API. {{text:3}} cambian las props del ejemplo; las herramientas de tema y de marca te permiten ver distintas apariencias. Esas herramientas pertenecen a Storybook, no al componente que instalas."
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "",
+        "value": "Empieza por la tarea del usuario y compara componentes antes de elegir una API:"
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "",
+        "value": "{{text:0}} empieza con {{text:1}} y compara {{text:2}}. NITRO ofrece herramientas de datos integradas; Table ofrece marcado de más bajo nivel. Ten en cuenta el comportamiento que tu aplicación tendría que aportar y consulta las reglas de selección antes de elegir una excepción."
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "",
+        "value": "{{text:0}} compara {{text:1}} y {{text:2}}. Un índice (TOC) ofrece destinos con nombre y navegación. Una barra de lectura es una indicación decorativa del desplazamiento por el documento, no navegación ni prueba de lectura. Pueden complementarse; para contenido breve puede que no haga falta ninguno."
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "",
+        "value": "{{text:0}} explora {{text:1}}. Observa cómo encajan la navegación, los encabezados y el contenido, y adapta la composición a tu flujo de trabajo en lugar de copiar el diseño sin más."
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "",
+        "value": "En cada elección, pregúntate por qué encaja, cuándo sería mejor una alternativa, qué estado controla tu aplicación y cómo se comporta junto a los componentes vecinos. Prueba los estados de carga, vacío, error, teclado y pantalla estrecha en la aplicación real, no solo en la story aislada."
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "",
+        "value": "El catálogo sigue mejorando: todavía no todos los componentes tienen guía de comparación o composición. No tomes un ejemplo aislado como prueba de que no existe un componente relacionado. Usa {{text:0}} y señala la guía que falte o sea contradictoria en {{text:1}}."
+      },
+      {
+        "key": "Go Deeper",
+        "context": "",
+        "value": "Profundiza"
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "",
+        "value": "{{text:0}}: el sistema de marca y los tokens visuales."
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "",
+        "value": "{{text:0}}: problemas habituales de integración y rutas de migración para aplicaciones existentes."
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "",
+        "value": "{{text:0}}: un enfoque ordenado para adoptar la biblioteca."
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "",
+        "value": "{{text:0}}: guía de migración específica para cada framework."
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "",
+        "value": "Contribuye o ejecuta en local"
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "",
+        "value": "Para modificar la biblioteca, mejorar su guía o ejecutar tu propio Storybook, sigue {{text:0}}. Cubre la configuración del repositorio, el desarrollo local, las pruebas, las convenciones de componentes y las versiones. Esos pasos no son necesarios para usar el paquete de npm."
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "",
+        "value": "¿Has encontrado una recomendación de selección poco clara o una relación sin documentar? Las contribuciones a la documentación son bienvenidas junto a las correcciones de componentes. {{text:0}} para mejorar el contenido compartido de GitHub, npm y Storybook. Las copias publicadas se actualizan cuando se publica el paquete o se despliega el sitio de documentación."
+      },
+      {
+        "key": "License",
+        "context": "",
+        "value": "Licencia"
+      },
+      {
+        "key": "Copyright © 2026 Medical Informatics Engineering, Inc. All rights reserved.",
+        "context": "",
+        "value": "Copyright © 2026 Medical Informatics Engineering, Inc. Todos los derechos reservados."
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "",
+        "value": "Este software es {{text:0}}:"
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "",
+        "value": "{{text:0}} uso, modificación y distribución en proyectos de código abierto, con atribución."
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "",
+        "value": "{{text:0}} proyectos personales, educación e investigación."
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}} para productos propietarios o uso comercial, escribe a {{text:1}}."
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "",
+        "value": "Consulta {{text:0}} para ver los términos completos."
+      },
+      {
+        "key": "Copy",
+        "context": "",
+        "value": "Copiar"
       }
     ],
     "ar": [

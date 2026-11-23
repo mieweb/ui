@@ -42,6 +42,14 @@ function isUsefulPhrase(value: string): boolean {
   return !isSensitive(value);
 }
 
+function containsProtectedText(element: Element, key: string): boolean {
+  const text = normalizeText(key);
+  return Array.from(element.querySelectorAll(PROTECTED_SELECTOR)).some((protectedElement) => {
+    const protectedText = normalizeText(protectedElement.textContent ?? '');
+    return protectedText !== '' && text.includes(protectedText);
+  });
+}
+
 // The runtime builds context from nearby headings/labels ("Section > Field"), which can
 // sit inside a protected region even when the phrase itself does not.
 function isSafeContext(context: string, protectedTexts: () => string[]): boolean {
@@ -92,6 +100,9 @@ export function filterLocoTextnodes(
       continue;
     }
     if (!isUsefulPhrase(key)) continue;
+    // The runtime joins inline children into one phrase, so a protected descendant's text
+    // can end up inside the key ("Patient: <span translate=no>Jane Doe</span>").
+    if (containsProtectedText(element, key)) continue;
     // Drop rather than blank an unsafe context: apply() looks up the exact key/context pair.
     if (context && !isSafeContext(context, getProtectedTexts)) continue;
     const id = `${key}\0${context}`;

@@ -25,13 +25,18 @@ The **Loco i18n** toolbar in [`preview.tsx`](../preview.tsx) has three modes:
 
 Live sync needs a read-only scan, but the runtime only offers `rescan()`, which writes
 originals back with `innerHTML` and re-applies translations over React-owned DOM. The vendored
-file therefore adds one method next to `textnodes()`:
+file therefore adds two methods next to `textnodes()`:
 
 ```js
+refresh:async function(){te=new WeakMap,re=new WeakMap,i.phrases=await pe(document.body)},
 scan:async function(e){te=new WeakMap,re=new WeakMap;return(await pe(e||document.body)).map(function(n){return{key:n.key,context:n.context||"",element:n.element}})},
 ```
 
 `pe` is the runtime's own scanner, so keys and contexts match what `apply()` looks up. Clearing
 the `te`/`re` context caches stops contexts from going stale when a heading changes in place.
+`refresh()` rebuilds the phrase registry `apply()` reuses from the current English DOM. Without
+it, `apply()` writes its stored originals back over text edited while English was showing, and
+skips newly rendered copy while any old node is still on the page.
+
 Re-apply this patch when updating the runtime, until it ships upstream in Loco.
 
