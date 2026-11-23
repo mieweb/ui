@@ -1,30 +1,32 @@
-import type * as React from 'react';
 import { Lexer, type Tokens } from 'marked';
+import type { MentionOption } from '../Messaging/useMentionAutocomplete';
 
 /**
  * A record a person picked while writing — a teammate, a ticket, a document —
- * as one suggestion in a trigger's list. What `kind` and `id` mean is the
+ * as one suggestion in a trigger's list. It is an `@mention` option (the same
+ * `MentionOption` `ChatComposer`'s `mentionOptions` take, drawn by the same
+ * `MentionMenu`) plus the kind it belongs to; a pick is saved as a link, so
+ * `MentionOption.value` doesn't apply. What `kind` and `id` mean is the
  * host's; the library only carries them.
  */
-export interface ReferenceOption {
+export interface ReferenceOption extends Omit<MentionOption, 'value'> {
   /** The {@link ReferenceTrigger.kind} this option belongs to. */
   kind: string;
   /** The record's id, as the host knows it. */
   id: string;
   /** Text of the chip and of the saved link, e.g. `@Ann Lee` or `TH-12: Fix login`. */
   label: string;
-  /** Secondary text in the suggestion list. */
-  description?: string;
-  /** Leading node in the suggestion list (an avatar, an icon). */
-  icon?: React.ReactNode;
-  /** Trailing meta text in the suggestion list (e.g. a status). */
-  meta?: string;
 }
 
 /**
  * One kind of reference: the character that opens its suggestion list, how to
  * find candidates, and how a picked one is written as a link and read back.
  * The host supplies one per kind — e.g. `@` for people, `#` for tickets.
+ *
+ * Triggers extend the library's existing `@mention` (`useMentionAutocomplete`
+ * and `MentionMenu`), not a second one: the same list, keyboard and ARIA,
+ * opened by any character, searched as you type, and saving a link to the
+ * record instead of `@word` text.
  */
 export interface ReferenceTrigger {
   /** Stable name of the kind, e.g. `'person'` or `'ticket'`. */

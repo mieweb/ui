@@ -16,6 +16,8 @@ const meta: Meta<typeof ReferenceChip> = {
 
 **A record named inline in text — a teammate, a ticket, a document — shown as a compact chip.** \`ReferenceChip\` renders an \`<a>\` with the \`Badge\` look: \`label\` is the text, \`href\` where the record lives, \`kind\` lands on \`data-reference-kind\`, \`icon\` leads (an avatar). The same file exports the vocabulary the editors share: **\`ReferenceTrigger\`** (\`kind\`, \`char\`, \`label\`, \`search(query)\`, \`toHref(id)\`, \`fromHref(href)\`) declares one kind of reference — the host supplies, say, \`@\` for people and \`#\` for tickets — **\`ReferenceOption\`** is one suggestion, and **\`referencesIn(markdown, triggers)\`** lists the references a saved text holds (\`{ kind, id, label, href }\`, each once, skipping code and images). A reference is **saved as an ordinary Markdown link** (\`[@Ann Lee](/people/u-ann)\`), so any Markdown viewer still shows a working link.
 
+**Built on \`@mention\`, not beside it.** \`ChatComposer\`'s \`mentionOptions\` (\`useMentionAutocomplete\` + \`MentionMenu\`) is the library's one *type a character → pick from a list*. Triggers extend it — any character, async \`search\`, a link saved instead of \`@word\` text — and use the same list: a \`ReferenceOption\` is a \`MentionOption\` plus its \`kind\`. Keep \`mentionOptions\` for *addressing* a chat participant (SuperChat's \`mentions\`, agent routing); use a trigger to *link to a record*.
+
 ### Use it when
 
 - Text names records the app knows and readers should be able to open them — "Ask @Ann Lee about TH-12".
