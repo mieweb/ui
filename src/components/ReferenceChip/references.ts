@@ -144,16 +144,38 @@ function decodeReferences(text: string): string {
 // references resolved, emphasis marks and inline HTML tags dropped,
 // code-span contents kept literal, and a hard line break read as a space —
 // a label is one line, and `[Ann  \nLee](…)` names "Ann Lee", not "AnnLee".
+// An escaped `&` (`\&#45;`) is a literal ampersand, so what follows is no
+// character reference. Marked drops the backslash from destinations before
+// we decode, which would lose that, so each escaped `&` is swapped for a
+// private-use stand-in first (an unescaped backslash, `\\&` being an
+// escaped backslash then a real `&`), and turned back into `&` — or into
+// `\&` inside code, where escapes are literal — once decoded. Text that
+// already holds the stand-in is left as written.
+const ESCAPED_AMP = '\uE000';
+
+function maskEscapedAmpersands(text: string): string {
+  return text.includes(ESCAPED_AMP)
+    ? text
+    : text.replace(/(?<!\\)((?:\\\\)*)\\&/g, `$1${ESCAPED_AMP}`);
+}
+
+/** Decodes `text`'s character references; a masked `&` stays a literal one. */
+function decodeText(text: string): string {
+  return decodeReferences(text).replaceAll(ESCAPED_AMP, '&');
+}
+
 function plainText(tokens: readonly Nested[]): string {
   return tokens
     .map((token) => {
       if (token.type === 'html') return '';
       if (token.type === 'br') return ' ';
-      if (token.type === 'codespan') return token.text ?? '';
+      if (token.type === 'codespan') {
+        return (token.text ?? '').replaceAll(ESCAPED_AMP, '\\&');
+      }
       if (token.tokens) return plainText(token.tokens);
       return token.type === 'text'
-        ? decodeReferences(token.text ?? '')
-        : (token.text ?? '');
+        ? decodeText(token.text ?? '')
+        : (token.text ?? '').replaceAll(ESCAPED_AMP, '&');
     })
     .join('');
 }
@@ -169,11 +191,13 @@ export function referencesIn(
 ): Reference[] {
   const seen = new Set<string>();
   const found: Reference[] = [];
-  for (const link of linksIn(new Lexer().lex(text) as Nested[])) {
+  const tokens = new Lexer().lex(maskEscapedAmpersands(text));
+  for (const link of linksIn(tokens as Nested[])) {
     // Marked resolves backslash escapes in a destination but keeps character
     // references as written; a Markdown renderer decodes them, so
-    // `/people/u&#45;ann` is the link to `u-ann` here too.
-    const href = decodeReferences(link.href);
+    // `/people/u&#45;ann` is the link to `u-ann` here too — and, the escaped
+    // `&` masked above, `/people/u\&#45;ann` stays `u&#45;ann`.
+    const href = decodeText(link.href);
     const label = plainText(link.tokens as Nested[]);
     const match = matchReference(href, triggers);
     if (!match) continue;
