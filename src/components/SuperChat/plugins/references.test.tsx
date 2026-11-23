@@ -108,4 +108,20 @@ describe('createReferencesPlugin', () => {
       expect(onOpen).not.toHaveBeenCalled();
     }
   );
+  it('leaves a link a trigger cannot decode as an ordinary link', () => {
+    const decoding: ReferenceTrigger = {
+      ...trigger('person', '/people/'),
+      fromHref: (href) =>
+        href.startsWith('/people/')
+          ? decodeURIComponent(href.slice('/people/'.length))
+          : null,
+    };
+    const renderText = createMarkdownRenderer({
+      plugins: [createReferencesPlugin({ triggers: [decoding] })],
+    });
+    render(<>{renderText('Ask [@Ann](/people/%E0%A4).', CONTEXT)}</>);
+    expect(screen.getByRole('link', { name: '@Ann' })).not.toHaveAttribute(
+      'data-reference-kind'
+    );
+  });
 });
