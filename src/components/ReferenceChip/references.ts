@@ -140,11 +140,13 @@ function decodeReferences(text: string): string {
 
 // The text a reader sees in inline `tokens`: escapes and character
 // references resolved, emphasis marks and inline HTML tags dropped,
-// code-span contents kept literal.
+// code-span contents kept literal, and a hard line break read as a space —
+// a label is one line, and `[Ann  \nLee](…)` names "Ann Lee", not "AnnLee".
 function plainText(tokens: readonly Nested[]): string {
   return tokens
     .map((token) => {
       if (token.type === 'html') return '';
+      if (token.type === 'br') return ' ';
       if (token.type === 'codespan') return token.text ?? '';
       if (token.tokens) return plainText(token.tokens);
       return token.type === 'text'
@@ -166,7 +168,10 @@ export function referencesIn(
   const seen = new Set<string>();
   const found: Reference[] = [];
   for (const link of linksIn(new Lexer().lex(text) as Nested[])) {
-    const { href } = link;
+    // Marked resolves backslash escapes in a destination but keeps character
+    // references as written; a Markdown renderer decodes them, so
+    // `/people/u&#45;ann` is the link to `u-ann` here too.
+    const href = decodeReferences(link.href);
     const label = plainText(link.tokens as Nested[]);
     const match = matchReference(href, triggers);
     if (!match) continue;

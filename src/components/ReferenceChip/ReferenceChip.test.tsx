@@ -18,6 +18,26 @@ const triggers = [
 ];
 
 describe('referencesIn', () => {
+  it('reads a hard line break in a label as a space', () => {
+    expect(referencesIn('[Ann  \nLee](/people/u-ann)', triggers)).toEqual([
+      { kind: 'person', id: 'u-ann', label: 'Ann Lee', href: '/people/u-ann' },
+    ]);
+  });
+
+  it('decodes character references in a destination, inline or reference-style', () => {
+    const ann = {
+      kind: 'person',
+      id: 'u-ann',
+      label: '@Ann',
+      href: '/people/u-ann',
+    };
+    expect(referencesIn('[@Ann](/people/u&#45;ann)', triggers)).toEqual([ann]);
+    expect(
+      referencesIn('[@Ann][a]\n\n[a]: /people/u&#x2D;ann', triggers)
+    ).toEqual([ann]);
+    expect(referencesIn('[@Ann](/people/u\\-ann)', triggers)).toEqual([ann]);
+  });
+
   it('skips a link a trigger throws on, instead of throwing', () => {
     const decoding: ReferenceTrigger = {
       ...triggers[0],
