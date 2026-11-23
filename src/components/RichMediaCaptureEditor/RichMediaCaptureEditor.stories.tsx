@@ -4,6 +4,10 @@ import { SquareDashed } from 'lucide-react';
 import { RichMediaCaptureEditor } from './RichMediaCaptureEditor';
 import type { RichEditorHandle } from '../RichEditor';
 import type { ScanDocument } from './captureCore';
+// Restores the heading/list/link styles Tailwind preflight strips — without
+// it, "## " and the Heading menu still convert blocks, but h1–h6 render
+// identically to plain text (mieweb/ui#796).
+import '@mieweb/ui/kerebron.css';
 
 /** Stand-in for the native document camera so Storybook can show Scan document. */
 const mockScanDocument: ScanDocument = async () => {

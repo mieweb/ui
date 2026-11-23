@@ -16,6 +16,8 @@ const meta: Meta<typeof ReferenceChip> = {
 
 **A record named inline in text — a teammate, a ticket, a document — shown as a compact chip.** \`ReferenceChip\` renders an \`<a>\` with the \`Badge\` look: \`label\` is the text, \`href\` where the record lives, \`kind\` lands on \`data-reference-kind\`, \`icon\` leads (an avatar). The same file exports the vocabulary the editors share: **\`ReferenceTrigger\`** (\`kind\`, \`char\`, \`label\`, \`search(query)\`, \`toHref(id)\`, \`fromHref(href)\`) declares one kind of reference — the host supplies, say, \`@\` for people and \`#\` for tickets — **\`ReferenceOption\`** is one suggestion, and **\`referencesIn(markdown, triggers)\`** lists the references a saved text holds (\`{ kind, id, label, href }\`, each once, skipping code and images). A reference is **saved as an ordinary Markdown link** (\`[@Ann Lee](/people/u-ann)\`), so any Markdown viewer still shows a working link.
 
+**Built on \`@mention\`, not beside it.** \`ChatComposer\`'s \`mentionOptions\` (\`useMentionAutocomplete\` + \`MentionMenu\`) is the library's one *type a character → pick from a list*. Triggers extend it — any character, async \`search\`, a link saved instead of \`@word\` text — and use the same list: a \`ReferenceOption\` is a \`MentionOption\` plus its \`kind\`. Keep \`mentionOptions\` for *addressing* a chat participant (SuperChat's \`mentions\`, agent routing); use a trigger to *link to a record*.
+
 ### Use it when
 
 - Text names records the app knows and readers should be able to open them — "Ask @Ann Lee about TH-12".
@@ -31,9 +33,9 @@ const meta: Meta<typeof ReferenceChip> = {
 \`\`\`tsx
 const triggers: ReferenceTrigger[] = [
   { kind: 'person', char: '@', label: t('people'), search: searchPeople,
-    toHref: (id) => \\\`/people/\\\${id}\\\`, fromHref: (h) => h.match(/^\\/people\\/(.+)/)?.[1] ?? null },
+    toHref: (id) => \`/people/\${id}\`, fromHref: (h) => h.match(/^\\/people\\/(.+)/)?.[1] ?? null },
   { kind: 'ticket', char: '#', label: t('tickets'), search: searchTickets,
-    toHref: (id) => \\\`/tickets/\\\${id}\\\`, fromHref: (h) => h.match(/^\\/tickets\\/(.+)/)?.[1] ?? null },
+    toHref: (id) => \`/tickets/\${id}\`, fromHref: (h) => h.match(/^\\/tickets\\/(.+)/)?.[1] ?? null },
 ];
 
 const mentioned = referencesIn(post.text, triggers)
@@ -51,7 +53,7 @@ The host owns the records: what a kind means, how candidates are found, and chec
 - The label takes its own direction (\`dir="auto"\`), so \`@Ann Lee\` reads correctly in a right-to-left page.
 - Long labels truncate with an ellipsis inside the chip; the full text stays the accessible name. Logical spacing only, so it mirrors in RTL.
 - The label is what was saved: the chip does not look up a newer name or status.
-- \`referencesIn\` reads standard inline links; reference-style links (\`[text][id]\`) are not recognised.`,
+- \`referencesIn\` reads inline links and reference-style links (\`[text][id]\` with an \`[id]: /href\` definition) alike; a reference-style link with no matching definition is plain text, not a reference.`,
       },
     },
     catalog: {
@@ -66,6 +68,16 @@ The host owns the records: what a kind means, how candidates are found, and chec
           type: 'uses',
           target: 'data-display-badge',
           why: 'Borrows badgeVariants for its look; Badge is the chip for a status or tag with no record behind it.',
+        },
+        {
+          type: 'alternative to',
+          target: 'data-display-badge',
+          why: 'Badge is a status or tag label with no record behind it; ReferenceChip names a record and links to it.',
+        },
+        {
+          type: 'alternative to',
+          target: 'text-inputs-tageditor',
+          why: 'TagEditor edits a list of removable tags in a form; ReferenceChip shows a record named inline in text.',
         },
       ],
     },
@@ -171,7 +183,7 @@ export const InText: Story = {
       </p>
       <ul
         dir="ltr"
-        className="bg-muted text-muted-foreground rounded p-2 font-mono text-xs"
+        className="bg-muted text-foreground rounded p-2 font-mono text-xs"
       >
         {referencesIn(savedPost, sampleTriggers).map(({ kind, id }) => (
           <li key={`${kind}:${id}`}>

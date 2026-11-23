@@ -15,6 +15,8 @@ import { cn } from '../../utils/cn';
 import { ArrowLeft } from 'lucide-react';
 import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
+import { controlledElements, useFocusTrap } from '../../hooks/useFocusTrap';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 import {
   useStickToBottom,
   useStreamEndedBelowFold,
@@ -23,7 +25,10 @@ import { CloseIcon } from '../AI/icons';
 import { ChatComposer } from '../ChatComposer/ChatComposer';
 import type {
   ChatComposerAgentOption,
+  ChatComposerError,
+  ChatComposerHandle,
   ChatComposerProps,
+  ChatComposerSendMeta,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
@@ -32,7 +37,13 @@ import { DictationButton, type DictationButtonProps } from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
-import { getConversationMediaItems } from './media';
+import { overlayButtonClass } from '../MediaPlayer/overlayButton';
+import {
+  isInPictureInPicture,
+  PIP_EVENTS,
+} from '../MediaPlayer/pictureInPicture';
+import { getConversationMediaItems, previewOfAttachments } from './media';
+import { linkifyCaption } from './captionLinks';
 import type { NewMessage } from '../Messaging/types';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
@@ -40,10 +51,12 @@ import {
   MessageRow,
   byTime,
   detectMentions,
+  matchMentionTokens,
   filesToComposerAttachments,
   acceptTokensFor,
+  DEFAULT_ATTACHMENT_LABELS,
 } from './parts';
-import { VirtualThread } from './VirtualThread';
+import { VirtualThread, type VirtualThreadLayout } from './VirtualThread';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -56,9 +69,12 @@ import type {
   SuperChatMediaFeedProps,
   SuperChatMediaItem,
   SuperChatMediaLabels,
+  SuperChatMessageLabels,
+  SuperChatRenderMessageMedia,
   SuperChatView,
   SuperChatRef,
   SuperChatRenderPlugin,
+  SuperChatMessageEdits,
 } from './types';
 
 // ============================================================================
@@ -77,10 +93,33 @@ export interface SuperChatProps {
     view: SuperChatView,
     meta: { conversation: SuperChatConversation }
   ) => void;
-  /** MediaFeed behavior, labels and action/render slots for explicit attachments. */
+  /**
+   * MediaFeed behavior, labels and action/render slots for explicit
+   * attachments. With `layout: 'overlay'`, mount `useKeyboardInset()` once in
+   * the app shell: on a phone the panel sizes itself from the visible viewport
+   * it publishes, so the iOS keyboard doesn't cover the message box. With its
+   * `native` source, pad the composer by `--mieweb-keyboard-inset` as for any
+   * ChatComposer.
+   */
   mediaFeedProps?: SuperChatMediaFeedProps;
   /** Labels for media launches and returning to the conversation. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
+  /** Labels for per-message states, e.g. a scheduled message's indicator. */
+  messageLabels?: Partial<SuperChatMessageLabels>;
+  /**
+   * Renders an attachment in the thread in place of the built-in card, e.g. the
+   * host's own video card. Its `open` opens the media view at that attachment,
+   * and its `maxSize` is the box to fit (`mediaMaxSize`).
+   */
+  renderMessageMedia?: SuperChatRenderMessageMedia;
+  /**
+   * The box an attachment card in the thread fits in, both ways: a pixel number
+   * or any CSS length. The built-in card is this wide, its picture at most this
+   * tall; a host's card gets it as `maxSize`. Cards keep this size however long
+   * the message, and shrink to fit a narrower one.
+   * @default '18rem'
+   */
+  mediaMaxSize?: number | string;
   /** The participant id representing the local user (alignment + compose). */
   currentParticipantId?: string;
   /** Opt-in rich render plugins (code/math/genui/…). */
@@ -91,6 +130,16 @@ export interface SuperChatProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * Props for the message box (`ChatComposer`), applied over SuperChat's own
+   * defaults: e.g. `placeholder`, `leadingSlot` for the host's own buttons
+   * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
+   * `mentionOptions: []` to turn @mentions off. With your own `mentionOptions`,
+   * `onMessageSent`'s `mentions` holds the ids of the options whose token
+   * (`value`, or the first word of `label`) appears in the text. `className`
+   * is merged.
+   */
+  composerProps?: SuperChatComposerProps;
   /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
@@ -106,12 +155,19 @@ export interface SuperChatProps {
    */
   attachmentDataUrls?: boolean;
   /**
-   * Largest file the composer takes, in bytes; a larger one is refused. A
-   * function sets the cap per file, e.g. a higher one for videos than photos
-   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
+   * Largest file the composer takes, in bytes; a larger one is refused
+   * (reported through `onComposerError`). A function sets the cap per file,
+   * e.g. a higher one for videos than photos (with
+   * `attachmentDataUrls={false}`, so a large file isn't read as base64).
    * @default 26214400 (25 MB)
    */
   maxFileSize?: ChatComposerProps['maxFileSize'];
+  /**
+   * Called when the composer refuses a file (too large, a type not accepted,
+   * over the attachment limit) or a send fails, so the host can say why.
+   * `message` is English; `context.reason` lets hosts word it themselves.
+   */
+  onComposerError?: (message: string, context?: ChatComposerError) => void;
   /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
@@ -169,9 +225,11 @@ export interface SuperChatProps {
   // --- callbacks (chat-component-compatible) ---
   /**
    * Fired when the local user sends a message. If the callback returns a
-   * promise it is awaited, and a rejected send restores the typed text into
-   * the composer (the declared `void` return keeps every previously valid
-   * callback assignable).
+   * promise it is awaited, the send button shows it's sending meanwhile, and
+   * a rejected send puts the typed text and the attachments back in the
+   * composer to try again (the declared `void` return keeps every previously
+   * valid callback assignable). `sendOption` is the id of the
+   * `composerProps.sendOptions` entry the user sent with, if any.
    */
   onMessageSent?: (
     text: string,
@@ -179,18 +237,20 @@ export interface SuperChatProps {
       conversation: SuperChatConversation;
       mentions: string[];
       attachments: ComposerAttachment[];
+      sendOption?: string;
     }
   ) => void | Promise<void>;
   /**
    * Fired when the local user saves an edit to one of their own messages.
    * Providing this enables the inline "Edit" affordance on self-authored
    * messages (the host owns state, so apply the new `text` to the message and
-   * typically stamp `editedAt`).
+   * typically stamp `editedAt`). The editor lists the message's attachments
+   * too: `removedMedia` / `removedFiles` are the ones the author took off.
    */
   onMessageEdited?: (
     messageId: string,
     text: string,
-    meta: { conversation: SuperChatConversation }
+    meta: { conversation: SuperChatConversation } & SuperChatMessageEdits
   ) => void;
   onConversationClosed?: (conversation: SuperChatConversation) => void;
   onReferenceClick?: (ref: SuperChatRef) => void;
@@ -200,6 +260,113 @@ export interface SuperChatProps {
    */
   onBack?: () => void;
 }
+
+/**
+ * Message box props a host may set through `composerProps`. SuperChat owns the
+ * draft and the send path, so `value`, `onValueChange`, `onSend` and
+ * `isSending` stay its.
+ * `replyTo` / `onCancelReply` are left out: SuperChat's send path doesn't pass
+ * a reply target on to `onMessageSent` yet.
+ */
+export type SuperChatComposerProps = Omit<
+  ChatComposerProps,
+  | 'value'
+  | 'onValueChange'
+  | 'onSend'
+  | 'isSending'
+  | 'replyTo'
+  | 'onCancelReply'
+>;
+
+/**
+ * Phone-sized screens, upright (under 40rem wide) or sideways (under 30rem
+ * tall): with the `overlay` media view open, the panel covers the screen
+ * there, the media above the message box.
+ * The query matches the classes below; `useMediaQuery` reads it for the modal
+ * behaviour.
+ */
+const PHONE_QUERY =
+  '(width < 40rem), (max-height: 30rem) and (orientation: landscape)';
+const PHONE_FULLSCREEN = [
+  // The visible viewport, not the layout one: iOS doesn't shrink the page for
+  // the keyboard. These are useKeyboardInset()'s variables; without them (no
+  // hook, or its native source, where the host pads the composer) it's the
+  // full screen.
+  'max-sm:fixed max-sm:inset-x-0 max-sm:z-50 max-sm:h-[var(--mieweb-visual-viewport-height,100dvh)] max-sm:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:fixed [@media(max-height:30rem)_and_(orientation:landscape)]:inset-x-0 [@media(max-height:30rem)_and_(orientation:landscape)]:z-50 [@media(max-height:30rem)_and_(orientation:landscape)]:h-[var(--mieweb-visual-viewport-height,100dvh)] [@media(max-height:30rem)_and_(orientation:landscape)]:top-[var(--mieweb-visual-viewport-offset-top,0px)]',
+  // Clear the notch and home bar on every side; native shells can override
+  // the insets with the --mieweb-safe-area-* variables (Modal's top and
+  // bottom ones, plus left and right for a sideways phone).
+  'max-sm:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] max-sm:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
+  // rtl-ignore -- safe-area insets are physical screen edges
+  'max-sm:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] max-sm:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:pt-[var(--mieweb-safe-area-top,env(safe-area-inset-top))] [@media(max-height:30rem)_and_(orientation:landscape)]:pb-[var(--mieweb-safe-area-bottom,env(safe-area-inset-bottom))]',
+  // rtl-ignore -- safe-area insets are physical screen edges
+  '[@media(max-height:30rem)_and_(orientation:landscape)]:pr-[var(--mieweb-safe-area-right,env(safe-area-inset-right))] [@media(max-height:30rem)_and_(orientation:landscape)]:pl-[var(--mieweb-safe-area-left,env(safe-area-inset-left))]',
+].join(' ');
+const isShown = (element: Element | null): element is HTMLElement =>
+  !!element &&
+  ((element as HTMLElement).checkVisibility?.({ visibilityProperty: true }) ??
+    !element.closest('[hidden]'));
+
+/**
+ * Whether a layer of the panel's own is open, which Escape closes first: a
+ * dialog inside it (the feed's viewer), or a popup one of its controls opened
+ * (a composer menu, portaled to the body). Widgets elsewhere on the page don't
+ * count.
+ */
+const POPUP_TRIGGERS = [
+  '[aria-expanded="true"][aria-controls][aria-haspopup]:not([aria-haspopup="false"])',
+  '[aria-expanded="true"][aria-controls][role="combobox"]',
+].join(', ');
+
+function hasOpenLayer(panel: HTMLElement): boolean {
+  if (Array.from(panel.querySelectorAll('[role="dialog"]')).some(isShown))
+    return true;
+  return Array.from(panel.querySelectorAll(POPUP_TRIGGERS)).some((control) =>
+    controlledElements(control).some(isShown)
+  );
+}
+
+/**
+ * The last `value` while each of its keys holds the same thing as before, so
+ * an object a host writes inline (a new one every render) isn't a change.
+ */
+function useShallowStable<T extends object | undefined>(value: T): T {
+  const ref = React.useRef(value);
+  const last = ref.current;
+  const same =
+    last === value ||
+    (!!last &&
+      !!value &&
+      Object.keys(last).length === Object.keys(value).length &&
+      Object.entries(value).every(([key, item]) =>
+        Object.is(item, (last as Record<string, unknown>)[key])
+      ));
+  if (!same) ref.current = value;
+  return same ? last : value;
+}
+
+/** The header gives its room to the clip on the same screens. */
+const PHONE_HIDDEN =
+  'max-sm:hidden [@media(max-height:30rem)_and_(orientation:landscape)]:hidden';
+
+/**
+ * How long a freshly opened virtualized thread is held at its end while its
+ * rows are measured (see the anchoring effect).
+ */
+const SETTLE_MS = 1500;
+/**
+ * A jump up by more than this share of the viewport while settling is the
+ * reader's (to a linked post, say), not the virtualizer correcting its
+ * estimates, so it ends the settling.
+ */
+const READER_JUMP_SHARE = 0.5;
+/**
+ * How many frames Back looks for the launching tile in a virtualized thread,
+ * which mounts its rows a frame or two after the thread itself.
+ */
+const LAUNCHER_SEARCH_FRAMES = 10;
 
 /**
  * Single-conversation chat panel. See the module `MAINTAINERS.md` for the
@@ -212,14 +379,19 @@ export function SuperChat({
   onViewChange,
   mediaFeedProps,
   mediaLabels,
+  messageLabels,
+  renderMessageMedia,
+  mediaMaxSize = '18rem',
   currentParticipantId,
   renderPlugins,
   renderTextContent,
   trustedContent,
   readOnly,
+  composerProps,
   acceptedFileTypes,
   attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
+  onComposerError,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -256,13 +428,27 @@ export function SuperChat({
     (internalView.conversationId === conversation.id
       ? internalView.view
       : 'thread');
-  const labels: SuperChatMediaLabels = {
-    backToConversation: 'Back to conversation',
-    openMedia: 'Open in media feed',
-    playMedia: 'Play',
-    unknownAuthor: 'Unknown',
-    ...mediaLabels,
-  };
+  // Every message row takes these, so they keep their identity while the
+  // host's words stay the same, even passed as a new object each render.
+  const hostLabels = useShallowStable(mediaLabels);
+  const labels = React.useMemo<SuperChatMediaLabels>(() => {
+    const openMedia = hostLabels?.openMedia ?? 'Open in media feed';
+    const playMedia = hostLabels?.playMedia ?? 'Play';
+    return {
+      backToConversation: 'Back to conversation',
+      ...DEFAULT_ATTACHMENT_LABELS,
+      // The named forms build on `openMedia` / `playMedia` unless given, so a
+      // host that translated those keeps its words on titled tiles.
+      openMediaNamed: (name) => `${openMedia}, ${name}`,
+      playMediaNamed: (title) => `${playMedia} ${title}`,
+      attachmentsPreview: previewOfAttachments,
+      unknownAuthor: 'Unknown',
+      ...hostLabels,
+      openMedia,
+      playMedia,
+    };
+  }, [hostLabels]);
+  const scheduledLabel = messageLabels?.scheduled ?? 'Scheduled';
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
     return order === 'desc' ? items.reverse() : items;
@@ -278,6 +464,49 @@ export function SuperChat({
   }>();
   const playbackRequestCounter = React.useRef(0);
   const mediaFeedRef = React.useRef<HTMLDivElement>(null);
+  const overlay = mediaFeedProps?.layout === 'overlay';
+  const mediaBox =
+    typeof mediaMaxSize === 'number' ? `${mediaMaxSize}px` : mediaMaxSize;
+  const isPhone = useMediaQuery(PHONE_QUERY);
+  // With the overlay media view open on a phone, the panel covers the
+  // screen (media above, message box below), so it acts as a modal there:
+  // focus stays inside and Escape goes back. SuperChat focuses the chosen
+  // item itself, so the trap doesn't.
+  const mediaOpen = overlay && activeView === 'media';
+  const covering = mediaOpen && isPhone;
+  const panelRef = useFocusTrap<HTMLElement>(covering, {
+    initialFocus: false,
+  });
+  const mediaViewRef = React.useRef<HTMLDivElement>(null);
+  // A clip floating in picture in picture: the media view stays mounted
+  // (hidden) after Back, since a browser closes the floating window when its
+  // video leaves the page, and the viewer floated it to keep watching while
+  // they reply. PiP events are heard on the document, which the hidden
+  // view's events still reach.
+  const [floating, setFloating] = React.useState(false);
+  // Ask the browser rather than trusting the last event: a floating video
+  // that leaves the page (a conversation change, a removed message) takes its
+  // window with it, and its own events no longer reach the document.
+  const checkFloating = React.useCallback(() => {
+    const view = mediaViewRef.current;
+    const floatingNow =
+      !!view &&
+      Array.from(view.querySelectorAll('video')).some(isInPictureInPicture);
+    setFloating(floatingNow);
+  }, []);
+  React.useEffect(() => {
+    if (typeof document === 'undefined') return;
+    for (const name of PIP_EVENTS)
+      document.addEventListener(name, checkFloating, true);
+    return () => {
+      for (const name of PIP_EVENTS)
+        document.removeEventListener(name, checkFloating, true);
+    };
+  }, [checkFloating]);
+  // Whatever re-renders the panel may have taken the floating video away.
+  React.useEffect(() => {
+    if (floating) checkFloating();
+  });
   const backToConversationRef = React.useRef<HTMLButtonElement>(null);
   const focusMediaOnOpenRef = React.useRef(false);
   const focusThreadOnBackRef = React.useRef(false);
@@ -349,6 +578,35 @@ export function SuperChat({
     setManualPlaybackRequest(undefined);
     setView('thread');
   }, [setView]);
+  // While the media view is open, Escape goes back to the conversation
+  // unless another layer (the feed's viewer, a host menu) is open. A key from
+  // inside the panel is heard on its way out of it, after the panel's own
+  // layers, and goes no further: a Modal or Sheet around the panel would
+  // otherwise close too (they listen on the document).
+  const mediaViewOpen = activeView === 'media';
+  const handlePanelKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const panel = panelRef.current;
+    if (!mediaViewOpen || !panel || event.key !== 'Escape') return;
+    if (event.nativeEvent.defaultPrevented) return;
+    // Not a key from something portaled out of the panel, such as a dialog
+    // a host card opened: that one is its own.
+    if (!panel.contains(event.target as Node) || hasOpenLayer(panel)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    handleBackToConversation();
+  };
+  // With focus nowhere (on the body), the key never passes through the panel.
+  React.useEffect(() => {
+    const panel = panelRef.current;
+    if (!mediaViewOpen || !panel) return;
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return;
+      if (event.target !== document.body || hasOpenLayer(panel)) return;
+      handleBackToConversation();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [mediaViewOpen, handleBackToConversation, panelRef]);
 
   // A fresh host playback request supersedes a consumed inline Play launch, so
   // `mediaFeedProps.playbackRequest` keeps working while the media view is open.
@@ -374,7 +632,12 @@ export function SuperChat({
   }, [conversation.id, internalView.conversationId]);
 
   React.useEffect(() => {
-    if (activeView !== 'media' || !focusMediaOnOpenRef.current) return;
+    if (activeView !== 'media') return;
+    // A phone panel that turns modal with focus behind it (defaultView
+    // "media", a host's switch) takes focus in, like an inline launch.
+    const focusBehind =
+      covering && !panelRef.current?.contains(document.activeElement);
+    if (!focusMediaOnOpenRef.current && !focusBehind) return;
     // The inline action is unmounted by the view switch. Move its focus to the
     // selected media item, or the Back control while data is unavailable.
     const target =
@@ -383,8 +646,13 @@ export function SuperChat({
       ) ?? mediaFeedRef.current?.querySelector<HTMLElement>('[role="feed"]');
     if (target) focusMediaOnOpenRef.current = false;
     (target ?? backToConversationRef.current)?.focus({ preventScroll: true });
+    // className too: a host (SuperChatInbox on a phone) can reveal a panel it
+    // had hidden, where focus couldn't land, by changing only that.
   }, [
     activeView,
+    covering,
+    className,
+    panelRef,
     mediaFeedProps?.loading,
     mediaFeedProps?.error,
     mediaItems.length,
@@ -431,16 +699,32 @@ export function SuperChat({
     const launchId = source
       ? JSON.stringify([source.messageId, source.attachmentId])
       : undefined;
-    const launcher =
+    const findLauncher = () =>
       source?.conversationId === conversation.id
         ? Array.from(
-            threadRef.current?.querySelectorAll<HTMLButtonElement>(
+            threadRef.current?.querySelectorAll<HTMLElement>(
               '[data-media-launch-id]'
             ) ?? []
           ).find((button) => button.dataset.mediaLaunchId === launchId)
         : undefined;
-    (launcher ?? threadRef.current)?.focus({ preventScroll: true });
-  }, [activeView, conversation.id, threadRef]);
+    // A virtualized thread mounts its rows a frame or two after the thread
+    // itself, so look again for a few frames before settling on the thread.
+    let frame = 0;
+    let framesLeft = virtualized ? LAUNCHER_SEARCH_FRAMES : 0;
+    const focusLauncher = () => {
+      const launcher = findLauncher();
+      if (!launcher && framesLeft-- > 0) {
+        frame = requestAnimationFrame(focusLauncher);
+        return;
+      }
+      // The tile or card it was opened from, in view if the restored
+      // position left it just outside.
+      launcher?.scrollIntoView?.({ block: 'nearest' });
+      (launcher ?? threadRef.current)?.focus({ preventScroll: true });
+    };
+    focusLauncher();
+    return () => cancelAnimationFrame(frame);
+  }, [activeView, conversation.id, threadRef, virtualized]);
   const [hasNewBelow, setHasNewBelow] = React.useState(false);
   // Own-send turn anchoring (ChatGPT/Claude-style): the freshly sent message
   // opens a "turn" that reserves a viewport of space, anchored so the bubble
@@ -459,10 +743,23 @@ export function SuperChat({
       }
     | undefined
   >(undefined);
+  // The virtualized thread's rows, kept while the media view is open, under
+  // the conversation's key so another conversation doesn't open on them.
+  const threadLayoutRef = React.useRef<VirtualThreadLayout | undefined>(
+    undefined
+  );
   const atBottomRef = React.useRef(isAtBottom);
   atBottomRef.current = isAtBottom;
   const pendingMediaOwnSendRef = React.useRef(false);
   const pendingMediaAppendRef = React.useRef(false);
+  const newestMessage = React.useMemo(
+    () => [...conversation.thread].sort(byTime).at(-1),
+    [conversation]
+  );
+  // Read by the settling observer below, which outlives the render it was
+  // set up in.
+  const newestStreamingRef = React.useRef(false);
+  newestStreamingRef.current = newestMessage?.status === 'streaming';
 
   // Anchor to the newest message on mount and when switching conversations:
   // bottom for ascending order, top for descending (feed-style) order.
@@ -472,13 +769,57 @@ export function SuperChat({
     pendingMediaAppendRef.current = false;
     setTurnStartId(null);
     anchoredTurnRef.current = null;
-    if (order === 'desc') {
-      const el = threadRef.current;
-      if (el) el.scrollTop = 0;
-    } else {
-      scrollToBottom('auto');
-    }
     setHasNewBelow(false);
+    const el = threadRef.current;
+    if (order === 'desc') {
+      if (el) el.scrollTop = 0;
+      return;
+    }
+    scrollToBottom('auto');
+    // A virtualized thread opens on rows it has only estimated, and measures
+    // them over the next moments: a day of photos and videos comes out far
+    // taller than guessed, and the virtualizer's corrections on the way can
+    // stop short of the end and read as the reader scrolling away. So for a
+    // moment after opening it's kept at its end as it grows, until the reader
+    // takes over (any input, or a jump up such as to a linked post) or it
+    // settles. A streaming newest message ends it too: the new-message policy
+    // holds the thread there while it streams, and pinning would undo that.
+    const content = threadContentRef.current;
+    if (
+      !virtualized ||
+      !el ||
+      !content ||
+      typeof globalThis.ResizeObserver === 'undefined'
+    )
+      return;
+    let settling = true;
+    const stop = () => {
+      settling = false;
+    };
+    let lastTop = el.scrollTop;
+    const onScroll = () => {
+      if (lastTop - el.scrollTop > el.clientHeight * READER_JUMP_SHARE) stop();
+      lastTop = el.scrollTop;
+    };
+    const observer = new globalThis.ResizeObserver(() => {
+      if (newestStreamingRef.current) stop();
+      if (!settling) return;
+      scrollToBottom('auto');
+      lastTop = el.scrollTop;
+    });
+    observer.observe(content);
+    const timer = setTimeout(stop, SETTLE_MS);
+    const inputs = ['wheel', 'touchstart', 'keydown', 'pointerdown'] as const;
+    for (const type of inputs)
+      el.addEventListener(type, stop, { passive: true });
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      stop();
+      observer.disconnect();
+      clearTimeout(timer);
+      for (const type of inputs) el.removeEventListener(type, stop);
+      el.removeEventListener('scroll', onScroll);
+    };
     // `threadRef`/`scrollToBottom` are stable for the hook instance.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversation.id, order]);
@@ -574,8 +915,8 @@ export function SuperChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadLength, order, isAtBottom, conversation.id, activeView]);
 
-  // The media view unmounts the thread's players, so capture its actual DOM
-  // position before leaving and restore it before the scroll hook re-attaches.
+  // The media view unmounts the thread's players, so keep its position while
+  // it's shown and restore it before the scroll hook re-attaches.
   // Appends still follow the usual policy: a reader keeps their position; a
   // pinned thread follows incoming messages; an own send opens its fresh turn.
   React.useLayoutEffect(() => {
@@ -595,20 +936,33 @@ export function SuperChat({
     } else if (ownSend && !virtualized) {
       // The turn layout effect below measures and anchors the newly mounted
       // thread. Do not clear the turn or override that position with bottom.
-    } else if (sameThread && !ownSend && (!snapshot.atBottom || !appended)) {
+    } else if (sameThread && !ownSend && !snapshot.atBottom) {
+      // A reader mid-thread comes back where they were.
       container.scrollTop = snapshot.scrollTop;
-      if (!snapshot.atBottom) stopFollowing();
+      stopFollowing();
     } else {
+      // At the bottom (or on a fresh thread) it's the bottom again, followed
+      // as rows mount: a virtualized thread measures them a frame or two
+      // after remounting, so the old pixel offset would land short of it.
       scrollToBottom('auto');
       if ([...conversation.thread].sort(byTime).at(-1)?.status === 'streaming')
         stopFollowing();
     }
 
+    // Kept as the reader scrolls: by the time this effect is cleaned up the
+    // media view has already taken the thread out of the page, where its
+    // scrollTop reads 0.
+    let scrollTop = container.scrollTop;
+    const record = () => {
+      scrollTop = container.scrollTop;
+    };
+    container.addEventListener('scroll', record, { passive: true });
     return () => {
+      container.removeEventListener('scroll', record);
       threadSnapshotRef.current = {
         conversationId: conversation.id,
         order,
-        scrollTop: container.scrollTop,
+        scrollTop,
         atBottom: atBottomRef.current,
       };
     };
@@ -662,10 +1016,6 @@ export function SuperChat({
 
   // A reply that finishes streaming below the fold upgrades the jump button
   // to the "New messages" hint — the reader hasn't seen the end of it.
-  const newestMessage = React.useMemo(
-    () => [...conversation.thread].sort(byTime).at(-1),
-    [conversation]
-  );
   const raiseNewBelow = React.useCallback(() => {
     if (order !== 'desc') setHasNewBelow(true);
   }, [order]);
@@ -719,8 +1069,12 @@ export function SuperChat({
       onOpenMedia={handleOpenMedia}
       openMediaLabel={labels.openMedia}
       playMediaLabel={labels.playMedia}
+      attachmentLabels={labels}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
+      scheduledLabel={scheduledLabel}
+      renderMessageMedia={renderMessageMedia}
+      mediaMaxSize={mediaBox}
     />
   );
 
@@ -731,9 +1085,10 @@ export function SuperChat({
   const conversationRef = React.useRef(conversation);
   conversationRef.current = conversation;
   const handleMessageEdited = React.useCallback(
-    (messageId: string, text: string) => {
+    (messageId: string, text: string, edits: SuperChatMessageEdits) => {
       onMessageEditedRef.current?.(messageId, text, {
         conversation: conversationRef.current,
+        ...edits,
       });
     },
     []
@@ -781,12 +1136,33 @@ export function SuperChat({
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + attachments: each one's File, and
   // its base64 `data:` URL unless `attachmentDataUrls` is off).
+  const composerRef = React.useRef<ChatComposerHandle>(null);
+  // The conversations a send is pending in: SuperChatInbox reuses this panel
+  // (and its composer) for every conversation, and only those are busy. Each
+  // send takes its own off when it settles, so sends can overlap.
+  const [sendingIn, setSendingIn] = React.useState<ReadonlySet<string>>(
+    () => new Set()
+  );
   const handleComposerSend = React.useCallback(
-    async (message: NewMessage) => {
+    async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
+      if (readOnly) return;
       const epoch = draftEpochRef.current;
+      const conversationId = conversation.id;
+      setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
-        const mentions = detectMentions(text, conversation.participants);
+        // A host's own `mentionOptions` decide what counts as a mention, by
+        // the token each one inserts; `[]` turns mentions off entirely.
+        const hostOptions = composerProps?.mentionOptions;
+        const mentions = hostOptions
+          ? matchMentionTokens(
+              text,
+              hostOptions.map((o) => ({
+                id: o.id,
+                token: o.value ?? o.label.split(' ')[0],
+              }))
+            )
+          : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
           message.attachments ?? [],
           { dataUrls: attachmentDataUrls }
@@ -795,35 +1171,69 @@ export function SuperChat({
         // returned promise (e.g. an async host callback) is awaited so its
         // rejection follows the same restore path as a synchronous throw.
         await Promise.resolve(
-          onMessageSent?.(text, { conversation, mentions, attachments })
+          onMessageSent?.(text, {
+            conversation,
+            mentions,
+            attachments,
+            ...(sendMeta?.sendOption !== undefined
+              ? { sendOption: sendMeta.sendOption }
+              : {}),
+          })
         );
-      } catch {
-        // Parity with the previous MessageComposer: restore the text when
-        // file conversion or the host callback fails (attachments are not
-        // restaged, matching the old behavior) — unless the user has typed
-        // a newer draft while this send was pending.
-        if (draftEpochRef.current === epoch) {
-          setDraft(message.content);
+      } catch (error) {
+        // Put the message back to try again, text and files, when file
+        // conversion or the host callback fails — only while its conversation
+        // is still the one shown, and the text unless the user has typed a
+        // newer draft while this send was pending.
+        if (conversationRef.current.id === conversationId) {
+          if (draftEpochRef.current === epoch) setDraft(message.content);
+          composerRef.current?.addFiles(message.attachments ?? []);
         }
+        // Rethrown so the composer reports it (`onComposerError`, reason
+        // 'send-failed'); it has nothing of its own to restore.
+        throw error;
+      } finally {
+        setSendingIn((current) => {
+          const next = new Set(current);
+          next.delete(conversationId);
+          return next;
+        });
       }
     },
-    [conversation, onMessageSent, attachmentDataUrls]
+    [
+      conversation,
+      onMessageSent,
+      composerProps?.mentionOptions,
+      readOnly,
+      attachmentDataUrls,
+    ]
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Escape out of the media view, heard from the controls inside (the dialog pattern on a phone); the panel itself takes no focus
     <section
+      ref={panelRef}
+      onKeyDown={handlePanelKeyDown}
       data-slot="superchat"
-      role="group"
+      role={covering ? 'dialog' : 'group'}
+      aria-modal={covering || undefined}
       aria-labelledby={headingId}
       className={cn(
         'flex min-w-0 flex-1 flex-col bg-white dark:bg-neutral-900',
+        // Mobile first: on a phone, upright or sideways, the overlay media
+        // view takes the whole screen above the message box.
+        mediaOpen && PHONE_FULLSCREEN,
         className
       )}
     >
       {showHeader ? (
         <header
           data-slot="superchat-header"
-          className="flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700"
+          className={cn(
+            'flex items-center justify-between gap-2 border-b border-neutral-200 p-3 dark:border-neutral-700',
+            // Its room goes to the clip; Back sits over the clip's corner.
+            mediaOpen && PHONE_HIDDEN
+          )}
         >
           <div className="flex min-w-0 items-center gap-2">
             {onBack && (
@@ -887,58 +1297,105 @@ export function SuperChat({
         </h2>
       )}
 
-      {activeView === 'media' ? (
+      {(activeView === 'media' || floating) && (
         <div
+          ref={mediaViewRef}
           data-slot="superchat-media-view"
-          className="flex min-h-0 flex-1 flex-col"
+          data-theme={overlay ? 'dark' : undefined}
+          className={cn(
+            'flex min-h-0 flex-1 flex-col',
+            overlay && 'bg-background relative',
+            // A clip floating in picture in picture keeps the view mounted
+            // after Back (its window closes if its video leaves the page).
+            activeView !== 'media' && 'hidden'
+          )}
         >
-          <div className="px-4 pt-2">
-            <ButtonGroup className="justify-start">
+          {!overlay && (
+            <div data-slot="superchat-media-back" className="px-4 pt-2">
+              <ButtonGroup className="justify-start">
+                <Button
+                  ref={backToConversationRef}
+                  variant="ghost"
+                  size="sm"
+                  leftIcon={
+                    <ArrowLeft
+                      className="size-4 rtl:-scale-x-100"
+                      aria-hidden="true"
+                    />
+                  }
+                  onClick={handleBackToConversation}
+                >
+                  {labels.backToConversation}
+                </Button>
+              </ButtonGroup>
+            </div>
+          )}
+          {/* One tree for both layouts, so switching keeps the feed (and its
+              playback) mounted. In the overlay it sits inside the safe-area
+              padding, so Back clears the notch. */}
+          <div
+            data-slot="superchat-media-stage"
+            className="relative flex min-h-0 flex-1 flex-col"
+          >
+            {overlay && (
+              // Over the clip's top corner, so the clip keeps the whole view.
               <Button
                 ref={backToConversationRef}
                 variant="ghost"
-                size="sm"
-                leftIcon={
-                  <ArrowLeft
-                    className="size-4 rtl:rotate-180"
-                    aria-hidden="true"
-                  />
-                }
+                size="icon"
+                aria-label={labels.backToConversation}
+                title={labels.backToConversation}
+                className={cn(
+                  overlayButtonClass,
+                  'absolute start-2 top-2 z-20'
+                )}
                 onClick={handleBackToConversation}
               >
-                {labels.backToConversation}
+                <ArrowLeft
+                  className="size-5 rtl:-scale-x-100"
+                  aria-hidden="true"
+                />
               </Button>
-            </ButtonGroup>
+            )}
+            <MediaFeed
+              {...mediaFeedProps}
+              // In the overlay layout the media view is already the full view
+              // (the whole screen on a phone), and the player's own controls
+              // go full screen: no viewer on top unless the host asks.
+              allowFullscreen={mediaFeedProps?.allowFullscreen ?? !overlay}
+              ref={mediaFeedRef}
+              key={conversation.id}
+              items={mediaItems}
+              getId={(item) => item.id}
+              getMedia={(item) => item.attachment}
+              getTitle={(item) => item.attachment.title ?? ''}
+              // Its links tappable, as in the thread.
+              getCaption={(item) => {
+                const caption = item.attachment.caption ?? item.message.text;
+                return caption ? linkifyCaption(caption) : caption;
+              }}
+              getAuthor={(item) => ({
+                name: item.participant?.name ?? labels.unknownAuthor,
+                avatar: item.participant?.avatar,
+              })}
+              activeItemId={
+                mediaFeedProps?.activeItemId ??
+                (mediaSelection?.conversationId === conversation.id
+                  ? mediaSelection.itemId
+                  : undefined)
+              }
+              onActiveItemChange={handleMediaSelection}
+              playbackRequest={
+                manualPlaybackRequest?.conversationId === conversation.id
+                  ? manualPlaybackRequest
+                  : mediaFeedProps?.playbackRequest
+              }
+              className={cn('min-h-0 flex-1', mediaFeedProps?.className)}
+            />
           </div>
-          <MediaFeed
-            {...mediaFeedProps}
-            ref={mediaFeedRef}
-            key={conversation.id}
-            items={mediaItems}
-            getId={(item) => item.id}
-            getMedia={(item) => item.attachment}
-            getTitle={(item) => item.attachment.title ?? ''}
-            getCaption={(item) => item.attachment.caption ?? item.message.text}
-            getAuthor={(item) => ({
-              name: item.participant?.name ?? labels.unknownAuthor,
-              avatar: item.participant?.avatar,
-            })}
-            activeItemId={
-              mediaFeedProps?.activeItemId ??
-              (mediaSelection?.conversationId === conversation.id
-                ? mediaSelection.itemId
-                : undefined)
-            }
-            onActiveItemChange={handleMediaSelection}
-            playbackRequest={
-              manualPlaybackRequest?.conversationId === conversation.id
-                ? manualPlaybackRequest
-                : mediaFeedProps?.playbackRequest
-            }
-            className={cn('min-h-0 flex-1', mediaFeedProps?.className)}
-          />
         </div>
-      ) : (
+      )}
+      {activeView !== 'media' && (
         <div
           data-slot="superchat-thread-viewport"
           className="relative flex min-h-0 flex-1 flex-col"
@@ -957,10 +1414,16 @@ export function SuperChat({
               onOpenMedia={handleOpenMedia}
               openMediaLabel={labels.openMedia}
               playMediaLabel={labels.playMedia}
+              attachmentLabels={labels}
               mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
+              scheduledLabel={scheduledLabel}
+              renderMessageMedia={renderMessageMedia}
+              mediaMaxSize={mediaBox}
               scrollRef={threadRef}
               contentRef={threadContentRef}
+              layoutRef={threadLayoutRef}
+              layoutKey={JSON.stringify([conversation.id, order])}
               containerProps={{
                 'data-slot': 'superchat-thread',
                 role: 'log',
@@ -1025,13 +1488,8 @@ export function SuperChat({
       )}
 
       <ChatComposer
-        value={draft}
-        onValueChange={handleDraftChange}
-        onSend={handleComposerSend}
-        disabled={readOnly}
-        // Matches the thread's p-4 gutter so the composer card lines up with
-        // the messages instead of running flush against the panel edges.
-        className="px-4 pb-4"
+        ref={composerRef}
+        onError={onComposerError}
         placeholder={
           readOnly
             ? 'Read-only conversation'
@@ -1040,7 +1498,6 @@ export function SuperChat({
         mentionOptions={mentionOptions}
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
-        // Same cap MessageComposer applied by default.
         maxFileSize={maxFileSize}
         maxLength={100000}
         inputLabel="Message"
@@ -1068,6 +1525,16 @@ export function SuperChat({
             />
           ) : undefined
         }
+        {...composerProps}
+        // A host may disable a writable composer, never enable a read-only one.
+        disabled={readOnly || composerProps?.disabled}
+        // Matches the thread's p-4 gutter so the composer card lines up with
+        // the messages instead of running flush against the panel edges.
+        className={cn('px-4 pb-4', composerProps?.className)}
+        value={draft}
+        isSending={sendingIn.has(conversation.id)}
+        onValueChange={handleDraftChange}
+        onSend={handleComposerSend}
       />
     </section>
   );

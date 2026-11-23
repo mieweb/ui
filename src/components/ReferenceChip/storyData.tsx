@@ -39,7 +39,7 @@ export function PersonIcon({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="bg-primary-600 inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-semibold text-white"
+      className="bg-primary-800 inline-flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-semibold text-white"
     >
       {initials(name)}
     </span>

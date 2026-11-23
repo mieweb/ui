@@ -1,4 +1,10 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { useEffect, useLayoutEffect, useRef, type RefObject } from 'react';
+
+// Layout timing in the browser, passive on the server: React's server
+// renderer warns on every useLayoutEffect call, even for a disabled listener
+// in a closed overlay.
+const useIsomorphicLayoutEffect =
+  typeof document !== 'undefined' ? useLayoutEffect : useEffect;
 
 interface ExclusiveOverlay {
   element: () => Element | null;
@@ -6,6 +12,33 @@ interface ExclusiveOverlay {
 
 /** Currently open exclusive overlays, in effect registration order. */
 const exclusiveOverlays: ExclusiveOverlay[] = [];
+
+/**
+ * Escape ownership resolved once per keypress. A synchronous close (legacy
+ * root or flushSync) unregisters the inner owner while the event is still
+ * dispatching; without this freeze a later listener on the same event would
+ * recompute "topmost" and dismiss its own layer too — one Escape, two closes.
+ *
+ * Cleared in a microtask after the dispatch so the cache never retains the
+ * event (and, through its target, a detached dialog subtree) once the
+ * keypress is over — and a redispatched event re-resolves ownership fresh.
+ */
+let frozenOwner: {
+  event: globalThis.KeyboardEvent;
+  owner: ExclusiveOverlay | undefined;
+} | null = null;
+
+function ownerFor(
+  event: globalThis.KeyboardEvent
+): ExclusiveOverlay | undefined {
+  if (frozenOwner?.event !== event) {
+    frozenOwner = { event, owner: topmostOverlay() };
+    queueMicrotask(() => {
+      frozenOwner = null;
+    });
+  }
+  return frozenOwner.owner;
+}
 
 /**
  * The overlay that owns Escape: the last registered overlay not covered by
@@ -66,7 +99,15 @@ export function useEscapeKey(
   const latest = useRef(callback);
   latest.current = callback;
 
-  useEffect(() => {
+  // Layout effect, not passive: the listener attaches in the same commit that
+  // puts the overlay on screen. A passive effect runs after paint, leaving a
+  // window where the dialog is visible but Escape goes nowhere — a keypress
+  // in that window is silently lost (seen as CI-only test timeouts).
+  // Layout effect, not passive: the listener attaches in the same commit that
+  // puts the overlay on screen. A passive effect runs after paint, leaving a
+  // window where the dialog is visible but Escape goes nowhere — a keypress
+  // in that window is silently lost (seen as CI-only test timeouts).
+  useIsomorphicLayoutEffect(() => {
     if (!enabled) return;
     const entry: ExclusiveOverlay = {
       element: () => (typeof exclusive === 'object' ? exclusive.current : null),
@@ -74,7 +115,7 @@ export function useEscapeKey(
     if (exclusive) exclusiveOverlays.push(entry);
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      if (exclusive && topmostOverlay() !== entry) return;
+      if (exclusive && ownerFor(event) !== entry) return;
       latest.current();
     };
     document.addEventListener('keydown', handleKeyDown);
