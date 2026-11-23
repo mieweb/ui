@@ -126,6 +126,19 @@ describe('referencesIn', () => {
     ).toBe('TH-1: Fix *beta* now');
   });
 
+  it('decodes every HTML5 entity name and numeric references by CommonMark rules', () => {
+    const label = (text: string) =>
+      referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
+    expect(label('Jos&eacute; &AMP; &NotEqualTilde;')).toBe('José & ≂̸');
+    expect(label('x&#128;y &#0; &#x110000;')).toBe('x\uFFFDy \uFFFD \uFFFD');
+    // Unknown names, and names without their semicolon, stay as written.
+    expect(label('&bogus; Jos&eacute &constructor;')).toBe(
+      '&bogus; Jos&eacute &constructor;'
+    );
+    // Escaped, or in code, a reference is literal text.
+    expect(label('\\&eacute; `&eacute;`')).toBe('&eacute; &eacute;');
+  });
+
   it('decodes character references in the label, but not escaped or in code', () => {
     expect(
       referencesIn(
