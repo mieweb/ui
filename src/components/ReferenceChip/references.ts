@@ -1,30 +1,33 @@
-import type * as React from 'react';
+import { decodeNamedCharacterReference } from 'decode-named-character-reference';
 import { Lexer, type Tokens } from 'marked';
+import type { MentionOption } from '../Messaging/useMentionAutocomplete';
 
 /**
  * A record a person picked while writing — a teammate, a ticket, a document —
- * as one suggestion in a trigger's list. What `kind` and `id` mean is the
+ * as one suggestion in a trigger's list. It is an `@mention` option (the same
+ * `MentionOption` `ChatComposer`'s `mentionOptions` take, drawn by the same
+ * `MentionMenu`) plus the kind it belongs to; a pick is saved as a link, so
+ * `MentionOption.value` doesn't apply. What `kind` and `id` mean is the
  * host's; the library only carries them.
  */
-export interface ReferenceOption {
+export interface ReferenceOption extends Omit<MentionOption, 'value'> {
   /** The {@link ReferenceTrigger.kind} this option belongs to. */
   kind: string;
   /** The record's id, as the host knows it. */
   id: string;
   /** Text of the chip and of the saved link, e.g. `@Ann Lee` or `TH-12: Fix login`. */
   label: string;
-  /** Secondary text in the suggestion list. */
-  description?: string;
-  /** Leading node in the suggestion list (an avatar, an icon). */
-  icon?: React.ReactNode;
-  /** Trailing meta text in the suggestion list (e.g. a status). */
-  meta?: string;
 }
 
 /**
  * One kind of reference: the character that opens its suggestion list, how to
  * find candidates, and how a picked one is written as a link and read back.
  * The host supplies one per kind — e.g. `@` for people, `#` for tickets.
+ *
+ * Triggers extend the library's existing `@mention` (`useMentionAutocomplete`
+ * and `MentionMenu`), not a second one: the same list, keyboard and ARIA,
+ * opened by any character, searched as you type, and saving a link to the
+ * record instead of `@word` text.
  */
 export interface ReferenceTrigger {
   /** Stable name of the kind, e.g. `'person'` or `'ticket'`. */
@@ -49,13 +52,23 @@ export interface Reference {
   href: string;
 }
 
-/** The kind and id `href` refers to, by the first trigger that claims it. */
+/**
+ * The kind and id `href` refers to, by the first trigger that claims it. A
+ * trigger that throws on a malformed link (say `decodeURIComponent` on
+ * `/people/%E0%A4`) doesn't claim it, so the link stays an ordinary link
+ * instead of taking the message down.
+ */
 export function matchReference(
   href: string,
   triggers: readonly ReferenceTrigger[]
 ): { kind: string; id: string } | null {
   for (const trigger of triggers) {
-    const id = trigger.fromHref(href);
+    let id: string | null;
+    try {
+      id = trigger.fromHref(href);
+    } catch {
+      continue;
+    }
     if (id) return { kind: trigger.kind, id };
   }
   return null;
@@ -92,42 +105,50 @@ function* linksIn(tokens: readonly Nested[]): Generator<Tokens.Link> {
   }
 }
 
-// Named character references decoded in labels; others stay as written.
-const NAMED_REFERENCES: Record<string, string> = {
-  amp: '&',
-  lt: '<',
-  gt: '>',
-  quot: '"',
-  apos: "'",
-  nbsp: ' ',
-  copy: '©',
-  reg: '®',
-  trade: '™',
-  hellip: '…',
-  ndash: '–',
-  mdash: '—',
-};
+// A numeric character reference's character, by CommonMark's rules (as
+// micromark, which SuperChat renders with): NUL, controls other than
+// whitespace, surrogates, noncharacters and anything past U+10FFFF read as
+// U+FFFD — so `&#128;` is "\uFFFD", not a C1 control.
+function numericReference(code: number): string {
+  if (
+    code < 9 ||
+    code === 11 ||
+    (code > 13 && code < 32) ||
+    (code > 126 && code < 160) ||
+    (code > 0xd7ff && code < 0xe000) ||
+    (code > 0xfdcf && code < 0xfdf0) ||
+    (code & 0xffff) === 0xffff ||
+    (code & 0xffff) === 0xfffe ||
+    code > 0x10ffff
+  ) {
+    return '\uFFFD';
+  }
+  return String.fromCodePoint(code);
+}
 
-// Marked keeps character references (`&amp;`, `&#169;`) as written in text
-// tokens; a reader sees the characters.
+// Marked keeps character references (`&eacute;`, `&#169;`) as written in text
+// tokens; a reader sees the characters. CommonMark's forms: up to 7 decimal
+// or 6 hex digits, or an HTML5 entity name with its semicolon. An unknown
+// name stays as written (an own-property lookup, so `&constructor;` too).
 function decodeReferences(text: string): string {
   return text.replace(
-    /&(?:#(\d+)|#[xX]([0-9a-fA-F]+)|([a-zA-Z]+));/g,
-    (match, dec?: string, hex?: string, name?: string) => {
-      if (name) return NAMED_REFERENCES[name] ?? match;
-      const code = dec ? Number(dec) : parseInt(hex!, 16);
-      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
-    }
+    /&(?:#(\d{1,7})|#[xX]([0-9a-fA-F]{1,6})|([A-Za-z][A-Za-z0-9]{0,31}));/g,
+    (match, dec?: string, hex?: string, name?: string) =>
+      name
+        ? decodeNamedCharacterReference(name) || match
+        : numericReference(dec ? Number(dec) : parseInt(hex!, 16))
   );
 }
 
 // The text a reader sees in inline `tokens`: escapes and character
 // references resolved, emphasis marks and inline HTML tags dropped,
-// code-span contents kept literal.
+// code-span contents kept literal, and a hard line break read as a space —
+// a label is one line, and `[Ann  \nLee](…)` names "Ann Lee", not "AnnLee".
 function plainText(tokens: readonly Nested[]): string {
   return tokens
     .map((token) => {
       if (token.type === 'html') return '';
+      if (token.type === 'br') return ' ';
       if (token.type === 'codespan') return token.text ?? '';
       if (token.tokens) return plainText(token.tokens);
       return token.type === 'text'
@@ -149,7 +170,10 @@ export function referencesIn(
   const seen = new Set<string>();
   const found: Reference[] = [];
   for (const link of linksIn(new Lexer().lex(text) as Nested[])) {
-    const { href } = link;
+    // Marked resolves backslash escapes in a destination but keeps character
+    // references as written; a Markdown renderer decodes them, so
+    // `/people/u&#45;ann` is the link to `u-ann` here too.
+    const href = decodeReferences(link.href);
     const label = plainText(link.tokens as Nested[]);
     const match = matchReference(href, triggers);
     if (!match) continue;

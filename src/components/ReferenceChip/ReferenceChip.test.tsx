@@ -18,6 +18,41 @@ const triggers = [
 ];
 
 describe('referencesIn', () => {
+  it('reads a hard line break in a label as a space', () => {
+    expect(referencesIn('[Ann  \nLee](/people/u-ann)', triggers)).toEqual([
+      { kind: 'person', id: 'u-ann', label: 'Ann Lee', href: '/people/u-ann' },
+    ]);
+  });
+
+  it('decodes character references in a destination, inline or reference-style', () => {
+    const ann = {
+      kind: 'person',
+      id: 'u-ann',
+      label: '@Ann',
+      href: '/people/u-ann',
+    };
+    expect(referencesIn('[@Ann](/people/u&#45;ann)', triggers)).toEqual([ann]);
+    expect(
+      referencesIn('[@Ann][a]\n\n[a]: /people/u&#x2D;ann', triggers)
+    ).toEqual([ann]);
+    expect(referencesIn('[@Ann](/people/u\\-ann)', triggers)).toEqual([ann]);
+  });
+
+  it('skips a link a trigger throws on, instead of throwing', () => {
+    const decoding: ReferenceTrigger = {
+      ...triggers[0],
+      fromHref: (href) =>
+        href.startsWith('/people/')
+          ? decodeURIComponent(href.slice('/people/'.length))
+          : null,
+    };
+    expect(
+      referencesIn('[@Ann](/people/%E0%A4) [@Raj](/people/u-raj)', [decoding])
+    ).toEqual([
+      { kind: 'person', id: 'u-raj', label: '@Raj', href: '/people/u-raj' },
+    ]);
+  });
+
   it('reads the links triggers claim, in order and each once', () => {
     const text =
       'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login](/tickets/t-12), ' +
@@ -91,6 +126,19 @@ describe('referencesIn', () => {
     ).toBe('TH-1: Fix *beta* now');
   });
 
+  it('decodes every HTML5 entity name and numeric references by CommonMark rules', () => {
+    const label = (text: string) =>
+      referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
+    expect(label('Jos&eacute; &AMP; &NotEqualTilde;')).toBe('José & ≂̸');
+    expect(label('x&#128;y &#0; &#x110000;')).toBe('x\uFFFDy \uFFFD \uFFFD');
+    // Unknown names, and names without their semicolon, stay as written.
+    expect(label('&bogus; Jos&eacute &constructor;')).toBe(
+      '&bogus; Jos&eacute &constructor;'
+    );
+    // Escaped, or in code, a reference is literal text.
+    expect(label('\\&eacute; `&eacute;`')).toBe('&eacute; &eacute;');
+  });
+
   it('decodes character references in the label, but not escaped or in code', () => {
     expect(
       referencesIn(
@@ -98,6 +146,15 @@ describe('referencesIn', () => {
         triggers
       )[0].label
     ).toBe('TH-3: R&D © A © &amp; &amp;');
+  });
+
+  it('leaves unknown entity names, including Object built-ins, as written', () => {
+    expect(
+      referencesIn(
+        '[TH-4: &constructor; &toString; &bogus;](/tickets/t-4)',
+        triggers
+      )[0].label
+    ).toBe('TH-4: &constructor; &toString; &bogus;');
   });
 
   it('drops inline HTML tags from the label, keeping their text', () => {
