@@ -3,8 +3,16 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMarkdownRenderer } from '../render/createMarkdownRenderer';
 import type { ReferenceTrigger } from '../../ReferenceChip/references';
+import { SuperChat } from '../SuperChat';
 import { createMathPlugin } from './math';
+import { createNitroTablePlugin } from './nitroTable';
 import { createReferencesPlugin } from './references';
+
+// Stand in for the datavis grid (absent under jsdom) so a table the NITRO
+// plugin hands to it really leaves the HTML path.
+vi.mock('./nitroTableGrid', () => ({
+  default: () => <div data-testid="nitro-grid" />,
+}));
 
 const trigger = (kind: string, prefix: string): ReferenceTrigger => ({
   kind,
@@ -123,5 +131,70 @@ describe('createReferencesPlugin', () => {
     expect(screen.getByRole('link', { name: '@Ann' })).not.toHaveAttribute(
       'data-reference-kind'
     );
+  });
+  it('keeps a chip in a table when the NITRO table plugin is on', async () => {
+    const onOpen = vi.fn();
+    const renderText = createMarkdownRenderer({
+      plugins: [
+        createNitroTablePlugin(),
+        createReferencesPlugin({ triggers, onOpen }),
+      ],
+    });
+    render(
+      <>
+        {renderText(
+          '| Code |\n| --- |\n| 93000 |\n\n| Owner |\n| --- |\n| [@Ann](/people/u-ann) |',
+          CONTEXT
+        )}
+      </>
+    );
+    // Once the grid has loaded for the plain table, the one with a chip
+    // has had every chance to swap in too — and must not have.
+    expect(await screen.findAllByTestId('nitro-grid')).toHaveLength(1);
+    const ann = screen.getByRole('link', { name: '@Ann' });
+    expect(ann).toHaveAttribute('data-reference-kind', 'person');
+    fireEvent.click(ann);
+    expect(onOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: 'person', id: 'u-ann' })
+    );
+  });
+
+  it('leaves a chip icon out of a plain-text copy', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn(async () => {});
+    vi.stubGlobal('navigator', {
+      ...globalThis.navigator,
+      clipboard: { writeText, write: vi.fn(async () => {}) },
+    });
+    render(
+      <SuperChat
+        currentParticipantId="u1"
+        defaultCopyFormat="plain"
+        renderPlugins={[
+          createReferencesPlugin({
+            triggers,
+            icon: () => <span aria-hidden="true">AL</span>,
+          }),
+        ]}
+        conversation={{
+          id: 'c1',
+          title: 'Refs',
+          participants: [{ id: 'u1', kind: 'human', name: 'Ann Lee' }],
+          thread: [
+            {
+              id: 'm1',
+              participantId: 'u1',
+              text: 'Ask [@Ann Lee](/people/u-ann).',
+              time: '2026-06-07T09:00:00Z',
+            },
+          ],
+        }}
+      />
+    );
+    await user.keyboard('{Control>}');
+    await user.click(screen.getByRole('button', { name: 'Copy message' }));
+    await user.keyboard('{/Control}');
+    expect(writeText).toHaveBeenCalledWith('Ask @Ann Lee.');
+    vi.unstubAllGlobals();
   });
 });

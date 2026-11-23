@@ -428,6 +428,21 @@ interface MessageAction {
   submenu?: { label: string; items: MessageActionItem[] };
 }
 
+/**
+ * The text a reader sees in `element`: its `textContent` without what is
+ * hidden from assistive tech, so a decorative node (a reference chip's
+ * initials avatar, KaTeX's visual copy of a formula) stays out of a plain
+ * copy — `@Ann Lee`, not `AL@Ann Lee`.
+ */
+function readableText(element: HTMLElement | null): string {
+  if (!element) return '';
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll('[aria-hidden="true"]').forEach((node) => {
+    node.remove();
+  });
+  return clone.textContent ?? '';
+}
+
 interface UseMessageCopyOptions {
   /** Markdown source for this message (plain-text / Markdown copy). */
   markdown: string;
@@ -987,7 +1002,7 @@ export const MessageRow = React.memo(function MessageRow({
   const copy = useMessageCopy({
     markdown: markdownSource,
     getHtml: () => bubbleRef.current?.innerHTML ?? '',
-    getText: () => bubbleRef.current?.textContent ?? '',
+    getText: () => readableText(bubbleRef.current),
     defaultFormat: defaultCopyFormat,
   });
 
