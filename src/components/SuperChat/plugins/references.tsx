@@ -42,18 +42,24 @@ interface HastNode {
   type?: string;
   tagName?: string;
   value?: string;
-  properties?: { alt?: unknown };
+  properties?: { alt?: unknown; ariaHidden?: unknown };
   children?: HastNode[];
 }
 
 /**
- * The plain text of a rendered link, its label. An image counts by its alt
- * text, as a screen reader reads it: `[![@Ann Lee](/a.png)](/people/u-ann)`
- * is named "@Ann Lee", not left an empty chip.
+ * The plain text of a rendered link, its label — read as a screen reader
+ * reads it. An image counts by its alt text: `[![@Ann Lee](/a.png)](/people/u-ann)`
+ * is named "@Ann Lee", not left an empty chip. Anything hidden from
+ * assistive tech and MathML's source annotation are skipped: KaTeX renders
+ * `$x$` as MathML, its TeX source and an aria-hidden visual copy, and only
+ * the MathML counts, so `[Ticket $x$](…)` reads "Ticket x", not "Ticket xxx".
  */
 function textOf(node: HastNode | undefined): string {
   if (!node) return '';
   if (node.type === 'text') return node.value ?? '';
+  const hidden = node.properties?.ariaHidden;
+  if (hidden === true || hidden === 'true') return '';
+  if (node.tagName === 'annotation') return '';
   if (node.tagName === 'img') {
     const alt = node.properties?.alt;
     return typeof alt === 'string' ? alt : '';

@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMarkdownRenderer } from '../render/createMarkdownRenderer';
 import type { ReferenceTrigger } from '../../ReferenceChip/references';
+import { createMathPlugin } from './math';
 import { createReferencesPlugin } from './references';
 
 const trigger = (kind: string, prefix: string): ReferenceTrigger => ({
@@ -63,6 +64,24 @@ describe('createReferencesPlugin', () => {
     fireEvent.click(ann);
     expect(onOpen).toHaveBeenCalledWith(
       expect.objectContaining({ label: '@Ann Lee' })
+    );
+  });
+
+  it('names a chip once when its text holds math, with the math plugin on', () => {
+    const onOpen = vi.fn();
+    const renderText = createMarkdownRenderer({
+      plugins: [
+        createMathPlugin(),
+        createReferencesPlugin({ triggers, onOpen }),
+      ],
+    });
+    render(<>{renderText('[Ticket $x$](/tickets/t-12)', CONTEXT)}</>);
+    const chip = screen.getByRole('link', { name: /Ticket/ });
+    expect(chip).toHaveAttribute('data-reference-kind', 'ticket');
+    expect(chip).toHaveTextContent(/^Ticket x$/);
+    fireEvent.click(chip);
+    expect(onOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'Ticket x' })
     );
   });
 
