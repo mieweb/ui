@@ -433,12 +433,14 @@ interface MessageAction {
  * The text a reader sees in `element`: its `textContent` without what is
  * hidden from assistive tech, so a decorative node (a reference chip's
  * initials avatar, KaTeX's visual copy of a formula) stays out of a plain
- * copy — `@Ann Lee`, not `AL@Ann Lee`.
+ * copy — `@Ann Lee`, not `AL@Ann Lee`. MathML's source annotation is left
+ * out too (as the references plugin's `textOf` does), so `$x$` copies as
+ * `x`, not `xx`.
  */
 function readableText(element: HTMLElement | null): string {
   if (!element) return '';
   const clone = element.cloneNode(true) as HTMLElement;
-  clone.querySelectorAll('[aria-hidden="true"]').forEach((node) => {
+  clone.querySelectorAll('[aria-hidden="true"], annotation').forEach((node) => {
     node.remove();
   });
   return clone.textContent ?? '';

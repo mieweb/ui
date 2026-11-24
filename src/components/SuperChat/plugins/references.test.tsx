@@ -8,6 +8,7 @@ import {
 import * as superChat from '../index';
 import type { ReferenceTrigger } from '../../ReferenceChip/references';
 import { SuperChat } from '../SuperChat';
+import type { SuperChatRenderPlugin } from '../types';
 import { createMathPlugin } from './math';
 import { createNitroTablePlugin } from './nitroTable';
 import { createReferencesPlugin } from './references';
@@ -163,44 +164,67 @@ describe('createReferencesPlugin', () => {
     );
   });
 
-  it('leaves a chip icon out of a plain-text copy', async () => {
+  /** What the message `text` copies as, by the plain-text default format. */
+  async function plainCopy(
+    text: string,
+    renderPlugins: SuperChatRenderPlugin[]
+  ): Promise<unknown> {
     const user = userEvent.setup();
-    const writeText = vi.fn(async () => {});
+    const writeText = vi.fn(async (_text: string) => {});
     vi.stubGlobal('navigator', {
       ...globalThis.navigator,
       clipboard: { writeText, write: vi.fn(async () => {}) },
     });
-    render(
-      <SuperChat
-        currentParticipantId="u1"
-        defaultCopyFormat="plain"
-        renderPlugins={[
-          createReferencesPlugin({
-            triggers,
-            icon: () => <span aria-hidden="true">AL</span>,
-          }),
-        ]}
-        conversation={{
-          id: 'c1',
-          title: 'Refs',
-          participants: [{ id: 'u1', kind: 'human', name: 'Ann Lee' }],
-          thread: [
-            {
-              id: 'm1',
-              participantId: 'u1',
-              text: 'Ask [@Ann Lee](/people/u-ann).',
-              time: '2026-06-07T09:00:00Z',
-            },
-          ],
-        }}
-      />
-    );
-    await user.keyboard('{Control>}');
-    await user.click(screen.getByRole('button', { name: 'Copy message' }));
-    await user.keyboard('{/Control}');
-    expect(writeText).toHaveBeenCalledWith('Ask @Ann Lee.');
-    vi.unstubAllGlobals();
+    try {
+      render(
+        <SuperChat
+          currentParticipantId="u1"
+          defaultCopyFormat="plain"
+          renderPlugins={renderPlugins}
+          conversation={{
+            id: 'c1',
+            title: 'Refs',
+            participants: [{ id: 'u1', kind: 'human', name: 'Ann Lee' }],
+            thread: [
+              {
+                id: 'm1',
+                participantId: 'u1',
+                text,
+                time: '2026-06-07T09:00:00Z',
+              },
+            ],
+          }}
+        />
+      );
+      await user.keyboard('{Control>}');
+      await user.click(screen.getByRole('button', { name: 'Copy message' }));
+      await user.keyboard('{/Control}');
+      return writeText.mock.calls[0]?.[0];
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  }
+
+  it('leaves a chip icon out of a plain-text copy', async () => {
+    expect(
+      await plainCopy('Ask [@Ann Lee](/people/u-ann).', [
+        createReferencesPlugin({
+          triggers,
+          icon: () => <span aria-hidden="true">AL</span>,
+        }),
+      ])
+    ).toBe('Ask @Ann Lee.');
   });
+
+  it('copies math once as plain text, with the math plugin on', async () => {
+    expect(
+      await plainCopy('Ask [@Ann Lee](/people/u-ann) about $x$.', [
+        createMathPlugin(),
+        createReferencesPlugin({ triggers }),
+      ])
+    ).toBe('Ask @Ann Lee about x.');
+  });
+
   it('exports MarkdownLink from the SuperChat entry for other link plugins', () => {
     expect(superChat.MarkdownLink).toBe(MarkdownLink);
   });
