@@ -28,6 +28,7 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 
 - The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
+- The text is a **chat message** that is sent and cleared — [ChatComposer](?path=/docs/chat-chatcomposer--docs) with \`editor="rich"\` mounts a compact RichEditor (no toolbar, Enter sends, same \`triggers\`) and still needs the setup above.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
 - Users mostly **read** a file and only occasionally fix it in place — [FileDocument](?path=/docs/files-filedocument--docs) shows it rendered, with a plain-text Edit mode and Save/Cancel, without the Kerebron peers or WASM.
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
@@ -93,6 +94,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
       entry: '@mieweb/ui/kerebron',
       peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: 'ChatComposer editor="rich" (experimental) mounts a compact RichEditor as its input, with the same triggers and setup; use it for a chat message that is sent and cleared, RichEditor for a document that is saved.',
+        },
         {
           type: 'composes with',
           target: 'editors-referencechip',

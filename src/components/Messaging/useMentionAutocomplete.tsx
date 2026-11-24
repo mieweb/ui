@@ -170,10 +170,9 @@ export function useMentionAutocomplete({
 
   // A reference trigger's search, newest answer only. Keyed by character and
   // query, with the trigger read through a ref, so a host that rebuilds its
-  // `triggers` each render doesn't search again.
-  // Each answer carries the character and query it was for: while a new
-  // search runs, an older one's results (another trigger's records) must
-  // not be shown or picked.
+  // `triggers` each render doesn't search again. Each answer carries the
+  // character and query it was for: while a new search runs, an older one's
+  // results (another trigger's records) must not be shown or picked.
   const [found, setFound] = React.useState<{
     char: string;
     query: string;
