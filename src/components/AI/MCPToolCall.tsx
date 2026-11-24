@@ -15,6 +15,8 @@ import {
   defaultToolHintLabels,
   ToolCallMetadata,
   type ToolHintLabels,
+  defaultToolCallResultLabels,
+  type ToolCallResultLabels,
   isSafeHref,
   linkHost,
   resultLinks,
@@ -510,12 +512,14 @@ export function ResourceLink({ link, onClick, className }: ResourceLinkProps) {
 interface ToolResultDisplayProps {
   result: MCPToolResult;
   onLinkClick?: (link: MCPResourceLink) => void;
+  resultLabels?: ToolCallResultLabels;
   className?: string;
 }
 
 function ToolResultDisplay({
   result,
   onLinkClick,
+  resultLabels,
   className,
 }: ToolResultDisplayProps) {
   return (
@@ -537,7 +541,9 @@ function ToolResultDisplay({
 
       <ToolResultLinks result={result} onLinkClick={onLinkClick} />
 
-      {hasRichResult(result) && <ToolCallResultContent result={result} />}
+      {hasRichResult(result) && (
+        <ToolCallResultContent result={result} labels={resultLabels} />
+      )}
     </div>
   );
 }
@@ -707,6 +713,8 @@ export interface ToolCallDisplayProps {
   uncertainNotice?: string;
   /** Translations for provider behavior hints. */
   hintLabels?: Partial<ToolHintLabels>;
+  /** Translations for structured, media and embedded result content. */
+  resultLabels?: Partial<ToolCallResultLabels>;
   /** Additional class name */
   className?: string;
 }
@@ -725,6 +733,7 @@ export function ToolCallDisplay({
   onLinkClick,
   uncertainNotice = 'Could not confirm completion. The action may have taken effect, so check before retrying.',
   hintLabels,
+  resultLabels,
   className,
 }: ToolCallDisplayProps) {
   const formatDuration = (ms?: number) => {
@@ -797,6 +806,7 @@ export function ToolCallDisplay({
           <ToolResultDisplay
             result={toolCall.result}
             onLinkClick={onLinkClick}
+            resultLabels={{ ...defaultToolCallResultLabels, ...resultLabels }}
           />
         </div>
       )}

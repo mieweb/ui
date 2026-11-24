@@ -58,6 +58,18 @@ describe('ToolCallDisplay', () => {
     expect(pill).toHaveAttribute('aria-expanded', 'true');
   });
 
+  it('translates rich result content through resultLabels', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: { type: 'json', data: '', structured: { a: 1 } },
+        })}
+        resultLabels={{ fields: 'Campos' }}
+      />
+    );
+    expect(screen.getByText('Campos')).toBeInTheDocument();
+  });
+
   it('keeps links and rich content on an error result', () => {
     renderWithTheme(
       <ToolCallDisplay
@@ -127,8 +139,8 @@ describe('MCPToolCallGroup outcomes', () => {
       <MCPToolCallGroup toolCalls={[call({ status: 'uncertain' })]} />
     );
     expect(
-      screen.getByText(/Could not confirm completion/)
-    ).toBeInTheDocument();
+      document.querySelector('[data-slot="ai-tool-call-uncertain"]')
+    ).toHaveTextContent(/Could not confirm completion/);
     expect(screen.getByText('Not confirmed')).toBeInTheDocument();
   });
 

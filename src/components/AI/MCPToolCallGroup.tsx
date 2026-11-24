@@ -26,6 +26,7 @@ import {
   hasRichResult,
   hasToolCallMetadata,
   isStructuredTwin,
+  safeStringify,
   ToolCallMetadata,
   ToolCallResultContent,
   type ToolCallResultLabels,
@@ -168,10 +169,28 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   result: defaultToolCallResultLabels,
 };
 
-/** Display names longer than this may be truncated in the row, so details repeat them. */
-const LONG_NAME_CHARS = 40;
 /** Result text up to this length is shown directly; longer text sits behind a disclosure. */
 const INLINE_RESULT_CHARS = 280;
+
+/** Whether the element's text is cut off by its own width, re-checked on resize. */
+function useIsTruncated(
+  ref: React.RefObject<HTMLElement | null>,
+  text: string | undefined
+): boolean {
+  const [truncated, setTruncated] = React.useState(false);
+  React.useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const measure = () =>
+      setTruncated(element.scrollWidth > element.clientWidth);
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [ref, text]);
+  return truncated;
+}
 
 function resolveLabels(
   overrides: MCPToolCallGroupLabelOverrides | undefined
@@ -310,15 +329,17 @@ const STATUS_BADGE_VARIANT: Record<
 };
 
 function formatParameters(toolCall: MCPToolCall): string {
-  return JSON.stringify(
-    Object.fromEntries(toolCall.parameters.map((p) => [p.name, p.value])),
-    null,
-    2
+  return (
+    safeStringify(
+      Object.fromEntries(toolCall.parameters.map((p) => [p.name, p.value])),
+      2
+    ) ?? ''
   );
 }
 
-function formatData(data: unknown): string {
-  return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+/** Text for a value, or null when JSON cannot represent it (BigInt, cycles). */
+function formatData(data: unknown): string | null {
+  return typeof data === 'string' ? data : safeStringify(data, 2);
 }
 
 function formatResult(toolCall: MCPToolCall): string | null {
@@ -326,7 +347,7 @@ function formatResult(toolCall: MCPToolCall): string | null {
   if (!result) return null;
   if (isStructuredTwin(result)) return null;
   if (result.data == null || result.data === '') return result.summary || null;
-  return formatData(result.data);
+  return formatData(result.data) ?? (result.summary || null);
 }
 
 /** The failure text: `error`, else an error result's detail, else its summary. */
@@ -334,7 +355,9 @@ function formatError(toolCall: MCPToolCall): string | null {
   if (toolCall.error) return toolCall.error;
   const { result } = toolCall;
   if (result?.type !== 'error') return null;
-  if (result.data != null && result.data !== '') return formatData(result.data);
+  if (result.data != null && result.data !== '') {
+    return formatData(result.data) ?? (result.summary || null);
+  }
   return result.summary || null;
 }
 
@@ -450,6 +473,12 @@ function ToolCallRow({
   const result =
     toolCall.result?.type === 'error' ? null : formatResult(toolCall);
   const errorText = formatError(toolCall);
+  // The row clamps the summary to one line, so details carry it in full.
+  const summary = toolCall.result?.summary;
+  const fullSummary =
+    summary && summary !== result && summary !== errorText ? summary : null;
+  const nameRef = React.useRef<HTMLElement>(null);
+  const nameTruncated = useIsTruncated(nameRef, toolCall.displayName);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasRich = hasRichResult(toolCall.result);
   const hasLabels = toolCall.parameters.some((param) => param.label);
@@ -458,6 +487,7 @@ function ToolCallRow({
     hasToolCallMetadata(toolCall) ||
     toolCall.parameters.length > 0 ||
     Boolean(result) ||
+    Boolean(fullSummary) ||
     hasLinks ||
     hasRich;
 
@@ -524,7 +554,9 @@ function ToolCallRow({
             {toolCall.displayName ? (
               // Host text may be in another script than the page; isolate it so
               // neutral characters such as a trailing "/" keep their place.
-              <bdi className="min-w-0 truncate">{toolCall.displayName}</bdi>
+              <bdi ref={nameRef} className="min-w-0 truncate">
+                {toolCall.displayName}
+              </bdi>
             ) : (
               <code className="min-w-0 truncate font-mono text-xs">
                 {toolCall.toolName}
@@ -551,8 +583,8 @@ function ToolCallRow({
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
             {toolCall.displayName && (
               <>
-                {/* Repeated only when long enough that the row may have truncated it. */}
-                {toolCall.displayName.length > LONG_NAME_CHARS && (
+                {/* Repeated in full only when the row actually cut it off. */}
+                {nameTruncated && (
                   <p
                     data-slot="ai-tool-call-display-name"
                     className="break-words"
@@ -579,6 +611,15 @@ function ToolCallRow({
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
               />
+            )}
+            {fullSummary && (
+              <p
+                data-slot="ai-tool-call-summary-full"
+                dir="auto"
+                className="text-sm break-words whitespace-pre-wrap"
+              >
+                {fullSummary}
+              </p>
             )}
             {result && result.length <= INLINE_RESULT_CHARS && (
               <p
@@ -897,6 +938,13 @@ export function MCPToolCallGroup({
       {/* Failures get their own region so progress updates never mask them. */}
       <p role="status" className="sr-only">
         {summary.failed > 0 ? labels.announceFailed(summary.failed) : ''}
+      </p>
+      {/* Unconfirmed outcomes too: another call still running leaves the
+          progress text unchanged, so this warning needs its own region. */}
+      <p role="status" className="sr-only">
+        {summary.uncertain > 0
+          ? `${labels.notConfirmed(summary.uncertain)}. ${labels.uncertainNotice}`
+          : ''}
       </p>
     </div>
   );

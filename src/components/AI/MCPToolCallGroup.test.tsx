@@ -354,14 +354,18 @@ describe('MCPToolCallGroup', () => {
         toolCalls={[call('a', 'running'), call('b', 'awaiting-approval')]}
       />
     );
-    expect(announcements()).toEqual(['1 tool call needs your approval', '']);
+    expect(announcements()).toEqual([
+      '1 tool call needs your approval',
+      '',
+      '',
+    ]);
 
     rerender(
       <MCPToolCallGroup
         toolCalls={[call('a', 'success'), call('b', 'error')]}
       />
     );
-    expect(announcements()).toEqual(['Used 2 tools', '1 tool call failed']);
+    expect(announcements()).toEqual(['Used 2 tools', '1 tool call failed', '']);
   });
 
   it('announces a failure while other calls are still active', () => {
@@ -376,7 +380,11 @@ describe('MCPToolCallGroup', () => {
         toolCalls={[call('a', 'error'), call('b', 'running')]}
       />
     );
-    expect(announcements()).toEqual(['Running 2 tools', '1 tool call failed']);
+    expect(announcements()).toEqual([
+      'Running 2 tools',
+      '1 tool call failed',
+      '',
+    ]);
 
     rerender(
       <MCPToolCallGroup
@@ -386,6 +394,7 @@ describe('MCPToolCallGroup', () => {
     expect(announcements()).toEqual([
       '1 tool call needs your approval',
       '1 tool call failed',
+      '',
     ]);
   });
 
@@ -502,8 +511,15 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
   });
 
-  it('repeats a long display name in full in the details', () => {
-    const name = 'Read src/components/AI/MCPToolCallGroup.test.tsx in full';
+  it('repeats the display name in full when the row cuts it off', () => {
+    // jsdom has no layout, so report the name as wider than its box.
+    const scrollWidth = vi
+      .spyOn(HTMLElement.prototype, 'scrollWidth', 'get')
+      .mockReturnValue(500);
+    const clientWidth = vi
+      .spyOn(HTMLElement.prototype, 'clientWidth', 'get')
+      .mockReturnValue(100);
+    const name = 'Read notes.md';
     renderWithTheme(
       <MCPToolCallGroup
         toolCalls={[call('a', 'success', { displayName: name })]}
@@ -511,10 +527,65 @@ describe('MCPToolCallGroup', () => {
     );
 
     const [row] = rows();
-    fireEvent.click(within(row).getByRole('button', { name: /Read src/ }));
+    fireEvent.click(within(row).getByRole('button', { name: /Read notes/ }));
     expect(
       row.querySelector('[data-slot="ai-tool-call-display-name"]')
     ).toHaveTextContent(name);
+    scrollWidth.mockRestore();
+    clientWidth.mockRestore();
+  });
+
+  it('survives result data JSON cannot represent', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', {
+            result: { type: 'json', data: { big: 1n }, summary: 'Counted' },
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(screen.getAllByText('Counted').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the full summary in the details beside other result text', () => {
+    const summary = 'Wrote 3 of 10 rows; rerun with --resume to finish';
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'uncertain', {
+            result: {
+              type: 'json',
+              data: '{"written":3}',
+              structured: { written: 3 },
+              summary,
+            },
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary-full"]')
+    ).toHaveTextContent(summary);
+  });
+
+  it('announces a newly unconfirmed call while another is still running', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'running')]}
+      />
+    );
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'uncertain')]}
+      />
+    );
+
+    expect(announcements()[2]).toMatch(/^1 not confirmed\. Could not confirm/);
   });
 
   it('shows the tool id in the row when there is no display name', () => {

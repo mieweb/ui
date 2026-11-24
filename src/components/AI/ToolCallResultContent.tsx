@@ -192,7 +192,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /** JSON text, or null for values JSON cannot represent (BigInt, cycles). */
-function safeStringify(value: unknown, indent?: number): string | null {
+export function safeStringify(value: unknown, indent?: number): string | null {
   try {
     return JSON.stringify(value, null, indent) ?? String(value);
   } catch {
