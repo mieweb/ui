@@ -13,9 +13,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  /* One worker per vCPU on the 4-vCPU GitHub runner; a single worker left
-   * three idle and made this the slowest CI job (~12 minutes). */
-  workers: process.env.CI ? 4 : undefined,
+  /* Two workers on the 4-vCPU GitHub runner. One left the runner mostly idle
+   * (~12 minutes); four starved the EncounterVisit editor, which then missed
+   * its 5 s waits. Two matches test:storybook's --maxWorkers 2. */
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['list'],
