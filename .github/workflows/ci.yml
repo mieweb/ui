@@ -7,6 +7,13 @@ on:
     branches: [main, develop]
     types: [opened, synchronize, reopened, ready_for_review]
 
+# A new push to a PR cancels that PR's run still in progress: only the latest
+# commit's result matters. Pushes to main/develop group by SHA and never cancel,
+# so every merged commit keeps its own run.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Least-privilege default for all jobs (override per-job as needed).
 permissions:
   contents: read
