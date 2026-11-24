@@ -605,9 +605,9 @@ export const ChatComposer = React.forwardRef<
   // Without an onSend handler, sending would silently discard the draft.
   const readyToSend =
     onSend !== undefined && !disabled && !isSending && !isStreaming;
-  /** Whether `text` (with the staged attachments) is a sendable message. */
-  const isSendable = (text: string) =>
-    (text.trim().length > 0 || attachments.length > 0 || canSendWhenEmpty) &&
+  /** Whether `text` (with `staged` attachments) is a sendable message. */
+  const isSendable = (text: string, staged = attachments) =>
+    (text.trim().length > 0 || staged.length > 0 || canSendWhenEmpty) &&
     !(maxLength !== undefined && text.length > maxLength);
   const canSend = readyToSend && isSendable(value);
 
@@ -828,11 +828,15 @@ export const ChatComposer = React.forwardRef<
   };
 
   const sendText = (text: string, sendOption?: string) => {
-    if (!onSend || !isSendable(text)) return;
+    // The attachments staged now, not when the send began: a rich send reads
+    // the editor first, and a file added or removed meanwhile must be sent or
+    // left out as it shows. addFiles/removeAttachment keep the ref current.
+    const staged = attachmentsRef.current;
+    if (!onSend || !isSendable(text, staged)) return;
     const content = text.trim();
     const message: NewMessage = {
       content,
-      attachments: attachments.map((attachment) => attachment.file),
+      attachments: staged.map((attachment) => attachment.file),
       // Only add the key when replying — hosts may key-check the payload.
       ...(replyTo ? { replyToId: replyTo.id } : {}),
       // Read from the text actually sent, so the two always agree.
@@ -840,7 +844,7 @@ export const ChatComposer = React.forwardRef<
         ? { references: referencesIn(content, triggers) }
         : {}),
     };
-    for (const attachment of attachments) {
+    for (const attachment of staged) {
       if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
     }
     // Clear the ref alongside the state: the unmount cleanup reads the ref,

@@ -166,6 +166,64 @@ describe('ChatComposer', () => {
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
   });
 
+  describe('a # search still pending', () => {
+    function deferredTicket() {
+      let answer: (
+        results: { kind: string; id: string; label: string }[]
+      ) => void = () => {};
+      const ticket = {
+        kind: 'ticket',
+        char: '#',
+        label: 'Tickets',
+        search: () =>
+          new Promise<{ kind: string; id: string; label: string }[]>(
+            (resolve) => (answer = resolve)
+          ),
+        toHref: (id: string) => `/tickets/${id}`,
+        fromHref: () => null,
+      };
+      return {
+        ticket,
+        answer: (results: { kind: string; id: string; label: string }[]) =>
+          React.act(async () => {
+            // The search starts a microtask after the query does.
+            await Promise.resolve();
+            answer(results);
+          }),
+      };
+    }
+    const fixLogin = [
+      { kind: 'ticket', id: 't-12', label: 'TH-12: Fix login' },
+    ];
+
+    it('stays dismissed after Escape when its answer arrives', async () => {
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await answer(fixLogin);
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+
+    it('opens nothing on the emptied composer once the draft is sent', async () => {
+      const onSend = vi.fn();
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledTimes(1);
+      await answer(fixLogin);
+      expect(input).toHaveValue('');
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);

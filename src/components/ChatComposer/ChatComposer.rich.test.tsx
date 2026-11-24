@@ -19,6 +19,8 @@ const editor = vi.hoisted(() => ({
   draft: '',
   focus: vi.fn(),
   props: null as Record<string, unknown> | null,
+  /** When set, getContent() waits on it: a read still pending. */
+  reading: null as Promise<void> | null,
 }));
 
 vi.mock('../RichEditor/RichEditor', async () => {
@@ -31,7 +33,10 @@ vi.mock('../RichEditor/RichEditor', async () => {
         if (!props.value) editor.draft = '';
       }, [props.value]);
       React.useImperativeHandle(ref, () => ({
-        getContent: async () => editor.draft,
+        getContent: async () => {
+          if (editor.reading) await editor.reading;
+          return editor.draft;
+        },
         focus: editor.focus,
       }));
       return <div role="textbox" aria-label={props['aria-label']} />;
@@ -44,6 +49,7 @@ afterEach(() => {
   editor.draft = '';
   editor.focus.mockClear();
   editor.props = null;
+  editor.reading = null;
 });
 
 const person = {
@@ -140,6 +146,44 @@ describe('ChatComposer rich input', () => {
     await waitFor(() => expect(onSend).toHaveBeenCalledTimes(1));
     await act(async () => {});
     expect(onSend).toHaveBeenCalledTimes(1);
+  });
+
+  describe('attachments changed while the draft is read', () => {
+    function holdRead() {
+      let release = () => {};
+      editor.reading = new Promise<void>((resolve) => (release = resolve));
+      return () => act(async () => release());
+    }
+
+    it('sends a file added meanwhile', async () => {
+      const ref = React.createRef<ChatComposerHandle>();
+      const { onSend, input } = await renderRich({ ref });
+      editor.draft = 'see file';
+      const release = holdRead();
+      fireEvent.keyDown(input, { key: 'Enter' });
+      const late = new File(['data'], 'late.txt', { type: 'text/plain' });
+      act(() => ref.current!.addFiles([late]));
+      await release();
+
+      await waitFor(() => expect(onSend).toHaveBeenCalledTimes(1));
+      expect(onSend.mock.calls[0][0].attachments).toEqual([late]);
+      expect(screen.queryByText('late.txt')).not.toBeInTheDocument();
+    });
+
+    it('leaves out a file removed meanwhile', async () => {
+      const ref = React.createRef<ChatComposerHandle>();
+      const { onSend, input } = await renderRich({ ref });
+      const gone = new File(['data'], 'gone.txt', { type: 'text/plain' });
+      act(() => ref.current!.addFiles([gone]));
+      editor.draft = 'no file';
+      const release = holdRead();
+      fireEvent.keyDown(input, { key: 'Enter' });
+      fireEvent.click(screen.getByRole('button', { name: 'Remove gone.txt' }));
+      await release();
+
+      await waitFor(() => expect(onSend).toHaveBeenCalledTimes(1));
+      expect(onSend.mock.calls[0][0].attachments).toEqual([]);
+    });
   });
 
   it('sends nothing when the editor holds only whitespace', async () => {

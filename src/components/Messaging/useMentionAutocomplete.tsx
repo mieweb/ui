@@ -160,11 +160,22 @@ export function useMentionAutocomplete({
     ],
     [hasOptions, triggers]
   );
-  const [mention, setMention] = React.useState<{
+  const [trackedMention, setMention] = React.useState<{
     char: string;
     query: string;
     start: number;
   } | null>(null);
+  // Only while the draft still holds the query: a send that clears it, or a
+  // host that replaces it, ends the query, so a late search answer can't open
+  // the menu over a draft it no longer belongs to.
+  const mention =
+    trackedMention &&
+    value.startsWith(
+      trackedMention.char + trackedMention.query,
+      trackedMention.start
+    )
+      ? trackedMention
+      : null;
   const activeTrigger =
     (mention && triggers?.find((t) => t.char === mention.char)) || null;
 
@@ -280,7 +291,9 @@ export function useMentionAutocomplete({
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
-    if (!menuOpen) return false;
+    // Escape also dismisses a reference query still searching, so its late
+    // answer doesn't open the menu after the user closed it.
+    if (!menuOpen && !(event.key === 'Escape' && activeTrigger)) return false;
     // All keyboard branches index with the clamped highlight so keyboard
     // behavior always agrees with the visible/ARIA selection, even when the
     // list shrank while the menu was open (e.g. the host swapped `options`
