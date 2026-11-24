@@ -550,3 +550,30 @@
 [data-slot='textarea-rich'] .kb-custom-menu__overflow-menu {
   max-width: calc(100% - 2 * var(--kb-space-xs, 4px));
 }
+
+/*
+ * ChatComposer's rich input (`editor="rich"`): the composer card is the
+ * frame, so the editor drops its own border, padding and toolbar space and
+ * sizes to its text, like the plain textarea.
+ */
+[data-slot='chat-composer-rich-input'] .kb-component {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+/* No stock mobile toolbar here either: drop menu.css's phone clearance
+ * (!important to beat it), as TextAreaRich does above. */
+[data-slot='chat-composer-rich-input'] .kb-component,
+[data-slot='chat-composer-rich-input'] .ProseMirror {
+  padding-bottom: 0 !important;
+}
+[data-slot='chat-composer-rich-input'] .kb-custom-menu {
+  display: none;
+}
+[data-slot='chat-composer-rich-input'] .ProseMirror {
+  min-height: 1.5rem;
+  padding: 0;
+}
+[data-slot='chat-composer-rich-input'] .ProseMirror p {
+  margin: 0;
+}

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
+import type { ReferenceOption } from '../ReferenceChip/references';
 import { renderWithTheme } from '../../test/test-utils';
 import { Modal } from '../Modal';
 import {
@@ -19,6 +20,345 @@ function getInput() {
 }
 
 describe('ChatComposer', () => {
+  it('sends the references its triggers claim with the message', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'Ask [@Ann Lee](/people/u-ann) [docs](https://x.y)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann Lee', href: '/people/u-ann' },
+    ]);
+  });
+
+  it('inserts a # trigger pick in the textarea as a Markdown link', async () => {
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async (query: string) =>
+        'fix login'.includes(query.toLowerCase())
+          ? [{ kind: 'ticket', id: 't-12', label: 'TH-12: Fix [beta] login' }]
+          : [],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'On #fix', selectionStart: 7, selectionEnd: 7 },
+    });
+    const option = await screen.findByRole('option', {
+      name: 'TH-12: Fix [beta] login',
+    });
+    expect(
+      screen.getByRole('listbox', { name: 'Tickets' })
+    ).toBeInTheDocument();
+    fireEvent.mouseDown(option);
+    expect(input).toHaveValue(
+      'On [TH-12: Fix \\[beta\\] login](/tickets/t-12) '
+    );
+  });
+
+  it('reads references from the trimmed text it sends', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    // Untrimmed, four spaces make this an indented code block.
+    fireEvent.change(input, {
+      target: { value: '    [@Ann](/people/u-ann)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0]).toMatchObject({
+      content: '[@Ann](/people/u-ann)',
+      references: [{ kind: 'person', id: 'u-ann', label: '@Ann' }],
+    });
+  });
+
+  it('inserts a pick whose label and address read back unchanged', async () => {
+    const onSend = vi.fn();
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async () => [
+        { kind: 'ticket', id: 'issue) & <x>', label: 'Fix *beta* `now` $5' },
+      ],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/tickets/') ? href.slice('/tickets/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+    });
+    fireEvent.mouseDown(await screen.findByRole('option'));
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      {
+        kind: 'ticket',
+        id: 'issue) & <x>',
+        label: 'Fix *beta* `now` $5',
+        href: '/tickets/issue) & <x>',
+      },
+    ]);
+  });
+
+  it("never shows one trigger's results for another's query", async () => {
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => [{ kind: 'person', id: 'u-ann', label: 'Ann Lee' }],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      // Still searching.
+      search: () => new Promise<never>(() => {}),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(
+      <ChatComposer onSend={vi.fn()} triggers={[person, ticket]} />
+    );
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '@a', selectionStart: 2, selectionEnd: 2 },
+    });
+    expect(
+      await screen.findByRole('option', { name: 'Ann Lee' })
+    ).toBeInTheDocument();
+    fireEvent.change(input, {
+      target: { value: '@a #a', selectionStart: 5, selectionEnd: 5 },
+    });
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
+  describe('a # search still pending', () => {
+    function deferredTicket() {
+      let answer: (
+        results: { kind: string; id: string; label: string }[]
+      ) => void = () => {};
+      const ticket = {
+        kind: 'ticket',
+        char: '#',
+        label: 'Tickets',
+        search: () =>
+          new Promise<{ kind: string; id: string; label: string }[]>(
+            (resolve) => (answer = resolve)
+          ),
+        toHref: (id: string) => `/tickets/${id}`,
+        fromHref: () => null,
+      };
+      return {
+        ticket,
+        answer: (results: { kind: string; id: string; label: string }[]) =>
+          React.act(async () => {
+            // The search starts a microtask after the query does.
+            await Promise.resolve();
+            answer(results);
+          }),
+      };
+    }
+    const fixLogin = [
+      { kind: 'ticket', id: 't-12', label: 'TH-12: Fix login' },
+    ];
+
+    it('stays dismissed after Escape when its answer arrives', async () => {
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await answer(fixLogin);
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+
+    it('opens nothing on the emptied composer once the draft is sent', async () => {
+      const onSend = vi.fn();
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledTimes(1);
+      await answer(fixLogin);
+      expect(input).toHaveValue('');
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a reference search still pending', () => {
+    let answer: (options: ReferenceOption[]) => void = () => {};
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: () =>
+        new Promise<ReferenceOption[]>((resolve) => (answer = resolve)),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    const t12 = { kind: 'ticket', id: 't-12', label: 'TH-12' };
+
+    it('opens no list once the composer is disabled', async () => {
+      const onValueChange = vi.fn();
+      const { rerender } = renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      fireEvent.change(getInput(), {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      // The search starts a microtask after the change.
+      await act(async () => {});
+      rerender(
+        <ChatComposer
+          disabled
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      onValueChange.mockClear();
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('takes Escape for itself inside a Modal, so the Modal stays open', async () => {
+      const onOpenChange = vi.fn();
+      renderWithTheme(
+        <Modal open onOpenChange={onOpenChange} aria-label="Compose">
+          <ChatComposer onSend={vi.fn()} triggers={[ticket]} />
+        </Modal>
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      await act(async () => {});
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).not.toHaveBeenCalled();
+      // The answer arriving after Escape opens nothing.
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      // The next Escape is the Modal's.
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('an @ trigger beside mentionOptions', () => {
+    // A host may hand the same objects to both.
+    const shared = [
+      { id: 'u-ann', kind: 'person', label: 'Ann Lee', value: 'ann' },
+    ];
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => shared,
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    async function openList() {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          mentionOptions={shared}
+          triggers={[person]}
+        />
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      return input;
+    }
+
+    it('lists one person from both with distinct keys', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await openList();
+        expect(
+          error.mock.calls.some((call) => String(call[0]).includes('same key'))
+        ).toBe(false);
+      } finally {
+        error.mockRestore();
+      }
+    });
+
+    it('inserts the listed entry as a mention, the result as a link', async () => {
+      const input = await openList();
+      fireEvent.mouseDown(screen.getAllByRole('option')[0]);
+      expect(input).toHaveValue('@ann ');
+
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      fireEvent.mouseDown(screen.getAllByRole('option')[1]);
+      expect(input).toHaveValue('[Ann Lee](/people/u-ann) ');
+    });
+
+    it('leaves Enter and the arrows to an IME while it composes', async () => {
+      const input = await openList();
+      fireEvent.keyDown(input, { key: 'ArrowDown', isComposing: true });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+      expect(input).toHaveValue('@an');
+      expect(screen.getAllByRole('option')[0]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    });
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);
