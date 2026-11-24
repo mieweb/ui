@@ -247,10 +247,11 @@ export function ParticipantAvatar({
 }
 
 // ============================================================================
-// Reference chip (chat-component `ref` thread items)
+// Ref item card (chat-component `ref` thread items) — a whole-message card for
+// an attached record; not the inline `ReferenceChip` from ../ReferenceChip.
 // ============================================================================
 
-export function ReferenceChip({
+export function RefItemCard({
   reference,
   linkBuilder,
   onReferenceClick,
@@ -426,6 +427,27 @@ interface MessageAction {
   onSelect: () => void;
   /** Explicit variants, rendered as a flyout submenu in the overflow menu. */
   submenu?: { label: string; items: MessageActionItem[] };
+}
+
+/**
+ * The text a reader sees in `element`: its `textContent` without what is
+ * hidden from assistive tech, so a decorative node (a reference chip's
+ * initials avatar, KaTeX's visual copy of a formula) stays out of a plain
+ * copy — `@Ann Lee`, not `AL@Ann Lee`. A formula copies once, as its TeX
+ * source (as the references plugin's `textOf` reads it): MathML's own text
+ * drops what its structure says, so `$x^2$` would copy as `x2`.
+ */
+function readableText(element: HTMLElement | null): string {
+  if (!element) return '';
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll('math').forEach((math) => {
+    const tex = math.querySelector('annotation')?.textContent;
+    if (tex) math.replaceWith(tex);
+  });
+  clone.querySelectorAll('[aria-hidden="true"], annotation').forEach((node) => {
+    node.remove();
+  });
+  return clone.textContent ?? '';
 }
 
 interface UseMessageCopyOptions {
@@ -987,7 +1009,7 @@ export const MessageRow = React.memo(function MessageRow({
   const copy = useMessageCopy({
     markdown: markdownSource,
     getHtml: () => bubbleRef.current?.innerHTML ?? '',
-    getText: () => bubbleRef.current?.textContent ?? '',
+    getText: () => readableText(bubbleRef.current),
     defaultFormat: defaultCopyFormat,
   });
 
@@ -1030,7 +1052,7 @@ export const MessageRow = React.memo(function MessageRow({
         data-slot="superchat-reference"
         className={cn('flex', isSelf && 'justify-end')}
       >
-        <ReferenceChip
+        <RefItemCard
           reference={message.ref}
           linkBuilder={linkBuilder}
           onReferenceClick={onReferenceClick}
