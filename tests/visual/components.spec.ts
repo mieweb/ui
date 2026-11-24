@@ -89,6 +89,29 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await page.mouse.up();
   });
 
+  test('SuperChat Inbox - Edit message with multi-line draft', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'superchat-inbox--playground');
+    // The first self-authored message carries the overflow menu with Edit.
+    await page.getByRole('button', { name: 'Message actions' }).first().click();
+    await page.getByRole('menuitem', { name: 'Edit message' }).click();
+    const editor = page.getByRole('textbox', { name: 'Edit message' });
+    await editor.fill('First line of the edit');
+    // Plain Enter must add a newline, not save.
+    await editor.press('End');
+    await editor.press('Enter');
+    await editor.pressSequentially('Second line of the edit');
+    await expect(editor).toHaveValue(
+      'First line of the edit\nSecond line of the edit'
+    );
+    // Capture the editor itself: the thread scrolls, so a page shot would
+    // show unrelated messages instead of the edit state.
+    await expect(
+      page.locator('[data-slot="superchat-message-editor"]')
+    ).toHaveScreenshot('superchat-inbox-edit-multiline.png');
+  });
+
   test('Input - Default', async ({ page }) => {
     await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
