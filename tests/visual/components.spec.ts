@@ -89,6 +89,29 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await page.mouse.up();
   });
 
+  test('SuperChat Inbox - Edit message with multi-line draft', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'superchat-inbox--playground');
+    // The first self-authored message carries the overflow menu with Edit.
+    await page.getByRole('button', { name: 'Message actions' }).first().click();
+    await page.getByRole('menuitem', { name: 'Edit message' }).click();
+    const editor = page.getByRole('textbox', { name: 'Edit message' });
+    await editor.fill('First line of the edit');
+    // Plain Enter must add a newline, not save.
+    await editor.press('End');
+    await editor.press('Enter');
+    await editor.pressSequentially('Second line of the edit');
+    await expect(editor).toHaveValue(
+      'First line of the edit\nSecond line of the edit'
+    );
+    // Capture the editor itself: the thread scrolls, so a page shot would
+    // show unrelated messages instead of the edit state.
+    await expect(
+      page.locator('[data-slot="superchat-message-editor"]')
+    ).toHaveScreenshot('superchat-inbox-edit-multiline.png');
+  });
+
   test('Input - Default', async ({ page }) => {
     await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
@@ -255,18 +278,22 @@ test.describe('Visual Regression Tests - Core Components', () => {
   // leaving the caret at the document start (the heading) — and headings drop
   // images in markdown serialization, so the round-trip silently loses the
   // capture on slow CI runners. Retry until the caret really sits in the
-  // target paragraph.
+  // target paragraph — and stays there through a settle beat, because the
+  // story's async document load can replace the doc right after a verified
+  // click and yank the selection back to the start.
   async function placeCaretInParagraph(page: Page, text: string) {
     const paragraph = page.locator('.ProseMirror p', { hasText: text });
+    const caretParagraphText = () =>
+      page.evaluate(() => {
+        const node = window.getSelection()?.anchorNode;
+        const element = node instanceof Element ? node : node?.parentElement;
+        return element?.closest('p')?.textContent ?? '';
+      });
     await expect(async () => {
       await paragraph.click();
-      expect(
-        await page.evaluate(() => {
-          const node = window.getSelection()?.anchorNode;
-          const element = node instanceof Element ? node : node?.parentElement;
-          return element?.closest('p')?.textContent ?? '';
-        })
-      ).toContain(text);
+      expect(await caretParagraphText()).toContain(text);
+      await page.waitForTimeout(150);
+      expect(await caretParagraphText()).toContain(text);
     }).toPass();
   }
 
@@ -298,6 +325,49 @@ test.describe('Visual Regression Tests - Core Components', () => {
     // uploaded URL (the mock returns an object URL), not a base64 embed.
     await expect(page.getByTestId('markdown-output')).toContainText(
       '![note-photo.png](blob:'
+    );
+  });
+
+  // Heading appearance (mieweb/ui#796): the surface must keep Kerebron's
+  // `kb-editor` class when labelling attributes are applied through setProps,
+  // and the story must load kerebron.css — otherwise every `.kb-editor` rule
+  // stops matching and h1–h6 render as body text while the commands keep
+  // "working" in the DOM. The unit tests guard the class string; this guards
+  // the rendered result end to end, "## " input rule included.
+  test('RichMediaCaptureEditor - headings render styled, not as body text', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-richmediacaptureeditor--default');
+    await placeCaretInParagraph(page, 'Capture something');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('## Heading two');
+    await expect(page.locator('.ProseMirror h2')).toHaveText('Heading two');
+
+    const fontOf = (selector: string) =>
+      page
+        .locator(`.ProseMirror ${selector}`)
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el);
+          return {
+            size: parseFloat(style.fontSize),
+            weight: parseInt(style.fontWeight, 10),
+          };
+        });
+    const [h1, h2, p] = await Promise.all([
+      fontOf('h1'),
+      fontOf('h2'),
+      fontOf('p'),
+    ]);
+    // Regressed surfaces render headings at exactly the paragraph's 16px/400.
+    expect(h1.size).toBeGreaterThan(p.size);
+    expect(h2.size).toBeGreaterThan(p.size);
+    expect(h1.weight).toBeGreaterThanOrEqual(700);
+    expect(h2.weight).toBeGreaterThanOrEqual(700);
+
+    await expect(page).toHaveScreenshot(
+      'rich-media-capture-editor-headings.png'
     );
   });
 
@@ -1278,6 +1348,37 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Select - Default', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-select--default');
     await expect(page).toHaveScreenshot('select-default.png');
+  });
+
+  test('Select - With descriptions (open, narrow)', async ({ page }) => {
+    // Narrow enough that the longest description wraps to a second line.
+    await page.setViewportSize({ width: 320, height: 480 });
+    await gotoStory(page, 'choice-inputs-select--with-descriptions', {
+      args: 'defaultValue:ticket',
+    });
+    await page.getByRole('combobox').click();
+    const option = page.getByRole('option', { name: 'Ticket' });
+    await expect(option).toHaveAttribute('aria-selected', 'true');
+
+    const description = option.locator(
+      "[data-slot='select-option-description']"
+    );
+    const label = option.getByText('Ticket', { exact: true });
+    const check = option.locator('svg');
+    const [descriptionBox, labelBox, checkBox] = await Promise.all([
+      description.boundingBox(),
+      label.boundingBox(),
+      check.boundingBox(),
+    ]);
+    // Wraps rather than truncating: taller than one line of the label.
+    expect(descriptionBox!.height).toBeGreaterThan(labelBox!.height * 1.5);
+    // Starts under the label, and never runs into the checkmark.
+    expect(Math.abs(descriptionBox!.x - labelBox!.x)).toBeLessThan(1);
+    expect(descriptionBox!.x + descriptionBox!.width).toBeLessThanOrEqual(
+      checkBox!.x
+    );
+
+    await expect(page).toHaveScreenshot('select-with-descriptions-open.png');
   });
 
   test('Select - Search stays anchored inside a transformed dialog', async ({

@@ -127,6 +127,18 @@
 }
 
 /*
+ * Kerebron's base.css sets `-webkit-user-modify: read-write` on .kb-editor.
+ * In Chromium that non-standard property makes the element editable even when
+ * ProseMirror renders it with contenteditable="false" — keystrokes bypass the
+ * editor state entirely and splice raw text into the DOM (caught by the
+ * read-only EncounterVisit visual test on mieweb/ui#802). Hand control back
+ * to the contenteditable attribute whenever the view is not editable.
+ */
+.kb-editor[contenteditable='false'] {
+  -webkit-user-modify: read-only;
+}
+
+/*
  * Kerebron leaves headings, lists, links and code to browser defaults, which
  * Tailwind's preflight strips (headings `inherit`, lists `list-style: none`,
  * links `color: inherit`) — so "# " and "- " produced real h1/ul nodes that
@@ -152,6 +164,64 @@
 [data-theme='dark'] .kb-editor :where(a),
 .dark .kb-editor :where(a) {
   color: var(--mieweb-primary-400, #94a3b8);
+}
+
+/*
+ * ProseMirror needs \`white-space: pre-wrap\` on the editable element, or the
+ * browser collapses a trailing space and the next keystroke replaces it —
+ * typing after an inline chip ("[chip] with") lost the space. Kerebron sets it
+ * on \`.kb-editor\`, which the custom-menu editor (RichEditor) doesn't carry.
+ */
+.kb-component .ProseMirror {
+  white-space: pre-wrap;
+}
+
+/*
+ * Reference chips (RichEditor \`triggers\`). Kerebron's editor rules are
+ * unlayered — \`.kb-editor *\` zeroes padding, \`.kb-editor :where(a)\` colours
+ * links — so in hosts whose editable carries \`.kb-editor\` they outrank the
+ * chip's layered Badge utilities. Restate the chip look here, unlayered and
+ * more specific, with the same tokens as \`Badge\` \`secondary\` \`sm\`.
+ */
+.kb-component .ProseMirror [data-slot='reference-chip'] {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  background-color: var(--mieweb-neutral-100, #f5f5f5);
+  color: var(--mieweb-neutral-900, #171717);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  vertical-align: baseline;
+}
+/* The label, cut short inside the chip rather than spilling out of it. */
+.kb-component .ProseMirror [data-slot='reference-chip-label'] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-theme='dark'] .kb-component .ProseMirror [data-slot='reference-chip'],
+.dark .kb-component .ProseMirror [data-slot='reference-chip'] {
+  background-color: var(--mieweb-neutral-800, #262626);
+  color: var(--mieweb-neutral-100, #f5f5f5);
+}
+/* ProseMirror puts a hidden separator image after an inline node that ends a
+ * line (a chip). Preflight's `img { display: block }` turned it into a line
+ * break, so every chip-ending line got an empty line under it; prosemirror.css
+ * keeps it inline, and Kerebron doesn't ship that rule. */
+.kb-component .ProseMirror img.ProseMirror-separator {
+  display: inline !important;
+  border: none !important;
+  margin: 0 !important;
+}
+.kb-component
+  .ProseMirror
+  [data-slot='reference-chip'].ProseMirror-selectednode {
+  outline: 2px solid var(--mieweb-primary-500, #27aae1);
+  outline-offset: 1px;
 }
 
 /*
@@ -249,6 +319,39 @@
 .dark .kb-editor .ts-constant,
 .dark .kb-editor .ts-constant_builtin {
   color: #4fc1ff;
+}
+/*
+ * The tokens left to upstream in light have the same gap in dark: without
+ * these they keep codecrock's light colours on a dark surface, so a variable
+ * name (#333) all but disappears. Same VS Code palette as above.
+ */
+[data-theme='dark'] .kb-editor .ts-variable,
+[data-theme='dark'] .kb-editor .ts-variable_builtin,
+.dark .kb-editor .ts-variable,
+.dark .kb-editor .ts-variable_builtin {
+  color: #d4d4d4;
+}
+[data-theme='dark'] .kb-editor .ts-property,
+.dark .kb-editor .ts-property {
+  color: #9cdcfe;
+}
+[data-theme='dark'] .kb-editor .ts-function,
+[data-theme='dark'] .kb-editor .ts-function_call,
+.dark .kb-editor .ts-function,
+.dark .kb-editor .ts-function_call {
+  color: #dcdcaa;
+}
+[data-theme='dark'] .kb-editor .ts-type,
+.dark .kb-editor .ts-type {
+  color: #4ec9b0;
+}
+[data-theme='dark'] .kb-editor .ts-namespace,
+.dark .kb-editor .ts-namespace {
+  color: #c8c8c8;
+}
+[data-theme='dark'] .kb-editor .ts-tag,
+.dark .kb-editor .ts-tag {
+  color: #569cd6;
 }
 
 /* Overflow-menu icons declare min sizes that burst their compact buttons. */

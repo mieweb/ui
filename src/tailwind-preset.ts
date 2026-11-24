@@ -409,6 +409,23 @@ export const miewebUISafelist = [
   'min-h-[30px]',
   'animate-ozwell-message-flare',
   'grid-cols-[22px_minmax(0,1fr)]',
+  // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
+  'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
+  'sm:w-[var(--superchat-sidebar-width)]',
+  '[&_a:not([data-slot=reference-chip])]:text-current',
+  '[&_a:not([data-slot=reference-chip]):hover]:text-current',
+  '-mx-1',
+  'inset-y-0',
+  'w-0.5',
+  'cursor-col-resize',
+  'start-[3px]',
+  'group-hover:bg-primary-500',
+  'group-focus-visible:bg-primary-600',
+  // AIMessage pending (scheduled) bubble
+  'border-neutral-400',
+  'text-neutral-900',
+  'dark:border-neutral-500',
+  'dark:bg-transparent',
   'h-[22px]',
   'w-[22px]',
   'text-[11px]',
@@ -937,6 +954,9 @@ export const miewebUISafelist = [
   'overflow-auto',
   // Select component
   'truncate',
+  // ReferenceChip: sits on the text baseline, underlined only on hover
+  'align-baseline',
+  'no-underline',
   // AIReconciliationPanel
   'ring-primary-200',
   'dark:ring-primary-900',
@@ -1467,7 +1487,6 @@ export const miewebUISafelist = [
   'sr-only',
   // ChatComposer responsive grid: stacked cells below md, single-row pill
   // (md: overrides) above, plus the card surface
-  'grid-cols-[auto_minmax(0,1fr)_auto]',
   'col-span-3',
   'col-start-1',
   'col-start-3',

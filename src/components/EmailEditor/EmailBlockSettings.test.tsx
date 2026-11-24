@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 
-import { renderWithTheme } from '../../test/test-utils';
+import { loadTextareaSurface, renderWithTheme } from '../../test/test-utils';
 import type { TextAreaRichKerebronProps } from '../TextAreaRich/TextAreaRichKerebron';
 
 // Sentinel in place of the global legacy-backed stub: captures the props the
@@ -16,6 +16,8 @@ vi.mock('../TextAreaRich/TextAreaRichKerebron', () => ({
 
 import { EmailEditor } from './EmailEditor';
 import { createEmailBlock, type EmailContentTree } from './types';
+
+beforeAll(loadTextareaSurface);
 
 const doc: EmailContentTree = {
   version: '1.0',

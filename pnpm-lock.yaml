@@ -25,7 +25,7 @@ patchedDependencies:
     hash: 6b433a5e766e4858e67aa21b9ad90af692c1e98c2aedc8c84dcce38071c432de
     path: patches/@kerebron__extension-markdown@0.8.12.patch
   '@kerebron/extension-menu@0.8.12':
-    hash: 1a3ef56cb3294e19ba88a47b2898969a21c5b213dafe1ec2f8b6399800cb31a3
+    hash: 33849c1472617257005c60842d03c747b8a5d084b2879f4132a34be6456a0e69
     path: patches/@kerebron__extension-menu@0.8.12.patch
 
 importers:
@@ -59,6 +59,9 @@ importers:
       datavis-ace:
         specifier: '=4.1.0'
         version: 4.1.0
+      decode-named-character-reference:
+        specifier: ^1.3.0
+        version: 1.3.0
       dompurify:
         specifier: ^3.4.17
         version: 3.4.17
@@ -140,7 +143,7 @@ importers:
         version: 0.8.12
       '@kerebron/extension-menu':
         specifier: ^0.8.12
-        version: 0.8.12(patch_hash=1a3ef56cb3294e19ba88a47b2898969a21c5b213dafe1ec2f8b6399800cb31a3)
+        version: 0.8.12(patch_hash=33849c1472617257005c60842d03c747b8a5d084b2879f4132a34be6456a0e69)
       '@kerebron/extension-yjs':
         specifier: ^0.8.12
         version: 0.8.12
@@ -7030,7 +7033,7 @@ snapshots:
       '@kerebron/extension-codecrock': 0.8.12(patch_hash=992a39133ad7f10f463d904fcce0e313ec5f6635917b6ee05275d88f6fb20351)
       '@kerebron/extension-dev-toolkit': 0.8.12(svelte@5.56.3(@typescript-eslint/types@8.56.1))
       '@kerebron/extension-markdown': 0.8.12(patch_hash=6b433a5e766e4858e67aa21b9ad90af692c1e98c2aedc8c84dcce38071c432de)
-      '@kerebron/extension-menu': 0.8.12(patch_hash=1a3ef56cb3294e19ba88a47b2898969a21c5b213dafe1ec2f8b6399800cb31a3)
+      '@kerebron/extension-menu': 0.8.12(patch_hash=33849c1472617257005c60842d03c747b8a5d084b2879f4132a34be6456a0e69)
       '@kerebron/extension-menu-legacy': 0.8.12
       '@kerebron/extension-odt': 0.8.12
       '@kerebron/extension-tables': 0.8.12
@@ -7092,7 +7095,7 @@ snapshots:
       prosemirror-state: 1.4.3
       prosemirror-view: 1.42.3
 
-  '@kerebron/extension-menu@0.8.12(patch_hash=1a3ef56cb3294e19ba88a47b2898969a21c5b213dafe1ec2f8b6399800cb31a3)':
+  '@kerebron/extension-menu@0.8.12(patch_hash=33849c1472617257005c60842d03c747b8a5d084b2879f4132a34be6456a0e69)':
     dependencies:
       '@kerebron/editor': 0.8.12
       prosemirror-model: 1.25.9

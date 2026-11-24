@@ -12,7 +12,11 @@
  * subpath: `@mieweb/ui/components/SuperChat/plugins`.
  */
 
-export { SuperChat, type SuperChatProps } from './SuperChat';
+export {
+  SuperChat,
+  type SuperChatProps,
+  type SuperChatComposerProps,
+} from './SuperChat';
 
 export {
   SuperChatConversations,
@@ -26,6 +30,7 @@ export { getConversationMediaItems } from './media';
 
 export {
   createMarkdownRenderer,
+  MarkdownLink,
   type CreateMarkdownRendererOptions,
 } from './render/createMarkdownRenderer';
 
@@ -48,6 +53,7 @@ export type {
   SuperChatMediaItem,
   SuperChatMediaFeedProps,
   SuperChatMediaLabels,
+  SuperChatMessageLabels,
   SuperChatMessageMediaRenderProps,
   SuperChatRenderMessageMedia,
   SuperChatView,

@@ -11,6 +11,7 @@ import { cva } from 'class-variance-authority';
 import {
   Check as CheckIcon,
   Clipboard as ClipboardIcon,
+  Clock as ClockIcon,
   Ellipsis as EllipsisIcon,
   Loader2,
   Pencil as PencilIcon,
@@ -56,6 +57,17 @@ export function formatTime(time: Date | string): string {
   });
 }
 
+/** "Thu, Oct 1, 9:00 AM" in the user's locale — for times that may not be today. */
+export function formatDateTime(time: Date | string): string {
+  return new Date(time).toLocaleString(undefined, {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
+
 export function byTime(a: SuperChatMessage, b: SuperChatMessage): number {
   return new Date(a.time).getTime() - new Date(b.time).getTime();
 }
@@ -75,20 +87,62 @@ export function detectMentions(
   text: string,
   participants: Participant[]
 ): string[] {
-  const ids: string[] = [];
-  for (const p of participants) {
-    if (p.kind === 'system') continue;
-    const token = '@' + p.name.split(' ')[0];
-    // Match a whole mention token only: the `@` must not be preceded by a word
-    // character or another `@`, and the token must not be followed by a word
-    // character (so `@Triage` does not match `@TriageAgent`).
+  return matchMentionTokens(
+    text,
+    participants
+      .filter((p) => p.kind !== 'system')
+      .map((p) => ({ id: p.id, token: p.name.split(' ')[0] }))
+  );
+}
+
+/** Letters, digits and combining marks in any script, plus `_`. */
+const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
+
+/**
+ * Ids whose `@token` appears in `text`, in `entries` order. Used for a host's
+ * own `mentionOptions`, whose inserted token is `value`, or the first word of
+ * `label` (the same default the composer inserts).
+ *
+ * Only whole tokens count: the `@` must not follow a letter, digit or another
+ * `@`, and the token must not run on into a letter or digit, in any script
+ * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
+ * the longest one at that spot wins, so `@john.doe` is not also `@john`;
+ * entries with the same token all match it (two people named Alex).
+ */
+export function matchMentionTokens(
+  text: string,
+  entries: { id: string; token: string }[]
+): string[] {
+  const found = new Set<string>();
+  // Indexed, so each match is checked against its own span only, not every
+  // earlier match: exact spans already taken, and every position they cover.
+  const takenSpans = new Set<string>();
+  const occupied = new Uint8Array(text.length);
+  const longestFirst = [...entries].sort(
+    (a, b) => b.token.length - a.token.length
+  );
+  for (const { id, token } of longestFirst) {
     const pattern = new RegExp(
-      `(?<![\\w@])${escapeRegExp(token)}(?![\\w])`,
-      'i'
+      `(?<![${MENTION_WORD}@])${escapeRegExp('@' + token)}(?![${MENTION_WORD}])`,
+      'giu'
     );
-    if (pattern.test(text)) ids.push(p.id);
+    for (const match of text.matchAll(pattern)) {
+      const start = match.index;
+      const end = start + match[0].length;
+      // A shorter token inside a longer one's match is rejected, but the same
+      // span counts for every entry that inserts that token (two "Alex"es).
+      const span = `${start}:${end}`;
+      if (!takenSpans.has(span)) {
+        if (occupied.subarray(start, end).includes(1)) continue;
+        takenSpans.add(span);
+        occupied.fill(1, start, end);
+      }
+      found.add(id);
+    }
   }
-  return ids;
+  return entries
+    .map((e) => e.id)
+    .filter((id, i, all) => found.has(id) && all.indexOf(id) === i);
 }
 
 export function lastMessageByTime(
@@ -193,10 +247,11 @@ export function ParticipantAvatar({
 }
 
 // ============================================================================
-// Reference chip (chat-component `ref` thread items)
+// Ref item card (chat-component `ref` thread items) — a whole-message card for
+// an attached record; not the inline `ReferenceChip` from ../ReferenceChip.
 // ============================================================================
 
-export function ReferenceChip({
+export function RefItemCard({
   reference,
   linkBuilder,
   onReferenceClick,
@@ -372,6 +427,27 @@ interface MessageAction {
   onSelect: () => void;
   /** Explicit variants, rendered as a flyout submenu in the overflow menu. */
   submenu?: { label: string; items: MessageActionItem[] };
+}
+
+/**
+ * The text a reader sees in `element`: its `textContent` without what is
+ * hidden from assistive tech, so a decorative node (a reference chip's
+ * initials avatar, KaTeX's visual copy of a formula) stays out of a plain
+ * copy — `@Ann Lee`, not `AL@Ann Lee`. A formula copies once, as its TeX
+ * source (as the references plugin's `textOf` reads it): MathML's own text
+ * drops what its structure says, so `$x^2$` would copy as `x2`.
+ */
+function readableText(element: HTMLElement | null): string {
+  if (!element) return '';
+  const clone = element.cloneNode(true) as HTMLElement;
+  clone.querySelectorAll('math').forEach((math) => {
+    const tex = math.querySelector('annotation')?.textContent;
+    if (tex) math.replaceWith(tex);
+  });
+  clone.querySelectorAll('[aria-hidden="true"], annotation').forEach((node) => {
+    node.remove();
+  });
+  return clone.textContent ?? '';
 }
 
 interface UseMessageCopyOptions {
@@ -700,6 +776,8 @@ interface MessageRowProps {
   mediaErrorLabel?: string;
   /** Localized preview retry text (falls back to the player default). */
   mediaRetryLabel?: string;
+  /** Prefix of the scheduled indicator, before its time. */
+  scheduledLabel?: string;
   /** The host's card for an attachment, in place of the built-in one. */
   renderMessageMedia?: SuperChatRenderMessageMedia;
   /** The box an attachment card fits in, a CSS length (SuperChat's `mediaMaxSize`). */
@@ -774,6 +852,7 @@ export const MessageRow = React.memo(function MessageRow({
   attachmentLabels = DEFAULT_ATTACHMENT_LABELS,
   mediaErrorLabel,
   mediaRetryLabel,
+  scheduledLabel = 'Scheduled',
   renderMessageMedia,
   mediaMaxSize = '18rem',
 }: MessageRowProps) {
@@ -930,7 +1009,7 @@ export const MessageRow = React.memo(function MessageRow({
   const copy = useMessageCopy({
     markdown: markdownSource,
     getHtml: () => bubbleRef.current?.innerHTML ?? '',
-    getText: () => bubbleRef.current?.textContent ?? '',
+    getText: () => readableText(bubbleRef.current),
     defaultFormat: defaultCopyFormat,
   });
 
@@ -973,7 +1052,7 @@ export const MessageRow = React.memo(function MessageRow({
         data-slot="superchat-reference"
         className={cn('flex', isSelf && 'justify-end')}
       >
-        <ReferenceChip
+        <RefItemCard
           reference={message.ref}
           linkBuilder={linkBuilder}
           onReferenceClick={onReferenceClick}
@@ -985,6 +1064,9 @@ export const MessageRow = React.memo(function MessageRow({
   const accent = participant?.color;
   const accentTextColor = accessibleAccentTextColor(accent);
   const authorName = participant?.name ?? 'Unknown';
+  const scheduled = message.scheduledFor
+    ? `${scheduledLabel} · ${formatDateTime(message.scheduledFor)}`
+    : null;
 
   const startEdit = () => {
     const el = bubbleRef.current;
@@ -1148,7 +1230,7 @@ export const MessageRow = React.memo(function MessageRow({
     <div
       data-slot="superchat-message"
       role="article"
-      aria-label={`${authorName}, ${formatTime(message.time)}`}
+      aria-label={`${authorName}, ${formatTime(message.time)}${scheduled ? `, ${scheduled}` : ''}`}
       className={cn(
         'group flex gap-2',
         isSelf ? 'flex-row-reverse' : 'flex-row'
@@ -1206,6 +1288,15 @@ export const MessageRow = React.memo(function MessageRow({
               (edited)
             </span>
           )}
+          {scheduled && (
+            <span
+              data-slot="superchat-scheduled-indicator"
+              className="inline-flex items-center gap-1 text-[10px] font-medium text-neutral-600 dark:text-neutral-300"
+            >
+              <ClockIcon size={10} aria-hidden="true" />
+              {scheduled}
+            </span>
+          )}
         </div>
 
         {/* w-full keeps this row at thread width even under the column's
@@ -1224,6 +1315,9 @@ export const MessageRow = React.memo(function MessageRow({
               data-slot="superchat-bubble"
               variant={isSelf ? 'user' : 'assistant'}
               hasError={message.status === 'error'}
+              // Keep the filled bubble while editing: the editor's controls are
+              // styled against it, and the pending outline has no fill.
+              pending={!!message.scheduledFor && !isEditing}
               className="text-sm has-[[data-slot=superchat-nitro-table]]:w-full has-[[data-slot=superchat-nitro-table]]:max-w-full"
             >
               {isEditing ? (
@@ -1242,7 +1336,12 @@ export const MessageRow = React.memo(function MessageRow({
                     }}
                     onPaste={handleEditPaste}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
+                      // Plain Enter inserts a newline (edits are often
+                      // multi-line); Ctrl/Cmd+Enter is the save shortcut. Skip
+                      // while an IME is composing so confirming a candidate
+                      // never saves or cancels.
+                      if (e.nativeEvent.isComposing) return;
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                         e.preventDefault();
                         saveEdit();
                       } else if (e.key === 'Escape') {

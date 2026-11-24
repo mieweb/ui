@@ -9,10 +9,11 @@ import { ENCOUNTER_NARRATIVE_ATTRIBUTES } from './narrativeFindings';
 import { EncounterMediaCaptureContext } from './mediaCapture';
 
 /**
- * Keep visit formatting small: no links, media, styles, or imported document
- * chrome. Every block format the editor's block menu and markdown shortcuts
- * offer (headings 1–3, quote, lists) is allowed, so published formatting
- * survives reopening the field.
+ * An XSS barrier, not a formatting policy: everything the standard editor
+ * toolbar emits (marks, links, headings, lists, tables, alignment, highlight)
+ * survives the publish round trip byte-for-byte, while scripts, event
+ * handlers, unsafe URLs, host classes and imported document chrome are
+ * stripped. Media stays out unless the host opts in.
  */
 export const sanitizeEncounterNarrativeHtml = sanitizeNarrativeHtml;
 
