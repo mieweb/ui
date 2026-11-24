@@ -1096,7 +1096,11 @@ export const ChatComposer = React.forwardRef<
             >
               <React.Suspense
                 fallback={
-                  <div className="text-sm text-neutral-400">{placeholder}</div>
+                  // Real text (not a ::placeholder), so it must meet AA
+                  // contrast: the theme's muted-text token does.
+                  <div className="text-muted-foreground text-sm">
+                    {placeholder}
+                  </div>
                 }
               >
                 <LazyRichEditor
