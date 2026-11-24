@@ -8,6 +8,7 @@ const projectGlobals = [
   'direction',
   'user',
   'device',
+  'locoMode',
 ];
 
 export function serializeProjectGlobals(globals: Record<string, unknown>) {
