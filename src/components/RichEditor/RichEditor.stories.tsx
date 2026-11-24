@@ -62,6 +62,8 @@ async function save() {
 
 \`triggers\` turns on inline references: one \`ReferenceTrigger\` per kind (\`@\` people, \`#\` tickets, …). Typing a trigger's character calls its \`search\`; arrows move, Enter or Tab inserts the pick as an **atomic chip** (the caret steps over it, Backspace removes it whole), Escape closes the list for that spot. The chip is saved in \`value\` as a plain Markdown link (\`[@Ann Lee](/people/u-ann)\`) and links a trigger claims load back as chips, so the stored text needs no new syntax; read the ids back with \`referencesIn\`. The editor is the combobox (\`aria-autocomplete\`, \`aria-controls\`, \`aria-activedescendant\`) and the list a \`listbox\` named by the trigger's \`label\`. See \`ReferenceChip\` (\`editors-referencechip\`) for the trigger contract.
 
+**A reference is not a mention.** Both open an \`@\` list, but a reference only saves a link to a record: it does not address a chat participant, notify anyone, or fill \`SuperChat\`'s \`mentions\` or agent routing. To address someone in a chat, use [ChatComposer](?path=/docs/chat-chatcomposer--docs)'s \`mentionOptions\` (which \`SuperChat\` fills from its participants). Use a trigger when the text should link to a record — a person's profile, a ticket — and the host reads the ids back with \`referencesIn\` to act on them itself.
+
 ### Pasted and dropped files
 
 Images and videos can be pasted or dropped straight onto the surface. **Set \`mediaUpload.uploadHandler\` if the document is persisted anywhere** — without it the file is embedded in the document itself, an image as a base64 \`data:\` URL and a video as an object URL. A 4 MB screenshot becomes roughly 5.8 MB of Markdown, which most APIs will refuse, and an object URL is dead as soon as the page reloads.
