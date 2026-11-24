@@ -17,6 +17,16 @@ async function gotoStory(
   await expect(page.locator('#storybook-root')).not.toBeEmpty();
 }
 
+/**
+ * The close-up's Play in the thread. It shares its message with another clip,
+ * so it is a gallery cell: a still with no text, its title only in its name.
+ */
+function closeUpInThread(page: Page) {
+  return page
+    .getByRole('log', { name: 'Messages' })
+    .getByRole('button', { name: 'Play A closer look', exact: true });
+}
+
 async function playingCount(page: Page) {
   return page.evaluate(
     () =>
@@ -118,9 +128,7 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
     await expect(
       page.getByRole('button', { name: 'Media', exact: true })
     ).toHaveCount(0);
-    const attachment = page
-      .locator('[data-slot="superchat-message-media"]')
-      .filter({ hasText: 'A closer look' });
+    const attachment = closeUpInThread(page);
     const threadVideo = attachment.locator('video');
     await expect(threadVideo).toHaveAttribute('src', /^blob:/);
     await expect.poll(() => playingCount(page)).toBe(0);
@@ -130,7 +138,7 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
     });
     await composer.fill('Keep this reply while I browse the recording.');
 
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     await expect(feed).toBeVisible();
     const clip = feed.getByRole('article', {
       name: 'A closer look',
@@ -178,15 +186,13 @@ test.describe('MediaFeed - native playback and conversation integration', () => 
       .getByRole('button', { name: 'Back to conversation', exact: true })
       .click();
     await expect(messages).toBeVisible();
-    await expect(
-      attachment.getByRole('button', { name: /Play/ })
-    ).toBeFocused();
+    await expect(attachment).toBeFocused();
     await expect(feed).toHaveCount(0);
     await expect.poll(() => playingCount(page)).toBe(0);
     await expect(composer).toHaveValue(
       'Keep this reply while I browse the recording.'
     );
-    await attachment.getByRole('button', { name: /Play/ }).click();
+    await attachment.click();
     await expect(feed).toBeVisible();
     await expect.poll(() => playingCount(page)).toBe(1);
     await expect(composer).toHaveValue(
@@ -376,6 +382,124 @@ test.describe('MediaPlayer - overlay controls', () => {
         .evaluate((bar) => getComputedStyle(bar).direction)
     ).toBe('ltr');
   });
+});
+
+test.describe('SuperChat - overlay media view', () => {
+  async function openCloseUp(page: Page, story: string) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await gotoStory(page, story);
+    const teamUpdates = page.getByRole('button', { name: /Team updates/ });
+    // A phone starts on the conversation list.
+    if (await teamUpdates.isVisible()) await teamUpdates.click();
+    const attachment = closeUpInThread(page);
+    await expect(attachment.locator('video')).toHaveAttribute('src', /^blob:/, {
+      timeout: 15000,
+    });
+    await attachment.click();
+    return attachment;
+  }
+
+  test('covers a phone as a dialog, and Escape goes back to the thread', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const attachment = await openCloseUp(
+      page,
+      'superchat-inbox--media-conversation-phone-portrait'
+    );
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const box = await dialog.boundingBox();
+    expect(box).toMatchObject({ x: 0, y: 0, width: 390, height: 844 });
+    await expect(
+      dialog.getByRole('article', { name: 'A closer look', exact: true })
+    ).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toHaveCount(0);
+    await expect(attachment).toBeFocused();
+  });
+
+  test('keeps Tab and Shift+Tab inside the phone dialog, on shown controls', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openCloseUp(
+      page,
+      'superchat-inbox--media-conversation-phone-portrait'
+    );
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const focusIsOnAShownControlInside = () =>
+      dialog.evaluate((panel) => {
+        const active = document.activeElement as HTMLElement | null;
+        return (
+          !!active &&
+          panel.contains(active) &&
+          active.checkVisibility({ visibilityProperty: true })
+        );
+      });
+    // Enough presses to pass both ends of the dialog more than once.
+    for (const key of ['Shift+Tab', 'Tab']) {
+      for (let press = 0; press < 30; press++) {
+        await page.keyboard.press(key);
+        expect(await focusIsOnAShownControlInside()).toBe(true);
+      }
+    }
+  });
+
+  test('Back sits at the start edge in RTL, its arrow flipped', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await gotoStory(
+      page,
+      'superchat-inbox--media-conversation-phone-portrait',
+      {
+        globals: 'direction:rtl',
+      }
+    );
+    const teamUpdates = page.getByRole('button', { name: /Team updates/ });
+    if (await teamUpdates.isVisible()) await teamUpdates.click();
+    const attachment = closeUpInThread(page);
+    await expect(attachment.locator('video')).toHaveAttribute('src', /^blob:/, {
+      timeout: 15000,
+    });
+    await attachment.click();
+    const back = page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Back to conversation', exact: true });
+    const box = (await back.boundingBox())!;
+    expect(box.x + box.width).toBeGreaterThan(390 - 60);
+    expect(
+      await back.locator('svg').evaluate((icon) => getComputedStyle(icon).scale)
+    ).toBe('-1 1');
+  });
+
+  for (const [name, story, viewport] of [
+    [
+      'portrait',
+      'superchat-inbox--media-conversation-phone-portrait',
+      { width: 390, height: 844 },
+    ],
+    [
+      'landscape',
+      'superchat-inbox--media-conversation-phone-landscape',
+      { width: 844, height: 390 },
+    ],
+  ] as const) {
+    test(`phone ${name}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await openCloseUp(page, story);
+      await expect(page.getByRole('dialog')).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      // Video frames aren't deterministic; the layout around them is.
+      await expect(page).toHaveScreenshot(
+        `superchat-overlay-phone-${name}.png`,
+        { animations: 'disabled', stylePath: 'tests/visual/hide-video.css' }
+      );
+    });
+  }
 });
 
 test.describe('MediaFeed - deterministic visual coverage', () => {

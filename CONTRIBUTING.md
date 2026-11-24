@@ -288,6 +288,13 @@ ingests, so **the story is the record of truth and the manifest is derived from 
 page (deprecated, experimental, product-specific, demo-only), so a component never
 needs a hand-written status notice.
 
+`maturity:deprecated` and `maturity:retired` additionally **hide the entry from
+the sidebar and search** (the `tags` option in [.storybook/main.ts](.storybook/main.ts),
+[mieweb/ui#731](https://github.com/mieweb/ui/issues/731)); the docs page stays
+built and reachable by direct URL. When deprecating a component, in the same PR:
+move its `title` under the flat `Deprecated/` tier and add its row (status,
+replacement, why) to the directory at [src/catalog/Deprecated.mdx](src/catalog/Deprecated.mdx).
+
 ### Description template
 
 Write `description.component` under these headings, in this order. Keep each
@@ -471,10 +478,11 @@ Current notes:
 | [DictationButton](src/components/DictationButton/MAINTAINERS.md) | Session-guarded mic lifecycle; `transcribe` extension point; default provider shares the Whisper worker (shared model setting, English-only, no mid-decode cancel) |
 | [EmailEditor](src/components/EmailEditor/MAINTAINERS.md) | Canvas preview (`EmailBlockPreview`) and MJML renderer (`renderEmailMjml`) must change together (validate with strict `mjml`); one DOMPurify policy (`sanitizeEmailHtml`) sanitises every output and pasted input — stored documents are never normalised in place |
 | [EncounterVisit](src/components/EncounterVisit/MAINTAINERS.md) | One eSheet response store across form, RichEdit and View; coded clinical adapters, MCP validation, protected MDY links and empty-report rendering invariants |
+| [FileViewer](src/components/FileViewer/MAINTAINERS.md) | Separate entry for SuperChat's optional Markdown peers; sanitising belongs to the default renderer only; LTR code safelist in both presets; FileDocument draft sync and single-flight Save/Cancel |
 | [FloatingWindow](src/components/FloatingWindow/MAINTAINERS.md)               | Manual drag/resize math; modal vs. floating modes; fully controlled                                                                                                                                             |
 | [Globe](src/components/Globe/MAINTAINERS.md)                                 | Optional `three`/`react-globe.gl` peers isolated to the `@mieweb/ui/globe` entry; WebGL palette + escaped tooltip HTML; pointer-only canvas (hosts add the keyboard path via `selectedId`)                      |
 | [MediaFeed](src/components/MediaFeed/MAINTAINERS.md)                         | Imported `news-widget` history (merge, don't squash); host owns data/navigation; feed-owned visibility via IntersectionObserver with hydration-safe fallback; consume-once `playbackRequest`; shares `MediaPlayer` with SuperChat thread previews; `stacked`/`overlay` layouts (dark by `data-theme` scoping, condensed rules scoped to stacked) |
-| [MediaPlayer](src/components/MediaPlayer/MAINTAINERS.md) | Overlay controls span two picture-in-picture and two full-screen APIs (standard and iPhone Safari); support read after mount; internal PiP helpers shared with MediaFeed |
+| [MediaPlayer](src/components/MediaPlayer/MAINTAINERS.md) | Overlay controls span two picture-in-picture and two full-screen APIs (standard and iPhone Safari); support read after mount; internal PiP helpers shared with MediaFeed and SuperChat |
 | [MegaMenu](src/components/MegaMenu/MAINTAINERS.md)                           | Shared open state across `MegaMenuBar`; viewport re-clamping incl. featured-layout swaps; `normalizePath` shared with `SiteHeader`'s mobile drawer                                                              |
 | [Messaging](src/components/Messaging/MAINTAINERS.md)                         | Shared @mention module consumed by both `MessageComposer` and `ChatComposer` (run all affected suites — see notes); `DragDropZone` reused as a pure drop target                                                 |
 | [Motion](src/motion/MAINTAINERS.md)                                          | Optional `motion` peer isolated to the `@mieweb/ui/motion` entry; cross-entry context pinned to `globalThis`; CSS fallback contract                                                                             |
@@ -485,7 +493,7 @@ Current notes:
 | [RadialExplorer](src/components/RadialExplorer/MAINTAINERS.md)               | Controlled/uncontrolled `activeId` (attract loop never runs controlled); trig geometry exempt from RTL flipping; safelisted radius math                                                                         |
 | [Sidebar](src/components/Sidebar/MAINTAINERS.md)                             | `SidebarNavGroup` unmounts its items by design (a11y + measured-height collapse); focus must be captured before the panel goes, via two recorders; `forceMount` sits outside the rail gate and does not animate |
 | [SliderCalculator](src/components/SliderCalculator/MAINTAINERS.md)           | `values`-keyed notify effect via `notifyRef` (inline `compute`/`onChange` must not loop); settled-only live announcement; `AnimatedNumber` reduced-motion branch                                                |
-| [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section                                                                                          |
+| [SuperChat](src/components/SuperChat/MAINTAINERS.md)                         | Conversation/inbox/panel surfaces, sanitization contract, plugin dependencies; design rationale in its Mission section; opt-in overlay media view (phone dialog, safe-area insets); keeps the media view mounted while a clip floats in picture in picture |
 | [Templates](src/templates/MAINTAINERS.md)                                    | Server-Component-safe `@mieweb/ui/templates` entry (test + CI guard); JSON-only block data; `components`/`trackingId` threading; tone contrast tuned against axe; marquee CSS side effect; TW3 safelist block   |
 | [Views](src/views/MAINTAINERS.md)                                            | Shared accessor contract across six layouts; wall-date handling via `toDateTime`; accent tokens carry no text colour; ViewSet-owned shared props; board keyboard move is not dnd-kit's                          |
 | [VideoCard](src/components/VideoCard/MAINTAINERS.md)                         | YouTube IFrame API lifecycle in `useYouTubeHoverPreview` (shared promise with error/timeout retry); dwell-hover contract; touch/reduced-motion opt-outs                                                         |

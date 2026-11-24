@@ -23,10 +23,30 @@ and `@kerebron/wasm` (tested together at 0.8.12). Import `@mieweb/ui/kerebron.cs
 and serve `@kerebron/wasm/assets` at `/kerebron-wasm`. Apply the Kerebron patches
 described by the RichEditor documentation for its toolbar and Markdown marks.
 
-**Required for Kerebron 0.8.12:** configure the consuming application's package
-manager to resolve every `prosemirror-view` dependency to **1.42.3**. Kerebron
-pins 1.40.0, while the protected MDY link bridge uses 1.42.3. Two view instances
-can make decorations incompatible and leave the older view's behavior active.
+**Required for Kerebron 0.8.12:** install the `@kerebron/*` peers at **exactly
+0.8.12** (the tested set) and configure the consuming application's package
+manager to resolve every ProseMirror core package to a **single version**.
+Without this, a fresh install loads multiple copies of `prosemirror-model`
+and typing throws:
+
+```
+RangeError: Can not convert <…> to a Fragment
+(looks like multiple versions of prosemirror-model were loaded)
+```
+
+Two mechanisms split the versions (mieweb/ui#709). First, `@mieweb/ui` and
+Kerebron 0.8.12 both pin `prosemirror-model` 1.25.9 / `prosemirror-state`
+1.4.3 exactly, but Kerebron 0.8.13 pins different versions — a `^0.8.12`
+range drifts onto it, and the exact pins can never dedupe. Second, even with
+matching pins, ProseMirror's own `^`-ranged internal dependencies (for
+example `prosemirror-state → prosemirror-model ^1.0.0`) resolve to the
+newest release on any fresh install; this repository is only protected by
+its frozen lockfile. `pnpm dedupe` cannot fix either case, so overrides are
+required. (`prosemirror-view` additionally needs 1.42.3 rather than
+Kerebron's pinned 1.40.0: the protected MDY link bridge uses 1.42.3, and two
+view instances can make decorations incompatible and leave the older view's
+behavior active.)
+
 The overrides in this library's checkout do not propagate to installed apps.
 
 For pnpm 10, add to the host's `pnpm-workspace.yaml`:
@@ -34,6 +54,9 @@ For pnpm 10, add to the host's `pnpm-workspace.yaml`:
 ```yaml
 overrides:
   prosemirror-view: "1.42.3"
+  prosemirror-model: "1.25.9"
+  prosemirror-state: "1.4.3"
+  prosemirror-transform: "1.10.4"
 ```
 
 For npm, add to the host's `package.json`:
@@ -41,7 +64,10 @@ For npm, add to the host's `package.json`:
 ```json
 {
   "overrides": {
-    "prosemirror-view": "1.42.3"
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
   }
 }
 ```
@@ -51,16 +77,20 @@ For Yarn, add to the host's `package.json`:
 ```json
 {
   "resolutions": {
-    "prosemirror-view": "1.42.3"
+    "prosemirror-view": "1.42.3",
+    "prosemirror-model": "1.25.9",
+    "prosemirror-state": "1.4.3",
+    "prosemirror-transform": "1.10.4"
   }
 }
 ```
 
-If the host also declares `prosemirror-view` directly, pin that dependency to
-1.42.3. Reinstall and inspect `pnpm why prosemirror-view`,
-`npm ls prosemirror-view` or `yarn why prosemirror-view`: every resolved instance
-must be 1.42.3. Keep this requirement until a tested Kerebron release shares the
-same view version without an override.
+If the host also declares any of these packages directly, pin those
+dependencies to the same versions. Reinstall and inspect
+`pnpm why prosemirror-model` / `pnpm why prosemirror-view` (or the
+`npm ls` / `yarn why` equivalents): every resolved instance of each package
+must be a single version. Keep this requirement until a tested Kerebron
+release shares the same ProseMirror versions without an override.
 
 **Recommended for EncounterVisit hosts:** resolve `js-yaml` to **4.3.2 or
 newer**. `@mieweb/templit` 0.2.0 (a direct dependency used by
@@ -87,8 +117,9 @@ peers** (only the Yjs collaboration peers — `@kerebron/extension-yjs`,
 `yjs`, `y-protocols` — remain optional):
 
 ```sh
-npm install @kerebron/editor @kerebron/editor-kits \
-  @kerebron/extension-basic-editor @kerebron/extension-menu @kerebron/wasm
+npm install --save-exact @kerebron/editor@0.8.12 @kerebron/editor-kits@0.8.12 \
+  @kerebron/extension-basic-editor@0.8.12 @kerebron/extension-menu@0.8.12 \
+  @kerebron/wasm@0.8.12
 ```
 
 ```ts
@@ -110,8 +141,8 @@ field right after rendering can load it once up front: render one rich
 `Textarea`, then wait until its `[data-slot="textarea-rich-loading"]` frame
 is gone.
 
-Because every consumer now resolves Kerebron, the **`prosemirror-view`
-1.42.3 override and the Kerebron patches** described under
+Because every consumer now resolves Kerebron, the **ProseMirror version
+overrides and the Kerebron patches** described under
 [eSheet and EncounterVisit](#esheet-and-encountervisit) above also apply to
 every consumer — previously only EncounterVisit RichEdit hosts needed them.
 Note that package managers that auto-install peers (npm 7+, pnpm 8+ by
@@ -268,3 +299,38 @@ the internal `ChatComposer`). Legacy `MessageComposerProps`-era keys —
 `inputTrailing`, `onSend`, controlled `value` / `onValueChange` — are still
 accepted and mapped for compatibility, but new code should use the
 `ChatComposerProps` names directly.
+
+## SuperChat attachments and the media view (0.12.0)
+
+SuperChat now lays a message's attachments out as in a messaging app, and its
+media view can fill a phone. Hosts that only pass messages need no code
+changes; check the points below if you style SuperChat's DOM, extend its
+types, or rely on what the composer accepts.
+
+- **Attachments sit after the bubble, not inside it.** The text keeps its
+  bubble and each attachment follows as its own tile; two or more pictures
+  share one gallery tile. A message's actions (⋯) moved to the avatar's
+  column. CSS that targeted `superchat-message-media` inside the bubble needs
+  a fresh look; the current `data-slot` names are in the
+  [SuperChat README](src/components/SuperChat/README.md).
+- **The composer accepts fewer picture formats.** `image/*` became JPEG, PNG,
+  GIF, WebP and AVIF, the formats every browser can show. Anything else, a
+  HEIC from an iPhone for example, is refused with a reason through
+  `onComposerError` instead of being sent as a tile that can't load. Convert
+  such files before they reach the composer if you need them.
+- **`AttachmentKind` gains `'document'`.** An exhaustive `switch` over it
+  needs a new case.
+- **`SuperChatMediaLabels` gains required keys** (`openMediaNamed`,
+  `playMediaNamed`, `moreMedia`, `gallery`, `sending`, `sendingProgress`,
+  `mediaUnavailable`, `editAttachments`, `removeAttachment`,
+  `attachmentName`, `attachmentsPreview`). A partial `mediaLabels` override
+  keeps working; a full object needs them.
+- **`onMessageEdited` can receive `''`** as the text, when the author clears
+  it and attachments remain.
+- **One send at a time per conversation.** `isSending` blocks a second send
+  in the same conversation until the first settles.
+- **Escape leaves the media view on every screen** and stops there, so a
+  `Modal` or `Sheet` around SuperChat stays open.
+- **`Dropdown` closes when a scroll carries its trigger out of view.**
+  Scrolling inside the menu, the page itself, or the on-screen keyboard's own
+  scroll leaves it open.

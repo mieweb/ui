@@ -10,14 +10,21 @@ import { cn } from '../../utils/cn';
 import type {
   AIMessage,
   AIMessageContent,
+  AIRenderCustomContent,
   AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
+  MCPToolCall,
 } from './types';
 import { MCPToolCallDisplay } from './MCPToolCall';
+import {
+  MCPToolCallGroup,
+  type MCPToolCallGroupOptions,
+} from './MCPToolCallGroup';
 import { SparklesIcon } from './icons';
 import { CollapsiblePill } from './CollapsiblePill';
 import { AudioPlayer } from '../AudioPlayer';
+import { formatFileSize } from '../../utils/fileSize';
 
 // ============================================================================
 // Avatar Component
@@ -235,6 +242,7 @@ interface ContentBlockProps {
   streaming: boolean;
   role: AIMessage['role'];
   renderTextContent?: AIRenderTextContent;
+  renderCustomContent?: AIRenderCustomContent;
 }
 
 function ContentBlock({
@@ -244,6 +252,7 @@ function ContentBlock({
   streaming,
   role,
   renderTextContent,
+  renderCustomContent,
 }: ContentBlockProps) {
   if (content.type === 'text' && content.text) {
     if (renderTextContent) {
@@ -257,6 +266,13 @@ function ContentBlock({
       <div className="prose prose-sm dark:prose-invert max-w-none">
         <p className="whitespace-pre-wrap">{content.text}</p>
       </div>
+    );
+  }
+
+  // Host-owned widgets (e.g. players) are not prose, so no `prose` wrapper.
+  if (content.type === 'custom') {
+    return (
+      <>{renderCustomContent?.(content.data, { messageId, streaming, role })}</>
     );
   }
 
@@ -406,13 +422,6 @@ function ContentBlock({
   return null;
 }
 
-/** Human-readable file size (e.g. "1.2 MB"). */
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 // ============================================================================
 // AI Message Component
 // ============================================================================
@@ -434,7 +443,9 @@ const messageVariants = cva('flex gap-3', {
 const bubbleVariants = cva('rounded-2xl px-4 py-2.5 w-fit max-w-[85%]', {
   variants: {
     variant: {
-      user: 'bg-primary-800 text-white dark:bg-primary-800',
+      // Links inherit the bubble's white text: a Markdown link's own
+      // `text-primary-800` is the bubble's background, so it would vanish.
+      user: 'bg-primary-800 text-white dark:bg-primary-800 [&_a]:text-current [&_a:hover]:text-current',
       assistant:
         'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-white',
       system:
@@ -453,6 +464,8 @@ export interface ChatBubbleProps
     VariantProps<typeof bubbleVariants> {
   /** Show error styling (red border). */
   hasError?: boolean;
+  /** Show the message as not delivered yet (e.g. scheduled): dashed outline, no fill. */
+  pending?: boolean;
   /**
    * Optional inline-start border accent color. Used by multi-participant
    * surfaces (e.g. SuperChat) to tint a speaker's bubble; AI chat leaves it
@@ -468,15 +481,27 @@ export interface ChatBubbleProps
  */
 const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
   (
-    { className, variant, hasError, accent, style, children, ...props },
+    {
+      className,
+      variant,
+      hasError,
+      pending,
+      accent,
+      style,
+      children,
+      ...props
+    },
     ref
   ) => {
     return (
       <div
         ref={ref}
         data-slot="chat-bubble"
+        data-pending={pending || undefined}
         className={cn(
           bubbleVariants({ variant }),
+          pending &&
+            'border-2 border-dashed border-neutral-400 bg-transparent text-neutral-900 dark:border-neutral-500 dark:bg-transparent dark:text-white',
           hasError && 'border border-red-300 dark:border-red-700',
           className
         )}
@@ -512,13 +537,85 @@ export interface AIMessageDisplayProps {
    */
   renderTextContent?: AIRenderTextContent;
   /**
+   * Optional renderer for `custom` content blocks. Called per custom block with
+   * its `data` and `{ messageId, streaming, role }`. Without it, custom blocks
+   * render nothing.
+   */
+  renderCustomContent?: AIRenderCustomContent;
+  /**
    * Optional renderer for a per-message footer shown below the bubble (e.g.
    * message action controls). Aligned with the message (right for user, left
    * for assistant).
    */
   renderMessageFooter?: AIRenderMessageFooter;
+  /**
+   * Opt in to grouped tool calls: each run of consecutive `tool_use` blocks
+   * renders as one {@link MCPToolCallGroup} (compact rows under a "Used N
+   * tools" header, with approval controls) instead of a pill per call. The
+   * options carry the group's callbacks and labels.
+   */
+  toolCallGroup?: MCPToolCallGroupOptions;
   /** Additional class name */
   className?: string;
+}
+
+/**
+ * Renders a message's content blocks in order. With `toolCallGroup`, each run
+ * of consecutive `tool_use` blocks becomes one group, keyed by its first call
+ * so the group keeps its state as later calls join it.
+ */
+function MessageContentBlocks({
+  message,
+  streaming,
+  onLinkClick,
+  renderTextContent,
+  renderCustomContent,
+  toolCallGroup,
+}: {
+  message: AIMessage;
+  streaming: boolean;
+  onLinkClick?: (link: MCPResourceLink) => void;
+  renderTextContent?: AIRenderTextContent;
+  renderCustomContent?: AIRenderCustomContent;
+  toolCallGroup?: MCPToolCallGroupOptions;
+}) {
+  const nodes: React.ReactNode[] = [];
+  let run: MCPToolCall[] = [];
+  const flushRun = () => {
+    if (run.length === 0) return;
+    nodes.push(
+      <MCPToolCallGroup
+        key={`tool-call-group-${run[0].id}`}
+        toolCalls={run}
+        onLinkClick={onLinkClick}
+        {...toolCallGroup}
+      />
+    );
+    run = [];
+  };
+
+  message.content.forEach((content, index) => {
+    if (toolCallGroup && content.type === 'tool_use' && content.toolCall) {
+      run.push(content.toolCall);
+      return;
+    }
+    flushRun();
+    nodes.push(
+      <ContentBlock
+        key={index}
+        content={content}
+        onLinkClick={onLinkClick}
+        messageId={message.id}
+        streaming={streaming}
+        role={message.role}
+        renderTextContent={renderTextContent}
+        renderCustomContent={renderCustomContent}
+      />
+    );
+  });
+  flushRun();
+
+  return <>{nodes}</>;
 }
 
 /**
@@ -531,12 +628,24 @@ export function AIMessageDisplay({
   showTimestamp = false,
   onLinkClick,
   renderTextContent,
+  renderCustomContent,
   renderMessageFooter,
+  toolCallGroup,
   className,
 }: AIMessageDisplayProps) {
   const isStreaming = message.status === 'streaming';
   const hasContent = message.content.length > 0;
   const messageFooter = renderMessageFooter?.(message);
+  const contentBlocks = (
+    <MessageContentBlocks
+      message={message}
+      streaming={isStreaming}
+      onLinkClick={onLinkClick}
+      renderTextContent={renderTextContent}
+      renderCustomContent={renderCustomContent}
+      toolCallGroup={toolCallGroup}
+    />
+  );
 
   const formatTime = (timestamp: Date | string) => {
     const date = new Date(timestamp);
@@ -555,19 +664,7 @@ export function AIMessageDisplay({
         data-slot="ai-message"
         className={cn(messageVariants({ role: message.role }), className)}
       >
-        <div className="min-w-0 flex-1 space-y-2">
-          {message.content.map((content, index) => (
-            <ContentBlock
-              key={index}
-              content={content}
-              onLinkClick={onLinkClick}
-              messageId={message.id}
-              streaming={isStreaming}
-              role={message.role}
-              renderTextContent={renderTextContent}
-            />
-          ))}
-        </div>
+        <div className="min-w-0 flex-1 space-y-2">{contentBlocks}</div>
       </div>
     );
   }
@@ -593,19 +690,7 @@ export function AIMessageDisplay({
           hasError={message.status === 'error'}
         >
           {hasContent ? (
-            <div className="space-y-3">
-              {message.content.map((content, index) => (
-                <ContentBlock
-                  key={index}
-                  content={content}
-                  onLinkClick={onLinkClick}
-                  messageId={message.id}
-                  streaming={isStreaming}
-                  role={message.role}
-                  renderTextContent={renderTextContent}
-                />
-              ))}
-            </div>
+            <div className="space-y-3">{contentBlocks}</div>
           ) : isStreaming ? (
             <div className="flex items-center justify-center">
               <AITypingIndicator />

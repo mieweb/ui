@@ -61,6 +61,10 @@ export interface DictationButtonProps
   variant?: RecordButtonVariant;
   /** Show `m:ss` while recording. */
   showDuration?: boolean;
+  /** Live waveform bars instead of the stop icon while recording. */
+  showWaveform?: boolean;
+  /** Pulse rings while recording. They extend past the button, so turn off in tight rows. Default true. */
+  showPulse?: boolean;
   /** Show the listening/transcribing/error caption. It is always announced to screen readers. */
   showStatus?: boolean;
   /** Override any user-facing string (i18n). */
@@ -96,6 +100,8 @@ export const DictationButton = React.forwardRef<
       size = 'sm',
       variant = 'ghost',
       showDuration = false,
+      showWaveform = false,
+      showPulse = true,
       showStatus = false,
       labels: labelOverrides,
       className,
@@ -173,6 +179,8 @@ export const DictationButton = React.forwardRef<
           disabled={disabled}
           size={size}
           variant={variant}
+          showWaveform={showWaveform}
+          showPulse={showPulse}
           aria-label={ariaLabel}
           onClick={() => {
             if (status === 'recording') stop();

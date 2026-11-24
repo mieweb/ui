@@ -9,6 +9,7 @@ import { create } from 'storybook/theming/create';
 import { Button } from 'storybook/internal/components';
 import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
 import { buildArgsParam } from 'storybook/internal/router';
+import { githubSourceUrl } from './github-source';
 import { serializeProjectGlobals } from './mobile-preview';
 
 // Brand theme configurations for the Storybook manager UI
@@ -617,6 +618,25 @@ addons.register('mieweb-brand-sync', (api) => {
   });
 });
 
+addons.register('mieweb-loco-locale-reset', (api) => {
+  let previousLocoMode: unknown = api.getGlobals()?.locoMode;
+
+  // 'setGlobals' fires once when the preview boots with the initial globals
+  // (from the URL); 'globalsUpdated' fires on every toolbar change.
+  api.on('setGlobals', ({ globals }: { globals?: Record<string, unknown> }) => {
+    previousLocoMode = globals?.locoMode;
+  });
+  api.on('globalsUpdated', ({ globals }) => {
+    const locoMode = globals?.locoMode;
+    // Changing the Loco mode resets the locale to English so every mode
+    // starts from the untranslated baseline.
+    if (previousLocoMode !== undefined && locoMode !== previousLocoMode && globals?.locale !== 'en') {
+      api.updateGlobals({ locale: 'en' });
+    }
+    previousLocoMode = locoMode;
+  });
+});
+
 // Redirect old/broken story bookmarks to the Introduction page
 addons.register('mieweb-404-redirect', (api) => {
   const FALLBACK_ID = 'introduction--docs';
@@ -667,10 +687,7 @@ function GitHubSourceTool() {
 
   if (!sourcePath) return null;
 
-  const githubUrl = `https://github.com/mieweb/ui/blob/main/${sourcePath
-    .split('/')
-    .map(encodeURIComponent)
-    .join('/')}`;
+  const githubUrl = githubSourceUrl(sourcePath);
 
   return React.createElement(
     Button,

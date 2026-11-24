@@ -7,7 +7,8 @@
  * design-system tokens + shared <Button> so it tracks theme + dark mode; the Ozwell accent is the
  * `ozwell` brand token.
  *
- * Voices are keyed by id in the speaker runtime (WHO); removing one revokes that person. The WHAT
+ * Voices are keyed by id in the speaker runtime (WHO, TitaNet) and in the doctor-check store (Nemotron);
+ * removing one revokes that person in both. The WHAT
  * phrase-prints are shared/speaker-independent, so they're left in place on per-voice removal.
  */
 import * as React from 'react';
@@ -16,6 +17,7 @@ import { Button } from '../../Button';
 import { inputVariants } from '../../Input';
 import { AlertDialog } from '../../AlertDialog';
 import { useSpeakerVerify } from './SpeakerVerify/useSpeakerVerify';
+import { useNemotronWakeVoices } from './useNemotronWakeVoices';
 import { clearWhatPrints } from '../voiceprintStore';
 import { VoiceSetup } from './VoiceSetup';
 import { OzwellLogo, DEFAULT_LOGO_SRC } from './OzwellLogo';
@@ -52,6 +54,24 @@ export function VoiceManager({
   voiceprintNamespace,
 }: VoiceManagerProps) {
   const sv = useSpeakerVerify({ voiceprintNamespace });
+  // Removing a voice also revokes its doctor-check (Nemotron) voiceprint.
+  const wakeVoices = useNemotronWakeVoices({ voiceprintNamespace });
+  // A failed revoke leaves that voice able to command Hey Ozwell, so it must be visible. The rest of the
+  // removal waits for the revoke, so a failure keeps the voice listed and the action can be retried.
+  const [revokeFailed, setRevokeFailed] = React.useState(false);
+  const revoke = (change: Promise<void>, onRevoked: () => void) => {
+    setRevokeFailed(false);
+    change.then(
+      () => {
+        onRevoked();
+        setTick((t) => t + 1);
+      },
+      (e: unknown) => {
+        console.error('[voice-manager] could not update the doctor check', e);
+        setRevokeFailed(true);
+      }
+    );
+  };
   const [inSetup, setInSetup] = React.useState<SetupTarget | null>(null);
   const [, setTick] = React.useState(0); // bump to force a re-read of the voice list after enroll/remove/clear
   const [addName, setAddName] = React.useState('');
@@ -91,21 +111,19 @@ export function VoiceManager({
     setAddName('');
     setInSetup({ mode: 'add', voiceId: id, label: name });
   };
-  const remove = (id: string) => {
-    sv.removeVoice(id);
-    setTick((t) => t + 1);
-  };
+  const remove = (id: string) =>
+    revoke(wakeVoices.remove(id), () => sv.removeVoice(id));
   const saveRename = (id: string) => {
     const l = editLabel.trim();
     if (l) sv.renameVoice(id, l);
     setEditingId(null);
     setTick((t) => t + 1);
   };
-  const clearAll = () => {
-    sv.clear();
-    void clearWhatPrints(voiceprintNamespace);
-    setTick((t) => t + 1);
-  };
+  const clearAll = () =>
+    revoke(wakeVoices.clear(), () => {
+      sv.clear();
+      void clearWhatPrints(voiceprintNamespace);
+    });
 
   return (
     <div className="bg-background text-foreground flex min-h-full flex-col items-center justify-center p-6 text-center">
@@ -130,6 +148,11 @@ export function VoiceManager({
       {sv.error && (
         <div className="text-destructive mt-4 text-[13px]">
           Couldn’t load the voice models — check the console.
+        </div>
+      )}
+      {revokeFailed && (
+        <div role="alert" className="text-destructive mt-4 text-[13px]">
+          Couldn’t remove the voice from Hey Ozwell’s doctor check. Try again.
         </div>
       )}
 

@@ -86,6 +86,7 @@ describe('Storybook URL state', () => {
       direction: 'rtl',
       user: 'alice',
       device: 'trusted',
+      locoMode: 'package',
     };
     const url = setStoryState(
       new URL(previewPath, window.location.origin),

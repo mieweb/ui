@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTheme } from '../../test/test-utils';
 import { Button } from '../Button';
@@ -12,7 +12,85 @@ import {
   DropdownSubmenu,
 } from './Dropdown';
 
+/** Moves the clock past the moment just after opening (openingScrollWindow). */
+function pastOpening() {
+  const now = Date.now();
+  vi.spyOn(Date, 'now').mockReturnValue(now + 1000);
+}
+
+/** A Dropdown inside a scroller, as in a thread or a list. */
+function renderInScroller(searchable = false) {
+  renderWithTheme(
+    <div data-testid="thread" style={{ overflow: 'auto', height: 100 }}>
+      <Dropdown searchable={searchable} trigger={<Button>Open menu</Button>}>
+        <DropdownItem>Alpha</DropdownItem>
+      </Dropdown>
+    </div>
+  );
+  const thread = screen.getByTestId('thread');
+  const trigger = screen.getByRole('button', { name: 'Open menu' });
+  return { thread, trigger };
+}
+
 describe('Dropdown', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it('closes when what holds its trigger scrolls, not for a scroll inside the menu', async () => {
+    const user = userEvent.setup();
+    const { thread, trigger } = renderInScroller();
+    await user.click(trigger);
+    fireEvent.scroll(screen.getByRole('menu'));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    pastOpening();
+    fireEvent.scroll(thread);
+    await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
+  it('stays open for the scroll that arrives just after opening', async () => {
+    // A browser sends the scroll that brought the trigger into view (a tap
+    // ending a fling, a test scrolling to it) a frame after the tap.
+    const user = userEvent.setup();
+    const { thread, trigger } = renderInScroller();
+    await user.click(trigger);
+    fireEvent.scroll(thread);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+  });
+
+  it('closes on a scroll while the search field has focus', async () => {
+    const user = userEvent.setup();
+    const { thread, trigger } = renderInScroller(true);
+    await user.click(trigger);
+    const search = screen.getByRole('searchbox', {
+      name: 'Search dropdown items',
+    });
+    await waitFor(() => expect(search).toHaveFocus());
+    pastOpening();
+    fireEvent.scroll(thread);
+    await vi.waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+  });
+
+  it('stays open for the scroll the on-screen keyboard makes as it opens', async () => {
+    // jsdom has no visualViewport; an EventTarget stands in for it.
+    const viewport = new window.EventTarget();
+    vi.stubGlobal('visualViewport', viewport);
+    try {
+      const user = userEvent.setup();
+      const { thread, trigger } = renderInScroller(true);
+      await user.click(trigger);
+      await waitFor(() =>
+        expect(
+          screen.getByRole('searchbox', { name: 'Search dropdown items' })
+        ).toHaveFocus()
+      );
+      pastOpening();
+      viewport.dispatchEvent(new Event('resize'));
+      fireEvent.scroll(thread);
+      expect(screen.getByRole('menu')).toBeInTheDocument();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('renders a search input when searchable is enabled', async () => {
     const user = userEvent.setup();
 
@@ -388,6 +466,80 @@ describe('Dropdown', () => {
     // ArrowRight closes it again, dispatched on the focused submenu item.
     fireEvent.keyDown(submenuItem, { key: 'ArrowRight' });
     expect(screen.queryByRole('menuitem', { name: 'Beta' })).toBeNull();
+  });
+
+  it('carries a local dir island onto the portaled menu', async () => {
+    const user = userEvent.setup();
+
+    renderWithTheme(
+      <Dropdown trigger={<Button>Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open menu' });
+    // jsdom does not cascade dir → direction (nor inherit it in computed
+    // styles); set both directly on the trigger element — the node the
+    // Dropdown resolves its direction from. This also covers a `dir` set on
+    // the trigger itself rather than an ancestor island.
+    act(() => {
+      trigger.setAttribute('dir', 'rtl');
+      trigger.style.direction = 'rtl';
+    });
+
+    await user.click(trigger);
+    const menu = await screen.findByRole('menu');
+    // `dir` lives on the portaled panel (the scroll container's wrapper),
+    // outside the island — the component must carry the direction along.
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'rtl');
+
+    // Reactive, not sampled at open: a live dir flip updates the open menu.
+    // The hook hears about it via MutationObserver, which delivers async.
+    act(() => {
+      trigger.setAttribute('dir', 'ltr');
+      trigger.style.direction = 'ltr';
+    });
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'ltr'));
+  });
+
+  it('re-resolves direction when the trigger node is replaced while open', async () => {
+    const user = userEvent.setup();
+
+    // jsdom does not cascade dir → direction; pass the inline style too.
+    const { rerender } = renderWithTheme(
+      <Dropdown trigger={<Button key="ltr">Open menu</Button>}>
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    const menu = await screen.findByRole('menu');
+    const panel = menu.closest('[data-slot="dropdown-menu"]');
+    expect(panel).toHaveAttribute('dir', 'ltr');
+    const originalTrigger = screen.getByRole('button', { name: 'Open menu' });
+
+    // Keyed replacement: the new trigger node is inserted with `dir` already
+    // set, so no attribute mutation ever fires — only the post-commit node
+    // identity check can catch it.
+    rerender(
+      <Dropdown
+        trigger={
+          <Button key="rtl" dir="rtl" style={{ direction: 'rtl' }}>
+            Open menu
+          </Button>
+        }
+      >
+        <DropdownItem value="alpha">Alpha</DropdownItem>
+      </Dropdown>
+    );
+
+    // Confirm this really was a replacement, not an in-place mutation —
+    // otherwise the MutationObserver would mask a stale node.
+    const newTrigger = screen.getByRole('button', { name: 'Open menu' });
+    expect(newTrigger).not.toBe(originalTrigger);
+
+    await waitFor(() => expect(panel).toHaveAttribute('dir', 'rtl'));
   });
 
   it('shows an indeterminate select-all state when some visible items are selected', async () => {

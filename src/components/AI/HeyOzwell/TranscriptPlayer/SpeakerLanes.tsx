@@ -10,9 +10,9 @@ import {
   type TimelineView,
 } from './model';
 
-/** Shared by every timeline row so labels, waveform, lanes and overview line up. */
+/** Shared by every timeline row so labels, waveform, lanes and overview line up; `--tp-label` is set by TranscriptPlayer. */
 export const ROW_GRID =
-  'grid grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-x-3';
+  'grid grid-cols-[var(--tp-label,6.5rem)_minmax(0,1fr)] items-center gap-x-3';
 
 const HIDE_DELAY_MS = 150;
 

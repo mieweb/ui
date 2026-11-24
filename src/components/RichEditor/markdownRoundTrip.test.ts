@@ -55,7 +55,12 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => {
+afterAll(async () => {
+  // createMarkdownPlugin debounces performSnapshot by 800ms with no cancel;
+  // destroy() does not clear it, and the timer firing after Vitest tears the
+  // jsdom environment down is an unhandled rejection (cross-realm Event in
+  // Workspace.openFile). Let the pending snapshot flush first.
+  await new Promise((resolve) => setTimeout(resolve, 850));
   editor?.destroy();
 });
 

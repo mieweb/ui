@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 
 export type Direction = 'ltr' | 'rtl';
@@ -74,13 +74,23 @@ export function useDirection(
     return () => observer.disconnect();
   }, [elementRef]);
 
-  // Re-sync when a re-render points elementRef.current at a different node:
-  // the MutationObserver only fires on `dir` attribute mutations, so a swapped
-  // ref target with a different inherited direction would otherwise go stale.
-  const currentElement = elementRef?.current ?? null;
+  // Re-sync when a commit points elementRef.current at a different node: the
+  // MutationObserver only fires on `dir` attribute mutations, so a replaced
+  // ref target whose `dir` was already set before insertion would otherwise
+  // go stale. No dependency array — ref targets are swapped during commit,
+  // *after* render captured any snapshot, so the check must run after every
+  // commit (ref targets change without this hook's deps re-rendering). The
+  // identity guard keeps it to one comparison per render and prevents
+  // update loops.
+  const lastElement = useRef<Element | null>(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    setDirection(resolveDirection(currentElement));
-  }, [currentElement]);
+    const element = elementRef?.current ?? null;
+    if (element !== lastElement.current) {
+      lastElement.current = element;
+      setDirection(resolveDirection(element));
+    }
+  });
 
   return direction;
 }

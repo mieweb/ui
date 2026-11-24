@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -514,6 +515,23 @@ describe('SuperChat', () => {
     expect(screen.getByText('hi').tagName).toBe('STRONG');
   });
 
+  it("sets a message's text, author and time in their own direction, not the page's", () => {
+    const { container } = render(
+      <div dir="rtl">
+        <SuperChat conversation={conversation} currentParticipantId="u1" />
+      </div>
+    );
+    // "hi Alice." in an RTL page keeps its full stop at the end, and
+    // "9:00 AM" doesn't read "AM 9:00".
+    const text = screen.getByText('hi').closest('.prose');
+    expect(text).toHaveAttribute('dir', 'auto');
+    const meta = container.querySelector(
+      '[data-slot="superchat-message-meta"]'
+    )!;
+    for (const part of meta.querySelectorAll('span:not([data-slot])'))
+      expect(part).toHaveAttribute('dir', 'auto');
+  });
+
   it('fires onMessageSent with detected mentions', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -603,6 +621,30 @@ describe('SuperChat', () => {
     await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(1));
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(input).toHaveValue('newer draft');
+  });
+
+  it('takes a larger file when maxFileSize allows it, per file', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        maxFileSize={(file) =>
+          (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024
+        }
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const video = new File(['x'], 'long.mp4', { type: 'video/mp4' });
+    Object.defineProperty(video, 'size', { value: 400 * 1024 * 1024 });
+    const photo = new File(['x'], 'huge.png', { type: 'image/png' });
+    Object.defineProperty(photo, 'size', { value: 25 * 1024 * 1024 + 1 });
+    await user.upload(fileInput, [video, photo]);
+    await screen.findByLabelText('Remove long.mp4');
+    expect(screen.queryByLabelText('Remove huge.png')).toBeNull();
   });
 
   it('rejects files over the 25 MiB cap', async () => {
@@ -696,11 +738,55 @@ describe('SuperChat', () => {
               name: 'picked.png',
               type: 'image/png',
               dataUrl: expect.stringMatching(/^data:image\/png/),
+              file,
             }),
           ],
         })
       )
     );
+  });
+
+  it('hands over only the file when attachmentDataUrls is off', async () => {
+    const onMessageSent = vi.fn();
+    const readAsDataURL = vi.spyOn(
+      window.FileReader.prototype,
+      'readAsDataURL'
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['fake-bytes'], 'clip.mp4', { type: 'video/mp4' });
+    await user.upload(fileInput, file);
+    await screen.findByLabelText('Remove clip.mp4');
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({
+              name: 'clip.mp4',
+              type: 'video/mp4',
+              dataUrl: '',
+              file,
+            }),
+          ],
+        })
+      )
+    );
+    // Never read into memory as base64.
+    expect(readAsDataURL).not.toHaveBeenCalled();
+    readAsDataURL.mockRestore();
   });
 
   it('attaches a non-image file (pdf) with an icon preview', async () => {
@@ -742,6 +828,35 @@ describe('SuperChat', () => {
     );
   });
 
+  it("puts a message's actions beside its bubble, not under the avatar", () => {
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageEdited={() => {}}
+      />
+    );
+    const gutter = container.querySelector(
+      '[data-slot="superchat-message-gutter"]'
+    )!;
+    expect(gutter.querySelector('button')).toBeNull();
+    const slot = container.querySelector(
+      '[data-slot="superchat-message-actions-slot"]'
+    )!;
+    const bubble = slot.parentElement?.querySelector(
+      '[data-slot="superchat-bubble"]'
+    );
+    expect(bubble).toBeTruthy();
+    // On the outer side, by the avatar: first in the row, which runs the
+    // author's way.
+    expect(
+      slot.compareDocumentPosition(bubble!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(
+      within(slot as HTMLElement).getAllByRole('button').length
+    ).toBeGreaterThan(0);
+  });
+
   it('restricts the file picker to acceptedFileTypes', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
@@ -757,11 +872,82 @@ describe('SuperChat', () => {
     const fileInput = container.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
-    expect(fileInput.accept).toBe('image/*');
+    expect(fileInput.accept).toBe(
+      'image/jpeg,image/png,image/gif,image/webp,image/avif'
+    );
     // A disallowed type (audio) is ignored — no preview chip appears.
     const file = new File(['id3'], 'song.mp3', { type: 'audio/mpeg' });
     await user.upload(fileInput, file);
     expect(screen.queryByLabelText('Remove song.mp3')).toBeNull();
+  });
+
+  it('refuses a HEIC photo and a file over maxFileSize, and says why', async () => {
+    const onComposerError = vi.fn();
+    const { default: userEvent } = await import('@testing-library/user-event');
+    // Past the picker's own filter, as a drop or a paste would be.
+    const user = userEvent.setup({ applyAccept: false });
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        acceptedFileTypes={['image', 'document']}
+        maxFileSize={1000}
+        onComposerError={onComposerError}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    expect(fileInput.accept).toContain('.docx');
+    await user.upload(fileInput, [
+      new File(['x'], 'IMG_0001.HEIC', { type: 'image/heic' }),
+      new File(['x'.repeat(2000)], 'big.png', { type: 'image/png' }),
+      new File(['x'], 'notes.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+    ]);
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('IMG_0001.HEIC'),
+      expect.objectContaining({ reason: 'file-type' })
+    );
+    expect(onComposerError).toHaveBeenCalledWith(
+      expect.stringContaining('big.png'),
+      expect.objectContaining({ reason: 'file-size' })
+    );
+    expect(screen.getByLabelText('Remove notes.docx')).toBeTruthy();
+  });
+
+  it('shows the send in progress, and a failed send puts the files back', async () => {
+    let fail: (error: Error) => void = () => {};
+    const onMessageSent = vi.fn(
+      () => new Promise<void>((_, reject) => (fail = reject))
+    );
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(['png'], 'shot.png', { type: 'image/png' })
+    );
+    await user.type(screen.getByLabelText('Message'), 'See this');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalled());
+    expect(
+      screen.getByRole('button', { name: 'Sending message…' })
+    ).toBeTruthy();
+    expect(screen.queryByLabelText('Remove shot.png')).toBeNull();
+    await act(async () => fail(new Error('offline')));
+    expect(await screen.findByLabelText('Remove shot.png')).toBeTruthy();
+    expect(screen.getByLabelText('Message')).toHaveValue('See this');
   });
 
   it('does not detect mentions for system participants', async () => {
@@ -800,6 +986,220 @@ describe('SuperChat', () => {
       />
     );
     expect(screen.getByLabelText('Message')).toBeDisabled();
+  });
+
+  describe('composerProps', () => {
+    it('overrides the placeholder and renders a leadingSlot button', () => {
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            placeholder: 'Post an update…',
+            leadingSlot: <button type="button">Pulse video</button>,
+          }}
+        />
+      );
+      expect(screen.getByLabelText('Message')).toHaveAttribute(
+        'placeholder',
+        'Post an update…'
+      );
+      expect(
+        screen.getByRole('button', { name: 'Pulse video' })
+      ).toBeInTheDocument();
+    });
+
+    it('keeps sending through onMessageSent', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageSent = vi.fn();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+          composerProps={{ placeholder: 'Post an update…' }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hi there');
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+      await waitFor(() =>
+        expect(onMessageSent).toHaveBeenCalledWith(
+          'hi there',
+          expect.objectContaining({ conversation })
+        )
+      );
+    });
+
+    it('passes the chosen send option to onMessageSent', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageSent = vi.fn();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+          composerProps={{
+            sendOptions: [{ id: 'later', label: 'Send later…' }],
+          }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'tomorrow');
+      await user.click(
+        screen.getByRole('button', { name: 'More send options' })
+      );
+      await user.click(screen.getByRole('menuitem', { name: 'Send later…' }));
+      await waitFor(() =>
+        expect(onMessageSent).toHaveBeenCalledWith(
+          'tomorrow',
+          expect.objectContaining({ sendOption: 'later' })
+        )
+      );
+    });
+
+    it('turns @mentions off with an empty mentionOptions', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ mentionOptions: [] }}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hello @Tri');
+      expect(
+        screen.queryByRole('listbox', { name: 'Mention' })
+      ).not.toBeInTheDocument();
+    });
+
+    it('resolves mentions by the token each host mentionOption inserts', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            mentionOptions: [
+              { id: 'u2', label: 'Alice Reyes', value: 'reviewer' },
+              { id: 'team', label: 'Everyone' },
+            ],
+          }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(
+        screen.getByLabelText('Message'),
+        'cc @reviewer and @Everyone, not @Triage'
+      );
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'cc @reviewer and @Everyone, not @Triage',
+        expect.objectContaining({ mentions: ['u2', 'team'] })
+      );
+    });
+
+    it('matches whole mention tokens only, longest first, in any script', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const send = async (text: string) => {
+        onMessageSent.mockClear();
+        await user.clear(screen.getByLabelText('Message'));
+        await user.type(screen.getByLabelText('Message'), text);
+        await user.click(screen.getByLabelText('Send message'));
+        return onMessageSent.mock.calls[0][1].mentions;
+      };
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{
+            mentionOptions: [
+              { id: 'john', label: 'John', value: 'john' },
+              { id: 'johndoe', label: 'John Doe', value: 'john.doe' },
+              { id: 'li', label: '李', value: '李' },
+              { id: 'liming', label: '李明', value: '李明' },
+            ],
+          }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      expect(await send('ask @john.doe')).toEqual(['johndoe']);
+      expect(await send('thanks @john.')).toEqual(['john']);
+      expect(await send('@john, @john.doe!')).toEqual(['john', 'johndoe']);
+      expect(await send('问 @李明')).toEqual(['liming']);
+      expect(await send('问 @李，好')).toEqual(['li']);
+      expect(await send('mail me@john.doe')).toEqual([]);
+    });
+
+    it('reports everyone who shares a mention token', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={{
+            ...conversation,
+            participants: [
+              ...conversation.participants,
+              { id: 'alex1', kind: 'human', name: 'Alex Smith' },
+              { id: 'alex2', kind: 'human', name: 'Alex Jones' },
+            ],
+          }}
+          currentParticipantId="u1"
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'hi @Alex');
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'hi @Alex',
+        expect.objectContaining({ mentions: ['alex1', 'alex2'] })
+      );
+    });
+
+    it('keeps a read-only conversation disabled whatever composerProps says', () => {
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          readOnly
+          composerProps={{ disabled: false }}
+        />
+      );
+      expect(screen.getByLabelText('Message')).toBeDisabled();
+    });
+
+    it('sends no mentions with an empty mentionOptions', async () => {
+      const onMessageSent = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ mentionOptions: [] }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'ping @Triage');
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'ping @Triage',
+        expect.objectContaining({ mentions: [] })
+      );
+    });
   });
 
   it('opens an @-mention menu and inserts the chosen participant', async () => {
@@ -929,8 +1329,101 @@ describe('SuperChat', () => {
 
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     expect(onMessageEdited).toHaveBeenCalledWith('m1', 'edited body', {
+      removedMedia: [],
+      removedFiles: [],
       conversation,
     });
+  });
+
+  it('inserts a newline on Enter instead of saving the edit', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.clear(editor);
+    await user.type(editor, 'line one{Enter}line two');
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(editor).toHaveValue('line one\nline two');
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledWith('m1', 'line one\nline two', {
+      removedMedia: [],
+      removedFiles: [],
+      conversation,
+    });
+  });
+
+  it.each([['Control'], ['Meta']])(
+    'saves the edit on %s+Enter',
+    async (modifier) => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageEdited = vi.fn();
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="u1"
+            onMessageEdited={onMessageEdited}
+          />
+        </div>
+      );
+      await startEditViaMenu(user);
+      const editor = screen.getByRole('textbox', { name: 'Edit message' });
+      await user.clear(editor);
+      await user.type(editor, 'shortcut save');
+      await user.keyboard(`{${modifier}>}{Enter}{/${modifier}}`);
+
+      expect(onMessageEdited).toHaveBeenCalledWith('m1', 'shortcut save', {
+        removedMedia: [],
+        removedFiles: [],
+        conversation,
+      });
+      expect(
+        screen.queryByRole('textbox', { name: 'Edit message' })
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    ['Ctrl+Enter', { key: 'Enter', ctrlKey: true }],
+    ['Cmd+Enter', { key: 'Enter', metaKey: true }],
+    ['Escape', { key: 'Escape' }],
+  ])('ignores %s while an IME is composing', async (_label, keyInit) => {
+    const { fireEvent } = await import('@testing-library/react');
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    fireEvent.change(editor, { target: { value: 'こんにちは' } });
+    fireEvent.keyDown(editor, { ...keyInit, isComposing: true });
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      'こんにちは'
+    );
   });
 
   it('pastes an image into the edit window as Markdown', async () => {
@@ -964,6 +1457,46 @@ describe('SuperChat', () => {
     expect(onMessageEdited).toHaveBeenCalledTimes(1);
     const [, savedText] = onMessageEdited.mock.calls[0];
     expect(savedText).toMatch(/!\[edited\.png\]\(data:image\/png/);
+  });
+
+  it('keeps the editor inside its bubble, however wide its content was', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    // The message measured wider than the bubble will have room for once it
+    // edits (a host card on thinner padding, say).
+    // At its widest (997px), on a host's thinner frame (6px) until the
+    // editor shows, then the usual 16px.
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(997);
+    const computed = window.getComputedStyle;
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((el, pseudo) => {
+      const style = computed(el, pseudo);
+      const bubble = el as HTMLElement;
+      if (bubble.dataset?.slot === 'superchat-bubble') {
+        const pad = bubble.querySelector(
+          '[data-slot="superchat-message-editor"]'
+        )
+          ? '16px'
+          : '6px';
+        Object.defineProperty(style, 'paddingLeft', { value: pad });
+        Object.defineProperty(style, 'paddingRight', { value: pad });
+      }
+      return style;
+    });
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={() => {}}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen
+      .getByRole('textbox', { name: 'Edit message' })
+      .closest<HTMLElement>('[data-slot="superchat-message-editor"]')!;
+    // Measured at 985px (997 - 2 × 6), kept to the 965px it has room for now.
+    expect(editor.style.minWidth).toBe('965px');
   });
 
   it('cancels an edit without firing onMessageEdited', async () => {
@@ -1004,6 +1537,70 @@ describe('SuperChat', () => {
       </div>
     );
     expect(screen.getByText('(edited)')).toBeInTheDocument();
+  });
+
+  it('draws a scheduled message as pending with its time', () => {
+    const scheduled: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        { ...conversation.thread[0], scheduledFor: '2026-06-08T09:00:00Z' },
+        conversation.thread[1],
+      ],
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={scheduled}
+          currentParticipantId="u1"
+          messageLabels={{ scheduled: 'Programado' }}
+        />
+      </div>
+    );
+    const indicators = container.querySelectorAll(
+      '[data-slot="superchat-scheduled-indicator"]'
+    );
+    expect(indicators).toHaveLength(1);
+    expect(indicators[0]).toHaveTextContent(/^Programado · /);
+    expect(
+      container.querySelectorAll('[data-slot="superchat-bubble"][data-pending]')
+    ).toHaveLength(1);
+    expect(
+      screen.getByRole('article', { name: /Programado · / })
+    ).toBeInTheDocument();
+  });
+
+  it('fills a scheduled message bubble again while it is edited', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const scheduled: SuperChatConversation = {
+      ...conversation,
+      thread: [
+        { ...conversation.thread[0], scheduledFor: '2026-06-08T09:00:00Z' },
+        conversation.thread[1],
+      ],
+    };
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={scheduled}
+          currentParticipantId="u1"
+          onMessageEdited={vi.fn()}
+        />
+      </div>
+    );
+    const pendingBubbles = () =>
+      container.querySelectorAll(
+        '[data-slot="superchat-bubble"][data-pending]'
+      );
+    expect(pendingBubbles()).toHaveLength(1);
+    await startEditViaMenu(user);
+    expect(
+      screen.getByRole('textbox', { name: 'Edit message' })
+    ).toBeInTheDocument();
+    // The editor's Cancel / Save are styled for the filled bubble.
+    expect(pendingBubbles()).toHaveLength(0);
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(pendingBubbles()).toHaveLength(1);
   });
 
   it('shows a copy affordance on every content message', () => {
@@ -1698,6 +2295,164 @@ describe('SuperChatConversations', () => {
     await user.click(screen.getByLabelText('New conversation'));
     expect(onNewConversation).toHaveBeenCalled();
   });
+
+  it('renders listFooter after the last conversation, inside the list', () => {
+    const { container } = render(
+      <SuperChatConversations
+        conversations={conversations}
+        listFooter={<span>No older conversations</span>}
+      />
+    );
+    const list = container.querySelector(
+      '[data-slot="superchat-conversation-list"]'
+    ) as HTMLElement;
+    expect(
+      within(list).getByText('No older conversations')
+    ).toBeInTheDocument();
+    expect(list.lastElementChild).toContainElement(
+      screen.getByText('No older conversations')
+    );
+  });
+
+  it('renders no footer element without listFooter', () => {
+    const { container } = render(
+      <SuperChatConversations conversations={conversations} />
+    );
+    expect(
+      container.querySelector(
+        '[data-slot="superchat-conversation-list-footer"]'
+      )
+    ).toBeNull();
+  });
+
+  describe('list header', () => {
+    it('renders exactly as before when no header props are passed', () => {
+      const { container } = render(
+        <SuperChatConversations conversations={conversations} />
+      );
+      expect(screen.getByText('Conversations')).toBeInTheDocument();
+      expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-header"]')
+      ).toBeNull();
+    });
+
+    it('replaces the heading with listTitle', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle="Work sessions"
+        />
+      );
+      expect(screen.getByText('Work sessions')).toBeInTheDocument();
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+    });
+
+    it('hides the heading row when listTitle is null and there is no new button', () => {
+      const { container } = render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(
+        container.querySelector('[data-slot="superchat-conversations-title"]')
+      ).toBeNull();
+    });
+
+    it('keeps the new-conversation button when listTitle is null', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listTitle={null}
+          onNewConversation={() => {}}
+        />
+      );
+      expect(screen.queryByText('Conversations')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('New conversation')).toBeInTheDocument();
+    });
+
+    it('renders listHeader content above the list', () => {
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          listHeader={<button type="button">Group by: Day</button>}
+        />
+      );
+      const filter = screen.getByRole('button', { name: 'Group by: Day' });
+      const list = screen.getByRole('list');
+      expect(
+        filter.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+    });
+
+    it('renders a labelled search box that reports each change', async () => {
+      const onChange = vi.fn();
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ value: '', onChange }}
+        />
+      );
+      const box = screen.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      expect(box).toHaveAttribute('placeholder', 'Search…');
+      await user.type(box, 'a');
+      expect(onChange).toHaveBeenCalledWith('a');
+    });
+
+    it('uses the host labels for the search box', () => {
+      render(
+        <SuperChatConversations
+          conversations={[]}
+          search={{
+            value: 'zzz',
+            onChange: () => {},
+            label: 'Search posts',
+            placeholder: 'Search posts, people…',
+            noResultsLabel: 'No matching posts',
+          }}
+        />
+      );
+      expect(
+        screen.getByRole('searchbox', { name: 'Search posts' })
+      ).toHaveAttribute('placeholder', 'Search posts, people…');
+      expect(screen.getByRole('status')).toHaveTextContent('No matching posts');
+    });
+
+    it('announces no results only when a query matches nothing', () => {
+      const search = { value: '', onChange: () => {} };
+      const { rerender } = render(
+        <SuperChatConversations conversations={[]} search={search} />
+      );
+      // An empty query with an empty list is not a "no results" state.
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={conversations}
+          search={{ ...search, value: 'Intake' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent('');
+
+      rerender(
+        <SuperChatConversations
+          conversations={[]}
+          search={{ ...search, value: 'nothing' }}
+        />
+      );
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'No matching conversations'
+      );
+    });
+  });
 });
 
 describe('SuperChatInbox', () => {
@@ -1750,6 +2505,432 @@ describe('SuperChatInbox', () => {
     expect(panel).not.toBeNull();
     const thread = within(panel as HTMLElement);
     expect(thread.getByText('first conversation')).toBeInTheDocument();
+  });
+
+  it('starts on the list below sm, or on the chat with defaultMobileView="chat"', () => {
+    const panelHidden = (defaultMobileView?: 'list' | 'chat') => {
+      const { container, unmount } = render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            defaultActiveConversationId="c1"
+            defaultMobileView={defaultMobileView}
+          />
+        </div>
+      );
+      const hidden = (
+        container.querySelector('[data-slot="superchat"]') as HTMLElement
+      ).classList.contains('hidden');
+      unmount();
+      return hidden;
+    };
+    expect(panelHidden()).toBe(true);
+    expect(panelHidden('chat')).toBe(false);
+  });
+
+  it('keeps the list on screen with defaultMobileView="chat" and no conversations', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={[]}
+          currentParticipantId="u1"
+          defaultMobileView="chat"
+        />
+      </div>
+    );
+    // The empty panel has no Back control, so the list must stay reachable.
+    expect(
+      (
+        container.querySelector(
+          '[data-slot="superchat-conversations"]'
+        ) as HTMLElement
+      ).classList.contains('hidden')
+    ).toBe(false);
+  });
+
+  describe('resizable sidebar', () => {
+    const renderInbox = (
+      props: Partial<React.ComponentProps<typeof SuperChatInbox>> = {}
+    ) =>
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            {...props}
+          />
+        </div>
+      );
+    const sidebarWidth = (container: HTMLElement) =>
+      (
+        container.querySelector('[data-slot="superchat-inbox"]') as HTMLElement
+      ).style.getPropertyValue('--superchat-sidebar-width');
+    // jsdom has no PointerEvent, and fireEvent.pointer* drops clientX; a
+    // MouseEvent of the pointer type carries it.
+    const pointer = (
+      el: HTMLElement,
+      type: 'pointerdown' | 'pointermove' | 'pointerup',
+      clientX = 0
+    ) =>
+      fireEvent(
+        el,
+        new MouseEvent(type, { bubbles: true, button: 0, clientX })
+      );
+
+    it('renders no divider and the default 256px width without resizableSidebar', () => {
+      const { container } = renderInbox();
+      expect(screen.queryByRole('separator')).toBeNull();
+      expect(sidebarWidth(container)).toBe('256px');
+    });
+
+    it('exposes the divider as a labelled vertical separator', () => {
+      renderInbox({ resizableSidebar: true });
+      const handle = screen.getByRole('separator', {
+        name: 'Resize conversation list',
+      });
+      expect(handle).toHaveAttribute('aria-orientation', 'vertical');
+      expect(handle).toHaveAttribute('aria-valuenow', '256');
+      expect(handle).toHaveAttribute('aria-valuemin', '200');
+      expect(handle).toHaveAttribute('aria-valuemax', '480');
+      expect(handle).toHaveAttribute('tabindex', '0');
+      // Hidden below sm, where only one pane shows.
+      expect(handle).toHaveClass('hidden', 'sm:block');
+    });
+
+    it('resizes by dragging, clamped to the min and max', () => {
+      const onSidebarWidthChange = vi.fn();
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        onSidebarWidthChange,
+      });
+      const handle = screen.getByRole('separator');
+      pointer(handle, 'pointerdown', 256);
+      pointer(handle, 'pointermove', 300);
+      expect(sidebarWidth(container)).toBe('300px');
+      // Reported once the drag ends, not on every move.
+      expect(onSidebarWidthChange).not.toHaveBeenCalled();
+      pointer(handle, 'pointermove', 2000);
+      expect(sidebarWidth(container)).toBe('480px');
+      pointer(handle, 'pointermove', 0);
+      expect(sidebarWidth(container)).toBe('200px');
+      pointer(handle, 'pointerup');
+      expect(onSidebarWidthChange).toHaveBeenCalledTimes(1);
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(200);
+      pointer(handle, 'pointermove', 400);
+      expect(sidebarWidth(container)).toBe('200px');
+    });
+
+    it('reports the width right away for a key press', () => {
+      const onSidebarWidthChange = vi.fn();
+      renderInbox({ resizableSidebar: true, onSidebarWidthChange });
+      fireEvent.keyDown(screen.getByRole('separator'), { key: 'ArrowRight' });
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(272);
+    });
+
+    it('reverts a drag to a controlled sidebarWidth the host did not update', () => {
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 360,
+      });
+      const handle = screen.getByRole('separator');
+      pointer(handle, 'pointerdown', 360);
+      pointer(handle, 'pointermove', 400);
+      expect(sidebarWidth(container)).toBe('400px');
+      pointer(handle, 'pointerup');
+      expect(sidebarWidth(container)).toBe('360px');
+    });
+
+    it('resizes with the arrow keys, Home and End', () => {
+      renderInbox({ resizableSidebar: true });
+      const handle = screen.getByRole('separator');
+      fireEvent.keyDown(handle, { key: 'ArrowRight' });
+      expect(handle).toHaveAttribute('aria-valuenow', '272');
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      expect(handle).toHaveAttribute('aria-valuenow', '240');
+      fireEvent.keyDown(handle, { key: 'End' });
+      expect(handle).toHaveAttribute('aria-valuenow', '480');
+      fireEvent.keyDown(handle, { key: 'Home' });
+      expect(handle).toHaveAttribute('aria-valuenow', '200');
+    });
+
+    it('inverts drag and arrow keys in RTL', () => {
+      const { container } = render(
+        <div dir="rtl" style={{ height: 400 }}>
+          <SuperChatInbox
+            conversations={conversations}
+            currentParticipantId="u1"
+            resizableSidebar
+          />
+        </div>
+      );
+      const handle = screen.getByRole('separator');
+      // jsdom doesn't inherit `direction` from `dir`; set it on the handle.
+      handle.style.direction = 'rtl';
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' });
+      expect(handle).toHaveAttribute('aria-valuenow', '272');
+      pointer(handle, 'pointerdown', 500);
+      pointer(handle, 'pointermove', 450);
+      expect(sidebarWidth(container)).toBe('322px');
+    });
+
+    it('restores defaultSidebarWidth on double-click', () => {
+      const onSidebarWidthChange = vi.fn();
+      renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 400,
+        defaultSidebarWidth: 300,
+        onSidebarWidthChange,
+      });
+      fireEvent.doubleClick(screen.getByRole('separator'));
+      expect(onSidebarWidthChange).toHaveBeenCalledWith(300);
+    });
+
+    it('follows a controlled sidebarWidth', () => {
+      const { container } = renderInbox({
+        resizableSidebar: true,
+        sidebarWidth: 360,
+      });
+      const handle = screen.getByRole('separator');
+      fireEvent.keyDown(handle, { key: 'ArrowRight' });
+      // Controlled: the width stays until the host passes the new one.
+      expect(sidebarWidth(container)).toBe('360px');
+    });
+
+    it('limits the width so the panel keeps 240px, and announces it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 600 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+        });
+        const handle = screen.getByRole('separator');
+        expect(sidebarWidth(container)).toBe('360px');
+        expect(handle).toHaveAttribute('aria-valuenow', '360');
+        expect(handle).toHaveAttribute('aria-valuemax', '360');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('lowers the sidebar minimum when the inbox is too narrow for both panes', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 400 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({ resizableSidebar: true });
+        const handle = screen.getByRole('separator');
+        // 400 - 240 for the panel leaves 160 for the list, below its 200 minimum.
+        expect(sidebarWidth(container)).toBe('160px');
+        expect(handle).toHaveAttribute('aria-valuemin', '160');
+        expect(handle).toHaveAttribute('aria-valuemax', '160');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('re-clamps a drag in progress when the inbox shrinks', () => {
+      let resize: (width: number) => void = () => {};
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe(target: Element) {
+            // Other parts observe too; drive only the inbox's own observer.
+            if (target.getAttribute('data-slot') !== 'superchat-inbox') return;
+            resize = (width) => this.cb([{ contentRect: { width } }]);
+            this.cb([{ contentRect: { width: 1000 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const { container } = renderInbox({ resizableSidebar: true });
+        const handle = screen.getByRole('separator');
+        pointer(handle, 'pointerdown', 256);
+        pointer(handle, 'pointermove', 480);
+        expect(sidebarWidth(container)).toBe('480px');
+        act(() => resize(600));
+        expect(sidebarWidth(container)).toBe('360px');
+        expect(handle).toHaveAttribute('aria-valuenow', '360');
+        expect(handle).toHaveAttribute('aria-valuemax', '360');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('saves the default on double-click even when a narrow inbox already shows it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 496 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('256px');
+        fireEvent.doubleClick(screen.getByRole('separator'));
+        expect(onSidebarWidthChange).toHaveBeenCalledWith(256);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('keeps the stored width when a key press leaves the divider where it is', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 600 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('360px');
+        fireEvent.keyDown(screen.getByRole('separator'), { key: 'ArrowRight' });
+        expect(onSidebarWidthChange).not.toHaveBeenCalled();
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('saves the default itself on reset in an inbox too narrow to show it', () => {
+      vi.stubGlobal(
+        'ResizeObserver',
+        class {
+          constructor(private cb: (e: unknown[]) => void) {}
+          observe() {
+            this.cb([{ contentRect: { width: 480 } }]);
+          }
+          disconnect() {}
+        }
+      );
+      try {
+        const onSidebarWidthChange = vi.fn();
+        const { container } = renderInbox({
+          resizableSidebar: true,
+          sidebarWidth: 480,
+          onSidebarWidthChange,
+        });
+        expect(sidebarWidth(container)).toBe('240px');
+        fireEvent.doubleClick(screen.getByRole('separator'));
+        expect(onSidebarWidthChange).toHaveBeenCalledWith(256);
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+
+    it('renders no divider when the sidebar is hidden', () => {
+      renderInbox({ resizableSidebar: true, showSidebar: false });
+      expect(screen.queryByRole('separator')).toBeNull();
+    });
+  });
+
+  it('passes the list header props through to the conversation list', () => {
+    const { container } = render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          listTitle="Days"
+          listHeader={<span>Team: Platform</span>}
+          search={{ value: '', onChange: () => {} }}
+        />
+      </div>
+    );
+    const list = within(
+      container.querySelector(
+        '[data-slot="superchat-conversations"]'
+      ) as HTMLElement
+    );
+    expect(list.getByText('Days')).toBeInTheDocument();
+    expect(list.getByText('Team: Platform')).toBeInTheDocument();
+    expect(
+      list.getByRole('searchbox', { name: 'Search conversations' })
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the open conversation and its draft when a search empties the list', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const inbox = (
+      query: string,
+      listConversations?: SuperChatConversation[]
+    ) => (
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={listConversations}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+          search={{ value: query, onChange: () => {} }}
+        />
+      </div>
+    );
+    const { container, rerender } = render(inbox(''));
+    await user.type(screen.getByLabelText('Message'), 'unsent reply');
+
+    rerender(inbox('nothing', []));
+
+    const panel = within(
+      container.querySelector('[data-slot="superchat"]') as HTMLElement
+    );
+    expect(panel.getByText('first conversation')).toBeInTheDocument();
+    expect(screen.getByLabelText('Message')).toHaveValue('unsent reply');
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'No matching conversations'
+    );
+  });
+
+  it('highlights no row when the open conversation is filtered out of the list', () => {
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChatInbox
+          conversations={conversations}
+          listConversations={conversations.filter((c) => c.id === 'c2')}
+          currentParticipantId="u1"
+          defaultActiveConversationId="c1"
+        />
+      </div>
+    );
+    const list = screen.getByRole('list');
+    expect(within(list).getByText('Follow-up')).toBeInTheDocument();
+    expect(within(list).queryByText('Intake')).not.toBeInTheDocument();
+    expect(list.querySelector('[aria-current="true"]')).not.toBeInTheDocument();
   });
 
   it('switches the active panel when another conversation is opened', async () => {

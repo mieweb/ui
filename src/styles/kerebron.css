@@ -127,6 +127,18 @@
 }
 
 /*
+ * Kerebron's base.css sets `-webkit-user-modify: read-write` on .kb-editor.
+ * In Chromium that non-standard property makes the element editable even when
+ * ProseMirror renders it with contenteditable="false" — keystrokes bypass the
+ * editor state entirely and splice raw text into the DOM (caught by the
+ * read-only EncounterVisit visual test on mieweb/ui#802). Hand control back
+ * to the contenteditable attribute whenever the view is not editable.
+ */
+.kb-editor[contenteditable='false'] {
+  -webkit-user-modify: read-only;
+}
+
+/*
  * Kerebron leaves headings, lists, links and code to browser defaults, which
  * Tailwind's preflight strips (headings `inherit`, lists `list-style: none`,
  * links `color: inherit`) — so "# " and "- " produced real h1/ul nodes that
@@ -249,6 +261,39 @@
 .dark .kb-editor .ts-constant,
 .dark .kb-editor .ts-constant_builtin {
   color: #4fc1ff;
+}
+/*
+ * The tokens left to upstream in light have the same gap in dark: without
+ * these they keep codecrock's light colours on a dark surface, so a variable
+ * name (#333) all but disappears. Same VS Code palette as above.
+ */
+[data-theme='dark'] .kb-editor .ts-variable,
+[data-theme='dark'] .kb-editor .ts-variable_builtin,
+.dark .kb-editor .ts-variable,
+.dark .kb-editor .ts-variable_builtin {
+  color: #d4d4d4;
+}
+[data-theme='dark'] .kb-editor .ts-property,
+.dark .kb-editor .ts-property {
+  color: #9cdcfe;
+}
+[data-theme='dark'] .kb-editor .ts-function,
+[data-theme='dark'] .kb-editor .ts-function_call,
+.dark .kb-editor .ts-function,
+.dark .kb-editor .ts-function_call {
+  color: #dcdcaa;
+}
+[data-theme='dark'] .kb-editor .ts-type,
+.dark .kb-editor .ts-type {
+  color: #4ec9b0;
+}
+[data-theme='dark'] .kb-editor .ts-namespace,
+.dark .kb-editor .ts-namespace {
+  color: #c8c8c8;
+}
+[data-theme='dark'] .kb-editor .ts-tag,
+.dark .kb-editor .ts-tag {
+  color: #569cd6;
 }
 
 /* Overflow-menu icons declare min sizes that burst their compact buttons. */
@@ -389,6 +434,21 @@
 [data-slot='textarea-rich'][data-toolbar='hidden']
   .kb-custom-menu__overflow-menu {
   display: none;
+}
+
+/* Kerebron's menu bar has a -8px top overhang (margin: calc(-1 * --kb-space-sm))
+ * sized for document-length editors. Inside the bordered one-comment field the
+ * overhang pokes above the field, painting over its top border, rounded
+ * corners, and anything docked above (the mediaCapture ribbon, mieweb/ui#734).
+ * Zero the overhang and round the top corners to the field's inner radius —
+ * but keep Kerebron's `position: sticky` so the toolbar still pins to the
+ * viewport while scrolling long content, exactly as upstream intends. The
+ * editable's offset (editorTop) is measured from live rects, so it follows
+ * automatically. */
+[data-slot='textarea-rich'] .kb-custom-menu {
+  margin-top: 0;
+  border-start-start-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
+  border-start-end-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
 }
 
 /* Disabled/readOnly: the toolbar is made `inert` (see TextAreaRichKerebron);

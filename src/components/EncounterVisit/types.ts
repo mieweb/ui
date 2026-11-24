@@ -1,4 +1,4 @@
-import type { FieldResponse } from '@esheet/core';
+import type { FieldResponse, FormDefinition } from '@esheet/core';
 import type { AssessmentItem, AssessmentOrder } from '../Assessment';
 import type { ConditionConcern } from '../ProblemList';
 
@@ -40,7 +40,13 @@ export interface EncounterObservationDefinition {
   required?: boolean;
 }
 
-export interface EncounterSectionDefinition {
+/**
+ * Read-only per-section view derived from the native eSheet form by
+ * `getEncounterFormSections` (mieweb/ui#772). The form is the single
+ * structural source of truth; views only let clinical validation, export and
+ * MCP tools keep reasoning in section terms. Never an input schema.
+ */
+export interface EncounterSectionView {
   id: string;
   title: string;
   description?: string;
@@ -50,19 +56,12 @@ export interface EncounterSectionDefinition {
   findings?: EncounterNarrativeFinding[];
   /** Require coding for the structured clinical entries in this section. */
   requireCoding?: boolean;
-  /** Add a free narrative alongside a structured section's fields. */
+  /** A free narrative exists alongside a structured section's fields. */
   narrative?: boolean;
+  /** Require the companion narrative itself, beyond the section's one-answer rule. */
+  narrativeRequired?: boolean;
   /** Require at least one answer in this section. */
   required?: boolean;
-}
-
-/** Visit sections and their observation granularity; contains no patient identity. */
-export interface EncounterVisitDefinition {
-  id: string;
-  title: string;
-  /** Explicit encounter date (YYYY-MM-DD) used for newly recorded condition assertions. */
-  encounterDate?: string;
-  sections: EncounterSectionDefinition[];
 }
 
 /** Explicit measurements only. Units: Celsius, cm, kg, mmHg, percent and /min. */
@@ -157,7 +156,8 @@ export interface EncounterValidationIssue {
 }
 
 export interface EncounterVisitSnapshot {
-  definition: EncounterVisitDefinition;
+  /** The native eSheet form — the only structural schema (mieweb/ui#772). */
+  form: FormDefinition;
   responses: EncounterResponses;
   observations: EncounterObservation[];
   note: string;
@@ -166,4 +166,4 @@ export interface EncounterVisitSnapshot {
   errors: EncounterValidationIssue[];
 }
 
-export type EncounterVisitMode = 'esheet' | 'rich' | 'view';
+export type EncounterVisitMode = 'esheet' | 'rich' | 'view' | 'export';

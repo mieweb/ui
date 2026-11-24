@@ -16,11 +16,13 @@ import type {
   AIChatSession,
   AISuggestedAction,
   AIChatCallbacks,
+  AIRenderCustomContent,
   AIRenderMessageFooter,
   AIRenderTextContent,
   MCPResourceLink,
 } from './types';
 import { AIMessageDisplay } from './AIMessage';
+import type { MCPToolCallGroupOptions } from './MCPToolCallGroup';
 import {
   ChatComposer,
   type ChatComposerProps,
@@ -334,8 +336,19 @@ export interface AIChatProps
    * text block with `{ messageId, streaming, role }`. Host must sanitize.
    */
   renderTextContent?: AIRenderTextContent;
+  /**
+   * Optional renderer for `custom` content blocks. Called per custom block with
+   * its `data` and `{ messageId, streaming, role }`.
+   */
+  renderCustomContent?: AIRenderCustomContent;
   /** Optional per-message footer rendered below each bubble (e.g. actions). */
   renderMessageFooter?: AIRenderMessageFooter;
+  /**
+   * Opt in to grouped tool calls: each run of consecutive `tool_use` blocks
+   * renders as one `MCPToolCallGroup` with these callbacks and labels, instead
+   * of a pill per call.
+   */
+  toolCallGroup?: MCPToolCallGroupOptions;
   /** Additional class name */
   className?: string;
 }
@@ -370,7 +383,9 @@ export function AIChat({
   onClear,
   onClose,
   renderTextContent,
+  renderCustomContent,
   renderMessageFooter,
+  toolCallGroup,
 }: AIChatProps) {
   React.useEffect(() => {
     notifyComposerMigrationOnce('AIChat');
@@ -533,7 +548,9 @@ export function AIChat({
       showTimestamp={showTimestamps}
       onLinkClick={handleLinkClick}
       renderTextContent={renderTextContent}
+      renderCustomContent={renderCustomContent}
       renderMessageFooter={renderMessageFooter}
+      toolCallGroup={toolCallGroup}
     />
   );
 

@@ -16,10 +16,15 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 | ------------------------------ | ------------------------------------ | ---------------------- |
 | [selection.md](./selection.md) | Component selection / catalog        | MIE UI Design Agent    |
 | [styling.md](./styling.md)     | Styling, tokens, brands, dark mode   | MIE UI Styling Agent   |
-| [install.md](./install.md)     | Install, CSS foundation, wiring      | MIE UI Install Agent   |
+| [install.md](./install.md)     | Install, CSS foundation              | MIE UI Install Agent   |
 | [a11y.md](./a11y.md)           | Accessibility                        | MIE UI A11y Agent      |
 | [i18n.md](./i18n.md)           | Internationalization / RTL           | MIE UI i18n Agent      |
 | [migration.md](./migration.md) | Migration / compliance (incl. icons) | MIE UI Migration Agent |
+| [richtext.md](./richtext.md)   | Rich text / Kerebron editors         | MIE UI Rich Text Agent |
+| [grids.md](./grids.md)         | DataVis NITRO + eSheet grids         | MIE UI Grids Agent     |
+| [datavis.md](./datavis.md)     | Charts / maps / decks / org charts   | MIE UI DataVis Agent   |
+| [views.md](./views.md)         | Views / dashboards / panels / shell  | MIE UI Views Agent     |
+| [superchat.md](./superchat.md) | Chat / AI messages / media convo     | MIE UI SuperChat Agent |
 
 ## Entry format
 
@@ -42,27 +47,56 @@ These files are maintainer-side quality tooling. They are **not** shipped by
 - **Agent** — the specialist that should end up answering. When the question
   is posed to the MIE UI Design Agent, correct routing to this agent (or a
   correct direct answer where the orchestrator owns the domain, e.g.
-  selection) is part of the pass criteria.
+  selection) is part of the pass criteria. Some questions legitimately
+  straddle domains (a file's primary agent vs. the shipped routing table);
+  the key names the routing-table owner, and a parenthetical explains the
+  split — grade routing against the key, not the file it lives in.
 - **Source** — where the known-good answer lives, so graders can re-verify
   and corpus fixes have a target.
 
 ## Running a manual eval
 
+The harness ([scripts/eval-agents.mjs](../../scripts/eval-agents.mjs)) scripts
+the bookkeeping; the asking and scoring stay human.
+
+0. Generate a run sheet (deterministic stratified sample; `--seed` to vary,
+   `--full` for release-gating runs over all entries):
+
+   ```sh
+   pnpm agent:evals --sheet 3 --seed 2026-11-19 --out agent/evals/runs/2026-11-19-sheet.md
+   ```
+
 1. Install the team into a sandbox app:
    `node <ui-repo>/agent/init-agent.mjs init-agent --experimental-agents`
    (run from the sandbox root; verify `pwd` first).
-2. Open the installed agent for the domain under test (or start from the
-   MIE UI Design Agent to also score routing).
-3. Ask a sample of questions from the file — a stratified sample of 3–5 per
-   domain is a meaningful smoke; the full set is for release-gating runs.
+2. Open the **MIE UI Design Agent** — the only picker entry — and ask the
+   questions there; routing is always in scope. Specialists ship
+   `user-invocable: false`, so to drill one directly (skipping routing),
+   temporarily set `user-invocable: true` in its installed
+   `.github/agents/` copy.
+3. Ask each question on the sheet and fill in its **Score** and **Notes**.
 4. Score each answer PASS / PARTIAL / FAIL against **Expect**:
    - PASS — all key points present, no corpus contradictions.
    - PARTIAL — correct direction but a key point missing.
    - FAIL — wrong, invented, or missing answer; misrouted.
-5. File every PARTIAL/FAIL as a corpus fix: if the knowledge exists but the
+5. Tally the sheet — prints a per-domain table and exits non-zero on any
+   FAIL or unscored entry:
+
+   ```sh
+   pnpm agent:evals --score agent/evals/runs/2026-11-19-sheet.md
+   ```
+
+6. File every PARTIAL/FAIL as a corpus fix: if the knowledge exists but the
    agent missed it, fix the agent/skill prompt; if the knowledge is absent,
    add it to `lessons/` (and regenerate skills with `pnpm agent:skills` when
    the fix lands in generated inputs).
+
+## Validating the sets
+
+`pnpm agent:evals` (no flags; runs in CI) validates the corpus itself: entry
+format and required fields, id prefixes and duplicates, ≥20 entries per file,
+**Agent** names against the shipped roster, **Source** repo paths against the
+working tree, and this README's files table.
 
 ## Maintaining the sets
 

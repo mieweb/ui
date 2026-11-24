@@ -119,6 +119,7 @@ Choosing an item does **not** close the menu by itself — close it from \`onCli
 
 - Accessibility: \`role="menu"\` with \`role="menuitem"\` / \`role="menuitemcheckbox"\` (\`aria-checked\`, \`"mixed"\` for indeterminate) buttons; the trigger gets \`aria-haspopup="menu"\`, \`aria-expanded\`, \`aria-controls\`. **No arrow-key navigation, Home/End or typeahead** — items are reached with Tab; Escape and outside click close (via \`useEscapeKey\` / \`useClickOutside\`). Focus is not moved into the menu on open unless \`searchable\` (then the search input is focused) and is not returned to the trigger on close.
 - Selecting an item does not close the menu; the consumer must call \`onOpenChange(false)\` or control \`open\`.
+- Scrolling a container that holds the trigger (a thread, a list) closes the menu, which would otherwise float on over whatever scrolled under. It stays open for a scroll inside the menu, the page's own scroll, and the scroll iOS makes as its keyboard opens for the search field.
 - \`searchable\` filtering inspects rendered children (\`getNodeText\` + \`searchText\`) — it only understands \`DropdownItem\`, \`DropdownContent\`, \`DropdownSeparator\`, \`DropdownLabel\`, \`DropdownHeader\` and fragments; arbitrary wrappers are filtered by their nested children.
 - Not a form control: no \`name\`, nothing submits; \`multiSelect\` values live in state only.
 - Strings default to English but are props: \`searchPlaceholder\` ("Search..."), \`searchAriaLabel\` ("Search dropdown items"), \`searchEmptyState\` ("No results found"), \`selectAllLabel\` ("Select all").
@@ -327,6 +328,47 @@ export const Placements: Story = {
         <DropdownItem>Item 1</DropdownItem>
         <DropdownItem>Item 2</DropdownItem>
       </Dropdown>
+    </div>
+  ),
+};
+
+/**
+ * The panel follows the **trigger's** computed direction, not the document's:
+ * inside a local `dir` island the portaled menu renders with the island's
+ * direction and `bottom-start` aligns to the island's start edge (the right
+ * edge under RTL). Flip the toolbar direction to check the opposite island.
+ */
+export const DirectionIslands: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <div
+        dir="rtl"
+        data-testid="rtl-island"
+        className="rounded-lg border border-dashed border-neutral-300 p-4"
+      >
+        <Dropdown
+          trigger={<Button>قائمة (RTL island)</Button>}
+          placement="bottom-start"
+        >
+          <DropdownLabel>الحساب</DropdownLabel>
+          <DropdownItem>الملف الشخصي</DropdownItem>
+          <DropdownItem>الإعدادات</DropdownItem>
+        </Dropdown>
+      </div>
+      <div
+        dir="ltr"
+        data-testid="ltr-island"
+        className="rounded-lg border border-dashed border-neutral-300 p-4"
+      >
+        <Dropdown
+          trigger={<Button>Menu (LTR island)</Button>}
+          placement="bottom-start"
+        >
+          <DropdownLabel>Account</DropdownLabel>
+          <DropdownItem>Profile</DropdownItem>
+          <DropdownItem>Settings</DropdownItem>
+        </Dropdown>
+      </div>
     </div>
   ),
 };

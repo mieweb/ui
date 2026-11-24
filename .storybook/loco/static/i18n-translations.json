@@ -1,0 +1,4918 @@
+{
+  "languages": [
+    "ar",
+    "es",
+    "zh-Hans"
+  ],
+  "languageNames": {
+    "ar": "العربية",
+    "es": "Spanish",
+    "zh-Hans": "Chinese (Simplified)"
+  },
+  "languageDirections": {
+    "ar": "rtl",
+    "es": "ltr",
+    "zh-Hans": "ltr"
+  },
+  "translations": {
+    "ar": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "\"إضافة جهة اتصال\""
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "(open: boolean) => void"
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "",
+        "value": " من React DOM، مع إبقاء بقية الصفحة تحت سيطرة إطار عملها الحالي. أزِل جذر React عندما تحذف الصفحة المضيفة تلك المنطقة. يتطلب ذلك بناء JavaScript يدعم React؛ فالمكوّنات ليست عناصر HTML مستقلة عن أي إطار عمل."
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "Install in Your Application",
+        "value": " من React DOM، مع إبقاء بقية الصفحة تحت سيطرة إطار عملها الحالي. أزِل جذر React عندما تحذف الصفحة المضيفة تلك المنطقة. يتطلب ذلك بناء JavaScript يدعم React؛ فالمكوّنات ليست عناصر HTML مستقلة عن أي إطار عمل."
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "",
+        "value": ". لا تحتاج إلى استنساخ هذا المستودع أو تشغيل Storybook لاستخدام المكتبة."
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "Install in Your Application",
+        "value": ". لا تحتاج إلى استنساخ هذا المستودع أو تشغيل Storybook لاستخدام المكتبة."
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "نافذة منبثقة لإضافة جهات اتصال مقدمي الخدمة/أصحاب العمل أو تعديلها، تتضمن حقولًا للاسم والجنس والمسمى الوظيفي والدرجة العلمية والبريد الإلكتروني والعنوان والحقول المخصصة."
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "إضافة جهة اتصال"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "إضافة حقل"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "",
+        "value": "أضف قدرات متخصصة عند الحاجة"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "Add Specialized Capabilities When Needed > Render Your First Component",
+        "value": "أضف قدرات متخصصة عند الحاجة"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "نافذة إضافة جهة اتصال"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "فئات CSS إضافية"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "العنوان"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "شقة، جناح، إلخ (اختياري)"
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "",
+        "value": "أنشئ تطبيقات مألوفة منذ التفاعل الأول."
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "@mieweb/ui",
+        "value": "أنشئ تطبيقات مألوفة منذ التفاعل الأول."
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "دالة تُستدعى عند حفظ جهة الاتصال"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "دالة تُستدعى عند تغيّر حالة فتح النافذة"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "إلغاء"
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "",
+        "value": "تحقّق من تبعيات التكامل المختار قبل استيراد نقطة دخوله. AGGrid متوقف عن الاستخدام في الأعمال الجديدة؛ ابدأ بـ DataVis NITRO للبيانات الجدولية."
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "تحقّق من تبعيات التكامل المختار قبل استيراد نقطة دخوله. AGGrid متوقف عن الاستخدام في الأعمال الجديدة؛ ابدأ بـ DataVis NITRO للبيانات الجدولية."
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "المدينة"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "انقر على حفظ لعرض أخطاء التحقق"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "ContactFormData"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "",
+        "value": "ساهم أو شغّل محليًا"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "Contribute or Run Locally > Go Deeper",
+        "value": "ساهم أو شغّل محليًا"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "",
+        "value": "ساهم أو شغّل محليًا"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "@mieweb/ui",
+        "value": "ساهم أو شغّل محليًا"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "عنصر التحكم"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "حقول مخصصة"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "توثيق المزخرفات"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "افتراضي"
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "الدرجة العلمية"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "الوصف"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "تعديل جهة الاتصال"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "وضع التعديل"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "البريد الإلكتروني"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "البريد الإلكتروني{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "توثيق متغيرات البيئة"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "بيانات جهة الاتصال الحالية للتعديل"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "",
+        "value": "استكشف المكوّنات وركّبها"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "Explore and Compose Components > Add Specialized Capabilities When Needed",
+        "value": "استكشف المكوّنات وركّبها"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "",
+        "value": "استكشف المكوّنات وركّبها"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "@mieweb/ui",
+        "value": "استكشف المكوّنات وركّبها"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "خطأ"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "اسم الحقل"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "الاسم الأول"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "الاسم الأول{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "الاسم الأول"
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "",
+        "value": "لمشروع لا يستخدم React، ثبّت تبعيات العرض:"
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "Install in Your Application",
+        "value": "لمشروع لا يستخدم React، ثبّت تبعيات العرض:"
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "",
+        "value": "في كل اختيار، اسأل: لماذا يناسب، ومتى يكون البديل أفضل، وما الحالة التي يملكها تطبيقك، وكيف يتصرف بجوار المكوّنات المجاورة. اختبر حالات التحميل والفراغ والخطأ ولوحة المفاتيح والشاشة الضيقة في التطبيق الفعلي، لا في القصة المعزولة فقط."
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "Explore and Compose Components",
+        "value": "في كل اختيار، اسأل: لماذا يناسب، ومتى يكون البديل أفضل، وما الحالة التي يملكها تطبيقك، وكيف يتصرف بجوار المكوّنات المجاورة. اختبر حالات التحميل والفراغ والخطأ ولوحة المفاتيح والشاشة الضيقة في التطبيق الفعلي، لا في القصة المعزولة فقط."
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "",
+        "value": "هل وجدت نصيحة اختيار غير واضحة أو علاقة غير موثّقة؟ نرحّب بالمساهمات في التوثيق إلى جانب إصلاحات المكوّنات. {{text:0}} لتحسين المحتوى المشترك بين GitHub وnpm وStorybook. تُحدَّث النسخ المنشورة عند إصدار الحزمة أو نشر موقع التوثيق."
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "Contribute or Run Locally",
+        "value": "هل وجدت نصيحة اختيار غير واضحة أو علاقة غير موثّقة؟ نرحّب بالمساهمات في التوثيق إلى جانب إصلاحات المكوّنات. {{text:0}} لتحسين المحتوى المشترك بين GitHub وnpm وStorybook. تُحدَّث النسخ المنشورة عند إصدار الحزمة أو نشر موقع التوثيق."
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "",
+        "value": "من جذر مستودع تطبيقك، شغّل:"
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "من جذر مستودع تطبيقك، شغّل:"
+      },
+      {
+        "key": "Get Started",
+        "context": "",
+        "value": "ابدأ الآن"
+      },
+      {
+        "key": "Get Started",
+        "context": "Get Started > See It In Action",
+        "value": "ابدأ الآن"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "",
+        "value": "تعمّق أكثر"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "Go Deeper > Explore and Compose Components",
+        "value": "تعمّق أكثر"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "",
+        "value": "تستخدم عمليات التكامل الكبيرة نقاط دخول منفصلة وتبعيات peer اختيارية، فلا تثبّت إلا ما تحتاجه:"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "تستخدم عمليات التكامل الكبيرة نقاط دخول منفصلة وتبعيات peer اختيارية، فلا تثبّت إلا ما تحتاجه:"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "إذا استمرت المشكلة، فتحقق من وحدة تحكم المتصفح أو الطرفية التي شغّلت منها Storybook."
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "",
+        "value": "إذا كان مشروعك يستخدم npm أو yarn بدلًا من ذلك، فشغّل"
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "Install in Your Application",
+        "value": "إذا كان مشروعك يستخدم npm أو yarn بدلًا من ذلك، فشغّل"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "",
+        "value": "استورد ورقة الأنماط المُجمَّعة مسبقًا مرة واحدة في نقطة دخول تطبيقك أو تخطيطه الجذري. واستورد بعدها ورقة أنماط علامة تجارية إذا أردت رموز تلك العلامة:"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "Render Your First Component",
+        "value": "استورد ورقة الأنماط المُجمَّعة مسبقًا مرة واحدة في نقطة دخول تطبيقك أو تخطيطه الجذري. واستورد بعدها ورقة أنماط علامة تجارية إذا أردت رموز تلك العلامة:"
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "",
+        "value": "في بيئة الإنتاج، وفّر التسميات المترجمة عبر نظام i18n في تطبيقك. وفي App Router الخاص بـ Next.js، ضع هذا المثال التفاعلي في مكوّن عميل واستورد الأنماط العامة من التخطيط الجذري."
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "Render Your First Component",
+        "value": "في بيئة الإنتاج، وفّر التسميات المترجمة عبر نظام i18n في تطبيقك. وفي App Router الخاص بـ Next.js، ضع هذا المثال التفاعلي في مكوّن عميل واستورد الأنماط العامة من التخطيط الجذري."
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "",
+        "value": "التثبيت في تطبيقك"
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "Install in Your Application > Get Started",
+        "value": "التثبيت في تطبيقك"
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "اسم العائلة"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "اسم العائلة{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "اسم العائلة"
+      },
+      {
+        "key": "License",
+        "context": "",
+        "value": "الترخيص"
+      },
+      {
+        "key": "License",
+        "context": "License > Contribute or Run Locally",
+        "value": "الترخيص"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "الحد الأدنى من الحقول"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "إعداد غير صحيح لـ Webpack أو Vite"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "سياقات/موفّرات مفقودة"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "متغيرات بيئة مفقودة"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "الجوال"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "عنوان النافذة"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "",
+        "value": "ركّب المكوّنات في عنصر DOM مخصص باستخدام"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "Install in Your Application",
+        "value": "ركّب المكوّنات في عنصر DOM مخصص باستخدام"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "الاسم"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "لا توجد معاينة"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "لم تتم إضافة حقول مخصصة. انقر على \"إضافة حقل\" لإضافة معلومات مخصصة."
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "",
+        "value": "افتح {{text:0}}. ‏Storybook هو الإطار المحيط بالأمثلة: يختار شريطه الجانبي المكوّنات، و{{text:1}} يعرض إعدادًا محددًا، و{{text:2}} يقدّم الإرشادات وواجهة البرمجة. {{text:3}} تغيّر خصائص المثال، وتتيح لك أدوات السمة والعلامة التجارية معاينة مظاهر مختلفة. هذه الأدوات تخص Storybook، لا المكوّن الذي تثبّته."
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "Explore and Compose Components",
+        "value": "افتح {{text:0}}. ‏Storybook هو الإطار المحيط بالأمثلة: يختار شريطه الجانبي المكوّنات، و{{text:1}} يعرض إعدادًا محددًا، و{{text:2}} يقدّم الإرشادات وواجهة البرمجة. {{text:3}} تغيّر خصائص المثال، وتتيح لك أدوات السمة والعلامة التجارية معاينة مظاهر مختلفة. هذه الأدوات تخص Storybook، لا المكوّن الذي تثبّته."
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "",
+        "value": "لا ينبغي أن يضطر الناس إلى إعادة تعلّم التنقل أو تعبئة نموذج أو التعافي من خطأ في كل مرة يفتحون فيها تطبيقًا آخر. تتيح الواجهات النظيفة والمتّسقة للمستخدمين نقل ما يعرفونه من مهمة إلى أخرى. وتقلّل عناصر التحكم المتوقَّعة والملاحظات الواضحة من التردد، وتترك مزيدًا من الانتباه للعمل المهم."
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "@mieweb/ui",
+        "value": "لا ينبغي أن يضطر الناس إلى إعادة تعلّم التنقل أو تعبئة نموذج أو التعافي من خطأ في كل مرة يفتحون فيها تطبيقًا آخر. تتيح الواجهات النظيفة والمتّسقة للمستخدمين نقل ما يعرفونه من مهمة إلى أخرى. وتقلّل عناصر التحكم المتوقَّعة والملاحظات الواضحة من التردد، وتترك مزيدًا من الانتباه للعمل المهم."
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "الهاتف"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "يرجى التحقق من إعدادات Storybook."
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "المسمى الوظيفي"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "جهة اتصال مقدم الخدمة"
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "",
+        "value": "اقرأ {{text:0}}. هذه تعليمات لوكلاء البرمجة، وليست مراجعًا آليًا لطلبات الدمج ولا بوابة دمج. يستخدم التطوير بمساعدة الوكلاء والتطوير اليدوي المكتبة نفسها والإعداد أدناه."
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "اقرأ {{text:0}}. هذه تعليمات لوكلاء البرمجة، وليست مراجعًا آليًا لطلبات الدمج ولا بوابة دمج. يستخدم التطوير بمساعدة الوكلاء والتطوير اليدوي المكتبة نفسها والإعداد أدناه."
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "",
+        "value": "اعرض مكوّنك الأول"
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "Render Your First Component > Set Up Your AI Coding Agent",
+        "value": "اعرض مكوّنك الأول"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "حفظ جهة الاتصال"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "حالة الحفظ"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "جارٍ الحفظ..."
+      },
+      {
+        "key": "See It In Action",
+        "context": "",
+        "value": "شاهده أثناء العمل"
+      },
+      {
+        "key": "See It In Action",
+        "context": "See It In Action > @mieweb/ui",
+        "value": "شاهده أثناء العمل"
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "",
+        "value": "راجع {{text:0}} للاطلاع على الشروط الكاملة."
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "License",
+        "value": "راجع {{text:0}} للاطلاع على الشروط الكاملة."
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "اختر..."
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "",
+        "value": "إعداد وكيل البرمجة بالذكاء الاصطناعي"
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "Set Up Your AI Coding Agent > Install in Your Application",
+        "value": "إعداد وكيل البرمجة بالذكاء الاصطناعي"
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "تعيين كائن"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "تعيين نص"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "الجنس"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "عرض الشيفرة"
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "عذرًا، إما أنه لا توجد لديك قصص أو لم يتم تحديد أي منها."
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "",
+        "value": "ابدأ من أساس مشترك واقضِ وقتًا أطول فيما يجعل تطبيقك قيّمًا. تدعم المكوّنات التصميم الشامل، لكنها لا تترجم محتواك تلقائيًا ولا تضمن إمكانية الوصول. تحقّق من تركيبها ولغتها وسلوكها مع الأشخاص والأجهزة التي يخدمها تطبيقك."
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "@mieweb/ui",
+        "value": "ابدأ من أساس مشترك واقضِ وقتًا أطول فيما يجعل تطبيقك قيّمًا. تدعم المكوّنات التصميم الشامل، لكنها لا تترجم محتواك تلقائيًا ولا تضمن إمكانية الوصول. تحقّق من تركيبها ولغتها وسلوكها مع الأشخاص والأجهزة التي يخدمها تطبيقك."
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "",
+        "value": "ابدأ بمهمة المستخدم، ثم قارن المكوّنات قبل اختيار واجهة برمجة:"
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "Explore and Compose Components",
+        "value": "ابدأ بمهمة المستخدم، ثم قارن المكوّنات قبل اختيار واجهة برمجة:"
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "الولاية"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "القصص"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "عنوان الشارع"
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "",
+        "value": "ينبغي أن يتجاوز هذا الاتساق المظهر. فالتجربة المتماسكة تتكيّف من الهاتف إلى سطح المكتب، وتبقى مقروءة في الوضعين الفاتح والداكن، وتستوعب اللغات المختلفة والتخطيطات من اليمين إلى اليسار، وتدعم مستخدمي لوحة المفاتيح والتقنيات المساعدة. التصميم المتجاوب والتدويل (i18n) وإمكانية الوصول (a11y) جزء من الأساس، لا بنود في قائمة تحقق ختامية."
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "@mieweb/ui",
+        "value": "ينبغي أن يتجاوز هذا الاتساق المظهر. فالتجربة المتماسكة تتكيّف من الهاتف إلى سطح المكتب، وتبقى مقروءة في الوضعين الفاتح والداكن، وتستوعب اللغات المختلفة والتخطيطات من اليمين إلى اليسار، وتدعم مستخدمي لوحة المفاتيح والتقنيات المساعدة. التصميم المتجاوب والتدويل (i18n) وإمكانية الوصول (a11y) جزء من الأساس، لا بنود في قائمة تحقق ختامية."
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "",
+        "value": "لا يزال الكتالوج قيد التحسين: فليست لكل المكوّنات إرشادات مقارنة أو تركيب بعد. لا تعتبر مثالًا معزولًا دليلًا على عدم وجود مكوّن ذي صلة. استخدم {{text:0}}، وأشِر إلى الإرشادات الناقصة أو المتعارضة في {{text:1}}."
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "Explore and Compose Components",
+        "value": "لا يزال الكتالوج قيد التحسين: فليست لكل المكوّنات إرشادات مقارنة أو تركيب بعد. لا تعتبر مثالًا معزولًا دليلًا على عدم وجود مكوّن ذي صلة. استخدم {{text:0}}، وأشِر إلى الإرشادات الناقصة أو المتعارضة في {{text:1}}."
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "تعذّر عرض المكوّن بشكل صحيح، غالبًا بسبب مشكلة في إعدادات Storybook. إليك بعض الأسباب الشائعة وكيفية معالجتها:"
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "",
+        "value": "بُنيت المكوّنات باستخدام React، لكن تطبيقك لا يلزم أن يكون كذلك. استخدمها في تطبيق React بالكامل أو ضمّنها في مناطق محددة من صفحات مبنية على Bootstrap أو مُصيَّرة على الخادم أو صفحات أخرى لا تستخدم React. اعتمد مكوّنًا أو سير عمل واحدًا في كل مرة دون إعادة كتابة بقية واجهتك."
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "@mieweb/ui",
+        "value": "بُنيت المكوّنات باستخدام React، لكن تطبيقك لا يلزم أن يكون كذلك. استخدمها في تطبيق React بالكامل أو ضمّنها في مناطق محددة من صفحات مبنية على Bootstrap أو مُصيَّرة على الخادم أو صفحات أخرى لا تستخدم React. اعتمد مكوّنًا أو سير عمل واحدًا في كل مرة دون إعادة كتابة بقية واجهتك."
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "",
+        "value": "تتطلب المكوّنات React 18+ وReact DOM 18+ للعرض، حتى عند تضمينها في صفحة لا تستخدم React. إذا كان مشروعك يتضمن هذه التبعيات بالفعل:"
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "Install in Your Application",
+        "value": "تتطلب المكوّنات React 18+ وReact DOM 18+ للعرض، حتى عند تضمينها في صفحة لا تستخدم React. إذا كان مشروعك يتضمن هذه التبعيات بالفعل:"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "",
+        "value": "لا يتطلب مسار CSS هذا استخدام Tailwind في تطبيقك. كمثال تفاعلي أول، اعرض مبدّل السمة داخل المزوّد:"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "Render Your First Component",
+        "value": "لا يتطلب مسار CSS هذا استخدام Tailwind في تطبيقك. كمثال تفاعلي أول، اعرض مبدّل السمة داخل المزوّد:"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "",
+        "value": "يثبّت هذا قواعد اختيار المكوّنات وتركيبها والسمات وإمكانية الوصول، ليبدأ وكيلك من مكوّنات المكتبة الموجودة. يكتب الملف"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "يثبّت هذا قواعد اختيار المكوّنات وتركيبها والسمات وإمكانية الوصول، ليبدأ وكيلك من مكوّنات المكتبة الموجودة. يكتب الملف"
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "هذا وصف قصير"
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "",
+        "value": "هذا البرنامج {{text:0}}:"
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "License",
+        "value": "هذا البرنامج {{text:0}}:"
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "",
+        "value": "لتعديل المكتبة أو تحسين إرشاداتها أو تشغيل Storybook الخاص بك، اتبع {{text:0}}. يغطي إعداد المستودع والتطوير المحلي والاختبارات وأعراف المكوّنات والإصدارات. هذه الخطوات غير مطلوبة لاستخدام حزمة npm."
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "Contribute or Run Locally",
+        "value": "لتعديل المكتبة أو تحسين إرشاداتها أو تشغيل Storybook الخاص بك، اتبع {{text:0}}. يغطي إعداد المستودع والتطوير المحلي والاختبارات وأعراف المكوّنات والإصدارات. هذه الخطوات غير مطلوبة لاستخدام حزمة npm."
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "صحيح"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "حاول إعادة تحميل الصفحة."
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "",
+        "value": "هل تستخدم وكيل برمجة بالذكاء الاصطناعي؟ {{text:0}} و{{text:1}} قبل أن تطلب منه إضافة مكوّنات إلى تطبيقك."
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "Install in Your Application",
+        "value": "هل تستخدم وكيل برمجة بالذكاء الاصطناعي؟ {{text:0}} و{{text:1}} قبل أن تطلب منه إضافة مكوّنات إلى تطبيقك."
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "القيمة"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "عرض المصدر على GitHub ↗"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "",
+        "value": "عند التضمين إلى جانب Bootstrap أو أوراق أنماط أخرى، افحص إعادة ضبط CSS والمحدّدات العامة وأنماط السمة بحثًا عن تعارضات. التركيب في عنصر DOM منفصل لا يعزل CSS."
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "Install in Your Application",
+        "value": "عند التضمين إلى جانب Bootstrap أو أوراق أنماط أخرى، افحص إعادة ضبط CSS والمحدّدات العامة وأنماط السمة بحثًا عن تعارضات. التركيب في عنصر DOM منفصل لا يعزل CSS."
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "ما إذا كان الحفظ قيد التنفيذ"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "ما إذا كانت النافذة مفتوحة"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "ما إذا كانت حقول العنوان ظاهرة"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "ما إذا كان قسم الحقول المخصصة ظاهرًا"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "ما إذا كان حقل الهاتف ظاهرًا"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "بالهاتف فقط"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "مع أخطاء التحقق"
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "الرمز البريدي"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "boolean"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "جهة اتصال"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "defaultValue"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "مثال: MD، RN، PA"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "مثال: مدير المكتب"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "email@example.com"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "false"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "",
+        "value": "لـ VS Code Copilot، ويحدّث كتلة مُدارة في"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "لـ VS Code Copilot، ويحدّث كتلة مُدارة في"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "",
+        "value": "للوكلاء الذين يقرؤون ذلك الملف. أعد التشغيل بعد ترقية"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "للوكلاء الذين يقرؤون ذلك الملف. أعد التشغيل بعد ترقية"
+      },
+      {
+        "key": "in",
+        "context": "",
+        "value": "في"
+      },
+      {
+        "key": "in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "في"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "isSaving"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "null"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "onOpenChange"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "onSave"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "open"
+      },
+      {
+        "key": "or",
+        "context": "",
+        "value": "أو"
+      },
+      {
+        "key": "or",
+        "context": "Install in Your Application",
+        "value": "أو"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "propertyName"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "showAddress"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "showCustomFields"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "showPhone"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "string"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "ملخص"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "العنوان"
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "",
+        "value": "لتحديث القواعد."
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "لتحديث القواعد."
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "true"
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "",
+        "value": "{{text:0}}، دون الحاجة إلى تثبيت."
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}، دون الحاجة إلى تثبيت."
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "",
+        "value": "{{text:0}}، حيث يمكنك استكشاف هذه المكوّنات دون إنشاء تطبيق أولًا. هذه المقدمة مشتركة بين GitHub وnpm وStorybook."
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}، حيث يمكنك استكشاف هذه المكوّنات دون إنشاء تطبيق أولًا. هذه المقدمة مشتركة بين GitHub وnpm وStorybook."
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "",
+        "value": "{{text:0}}، مع وكيل برمجة بالذكاء الاصطناعي أو بدونه."
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}، مع وكيل برمجة بالذكاء الاصطناعي أو بدونه."
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: تحقق من أن Storybook يلتقط جميع الإعدادات اللازمة للمحمّلات والإضافات والمعلمات الأخرى ذات الصلة. يمكنك العثور على أدلة خطوة بخطوة لإعداد {{text:1}} أو {{text:2}} مع Storybook."
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: يمكنك استخدام المزخرفات لتوفير سياقات أو موفّرات محددة، وهي ضرورية أحيانًا لعرض المكوّنات بشكل صحيح. للحصول على تعليمات مفصلة حول استخدام المزخرفات، يرجى زيارة {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: قد يتطلب Storybook لديك متغيرات بيئة محددة ليعمل كما هو متوقع. يمكنك إعداد متغيرات بيئة مخصصة كما هو موضح في {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "",
+        "value": "{{text:0}}: نهج مرتّب لاعتماد المكتبة."
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: نهج مرتّب لاعتماد المكتبة."
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "",
+        "value": "{{text:0}}: إرشادات ترحيل خاصة بكل إطار عمل."
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: إرشادات ترحيل خاصة بكل إطار عمل."
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "",
+        "value": "{{text:0}}: مزالق التكامل ومسارات الترحيل للتطبيقات الحالية."
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: مزالق التكامل ومسارات الترحيل للتطبيقات الحالية."
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "",
+        "value": "{{text:0}}: نظام العلامة التجارية والرموز المرئية."
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: نظام العلامة التجارية والرموز المرئية."
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "",
+        "value": "{{text:0}} قارن بين {{text:1}} و{{text:2}}. يوفّر جدول المحتويات (TOC) وجهات مسماة وتنقلًا. أما شريط القراءة فهو إشارة زخرفية لتمرير المستند، وليس تنقلًا ولا دليلًا على القراءة. يمكن أن يكمّل أحدهما الآخر، وقد لا يلزم أيٌّ منهما للمحتوى القصير."
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} قارن بين {{text:1}} و{{text:2}}. يوفّر جدول المحتويات (TOC) وجهات مسماة وتنقلًا. أما شريط القراءة فهو إشارة زخرفية لتمرير المستند، وليس تنقلًا ولا دليلًا على القراءة. يمكن أن يكمّل أحدهما الآخر، وقد لا يلزم أيٌّ منهما للمحتوى القصير."
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "",
+        "value": "{{text:0}} استكشف {{text:1}}. افحص كيف يتكامل التنقل والترويسات والمحتوى، ثم كيّف التركيب مع سير عملك بدلًا من نسخ التخطيط كما هو."
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} استكشف {{text:1}}. افحص كيف يتكامل التنقل والترويسات والمحتوى، ثم كيّف التركيب مع سير عملك بدلًا من نسخ التخطيط كما هو."
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}} للمنتجات المملوكة أو الاستخدام التجاري، تواصل مع {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "License",
+        "value": "{{text:0}} للمنتجات المملوكة أو الاستخدام التجاري، تواصل مع {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "",
+        "value": "{{text:0}} المشاريع الشخصية والتعليم والبحث."
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "License",
+        "value": "{{text:0}} المشاريع الشخصية والتعليم والبحث."
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "",
+        "value": "{{text:0}} ابدأ بـ {{text:1}} وقارنه بـ {{text:2}}. يوفّر NITRO أدوات بيانات متكاملة، بينما يوفّر Table ترميزًا منخفض المستوى. ضع في اعتبارك السلوك الذي سيتعيّن على تطبيقك توفيره، وراجع قواعد الاختيار قبل اختيار استثناء."
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} ابدأ بـ {{text:1}} وقارنه بـ {{text:2}}. يوفّر NITRO أدوات بيانات متكاملة، بينما يوفّر Table ترميزًا منخفض المستوى. ضع في اعتبارك السلوك الذي سيتعيّن على تطبيقك توفيره، وراجع قواعد الاختيار قبل اختيار استثناء."
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "",
+        "value": "{{text:0}} لرؤية التنقل والترويسات والبطاقات وعروض البيانات تعمل معًا في تخطيط تطبيق. جرّب مبدّلي العلامة التجارية والسمة لترى كيف تتكيّف المكوّنات نفسها. لا يلزم التثبيت."
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "See It In Action",
+        "value": "{{text:0}} لرؤية التنقل والترويسات والبطاقات وعروض البيانات تعمل معًا في تخطيط تطبيق. جرّب مبدّلي العلامة التجارية والسمة لترى كيف تتكيّف المكوّنات نفسها. لا يلزم التثبيت."
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "",
+        "value": "{{text:0}} الاستخدام والتعديل والتوزيع في المشاريع مفتوحة المصدر مع ذكر المصدر."
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "License",
+        "value": "{{text:0}} الاستخدام والتعديل والتوزيع في المشاريع مفتوحة المصدر مع ذكر المصدر."
+      }
+    ],
+    "es": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "Agregar contacto"
+      },
+      {
+        "key": "\"Are you sure?\"",
+        "context": "",
+        "value": "¿Estás seguro?"
+      },
+      {
+        "key": "\"Continue\"",
+        "context": "",
+        "value": "Continuar"
+      },
+      {
+        "key": "\"Dismiss alert\"",
+        "context": "",
+        "value": "Descartar alerta"
+      },
+      {
+        "key": "\"This will save your changes and continue.\"",
+        "context": "",
+        "value": "Esto guardará tus cambios y continuará."
+      },
+      {
+        "key": "\"danger\"",
+        "context": "",
+        "value": "peligro"
+      },
+      {
+        "key": "\"default\"",
+        "context": "",
+        "value": "predeterminado"
+      },
+      {
+        "key": "\"destructive\"",
+        "context": "",
+        "value": "destructivo"
+      },
+      {
+        "key": "\"info\"",
+        "context": "",
+        "value": "información"
+      },
+      {
+        "key": "\"success\"",
+        "context": "",
+        "value": "éxito"
+      },
+      {
+        "key": "\"warning\"",
+        "context": "",
+        "value": "advertencia"
+      },
+      {
+        "key": "$$typeof",
+        "context": "",
+        "value": "$$typeof"
+      },
+      {
+        "key": "(() => void)",
+        "context": "",
+        "value": "(() => void)"
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "(open: boolean) => void"
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "",
+        "value": ", dejando el resto de la página bajo el control de su framework actual. Desmonta la raíz de React cuando la página anfitriona elimine esa zona. Esto requiere una compilación de JavaScript compatible con React; los componentes no son widgets HTML independientes de cualquier framework."
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "Install in Your Application",
+        "value": ", dejando el resto de la página bajo el control de su framework actual. Desmonta la raíz de React cuando la página anfitriona elimine esa zona. Esto requiere una compilación de JavaScript compatible con React; los componentes no son widgets HTML independientes de cualquier framework."
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "",
+        "value": ". No necesitas clonar este repositorio ni ejecutar Storybook para usar la biblioteca."
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "Install in Your Application",
+        "value": ". No necesitas clonar este repositorio ni ejecutar Storybook para usar la biblioteca."
+      },
+      {
+        "key": "A modal dialog that interrupts the user with important content and expects a response. Built on top of {@link Modal}.",
+        "context": "",
+        "value": "Un cuadro de diálogo modal que interrumpe al usuario con contenido importante y espera una respuesta. Construido sobre {@link Modal}."
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "Un modal para agregar o editar contactos de proveedor/empleador con campos para nombre, sexo, cargo, título, correo electrónico, dirección y campos personalizados."
+      },
+      {
+        "key": "A navigation breadcrumb component.",
+        "context": "",
+        "value": "Un componente de ruta de navegación."
+      },
+      {
+        "key": "Accessible label for the dismiss button",
+        "context": "",
+        "value": "Etiqueta accesible para el botón de descartar"
+      },
+      {
+        "key": "Active Locale:",
+        "context": "",
+        "value": "Configuración regional activa:"
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "Agregar contacto"
+      },
+      {
+        "key": "Add Contact =>",
+        "context": "",
+        "value": "Agregar contacto =>"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "Agregar campo"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "",
+        "value": "Añade capacidades especializadas cuando las necesites"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "Add Specialized Capabilities When Needed > Render Your First Component",
+        "value": "Añade capacidades especializadas cuando las necesites"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "AddContactModal"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "Clases CSS adicionales"
+      },
+      {
+        "key": "Additional class name",
+        "context": "",
+        "value": "Nombre de clase adicional"
+      },
+      {
+        "key": "Additional class name for the dialog content",
+        "context": "",
+        "value": "Nombre de clase adicional para el contenido del cuadro de diálogo"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "Dirección"
+      },
+      {
+        "key": "Alert",
+        "context": "",
+        "value": "Alerta"
+      },
+      {
+        "key": "AlertDialog",
+        "context": "",
+        "value": "AlertDialog"
+      },
+      {
+        "key": "All Variants",
+        "context": "",
+        "value": "Todas las variantes"
+      },
+      {
+        "key": "An alert component for displaying important messages.",
+        "context": "",
+        "value": "Un componente de alerta para mostrar mensajes importantes."
+      },
+      {
+        "key": "Analytics",
+        "context": "",
+        "value": "Analítica"
+      },
+      {
+        "key": "Annual Report.pdf",
+        "context": "",
+        "value": "Informe anual.pdf"
+      },
+      {
+        "key": "Another Long Subcategory Name",
+        "context": "",
+        "value": "Otro nombre de subcategoría largo"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "Apto, suite, etc. (opcional)"
+      },
+      {
+        "key": "Array of breadcrumb items",
+        "context": "",
+        "value": "Matriz de elementos de ruta de navegación"
+      },
+      {
+        "key": "Breadcrumb",
+        "context": "",
+        "value": "Ruta de navegación"
+      },
+      {
+        "key": "BreadcrumbItem[]",
+        "context": "",
+        "value": "BreadcrumbItem[]"
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "",
+        "value": "Crea aplicaciones que resulten familiares desde la primera interacción."
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "@mieweb/ui",
+        "value": "Crea aplicaciones que resulten familiares desde la primera interacción."
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "Callback cuando se guarda el contacto"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "Callback cuando cambia el estado de apertura del modal"
+      },
+      {
+        "key": "Callback when the alert is dismissed",
+        "context": "",
+        "value": "Callback cuando se descarta la alerta"
+      },
+      {
+        "key": "Callback when the modal should close",
+        "context": "",
+        "value": "Callback cuando debería cerrarse el modal"
+      },
+      {
+        "key": "Called when the action button is clicked",
+        "context": "",
+        "value": "Se llama cuando se hace clic en el botón de acción"
+      },
+      {
+        "key": "Called when the cancel button is clicked",
+        "context": "",
+        "value": "Se llama cuando se hace clic en el botón de cancelar"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "Cancelar"
+      },
+      {
+        "key": "Cancel =>",
+        "context": "",
+        "value": "Cancelar =>"
+      },
+      {
+        "key": "Category",
+        "context": "",
+        "value": "Categoría"
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "",
+        "value": "Revisa las dependencias de la integración elegida antes de importar su punto de entrada. AGGrid está obsoleto para trabajo nuevo; para datos tabulares, empieza con DataVis NITRO."
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "Revisa las dependencias de la integración elegida antes de importar su punto de entrada. AGGrid está obsoleto para trabajo nuevo; para datos tabulares, empieza con DataVis NITRO."
+      },
+      {
+        "key": "Choose option...",
+        "context": "",
+        "value": "Elige una opción..."
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "Ciudad"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "Haz clic en Guardar para ver los errores de validación"
+      },
+      {
+        "key": "Collapsed",
+        "context": "",
+        "value": "Contraído"
+      },
+      {
+        "key": "Computers",
+        "context": "",
+        "value": "Computadoras"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "ContactFormData"
+      },
+      {
+        "key": "Continue",
+        "context": "",
+        "value": "Continuar"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "",
+        "value": "Contribuye o ejecuta en local"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "Contribute or Run Locally > Go Deeper",
+        "value": "Contribuye o ejecuta en local"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "",
+        "value": "Contribuir o ejecutar en local"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "@mieweb/ui",
+        "value": "Contribuir o ejecutar en local"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "Control"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "Campos personalizados"
+      },
+      {
+        "key": "Custom Separator",
+        "context": "",
+        "value": "Separador personalizado"
+      },
+      {
+        "key": "Custom body content (rendered below the description)",
+        "context": "",
+        "value": "Contenido del cuerpo personalizado (se muestra debajo de la descripción)"
+      },
+      {
+        "key": "Custom render function for links",
+        "context": "",
+        "value": "Función de renderizado personalizada para enlaces"
+      },
+      {
+        "key": "Danger",
+        "context": "",
+        "value": "Peligro"
+      },
+      {
+        "key": "Danger alert style.",
+        "context": "",
+        "value": "Estilo de alerta de peligro."
+      },
+      {
+        "key": "Dashboard",
+        "context": "",
+        "value": "Panel"
+      },
+      {
+        "key": "Data",
+        "context": "",
+        "value": "Datos"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "Documentación de decoradores"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "Predeterminado"
+      },
+      {
+        "key": "Default Alert",
+        "context": "",
+        "value": "Alerta predeterminada"
+      },
+      {
+        "key": "Default alert style.",
+        "context": "",
+        "value": "Estilo de alerta predeterminado."
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "Grado"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "Descripción"
+      },
+      {
+        "key": "Destructive",
+        "context": "",
+        "value": "Destructivo"
+      },
+      {
+        "key": "Dialog title",
+        "context": "",
+        "value": "Título del diálogo"
+      },
+      {
+        "key": "Did you know?",
+        "context": "",
+        "value": "¿Sabías que...?"
+      },
+      {
+        "key": "Disables the action button",
+        "context": "",
+        "value": "Desactiva el botón de acción"
+      },
+      {
+        "key": "Dismissible",
+        "context": "",
+        "value": "Se puede descartar"
+      },
+      {
+        "key": "Dismissible Alert",
+        "context": "",
+        "value": "Alerta descartable"
+      },
+      {
+        "key": "Documents",
+        "context": "",
+        "value": "Documentos"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "Editar contacto"
+      },
+      {
+        "key": "Edit JSON",
+        "context": "",
+        "value": "Editar JSON"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "Modo de edición"
+      },
+      {
+        "key": "Electronics",
+        "context": "",
+        "value": "Electrónica"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "Correo electrónico"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "Correo electrónico{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "Documentación de variables de entorno"
+      },
+      {
+        "key": "Error",
+        "context": "",
+        "value": "Error"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "Datos de contacto existentes para editar"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "",
+        "value": "Explora y combina componentes"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "Explore and Compose Components > Add Specialized Capabilities When Needed",
+        "value": "Explora y combina componentes"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "",
+        "value": "Explorar y combinar componentes"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "@mieweb/ui",
+        "value": "Explorar y combinar componentes"
+      },
+      {
+        "key": "Fallback text",
+        "context": "",
+        "value": "Texto de reserva"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "Falso"
+      },
+      {
+        "key": "Female",
+        "context": "",
+        "value": "Femenino"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "Nombre del campo"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "Nombre{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "",
+        "value": "Para un proyecto sin React, instala las dependencias de renderizado:"
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "Install in Your Application",
+        "value": "Para un proyecto sin React, instala las dependencias de renderizado:"
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "",
+        "value": "En cada elección, pregúntate por qué encaja, cuándo sería mejor una alternativa, qué estado controla tu aplicación y cómo se comporta junto a los componentes vecinos. Prueba los estados de carga, vacío, error, teclado y pantalla estrecha en la aplicación real, no solo en la story aislada."
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "Explore and Compose Components",
+        "value": "En cada elección, pregúntate por qué encaja, cuándo sería mejor una alternativa, qué estado controla tu aplicación y cómo se comporta junto a los componentes vecinos. Prueba los estados de carga, vacío, error, teclado y pantalla estrecha en la aplicación real, no solo en la story aislada."
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "",
+        "value": "¿Has encontrado una recomendación de selección poco clara o una relación sin documentar? Las contribuciones a la documentación son bienvenidas junto a las correcciones de componentes. {{text:0}} para mejorar el contenido compartido de GitHub, npm y Storybook. Las copias publicadas se actualizan cuando se publica el paquete o se despliega el sitio de documentación."
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "Contribute or Run Locally",
+        "value": "¿Has encontrado una recomendación de selección poco clara o una relación sin documentar? Las contribuciones a la documentación son bienvenidas junto a las correcciones de componentes. {{text:0}} para mejorar el contenido compartido de GitHub, npm y Storybook. Las copias publicadas se actualizan cuando se publica el paquete o se despliega el sitio de documentación."
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "",
+        "value": "Desde la raíz del repositorio de tu aplicación, ejecuta:"
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "Desde la raíz del repositorio de tu aplicación, ejecuta:"
+      },
+      {
+        "key": "Gaming Laptops",
+        "context": "",
+        "value": "Portátiles gaming"
+      },
+      {
+        "key": "Get Started",
+        "context": "",
+        "value": "Primeros pasos"
+      },
+      {
+        "key": "Get Started",
+        "context": "Get Started > See It In Action",
+        "value": "Primeros pasos"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "",
+        "value": "Profundiza"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "Go Deeper > Explore and Compose Components",
+        "value": "Profundiza"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "",
+        "value": "Las integraciones pesadas usan puntos de entrada separados y dependencias peer opcionales, así que solo instalas lo que necesitas:"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "Las integraciones pesadas usan puntos de entrada separados y dependencias peer opcionales, así que solo instalas lo que necesitas:"
+      },
+      {
+        "key": "Hidden Text",
+        "context": "",
+        "value": "Texto oculto"
+      },
+      {
+        "key": "Hides the cancel button",
+        "context": "",
+        "value": "Oculta el botón de cancelar"
+      },
+      {
+        "key": "Home",
+        "context": "",
+        "value": "Inicio"
+      },
+      {
+        "key": "Icon to display in the alert",
+        "context": "",
+        "value": "Icono que se mostrará en la alerta"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "Si el problema persiste, revisa la consola del navegador o la terminal desde la que ejecutaste Storybook."
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "",
+        "value": "Si tu proyecto usa npm o yarn, ejecuta"
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "Install in Your Application",
+        "value": "Si tu proyecto usa npm o yarn, ejecuta"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "",
+        "value": "Importa la hoja de estilos precompilada una sola vez en el punto de entrada o el layout raíz de tu aplicación. Importa después una hoja de estilos de marca si quieres los tokens de esa marca:"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "Render Your First Component",
+        "value": "Importa la hoja de estilos precompilada una sola vez en el punto de entrada o el layout raíz de tu aplicación. Importa después una hoja de estilos de marca si quieres los tokens de esa marca:"
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "",
+        "value": "En producción, proporciona las etiquetas traducidas mediante el sistema de i18n de tu aplicación. En el App Router de Next.js, coloca este ejemplo interactivo en un componente de cliente e importa los estilos globales desde el layout raíz."
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "Render Your First Component",
+        "value": "En producción, proporciona las etiquetas traducidas mediante el sistema de i18n de tu aplicación. En el App Router de Next.js, coloca este ejemplo interactivo en un componente de cliente e importa los estilos globales desde el layout raíz."
+      },
+      {
+        "key": "Info",
+        "context": "",
+        "value": "Información"
+      },
+      {
+        "key": "Information",
+        "context": "",
+        "value": "Información"
+      },
+      {
+        "key": "Informational alert style.",
+        "context": "",
+        "value": "Estilo de alerta informativa."
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "",
+        "value": "Instalación en tu aplicación"
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "Install in Your Application > Get Started",
+        "value": "Instalación en tu aplicación"
+      },
+      {
+        "key": "Label for the cancel button (default \"Cancel\")",
+        "context": "",
+        "value": "Etiqueta para el botón de cancelar (predeterminado \"Cancelar\")"
+      },
+      {
+        "key": "Label for the confirm/action button (default \"Continue\")",
+        "context": "",
+        "value": "Etiqueta para el botón de confirmar/acción (predeterminado \"Continuar\")"
+      },
+      {
+        "key": "Laptops",
+        "context": "",
+        "value": "Portátiles"
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "Apellido"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "Apellido{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "Apellido"
+      },
+      {
+        "key": "Library",
+        "context": "",
+        "value": "Biblioteca"
+      },
+      {
+        "key": "License",
+        "context": "",
+        "value": "Licencia"
+      },
+      {
+        "key": "License",
+        "context": "License > Contribute or Run Locally",
+        "value": "Licencia"
+      },
+      {
+        "key": "Long Labels",
+        "context": "",
+        "value": "Etiquetas largas"
+      },
+      {
+        "key": "Maximum items to display (collapses middle items)",
+        "context": "",
+        "value": "Número máximo de elementos a mostrar (contrae los elementos intermedios)"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "Campos mínimos"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "Webpack o Vite mal configurado"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "Falta contexto/proveedores"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "Faltan variables de entorno"
+      },
+      {
+        "key": "Missing Phrase =>",
+        "context": "",
+        "value": "Frase faltante =>"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "Móvil"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "Título del modal"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "",
+        "value": "Monta los componentes en un elemento DOM dedicado con la función de React DOM"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "Install in Your Application",
+        "value": "Monta los componentes en un elemento DOM dedicado con la función de React DOM"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "Nombre"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "Sin vista previa"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "No se han añadido campos personalizados. Haz clic en \"Agregar campo\" para añadir información personalizada."
+      },
+      {
+        "key": "Open Modal",
+        "context": "",
+        "value": "Abrir modal"
+      },
+      {
+        "key": "Open dialog",
+        "context": "",
+        "value": "Abrir cuadro de diálogo"
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "",
+        "value": "Abre {{text:0}}. Storybook es el envoltorio de los ejemplos: su barra lateral selecciona componentes, una {{text:1}} muestra una configuración concreta y {{text:2}} presenta la guía y la API. {{text:3}} cambian las props del ejemplo; las herramientas de tema y de marca te permiten ver distintas apariencias. Esas herramientas pertenecen a Storybook, no al componente que instalas."
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "Explore and Compose Components",
+        "value": "Abre {{text:0}}. Storybook es el envoltorio de los ejemplos: su barra lateral selecciona componentes, una {{text:1}} muestra una configuración concreta y {{text:2}} presenta la guía y la API. {{text:3}} cambian las props del ejemplo; las herramientas de tema y de marca te permiten ver distintas apariencias. Esas herramientas pertenecen a Storybook, no al componente que instalas."
+      },
+      {
+        "key": "Optional descriptive body text",
+        "context": "",
+        "value": "Texto descriptivo opcional del cuerpo"
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "",
+        "value": "Las personas no deberían tener que volver a aprender a navegar, completar un formulario o recuperarse de un error cada vez que abren otra aplicación. Las interfaces limpias y coherentes permiten trasladar lo que ya se sabe de una tarea a la siguiente. Los controles predecibles y una respuesta clara reducen la duda y dejan más atención para el trabajo que importa."
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "@mieweb/ui",
+        "value": "Las personas no deberían tener que volver a aprender a navegar, completar un formulario o recuperarse de un error cada vez que abren otra aplicación. Las interfaces limpias y coherentes permiten trasladar lo que ya se sabe de una tarea a la siguiente. Los controles predecibles y una respuesta clara reducen la duda y dejan más atención para el trabajo que importa."
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "Teléfono"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "Por favor, revisa la configuración de Storybook."
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "Título del puesto"
+      },
+      {
+        "key": "Products",
+        "context": "",
+        "value": "Productos"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "Contacto del proveedor"
+      },
+      {
+        "key": "ReactElement<unknown, string | JSXElementConstructor<any>> | null",
+        "context": "",
+        "value": "ReactElement<unknown, string | JSXElementConstructor<any>> | null"
+      },
+      {
+        "key": "ReactNode",
+        "context": "",
+        "value": "ReactNode"
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "",
+        "value": "Consulta {{text:0}}. Son instrucciones para agentes de programación, no un revisor automático de PR ni un control de fusión. El desarrollo asistido por agentes y el manual usan la misma biblioteca y la configuración que sigue."
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "Consulta {{text:0}}. Son instrucciones para agentes de programación, no un revisor automático de PR ni un control de fusión. El desarrollo asistido por agentes y el manual usan la misma biblioteca y la configuración que sigue."
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "",
+        "value": "Renderiza tu primer componente"
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "Render Your First Component > Set Up Your AI Coding Agent",
+        "value": "Renderiza tu primer componente"
+      },
+      {
+        "key": "Reports",
+        "context": "",
+        "value": "Informes"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "Guardar contacto"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "Estado de guardado"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "Guardando..."
+      },
+      {
+        "key": "See It In Action",
+        "context": "",
+        "value": "Míralo en acción"
+      },
+      {
+        "key": "See It In Action",
+        "context": "See It In Action > @mieweb/ui",
+        "value": "Míralo en acción"
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "",
+        "value": "Consulta {{text:0}} para ver los términos completos."
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "License",
+        "value": "Consulta {{text:0}} para ver los términos completos."
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "Seleccionar..."
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "",
+        "value": "Configura tu agente de programación con IA"
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "Set Up Your AI Coding Agent > Install in Your Application",
+        "value": "Configura tu agente de programación con IA"
+      },
+      {
+        "key": "Set boolean",
+        "context": "",
+        "value": "Establecer booleano"
+      },
+      {
+        "key": "Set number",
+        "context": "",
+        "value": "Establecer número"
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "Establecer objeto"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "Establecer cadena"
+      },
+      {
+        "key": "Settings",
+        "context": "",
+        "value": "Configuración"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "Sexo"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "Mostrar código"
+      },
+      {
+        "key": "Smartphones",
+        "context": "",
+        "value": "Teléfonos inteligentes"
+      },
+      {
+        "key": "Something went wrong. Please try again.",
+        "context": "",
+        "value": "Algo salió mal. Por favor, inténtalo de nuevo."
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "Lo sentimos, pero no tienes historias o no se ha seleccionado ninguna por algún motivo."
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "",
+        "value": "Parte de una base común y dedica más tiempo a lo que hace valiosa tu aplicación. Los componentes favorecen el diseño inclusivo; no traducen automáticamente tu contenido ni garantizan la accesibilidad. Valida su composición, su idioma y su comportamiento con las personas y los dispositivos a los que sirve tu aplicación."
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "@mieweb/ui",
+        "value": "Parte de una base común y dedica más tiempo a lo que hace valiosa tu aplicación. Los componentes favorecen el diseño inclusivo; no traducen automáticamente tu contenido ni garantizan la accesibilidad. Valida su composición, su idioma y su comportamiento con las personas y los dispositivos a los que sirve tu aplicación."
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "",
+        "value": "Empieza por la tarea del usuario y compara componentes antes de elegir una API:"
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "Explore and Compose Components",
+        "value": "Empieza por la tarea del usuario y compara componentes antes de elegir una API:"
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "Estado"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "Historias"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "Dirección"
+      },
+      {
+        "key": "Subcategory",
+        "context": "",
+        "value": "Subcategoría"
+      },
+      {
+        "key": "Success",
+        "context": "",
+        "value": "Éxito"
+      },
+      {
+        "key": "Success alert style.",
+        "context": "",
+        "value": "Estilo de alerta de éxito."
+      },
+      {
+        "key": "Success!",
+        "context": "",
+        "value": "¡Éxito!"
+      },
+      {
+        "key": "Symbol(react.fragment)",
+        "context": "",
+        "value": "Símbolo(react.fragment)"
+      },
+      {
+        "key": "Symbol(react.transitional.element)",
+        "context": "",
+        "value": "Símbolo(react.transitional.element)"
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "",
+        "value": "Esa coherencia debe ir más allá de la apariencia. Una experiencia coherente se adapta del móvil al escritorio, sigue siendo legible en modo claro y oscuro, admite distintos idiomas y diseños de derecha a izquierda, y da soporte a quienes usan el teclado o tecnologías de asistencia. El diseño adaptable, la internacionalización (i18n) y la accesibilidad (a11y) forman parte de la base, no de una lista de comprobación final."
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "@mieweb/ui",
+        "value": "Esa coherencia debe ir más allá de la apariencia. Una experiencia coherente se adapta del móvil al escritorio, sigue siendo legible en modo claro y oscuro, admite distintos idiomas y diseños de derecha a izquierda, y da soporte a quienes usan el teclado o tecnologías de asistencia. El diseño adaptable, la internacionalización (i18n) y la accesibilidad (a11y) forman parte de la base, no de una lista de comprobación final."
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "",
+        "value": "El catálogo sigue mejorando: todavía no todos los componentes tienen guía de comparación o composición. No tomes un ejemplo aislado como prueba de que no existe un componente relacionado. Usa {{text:0}} y señala la guía que falte o sea contradictoria en {{text:1}}."
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "Explore and Compose Components",
+        "value": "El catálogo sigue mejorando: todavía no todos los componentes tienen guía de comparación o composición. No tomes un ejemplo aislado como prueba de que no existe un componente relacionado. Usa {{text:0}} y señala la guía que falte o sea contradictoria en {{text:1}}."
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "El componente no se pudo renderizar correctamente, probablemente debido a un problema de configuración en Storybook. Estas son algunas causas comunes y cómo puedes abordarlas:"
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "",
+        "value": "Los componentes están hechos con React, pero tu aplicación no tiene por qué estarlo. Úsalos en toda una aplicación React o intégralos en zonas concretas de páginas basadas en Bootstrap, renderizadas en el servidor u otras páginas sin React. Adopta un componente o un flujo de trabajo cada vez, sin reescribir el resto de tu interfaz."
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "@mieweb/ui",
+        "value": "Los componentes están hechos con React, pero tu aplicación no tiene por qué estarlo. Úsalos en toda una aplicación React o intégralos en zonas concretas de páginas basadas en Bootstrap, renderizadas en el servidor u otras páginas sin React. Adopta un componente o un flujo de trabajo cada vez, sin reescribir el resto de tu interfaz."
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "",
+        "value": "Los componentes necesitan React 18+ y React DOM 18+ para renderizarse, también cuando se integran en una página sin React. Si tu proyecto ya tiene esas dependencias:"
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "Install in Your Application",
+        "value": "Los componentes necesitan React 18+ y React DOM 18+ para renderizarse, también cuando se integran en una página sin React. Si tu proyecto ya tiene esas dependencias:"
+      },
+      {
+        "key": "The separator between breadcrumb items",
+        "context": "",
+        "value": "El separador entre elementos de la ruta de navegación"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "",
+        "value": "Esta vía de CSS no requiere Tailwind en tu aplicación. Como primer ejemplo interactivo, renderiza un selector de tema dentro del proveedor:"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "Render Your First Component",
+        "value": "Esta vía de CSS no requiere Tailwind en tu aplicación. Como primer ejemplo interactivo, renderiza un selector de tema dentro del proveedor:"
+      },
+      {
+        "key": "This alert can be dismissed by clicking the close button.",
+        "context": "",
+        "value": "Esta alerta se puede descartar haciendo clic en el botón de cerrar."
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "",
+        "value": "Esto instala reglas de selección de componentes, composición, temas y accesibilidad para que tu agente parta de los componentes existentes de la biblioteca. Escribe"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "Esto instala reglas de selección de componentes, composición, temas y accesibilidad para que tu agente parta de los componentes existentes de la biblioteca. Escribe"
+      },
+      {
+        "key": "This is a default alert message.",
+        "context": "",
+        "value": "Este es un mensaje de alerta predeterminado."
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "Esta es una descripción breve"
+      },
+      {
+        "key": "This is an informational message.",
+        "context": "",
+        "value": "Este es un mensaje informativo."
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "",
+        "value": "Este software es {{text:0}}:"
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "License",
+        "value": "Este software es {{text:0}}:"
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "",
+        "value": "Para modificar la biblioteca, mejorar su guía o ejecutar tu propio Storybook, sigue {{text:0}}. Cubre la configuración del repositorio, el desarrollo local, las pruebas, las convenciones de componentes y las versiones. Esos pasos no son necesarios para usar el paquete de npm."
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "Contribute or Run Locally",
+        "value": "Para modificar la biblioteca, mejorar su guía o ejecutar tu propio Storybook, sigue {{text:0}}. Cubre la configuración del repositorio, el desarrollo local, las pruebas, las convenciones de componentes y las versiones. Esos pasos no son necesarios para usar el paquete de npm."
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "Verdadero"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "Intenta recargar la página."
+      },
+      {
+        "key": "Two Items",
+        "context": "",
+        "value": "Dos elementos"
+      },
+      {
+        "key": "Unlike a regular Modal, it does not close on overlay click or Escape by default — the user must explicitly choose an action.",
+        "context": "",
+        "value": "A diferencia de un modal normal, no se cierra al hacer clic en la superposición ni con Escape de forma predeterminada; el usuario debe elegir explícitamente una acción."
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "",
+        "value": "¿Usas un agente de programación con IA? {{text:0}} y {{text:1}} antes de pedirle que añada componentes a tu aplicación."
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "Install in Your Application",
+        "value": "¿Usas un agente de programación con IA? {{text:0}} y {{text:1}} antes de pedirle que añada componentes a tu aplicación."
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "Valor"
+      },
+      {
+        "key": "Very Long Category Name That Might Wrap",
+        "context": "",
+        "value": "Nombre de categoría muy largo que podría saltar de línea"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "Ver el código fuente en GitHub ↗"
+      },
+      {
+        "key": "Visual emphasis for the action button",
+        "context": "",
+        "value": "Énfasis visual para el botón de acción"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Warning",
+        "context": "",
+        "value": "Advertencia"
+      },
+      {
+        "key": "Warning alert style.",
+        "context": "",
+        "value": "Estilo de alerta de advertencia."
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "",
+        "value": "Al integrarlos junto a Bootstrap u otras hojas de estilo, revisa los resets de CSS, los selectores globales y los estilos de tema por si hay conflictos. Montarlos en un elemento DOM aparte no aísla el CSS."
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "Install in Your Application",
+        "value": "Al integrarlos junto a Bootstrap u otras hojas de estilo, revisa los resets de CSS, los selectores globales y los estilos de tema por si hay conflictos. Montarlos en un elemento DOM aparte no aísla el CSS."
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "Si el guardado está en curso"
+      },
+      {
+        "key": "Whether the alert can be dismissed",
+        "context": "",
+        "value": "Si la alerta se puede descartar"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "Si el modal está abierto"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "Si se deben mostrar los campos de dirección"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "Si se debe mostrar la sección de campos personalizados"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "Si se debe mostrar el campo de teléfono"
+      },
+      {
+        "key": "With Custom Link",
+        "context": "",
+        "value": "Con enlace personalizado"
+      },
+      {
+        "key": "With Icon",
+        "context": "",
+        "value": "Con ícono"
+      },
+      {
+        "key": "With Icons",
+        "context": "",
+        "value": "Con íconos"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "Solo con teléfono"
+      },
+      {
+        "key": "With Slash Separator",
+        "context": "",
+        "value": "Con separador de barra diagonal"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "Con errores de validación"
+      },
+      {
+        "key": "You can customize the look and feel of alerts with different variants.",
+        "context": "",
+        "value": "Puedes personalizar la apariencia y el estilo de las alertas con diferentes variantes."
+      },
+      {
+        "key": "Your changes have been saved successfully.",
+        "context": "",
+        "value": "Tus cambios se han guardado correctamente."
+      },
+      {
+        "key": "Your session is about to expire in 5 minutes.",
+        "context": "",
+        "value": "Tu sesión está a punto de expirar en 5 minutos."
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "Código postal"
+      },
+      {
+        "key": "actionDisabled",
+        "context": "",
+        "value": "actionDisabled"
+      },
+      {
+        "key": "actionLabel",
+        "context": "",
+        "value": "actionLabel"
+      },
+      {
+        "key": "alertCircle",
+        "context": "",
+        "value": "alertCircle"
+      },
+      {
+        "key": "alertTriangle",
+        "context": "",
+        "value": "alertTriangle"
+      },
+      {
+        "key": "arrow",
+        "context": "",
+        "value": "arrow"
+      },
+      {
+        "key": "bell",
+        "context": "",
+        "value": "bell"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "boolean"
+      },
+      {
+        "key": "cancelLabel",
+        "context": "",
+        "value": "cancelLabel"
+      },
+      {
+        "key": "checkCircle",
+        "context": "",
+        "value": "checkCircle"
+      },
+      {
+        "key": "chevron",
+        "context": "",
+        "value": "chevron"
+      },
+      {
+        "key": "children",
+        "context": "",
+        "value": "children"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "contacto"
+      },
+      {
+        "key": "danger",
+        "context": "",
+        "value": "peligro"
+      },
+      {
+        "key": "default",
+        "context": "",
+        "value": "predeterminado"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "valorPredeterminado"
+      },
+      {
+        "key": "description",
+        "context": "",
+        "value": "descripción"
+      },
+      {
+        "key": "destructive",
+        "context": "",
+        "value": "destructivo"
+      },
+      {
+        "key": "dismissLabel",
+        "context": "",
+        "value": "etiquetaDescartar"
+      },
+      {
+        "key": "dismissible",
+        "context": "",
+        "value": "descartable"
+      },
+      {
+        "key": "dot",
+        "context": "",
+        "value": "punto"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "p. ej., MD, RN, PA"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "p. ej., Gerente de oficina"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "correo@ejemplo.com"
+      },
+      {
+        "key": "en",
+        "context": "",
+        "value": "en"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "false"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "",
+        "value": "para VS Code Copilot y actualiza un bloque gestionado en"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "para VS Code Copilot y actualiza un bloque gestionado en"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "",
+        "value": "para los agentes que leen ese archivo. Vuelve a ejecutarlo después de actualizar"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "para los agentes que leen ese archivo. Vuelve a ejecutarlo después de actualizar"
+      },
+      {
+        "key": "guillemet",
+        "context": "",
+        "value": "comillas angulares"
+      },
+      {
+        "key": "hideCancel",
+        "context": "",
+        "value": "ocultarCancelar"
+      },
+      {
+        "key": "icon",
+        "context": "",
+        "value": "icono"
+      },
+      {
+        "key": "in",
+        "context": "",
+        "value": "en"
+      },
+      {
+        "key": "in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "en"
+      },
+      {
+        "key": "info",
+        "context": "",
+        "value": "información"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "guardando"
+      },
+      {
+        "key": "items",
+        "context": "",
+        "value": "elementos"
+      },
+      {
+        "key": "key",
+        "context": "",
+        "value": "clave"
+      },
+      {
+        "key": "keys",
+        "context": "",
+        "value": "claves"
+      },
+      {
+        "key": "lightbulb",
+        "context": "",
+        "value": "bombilla"
+      },
+      {
+        "key": "maxItems",
+        "context": "",
+        "value": "máximoDeElementos"
+      },
+      {
+        "key": "none",
+        "context": "",
+        "value": "ninguno"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "nulo"
+      },
+      {
+        "key": "number",
+        "context": "",
+        "value": "número"
+      },
+      {
+        "key": "object",
+        "context": "",
+        "value": "objeto"
+      },
+      {
+        "key": "onAction",
+        "context": "",
+        "value": "onAction"
+      },
+      {
+        "key": "onCancel",
+        "context": "",
+        "value": "onCancel"
+      },
+      {
+        "key": "onDismiss",
+        "context": "",
+        "value": "onDismiss"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "onOpenChange"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "onSave"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "abierto"
+      },
+      {
+        "key": "or",
+        "context": "",
+        "value": "o"
+      },
+      {
+        "key": "or",
+        "context": "Install in Your Application",
+        "value": "o"
+      },
+      {
+        "key": "pipe",
+        "context": "",
+        "value": "barra vertical"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "nombreDePropiedad"
+      },
+      {
+        "key": "props",
+        "context": "",
+        "value": "props"
+      },
+      {
+        "key": "ref",
+        "context": "",
+        "value": "ref"
+      },
+      {
+        "key": "renderLink",
+        "context": "",
+        "value": "renderLink"
+      },
+      {
+        "key": "separatorName",
+        "context": "",
+        "value": "nombreDelSeparador"
+      },
+      {
+        "key": "shieldAlert",
+        "context": "",
+        "value": "shieldAlert"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "mostrarDirección"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "mostrarCamposPersonalizados"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "mostrarTeléfono"
+      },
+      {
+        "key": "slash",
+        "context": "",
+        "value": "barra diagonal"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "cadena"
+      },
+      {
+        "key": "success",
+        "context": "",
+        "value": "éxito"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "resumen"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "título"
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "",
+        "value": "para refrescar las reglas."
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "para refrescar las reglas."
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "verdadero"
+      },
+      {
+        "key": "type",
+        "context": "",
+        "value": "tipo"
+      },
+      {
+        "key": "variant",
+        "context": "",
+        "value": "variante"
+      },
+      {
+        "key": "warning",
+        "context": "",
+        "value": "advertencia"
+      },
+      {
+        "key": "zap",
+        "context": "",
+        "value": "zap"
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "",
+        "value": "{{text:0}}, sin necesidad de instalar nada."
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}, sin necesidad de instalar nada."
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "",
+        "value": "{{text:0}}, donde puedes explorar esos componentes sin crear antes una aplicación. Esta introducción se comparte en GitHub, npm y Storybook."
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}, donde puedes explorar esos componentes sin crear antes una aplicación. Esta introducción se comparte en GitHub, npm y Storybook."
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "",
+        "value": "{{text:0}}, con o sin un agente de programación con IA."
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}, con o sin un agente de programación con IA."
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: Verifica que Storybook detecte todos los ajustes necesarios para los cargadores, plugins y otros parámetros relevantes. Puedes encontrar guías paso a paso para configurar {{text:1}} o {{text:2}} con Storybook."
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: Puedes usar decoradores para proporcionar contextos o proveedores específicos, que a veces son necesarios para que los componentes se rendericen correctamente. Para obtener instrucciones detalladas sobre el uso de decoradores, visita el {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: Es posible que tu Storybook requiera variables de entorno específicas para funcionar según lo previsto. Puedes configurar variables de entorno personalizadas según se describe en el {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "",
+        "value": "{{text:0}}: un enfoque ordenado para adoptar la biblioteca."
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: un enfoque ordenado para adoptar la biblioteca."
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "",
+        "value": "{{text:0}}: guía de migración específica para cada framework."
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: guía de migración específica para cada framework."
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "",
+        "value": "{{text:0}}: problemas habituales de integración y rutas de migración para aplicaciones existentes."
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: problemas habituales de integración y rutas de migración para aplicaciones existentes."
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "",
+        "value": "{{text:0}}: el sistema de marca y los tokens visuales."
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}: el sistema de marca y los tokens visuales."
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "",
+        "value": "{{text:0}} compara {{text:1}} y {{text:2}}. Un índice (TOC) ofrece destinos con nombre y navegación. Una barra de lectura es una indicación decorativa del desplazamiento por el documento, no navegación ni prueba de lectura. Pueden complementarse; para contenido breve puede que no haga falta ninguno."
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} compara {{text:1}} y {{text:2}}. Un índice (TOC) ofrece destinos con nombre y navegación. Una barra de lectura es una indicación decorativa del desplazamiento por el documento, no navegación ni prueba de lectura. Pueden complementarse; para contenido breve puede que no haga falta ninguno."
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "",
+        "value": "{{text:0}} explora {{text:1}}. Observa cómo encajan la navegación, los encabezados y el contenido, y adapta la composición a tu flujo de trabajo en lugar de copiar el diseño sin más."
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} explora {{text:1}}. Observa cómo encajan la navegación, los encabezados y el contenido, y adapta la composición a tu flujo de trabajo en lugar de copiar el diseño sin más."
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}} para productos propietarios o uso comercial, escribe a {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "License",
+        "value": "{{text:0}} para productos propietarios o uso comercial, escribe a {{text:1}}."
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "",
+        "value": "{{text:0}} proyectos personales, educación e investigación."
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "License",
+        "value": "{{text:0}} proyectos personales, educación e investigación."
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "",
+        "value": "{{text:0}} empieza con {{text:1}} y compara {{text:2}}. NITRO ofrece herramientas de datos integradas; Table ofrece marcado de más bajo nivel. Ten en cuenta el comportamiento que tu aplicación tendría que aportar y consulta las reglas de selección antes de elegir una excepción."
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} empieza con {{text:1}} y compara {{text:2}}. NITRO ofrece herramientas de datos integradas; Table ofrece marcado de más bajo nivel. Ten en cuenta el comportamiento que tu aplicación tendría que aportar y consulta las reglas de selección antes de elegir una excepción."
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "",
+        "value": "{{text:0}} para ver la navegación, los encabezados, las tarjetas y las visualizaciones de datos funcionando juntos en el diseño de una aplicación. Prueba los selectores de marca y de tema para ver cómo se adaptan los mismos componentes. No hace falta instalar nada."
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "See It In Action",
+        "value": "{{text:0}} para ver la navegación, los encabezados, las tarjetas y las visualizaciones de datos funcionando juntos en el diseño de una aplicación. Prueba los selectores de marca y de tema para ver cómo se adaptan los mismos componentes. No hace falta instalar nada."
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "",
+        "value": "{{text:0}} uso, modificación y distribución en proyectos de código abierto, con atribución."
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "License",
+        "value": "{{text:0}} uso, modificación y distribución en proyectos de código abierto, con atribución."
+      }
+    ],
+    "zh-Hans": [
+      {
+        "key": "\"Add Contact\"",
+        "context": "",
+        "value": "添加联系人"
+      },
+      {
+        "key": "\"Are you sure?\"",
+        "context": "",
+        "value": "你确定吗？"
+      },
+      {
+        "key": "\"Continue\"",
+        "context": "",
+        "value": "继续"
+      },
+      {
+        "key": "\"Dismiss alert\"",
+        "context": "",
+        "value": "关闭提醒"
+      },
+      {
+        "key": "\"This will save your changes and continue.\"",
+        "context": "",
+        "value": "这将保存你的更改并继续。"
+      },
+      {
+        "key": "\"danger\"",
+        "context": "",
+        "value": "危险"
+      },
+      {
+        "key": "\"default\"",
+        "context": "",
+        "value": "默认"
+      },
+      {
+        "key": "\"destructive\"",
+        "context": "",
+        "value": "破坏性的"
+      },
+      {
+        "key": "\"info\"",
+        "context": "",
+        "value": "信息"
+      },
+      {
+        "key": "\"success\"",
+        "context": "",
+        "value": "成功"
+      },
+      {
+        "key": "\"warning\"",
+        "context": "",
+        "value": "警告"
+      },
+      {
+        "key": "$$typeof",
+        "context": "",
+        "value": "$typeof"
+      },
+      {
+        "key": "(() => void)",
+        "context": "",
+        "value": "(() => void)"
+      },
+      {
+        "key": "(contact: ContactFormData) => void",
+        "context": "",
+        "value": "(contact: ContactFormData) => void"
+      },
+      {
+        "key": "(open: boolean) => void",
+        "context": "",
+        "value": "（open：布尔值）=> void"
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "",
+        "value": "，页面的其余部分仍由现有框架控制。当宿主页面移除该区域时，请卸载 React 根节点。这需要支持 React 的 JavaScript 构建；这些组件并不是脱离框架的 HTML 小部件。"
+      },
+      {
+        "key": ", leaving the rest of the page under its existing framework's control. Unmount the React root when the host removes that area. This requires a JavaScript build that supports React; the components are not framework-free HTML widgets.",
+        "context": "Install in Your Application",
+        "value": "，页面的其余部分仍由现有框架控制。当宿主页面移除该区域时，请卸载 React 根节点。这需要支持 React 的 JavaScript 构建；这些组件并不是脱离框架的 HTML 小部件。"
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "",
+        "value": "。使用该库无需克隆此仓库或运行 Storybook。"
+      },
+      {
+        "key": ". You do not need to clone this repository or run Storybook to use the library.",
+        "context": "Install in Your Application",
+        "value": "。使用该库无需克隆此仓库或运行 Storybook。"
+      },
+      {
+        "key": "A modal dialog that interrupts the user with important content and expects a response. Built on top of {@link Modal}.",
+        "context": "",
+        "value": "一个模态对话框，会以重要内容打断用户并期望得到回应。构建于 {@link Modal} 之上。"
+      },
+      {
+        "key": "A modal for adding or editing provider/employer contacts with fields for name, sex, position, degree, email, address, and custom fields.",
+        "context": "",
+        "value": "一个用于添加或编辑提供方/雇主联系人信息的模态框，包含姓名、性别、职位、学位、电子邮箱、地址以及自定义字段等字段。"
+      },
+      {
+        "key": "A navigation breadcrumb component.",
+        "context": "",
+        "value": "一个导航面包屑组件。"
+      },
+      {
+        "key": "Accessible label for the dismiss button",
+        "context": "",
+        "value": "关闭按钮的无障碍标签"
+      },
+      {
+        "key": "Active Locale:",
+        "context": "",
+        "value": "当前区域设置："
+      },
+      {
+        "key": "Add Contact",
+        "context": "",
+        "value": "添加联系人"
+      },
+      {
+        "key": "Add Contact =>",
+        "context": "",
+        "value": "添加联系人 =>"
+      },
+      {
+        "key": "Add Field",
+        "context": "",
+        "value": "添加字段"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "",
+        "value": "按需添加专用功能"
+      },
+      {
+        "key": "Add Specialized Capabilities When Needed",
+        "context": "Add Specialized Capabilities When Needed > Render Your First Component",
+        "value": "按需添加专用功能"
+      },
+      {
+        "key": "AddContactModal",
+        "context": "",
+        "value": "添加联系人弹窗"
+      },
+      {
+        "key": "Additional CSS classes",
+        "context": "",
+        "value": "附加 CSS 类"
+      },
+      {
+        "key": "Additional class name",
+        "context": "",
+        "value": "附加类名"
+      },
+      {
+        "key": "Additional class name for the dialog content",
+        "context": "",
+        "value": "对话框内容的附加类名"
+      },
+      {
+        "key": "Address",
+        "context": "",
+        "value": "地址"
+      },
+      {
+        "key": "Alert",
+        "context": "",
+        "value": "警报"
+      },
+      {
+        "key": "AlertDialog",
+        "context": "",
+        "value": "警报对话框"
+      },
+      {
+        "key": "All Variants",
+        "context": "",
+        "value": "所有变体"
+      },
+      {
+        "key": "An alert component for displaying important messages.",
+        "context": "",
+        "value": "用于显示重要消息的警报组件。"
+      },
+      {
+        "key": "Analytics",
+        "context": "",
+        "value": "分析"
+      },
+      {
+        "key": "Annual Report.pdf",
+        "context": "",
+        "value": "年度报告.pdf"
+      },
+      {
+        "key": "Another Long Subcategory Name",
+        "context": "",
+        "value": "另一个较长的子类别名称"
+      },
+      {
+        "key": "Apt, Suite, etc. (optional)",
+        "context": "",
+        "value": "公寓、套房等（可选）"
+      },
+      {
+        "key": "Array of breadcrumb items",
+        "context": "",
+        "value": "面包屑项数组"
+      },
+      {
+        "key": "Breadcrumb",
+        "context": "",
+        "value": "面包屑导航"
+      },
+      {
+        "key": "BreadcrumbItem[]",
+        "context": "",
+        "value": "面包屑项[]"
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "",
+        "value": "构建从第一次交互起就让人感到熟悉的应用。"
+      },
+      {
+        "key": "Build applications that feel familiar from the first interaction.",
+        "context": "@mieweb/ui",
+        "value": "构建从第一次交互起就让人感到熟悉的应用。"
+      },
+      {
+        "key": "Callback when contact is saved",
+        "context": "",
+        "value": "保存联系人时回调"
+      },
+      {
+        "key": "Callback when modal open state changes",
+        "context": "",
+        "value": "当模态框打开状态发生变化时回调"
+      },
+      {
+        "key": "Callback when the alert is dismissed",
+        "context": "",
+        "value": "当警报被关闭时回调"
+      },
+      {
+        "key": "Callback when the modal should close",
+        "context": "",
+        "value": "当模态框应关闭时回调"
+      },
+      {
+        "key": "Called when the action button is clicked",
+        "context": "",
+        "value": "当操作按钮被点击时调用"
+      },
+      {
+        "key": "Called when the cancel button is clicked",
+        "context": "",
+        "value": "在点击取消按钮时调用"
+      },
+      {
+        "key": "Cancel",
+        "context": "",
+        "value": "取消"
+      },
+      {
+        "key": "Cancel =>",
+        "context": "",
+        "value": "取消 =>"
+      },
+      {
+        "key": "Category",
+        "context": "",
+        "value": "类别"
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "",
+        "value": "导入某个集成的入口之前，请先检查它的依赖。AGGrid 已不建议用于新项目；表格数据请从 DataVis NITRO 开始。"
+      },
+      {
+        "key": "Check the selected integration's dependencies before importing its entry point. AGGrid is deprecated for new work; start with DataVis NITRO for tabular data.",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "导入某个集成的入口之前，请先检查它的依赖。AGGrid 已不建议用于新项目；表格数据请从 DataVis NITRO 开始。"
+      },
+      {
+        "key": "Choose option...",
+        "context": "",
+        "value": "选择选项…"
+      },
+      {
+        "key": "City",
+        "context": "",
+        "value": "城市"
+      },
+      {
+        "key": "Click Save to see validation errors",
+        "context": "",
+        "value": "点击“保存”以查看验证错误"
+      },
+      {
+        "key": "Collapsed",
+        "context": "",
+        "value": "已折叠"
+      },
+      {
+        "key": "Computers",
+        "context": "",
+        "value": "计算机"
+      },
+      {
+        "key": "ContactFormData",
+        "context": "",
+        "value": "联系表单数据"
+      },
+      {
+        "key": "Continue",
+        "context": "",
+        "value": "继续"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "",
+        "value": "参与贡献或在本地运行"
+      },
+      {
+        "key": "Contribute or Run Locally",
+        "context": "Contribute or Run Locally > Go Deeper",
+        "value": "参与贡献或在本地运行"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "",
+        "value": "参与贡献或在本地运行"
+      },
+      {
+        "key": "Contribute or run locally",
+        "context": "@mieweb/ui",
+        "value": "参与贡献或在本地运行"
+      },
+      {
+        "key": "Control",
+        "context": "",
+        "value": "控制"
+      },
+      {
+        "key": "Custom Fields",
+        "context": "",
+        "value": "自定义字段"
+      },
+      {
+        "key": "Custom Separator",
+        "context": "",
+        "value": "自定义分隔符"
+      },
+      {
+        "key": "Custom body content (rendered below the description)",
+        "context": "",
+        "value": "自定义正文内容（呈现在描述下方）"
+      },
+      {
+        "key": "Custom render function for links",
+        "context": "",
+        "value": "链接的自定义渲染函数"
+      },
+      {
+        "key": "Danger",
+        "context": "",
+        "value": "危险"
+      },
+      {
+        "key": "Danger alert style.",
+        "context": "",
+        "value": "危险警报样式。"
+      },
+      {
+        "key": "Dashboard",
+        "context": "",
+        "value": "仪表板"
+      },
+      {
+        "key": "Data",
+        "context": "",
+        "value": "数据"
+      },
+      {
+        "key": "Decorators documentation",
+        "context": "",
+        "value": "装饰器文档"
+      },
+      {
+        "key": "Default",
+        "context": "",
+        "value": "默认"
+      },
+      {
+        "key": "Default Alert",
+        "context": "",
+        "value": "默认警报"
+      },
+      {
+        "key": "Default alert style.",
+        "context": "",
+        "value": "默认警报样式。"
+      },
+      {
+        "key": "Degree",
+        "context": "",
+        "value": "学位"
+      },
+      {
+        "key": "Description",
+        "context": "",
+        "value": "描述"
+      },
+      {
+        "key": "Destructive",
+        "context": "",
+        "value": "破坏性的"
+      },
+      {
+        "key": "Dialog title",
+        "context": "",
+        "value": "对话框标题"
+      },
+      {
+        "key": "Did you know?",
+        "context": "",
+        "value": "你知道吗？"
+      },
+      {
+        "key": "Disables the action button",
+        "context": "",
+        "value": "禁用操作按钮"
+      },
+      {
+        "key": "Dismissible",
+        "context": "",
+        "value": "可关闭"
+      },
+      {
+        "key": "Dismissible Alert",
+        "context": "",
+        "value": "可关闭的提醒"
+      },
+      {
+        "key": "Documents",
+        "context": "",
+        "value": "文档"
+      },
+      {
+        "key": "Edit Contact",
+        "context": "",
+        "value": "编辑联系人"
+      },
+      {
+        "key": "Edit JSON",
+        "context": "",
+        "value": "编辑 JSON"
+      },
+      {
+        "key": "Edit Mode",
+        "context": "",
+        "value": "编辑模式"
+      },
+      {
+        "key": "Electronics",
+        "context": "",
+        "value": "电子产品"
+      },
+      {
+        "key": "Email",
+        "context": "",
+        "value": "电子邮件"
+      },
+      {
+        "key": "Email{{text:0}}",
+        "context": "",
+        "value": "电子邮件{{text:0}}"
+      },
+      {
+        "key": "Environment Variables documentation",
+        "context": "",
+        "value": "环境变量文档"
+      },
+      {
+        "key": "Error",
+        "context": "",
+        "value": "错误"
+      },
+      {
+        "key": "Existing contact data for editing",
+        "context": "",
+        "value": "用于编辑的现有联系人数据"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "",
+        "value": "探索与组合组件"
+      },
+      {
+        "key": "Explore and Compose Components",
+        "context": "Explore and Compose Components > Add Specialized Capabilities When Needed",
+        "value": "探索与组合组件"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "",
+        "value": "探索与组合组件"
+      },
+      {
+        "key": "Explore and compose components",
+        "context": "@mieweb/ui",
+        "value": "探索与组合组件"
+      },
+      {
+        "key": "Fallback text",
+        "context": "",
+        "value": "备用文本"
+      },
+      {
+        "key": "False",
+        "context": "",
+        "value": "假"
+      },
+      {
+        "key": "Female",
+        "context": "",
+        "value": "女性"
+      },
+      {
+        "key": "Field name",
+        "context": "",
+        "value": "字段名称"
+      },
+      {
+        "key": "First Name",
+        "context": "",
+        "value": "名字"
+      },
+      {
+        "key": "First Name{{text:0}}",
+        "context": "",
+        "value": "名字{{text:0}}"
+      },
+      {
+        "key": "First name",
+        "context": "",
+        "value": "名字"
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "",
+        "value": "对于没有 React 的项目，请安装渲染所需的依赖："
+      },
+      {
+        "key": "For a project without React, install the rendering dependencies:",
+        "context": "Install in Your Application",
+        "value": "对于没有 React 的项目，请安装渲染所需的依赖："
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "",
+        "value": "每做一个选择，都要问：为什么合适、什么时候换一种方案更好、哪些状态由你的应用掌控，以及它与相邻组件一起时表现如何。请在实际应用中（而不只是在孤立的 story 中）检验加载、空状态、错误、键盘和窄屏等情况。"
+      },
+      {
+        "key": "For each choice, ask why it fits, when an alternative would be better, what state your application owns, and how it behaves alongside neighboring components. Exercise loading, empty, error, keyboard, and narrow-screen states in the actual application, not only the isolated story.",
+        "context": "Explore and Compose Components",
+        "value": "每做一个选择，都要问：为什么合适、什么时候换一种方案更好、哪些状态由你的应用掌控，以及它与相邻组件一起时表现如何。请在实际应用中（而不只是在孤立的 story 中）检验加载、空状态、错误、键盘和窄屏等情况。"
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "",
+        "value": "发现选择建议不清楚，或有未记录的组件关系？除了组件修复，也欢迎贡献文档。{{text:0}} 来改进 GitHub、npm 和 Storybook 共用的内容。发布新版本或部署文档站点后，已发布的副本会随之更新。"
+      },
+      {
+        "key": "Found unclear selection advice or an undocumented relationship? Documentation contributions are welcome alongside component fixes.{{text:0}}to improve the shared GitHub, npm, and Storybook content. Published copies update when the package is released or the documentation site is deployed.",
+        "context": "Contribute or Run Locally",
+        "value": "发现选择建议不清楚，或有未记录的组件关系？除了组件修复，也欢迎贡献文档。{{text:0}} 来改进 GitHub、npm 和 Storybook 共用的内容。发布新版本或部署文档站点后，已发布的副本会随之更新。"
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "",
+        "value": "在你的应用仓库根目录下运行："
+      },
+      {
+        "key": "From your application's repository root, run:",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "在你的应用仓库根目录下运行："
+      },
+      {
+        "key": "Gaming Laptops",
+        "context": "",
+        "value": "游戏笔记本电脑"
+      },
+      {
+        "key": "Get Started",
+        "context": "",
+        "value": "快速开始"
+      },
+      {
+        "key": "Get Started",
+        "context": "Get Started > See It In Action",
+        "value": "快速开始"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "",
+        "value": "深入了解"
+      },
+      {
+        "key": "Go Deeper",
+        "context": "Go Deeper > Explore and Compose Components",
+        "value": "深入了解"
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "",
+        "value": "大型集成使用独立的入口和可选的 peer 依赖，因此你只需安装所需的部分："
+      },
+      {
+        "key": "Heavy integrations use separate entry points and optional peer dependencies so you only install what you need:",
+        "context": "Add Specialized Capabilities When Needed",
+        "value": "大型集成使用独立的入口和可选的 peer 依赖，因此你只需安装所需的部分："
+      },
+      {
+        "key": "Hidden Text",
+        "context": "",
+        "value": "隐藏文本"
+      },
+      {
+        "key": "Hides the cancel button",
+        "context": "",
+        "value": "隐藏取消按钮"
+      },
+      {
+        "key": "Home",
+        "context": "",
+        "value": "首页"
+      },
+      {
+        "key": "Icon to display in the alert",
+        "context": "",
+        "value": "在警报中显示的图标"
+      },
+      {
+        "key": "If the problem persists, check the browser console, or the terminal you've run Storybook from.",
+        "context": "",
+        "value": "如果问题仍然存在，请检查浏览器控制台，或检查你运行 Storybook 的终端。"
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "",
+        "value": "如果你的项目使用 npm 或 yarn，请运行"
+      },
+      {
+        "key": "If your project uses npm or yarn instead, run",
+        "context": "Install in Your Application",
+        "value": "如果你的项目使用 npm 或 yarn，请运行"
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "",
+        "value": "在应用的入口文件或根布局中导入一次预编译样式表。如果需要某个品牌的令牌，请在其后导入该品牌的样式表："
+      },
+      {
+        "key": "Import the precompiled stylesheet once in your application's entry point or root layout. Import a brand stylesheet after it when you want that brand's tokens:",
+        "context": "Render Your First Component",
+        "value": "在应用的入口文件或根布局中导入一次预编译样式表。如果需要某个品牌的令牌，请在其后导入该品牌的样式表："
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "",
+        "value": "在生产环境中，请通过应用的 i18n 系统提供翻译后的标签。在 Next.js App Router 中，请把这个交互示例放在客户端组件中，并从根布局导入全局样式。"
+      },
+      {
+        "key": "In production, supply translated labels through your application's i18n system. In Next.js App Router, put this interactive example in a client component and import global styles from the root layout.",
+        "context": "Render Your First Component",
+        "value": "在生产环境中，请通过应用的 i18n 系统提供翻译后的标签。在 Next.js App Router 中，请把这个交互示例放在客户端组件中，并从根布局导入全局样式。"
+      },
+      {
+        "key": "Info",
+        "context": "",
+        "value": "信息"
+      },
+      {
+        "key": "Information",
+        "context": "",
+        "value": "信息"
+      },
+      {
+        "key": "Informational alert style.",
+        "context": "",
+        "value": "信息提示样式。"
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "",
+        "value": "在你的应用中安装"
+      },
+      {
+        "key": "Install in Your Application",
+        "context": "Install in Your Application > Get Started",
+        "value": "在你的应用中安装"
+      },
+      {
+        "key": "Label for the cancel button (default \"Cancel\")",
+        "context": "",
+        "value": "取消按钮的标签（默认为“取消”）"
+      },
+      {
+        "key": "Label for the confirm/action button (default \"Continue\")",
+        "context": "",
+        "value": "确认/操作按钮的标签（默认“继续”）"
+      },
+      {
+        "key": "Laptops",
+        "context": "",
+        "value": "笔记本电脑"
+      },
+      {
+        "key": "Last Name",
+        "context": "",
+        "value": "姓氏"
+      },
+      {
+        "key": "Last Name{{text:0}}",
+        "context": "",
+        "value": "姓氏{{text:0}}"
+      },
+      {
+        "key": "Last name",
+        "context": "",
+        "value": "姓"
+      },
+      {
+        "key": "Library",
+        "context": "",
+        "value": "图书馆"
+      },
+      {
+        "key": "License",
+        "context": "",
+        "value": "许可证"
+      },
+      {
+        "key": "License",
+        "context": "License > Contribute or Run Locally",
+        "value": "许可证"
+      },
+      {
+        "key": "Long Labels",
+        "context": "",
+        "value": "长标签"
+      },
+      {
+        "key": "Maximum items to display (collapses middle items)",
+        "context": "",
+        "value": "最大显示项目数（折叠中间项目）"
+      },
+      {
+        "key": "Minimal Fields",
+        "context": "",
+        "value": "最少字段"
+      },
+      {
+        "key": "Misconfigured Webpack or Vite",
+        "context": "",
+        "value": "配置错误的 Webpack 或 Vite"
+      },
+      {
+        "key": "Missing Context/Providers",
+        "context": "",
+        "value": "缺少上下文/提供方"
+      },
+      {
+        "key": "Missing Environment Variables",
+        "context": "",
+        "value": "缺少环境变量"
+      },
+      {
+        "key": "Missing Phrase =>",
+        "context": "",
+        "value": "缺失短语 =>"
+      },
+      {
+        "key": "Mobile",
+        "context": "",
+        "value": "移动端"
+      },
+      {
+        "key": "Modal title",
+        "context": "",
+        "value": "模态框标题"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "",
+        "value": "将组件挂载到专用的 DOM 元素中，使用 React DOM 的"
+      },
+      {
+        "key": "Mount components into a dedicated DOM element with React DOM's",
+        "context": "Install in Your Application",
+        "value": "将组件挂载到专用的 DOM 元素中，使用 React DOM 的"
+      },
+      {
+        "key": "Name",
+        "context": "",
+        "value": "名称"
+      },
+      {
+        "key": "No Preview",
+        "context": "",
+        "value": "无预览"
+      },
+      {
+        "key": "No custom fields added. Click \"Add Field\" to add custom information.",
+        "context": "",
+        "value": "未添加自定义字段。点击“添加字段”以添加自定义信息。"
+      },
+      {
+        "key": "Open Modal",
+        "context": "",
+        "value": "打开模态框"
+      },
+      {
+        "key": "Open dialog",
+        "context": "",
+        "value": "打开对话框"
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "",
+        "value": "打开 {{text:0}}。Storybook 是示例的外壳：侧边栏用于选择组件，{{text:1}} 演示某一种配置，{{text:2}} 提供指南和 API。{{text:3}} 可以修改示例的 props；主题和品牌工具可以查看不同的外观。这些工具属于 Storybook，而不属于你安装的组件。"
+      },
+      {
+        "key": "Open{{text:0}}. Storybook is the wrapper around the examples: its sidebar selects components, a{{text:1}}demonstrates a particular configuration, and{{text:2}}presents guidance and the API.{{text:3}}change example props; theme and brand tools let you inspect different appearances. Those tools belong to Storybook, not to the component you install.",
+        "context": "Explore and Compose Components",
+        "value": "打开 {{text:0}}。Storybook 是示例的外壳：侧边栏用于选择组件，{{text:1}} 演示某一种配置，{{text:2}} 提供指南和 API。{{text:3}} 可以修改示例的 props；主题和品牌工具可以查看不同的外观。这些工具属于 Storybook，而不属于你安装的组件。"
+      },
+      {
+        "key": "Optional descriptive body text",
+        "context": "",
+        "value": "可选的描述性正文文本"
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "",
+        "value": "人们不应该每打开一个应用，就得重新学习如何导航、填写表单或从错误中恢复。简洁、一致的界面让用户能把已经掌握的知识从一项任务带到下一项任务。可预期的控件和清晰的反馈能减少犹豫，把更多注意力留给真正重要的工作。"
+      },
+      {
+        "key": "People should not have to relearn how to navigate, fill out a form, or recover from an error every time they open another application. Clean, consistent interfaces let users carry what they already know from one task to the next. Predictable controls and clear feedback reduce hesitation and leave more attention for the work that matters.",
+        "context": "@mieweb/ui",
+        "value": "人们不应该每打开一个应用，就得重新学习如何导航、填写表单或从错误中恢复。简洁、一致的界面让用户能把已经掌握的知识从一项任务带到下一项任务。可预期的控件和清晰的反馈能减少犹豫，把更多注意力留给真正重要的工作。"
+      },
+      {
+        "key": "Phone",
+        "context": "",
+        "value": "电话"
+      },
+      {
+        "key": "Please check the Storybook config.",
+        "context": "",
+        "value": "请检查 Storybook 配置。"
+      },
+      {
+        "key": "Position Title",
+        "context": "",
+        "value": "职位名称"
+      },
+      {
+        "key": "Products",
+        "context": "",
+        "value": "产品"
+      },
+      {
+        "key": "Provider Contact",
+        "context": "",
+        "value": "提供者联系方式"
+      },
+      {
+        "key": "ReactElement<unknown, string | JSXElementConstructor<any>> | null",
+        "context": "",
+        "value": "ReactElement<unknown, string | JSXElementConstructor<any>> | null"
+      },
+      {
+        "key": "ReactNode",
+        "context": "",
+        "value": "ReactNode"
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "",
+        "value": "请阅读 {{text:0}}。这些是给编程助手的说明，而不是自动的 PR 审查者或合并门槛。助手辅助开发和手动开发使用相同的库和下面的设置。"
+      },
+      {
+        "key": "Read the{{text:0}}. These are instructions for coding agents, not an automatic PR reviewer or merge gate. Agent-assisted and manual development use the same library and setup below.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "请阅读 {{text:0}}。这些是给编程助手的说明，而不是自动的 PR 审查者或合并门槛。助手辅助开发和手动开发使用相同的库和下面的设置。"
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "",
+        "value": "渲染你的第一个组件"
+      },
+      {
+        "key": "Render Your First Component",
+        "context": "Render Your First Component > Set Up Your AI Coding Agent",
+        "value": "渲染你的第一个组件"
+      },
+      {
+        "key": "Reports",
+        "context": "",
+        "value": "报告"
+      },
+      {
+        "key": "Save Contact",
+        "context": "",
+        "value": "保存联系人"
+      },
+      {
+        "key": "Saving State",
+        "context": "",
+        "value": "保存状态"
+      },
+      {
+        "key": "Saving...",
+        "context": "",
+        "value": "正在保存…"
+      },
+      {
+        "key": "See It In Action",
+        "context": "",
+        "value": "实际效果"
+      },
+      {
+        "key": "See It In Action",
+        "context": "See It In Action > @mieweb/ui",
+        "value": "实际效果"
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "",
+        "value": "完整条款请参阅 {{text:0}}。"
+      },
+      {
+        "key": "See the{{text:0}}for full terms.",
+        "context": "License",
+        "value": "完整条款请参阅 {{text:0}}。"
+      },
+      {
+        "key": "Select...",
+        "context": "",
+        "value": "选择…"
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "",
+        "value": "设置你的 AI 编程助手"
+      },
+      {
+        "key": "Set Up Your AI Coding Agent",
+        "context": "Set Up Your AI Coding Agent > Install in Your Application",
+        "value": "设置你的 AI 编程助手"
+      },
+      {
+        "key": "Set boolean",
+        "context": "",
+        "value": "设置布尔值"
+      },
+      {
+        "key": "Set number",
+        "context": "",
+        "value": "设置编号"
+      },
+      {
+        "key": "Set object",
+        "context": "",
+        "value": "设置对象"
+      },
+      {
+        "key": "Set string",
+        "context": "",
+        "value": "设置字符串"
+      },
+      {
+        "key": "Settings",
+        "context": "",
+        "value": "设置"
+      },
+      {
+        "key": "Sex",
+        "context": "",
+        "value": "性别"
+      },
+      {
+        "key": "Show code",
+        "context": "",
+        "value": "显示代码"
+      },
+      {
+        "key": "Smartphones",
+        "context": "",
+        "value": "智能手机"
+      },
+      {
+        "key": "Something went wrong. Please try again.",
+        "context": "",
+        "value": "出了点问题。请再试一次。"
+      },
+      {
+        "key": "Sorry, but you either have no stories or none are selected somehow.",
+        "context": "",
+        "value": "抱歉，但你要么没有任何故事，要么不知为何没有选中任何故事。"
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "",
+        "value": "从共同的基础出发，把更多时间花在让应用更有价值的地方。这些组件支持包容性设计，但不会自动翻译你的内容，也不能保证无障碍。请针对你的应用所服务的人群和设备，验证组件的组合方式、语言和行为。"
+      },
+      {
+        "key": "Start with a common foundation and spend more time on what makes your application valuable. The components support inclusive design; they do not automatically translate your content or guarantee accessibility. Validate their composition, language, and behavior with the people and devices your application serves.",
+        "context": "@mieweb/ui",
+        "value": "从共同的基础出发，把更多时间花在让应用更有价值的地方。这些组件支持包容性设计，但不会自动翻译你的内容，也不能保证无障碍。请针对你的应用所服务的人群和设备，验证组件的组合方式、语言和行为。"
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "",
+        "value": "先从用户的任务出发，再比较组件，然后选择 API："
+      },
+      {
+        "key": "Start with the user's task, then compare components before choosing an API:",
+        "context": "Explore and Compose Components",
+        "value": "先从用户的任务出发，再比较组件，然后选择 API："
+      },
+      {
+        "key": "State",
+        "context": "",
+        "value": "州"
+      },
+      {
+        "key": "Stories",
+        "context": "",
+        "value": "故事"
+      },
+      {
+        "key": "Street Address",
+        "context": "",
+        "value": "街道地址"
+      },
+      {
+        "key": "Subcategory",
+        "context": "",
+        "value": "子类别"
+      },
+      {
+        "key": "Success",
+        "context": "",
+        "value": "成功"
+      },
+      {
+        "key": "Success alert style.",
+        "context": "",
+        "value": "成功提醒样式。"
+      },
+      {
+        "key": "Success!",
+        "context": "",
+        "value": "成功！"
+      },
+      {
+        "key": "Symbol(react.fragment)",
+        "context": "",
+        "value": "符号(react.fragment)"
+      },
+      {
+        "key": "Symbol(react.transitional.element)",
+        "context": "",
+        "value": "符号（react.transitional.element）"
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "",
+        "value": "这种一致性不应只停留在外观上。连贯的体验能从移动端适配到桌面端，在浅色和深色模式下都清晰易读，支持不同语言和从右到左的布局，并照顾到键盘用户和辅助技术用户。响应式设计、国际化（i18n）和无障碍（a11y）应当属于基础，而不是收尾时的检查清单。"
+      },
+      {
+        "key": "That consistency should extend beyond appearance. A coherent experience adapts from mobile to desktop, remains legible in light and dark mode, accommodates different languages and right-to-left layouts, and supports keyboard and assistive-technology users. Responsive design, internationalization (i18n), and accessibility (a11y) belong in the foundation, not on a finishing checklist.",
+        "context": "@mieweb/ui",
+        "value": "这种一致性不应只停留在外观上。连贯的体验能从移动端适配到桌面端，在浅色和深色模式下都清晰易读，支持不同语言和从右到左的布局，并照顾到键盘用户和辅助技术用户。响应式设计、国际化（i18n）和无障碍（a11y）应当属于基础，而不是收尾时的检查清单。"
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "",
+        "value": "组件目录仍在完善中：并非每个组件都已有比较或组合指南。不要把单个示例当作不存在相关组件的证据。请使用 {{text:0}}，并在 {{text:1}} 中指出缺失或相互矛盾的指南。"
+      },
+      {
+        "key": "The catalog is still being improved: not every component has comparison or composition guidance yet. Do not treat an isolated example as evidence that no related component exists. Use the{{text:0}}and flag missing or conflicting guidance in a{{text:1}}.",
+        "context": "Explore and Compose Components",
+        "value": "组件目录仍在完善中：并非每个组件都已有比较或组合指南。不要把单个示例当作不存在相关组件的证据。请使用 {{text:0}}，并在 {{text:1}} 中指出缺失或相互矛盾的指南。"
+      },
+      {
+        "key": "The component failed to render properly, likely due to a configuration issue in Storybook. Here are some common causes and how you can address them:",
+        "context": "",
+        "value": "该组件未能正确渲染，可能是由于 Storybook 中的配置问题导致的。以下是一些常见原因以及对应的解决方法："
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "",
+        "value": "这些组件基于 React 构建，但你的应用不必如此。你可以在整个 React 应用中使用它们，也可以把它们嵌入基于 Bootstrap、服务端渲染或其他非 React 页面的特定区域。一次采用一个组件或一个工作流，无需重写界面的其余部分。"
+      },
+      {
+        "key": "The components are built with React, but your application does not have to be. Use them throughout a React application or embed them in selected areas of Bootstrap-based, server-rendered, or other non-React pages. Adopt a component or a workflow at a time without rewriting the rest of your interface.",
+        "context": "@mieweb/ui",
+        "value": "这些组件基于 React 构建，但你的应用不必如此。你可以在整个 React 应用中使用它们，也可以把它们嵌入基于 Bootstrap、服务端渲染或其他非 React 页面的特定区域。一次采用一个组件或一个工作流，无需重写界面的其余部分。"
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "",
+        "value": "这些组件需要 React 18+ 和 React DOM 18+ 才能渲染，嵌入非 React 页面时也是如此。如果你的项目已有这些依赖："
+      },
+      {
+        "key": "The components require React 18+ and React DOM 18+ to render, including when embedded in a non-React page. If your project already has those dependencies:",
+        "context": "Install in Your Application",
+        "value": "这些组件需要 React 18+ 和 React DOM 18+ 才能渲染，嵌入非 React 页面时也是如此。如果你的项目已有这些依赖："
+      },
+      {
+        "key": "The separator between breadcrumb items",
+        "context": "",
+        "value": "面包屑项之间的分隔符"
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "",
+        "value": "这种 CSS 方式不要求你的应用使用 Tailwind。作为第一个交互示例，请在 provider 内渲染一个主题切换器："
+      },
+      {
+        "key": "This CSS path does not require Tailwind in your application. For a first interactive example, render a theme switcher inside the provider:",
+        "context": "Render Your First Component",
+        "value": "这种 CSS 方式不要求你的应用使用 Tailwind。作为第一个交互示例，请在 provider 内渲染一个主题切换器："
+      },
+      {
+        "key": "This alert can be dismissed by clicking the close button.",
+        "context": "",
+        "value": "此警报可通过点击关闭按钮来关闭。"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "",
+        "value": "这会安装组件选择、组合、主题和无障碍规则，让你的助手从库中现有的组件开始。它会写入"
+      },
+      {
+        "key": "This installs component-selection, composition, theming, and accessibility rules so your agent can start with existing library components. It writes",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "这会安装组件选择、组合、主题和无障碍规则，让你的助手从库中现有的组件开始。它会写入"
+      },
+      {
+        "key": "This is a default alert message.",
+        "context": "",
+        "value": "这是默认的警报消息。"
+      },
+      {
+        "key": "This is a short description",
+        "context": "",
+        "value": "这是一个简短的描述"
+      },
+      {
+        "key": "This is an informational message.",
+        "context": "",
+        "value": "这是一条信息性消息。"
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "",
+        "value": "本软件为 {{text:0}}："
+      },
+      {
+        "key": "This software is{{text:0}}:",
+        "context": "License",
+        "value": "本软件为 {{text:0}}："
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "",
+        "value": "如需修改该库、改进其指南或运行你自己的 Storybook，请按照 {{text:0}} 操作。其中涵盖仓库设置、本地开发、测试、组件约定和发布。仅使用 npm 包则无需这些步骤。"
+      },
+      {
+        "key": "To change the library, improve its guidance, or run your own Storybook, follow{{text:0}}. It covers repository setup, local development, tests, component conventions, and releases. Those steps are not required to consume the npm package.",
+        "context": "Contribute or Run Locally",
+        "value": "如需修改该库、改进其指南或运行你自己的 Storybook，请按照 {{text:0}} 操作。其中涵盖仓库设置、本地开发、测试、组件约定和发布。仅使用 npm 包则无需这些步骤。"
+      },
+      {
+        "key": "True",
+        "context": "",
+        "value": "真"
+      },
+      {
+        "key": "Try reloading the page.",
+        "context": "",
+        "value": "尝试重新加载页面。"
+      },
+      {
+        "key": "Two Items",
+        "context": "",
+        "value": "两项"
+      },
+      {
+        "key": "Unlike a regular Modal, it does not close on overlay click or Escape by default — the user must explicitly choose an action.",
+        "context": "",
+        "value": "与常规模态框不同，默认情况下，点击遮罩层或按下 Escape 不会关闭它——用户必须明确选择一个操作。"
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "",
+        "value": "在使用 AI 编程助手吗？请先 {{text:0}} 并 {{text:1}}，再让它向你的应用添加组件。"
+      },
+      {
+        "key": "Using an AI coding agent?{{text:0}}and{{text:1}}before asking it to add components to your application.",
+        "context": "Install in Your Application",
+        "value": "在使用 AI 编程助手吗？请先 {{text:0}} 并 {{text:1}}，再让它向你的应用添加组件。"
+      },
+      {
+        "key": "Value",
+        "context": "",
+        "value": "值"
+      },
+      {
+        "key": "Very Long Category Name That Might Wrap",
+        "context": "",
+        "value": "可能会换行的非常长的类别名称"
+      },
+      {
+        "key": "View source on GitHub ↗",
+        "context": "",
+        "value": "在 GitHub 上查看源代码 ↗"
+      },
+      {
+        "key": "Visual emphasis for the action button",
+        "context": "",
+        "value": "操作按钮的视觉强调"
+      },
+      {
+        "key": "Vite",
+        "context": "",
+        "value": "Vite"
+      },
+      {
+        "key": "Warning",
+        "context": "",
+        "value": "警告"
+      },
+      {
+        "key": "Warning alert style.",
+        "context": "",
+        "value": "警告提示样式。"
+      },
+      {
+        "key": "Webpack",
+        "context": "",
+        "value": "Webpack"
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "",
+        "value": "与 Bootstrap 或其他样式表一起嵌入时，请检查 CSS 重置、全局选择器和主题样式是否存在冲突。挂载到单独的 DOM 元素并不能隔离 CSS。"
+      },
+      {
+        "key": "When embedding alongside Bootstrap or other stylesheets, check CSS resets, global selectors, and theme styles for conflicts. Mounting into a separate DOM element does not isolate CSS.",
+        "context": "Install in Your Application",
+        "value": "与 Bootstrap 或其他样式表一起嵌入时，请检查 CSS 重置、全局选择器和主题样式是否存在冲突。挂载到单独的 DOM 元素并不能隔离 CSS。"
+      },
+      {
+        "key": "Whether save is in progress",
+        "context": "",
+        "value": "是否正在保存中"
+      },
+      {
+        "key": "Whether the alert can be dismissed",
+        "context": "",
+        "value": "警报是否可以关闭"
+      },
+      {
+        "key": "Whether the modal is open",
+        "context": "",
+        "value": "模态框是否打开"
+      },
+      {
+        "key": "Whether to show address fields",
+        "context": "",
+        "value": "是否显示地址字段"
+      },
+      {
+        "key": "Whether to show custom fields section",
+        "context": "",
+        "value": "是否显示自定义字段部分"
+      },
+      {
+        "key": "Whether to show phone field",
+        "context": "",
+        "value": "是否显示电话字段"
+      },
+      {
+        "key": "With Custom Link",
+        "context": "",
+        "value": "使用自定义链接"
+      },
+      {
+        "key": "With Icon",
+        "context": "",
+        "value": "带图标"
+      },
+      {
+        "key": "With Icons",
+        "context": "",
+        "value": "带图标"
+      },
+      {
+        "key": "With Phone Only",
+        "context": "",
+        "value": "仅限电话"
+      },
+      {
+        "key": "With Slash Separator",
+        "context": "",
+        "value": "带斜杠分隔符"
+      },
+      {
+        "key": "With Validation Errors",
+        "context": "",
+        "value": "带验证错误"
+      },
+      {
+        "key": "You can customize the look and feel of alerts with different variants.",
+        "context": "",
+        "value": "您可以使用不同的变体来自定义警报的外观和体验。"
+      },
+      {
+        "key": "Your changes have been saved successfully.",
+        "context": "",
+        "value": "您的更改已成功保存。"
+      },
+      {
+        "key": "Your session is about to expire in 5 minutes.",
+        "context": "",
+        "value": "您的会话将在 5 分钟后到期。"
+      },
+      {
+        "key": "ZIP",
+        "context": "",
+        "value": "邮政编码"
+      },
+      {
+        "key": "actionDisabled",
+        "context": "",
+        "value": "操作已禁用"
+      },
+      {
+        "key": "actionLabel",
+        "context": "",
+        "value": "actionLabel"
+      },
+      {
+        "key": "alertCircle",
+        "context": "",
+        "value": "警报圆圈"
+      },
+      {
+        "key": "alertTriangle",
+        "context": "",
+        "value": "警报三角形"
+      },
+      {
+        "key": "arrow",
+        "context": "",
+        "value": "箭头"
+      },
+      {
+        "key": "bell",
+        "context": "",
+        "value": "铃声"
+      },
+      {
+        "key": "boolean",
+        "context": "",
+        "value": "布尔值"
+      },
+      {
+        "key": "cancelLabel",
+        "context": "",
+        "value": "“取消”标签"
+      },
+      {
+        "key": "checkCircle",
+        "context": "",
+        "value": "checkCircle"
+      },
+      {
+        "key": "chevron",
+        "context": "",
+        "value": "人字形标记"
+      },
+      {
+        "key": "children",
+        "context": "",
+        "value": "儿童"
+      },
+      {
+        "key": "className",
+        "context": "",
+        "value": "className"
+      },
+      {
+        "key": "contact",
+        "context": "",
+        "value": "联系"
+      },
+      {
+        "key": "danger",
+        "context": "",
+        "value": "危险"
+      },
+      {
+        "key": "default",
+        "context": "",
+        "value": "默认"
+      },
+      {
+        "key": "defaultValue",
+        "context": "",
+        "value": "默认值"
+      },
+      {
+        "key": "description",
+        "context": "",
+        "value": "描述"
+      },
+      {
+        "key": "destructive",
+        "context": "",
+        "value": "破坏性的"
+      },
+      {
+        "key": "dismissLabel",
+        "context": "",
+        "value": "关闭标签"
+      },
+      {
+        "key": "dismissible",
+        "context": "",
+        "value": "可关闭的"
+      },
+      {
+        "key": "dot",
+        "context": "",
+        "value": "点"
+      },
+      {
+        "key": "e.g., MD, RN, PA",
+        "context": "",
+        "value": "例如，医学博士（MD）、注册护士（RN）、医师助理（PA）"
+      },
+      {
+        "key": "e.g., Office Manager",
+        "context": "",
+        "value": "例如，办公室经理"
+      },
+      {
+        "key": "email@example.com",
+        "context": "",
+        "value": "email@example.com"
+      },
+      {
+        "key": "en",
+        "context": "",
+        "value": "en"
+      },
+      {
+        "key": "false",
+        "context": "",
+        "value": "假"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "",
+        "value": "，供 VS Code Copilot 使用，并更新"
+      },
+      {
+        "key": "for VS Code Copilot and updates a managed block in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "，供 VS Code Copilot 使用，并更新"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "",
+        "value": "中的托管区块，供读取该文件的助手使用。升级"
+      },
+      {
+        "key": "for agents that read that file. Rerun after upgrading",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "中的托管区块，供读取该文件的助手使用。升级"
+      },
+      {
+        "key": "guillemet",
+        "context": "",
+        "value": "书名号"
+      },
+      {
+        "key": "hideCancel",
+        "context": "",
+        "value": "隐藏取消"
+      },
+      {
+        "key": "icon",
+        "context": "",
+        "value": "图标"
+      },
+      {
+        "key": "in",
+        "context": "",
+        "value": "到"
+      },
+      {
+        "key": "in",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "到"
+      },
+      {
+        "key": "info",
+        "context": "",
+        "value": "信息"
+      },
+      {
+        "key": "isSaving",
+        "context": "",
+        "value": "正在保存"
+      },
+      {
+        "key": "items",
+        "context": "",
+        "value": "项目"
+      },
+      {
+        "key": "key",
+        "context": "",
+        "value": "键"
+      },
+      {
+        "key": "keys",
+        "context": "",
+        "value": "键"
+      },
+      {
+        "key": "lightbulb",
+        "context": "",
+        "value": "灯泡"
+      },
+      {
+        "key": "maxItems",
+        "context": "",
+        "value": "最大项目数"
+      },
+      {
+        "key": "none",
+        "context": "",
+        "value": "无"
+      },
+      {
+        "key": "null",
+        "context": "",
+        "value": "空"
+      },
+      {
+        "key": "number",
+        "context": "",
+        "value": "数量"
+      },
+      {
+        "key": "object",
+        "context": "",
+        "value": "对象"
+      },
+      {
+        "key": "onAction",
+        "context": "",
+        "value": "onAction"
+      },
+      {
+        "key": "onCancel",
+        "context": "",
+        "value": "取消时"
+      },
+      {
+        "key": "onDismiss",
+        "context": "",
+        "value": "关闭时"
+      },
+      {
+        "key": "onOpenChange",
+        "context": "",
+        "value": "打开状态变化"
+      },
+      {
+        "key": "onSave",
+        "context": "",
+        "value": "保存时"
+      },
+      {
+        "key": "open",
+        "context": "",
+        "value": "打开"
+      },
+      {
+        "key": "or",
+        "context": "",
+        "value": "或"
+      },
+      {
+        "key": "or",
+        "context": "Install in Your Application",
+        "value": "或"
+      },
+      {
+        "key": "pipe",
+        "context": "",
+        "value": "管道"
+      },
+      {
+        "key": "propertyName",
+        "context": "",
+        "value": "propertyName"
+      },
+      {
+        "key": "props",
+        "context": "",
+        "value": "道具"
+      },
+      {
+        "key": "ref",
+        "context": "",
+        "value": "参考"
+      },
+      {
+        "key": "renderLink",
+        "context": "",
+        "value": "renderLink"
+      },
+      {
+        "key": "separatorName",
+        "context": "",
+        "value": "separatorName"
+      },
+      {
+        "key": "shieldAlert",
+        "context": "",
+        "value": "shieldAlert"
+      },
+      {
+        "key": "showAddress",
+        "context": "",
+        "value": "显示地址"
+      },
+      {
+        "key": "showCustomFields",
+        "context": "",
+        "value": "显示自定义字段"
+      },
+      {
+        "key": "showPhone",
+        "context": "",
+        "value": "显示电话"
+      },
+      {
+        "key": "slash",
+        "context": "",
+        "value": "斜杠"
+      },
+      {
+        "key": "string",
+        "context": "",
+        "value": "字符串"
+      },
+      {
+        "key": "success",
+        "context": "",
+        "value": "成功"
+      },
+      {
+        "key": "summary",
+        "context": "",
+        "value": "摘要"
+      },
+      {
+        "key": "title",
+        "context": "",
+        "value": "标题"
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "",
+        "value": "后请重新运行以刷新规则。"
+      },
+      {
+        "key": "to refresh the rules.",
+        "context": "Set Up Your AI Coding Agent",
+        "value": "后请重新运行以刷新规则。"
+      },
+      {
+        "key": "true",
+        "context": "",
+        "value": "真"
+      },
+      {
+        "key": "type",
+        "context": "",
+        "value": "类型"
+      },
+      {
+        "key": "variant",
+        "context": "",
+        "value": "变体"
+      },
+      {
+        "key": "warning",
+        "context": "",
+        "value": "警告"
+      },
+      {
+        "key": "zap",
+        "context": "",
+        "value": "轻触"
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "",
+        "value": "{{text:0}}，无需安装。"
+      },
+      {
+        "key": "{{text:0}}, no installation needed.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}，无需安装。"
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "",
+        "value": "{{text:0}}，你无需先构建应用即可在这里探索这些组件。本介绍同时用于 GitHub、npm 和 Storybook。"
+      },
+      {
+        "key": "{{text:0}}, where you can explore those components without building an app first. This introduction is shared by GitHub, npm, and Storybook.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}，你无需先构建应用即可在这里探索这些组件。本介绍同时用于 GitHub、npm 和 Storybook。"
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "",
+        "value": "{{text:0}}，可使用或不使用 AI 编程助手。"
+      },
+      {
+        "key": "{{text:0}}, with or without an AI coding agent.",
+        "context": "@mieweb/ui",
+        "value": "{{text:0}}，可使用或不使用 AI 编程助手。"
+      },
+      {
+        "key": "{{text:0}}: Verify that Storybook picks up all necessary settings for loaders, plugins, and other relevant parameters. You can find step-by-step guides for configuring{{text:1}}or{{text:2}}with Storybook.",
+        "context": "",
+        "value": "{{text:0}}: 验证 Storybook 是否获取了加载器、插件及其他相关参数所需的全部设置。你可以找到关于使用 Storybook 配置{{text:1}}或{{text:2}}的分步指南。"
+      },
+      {
+        "key": "{{text:0}}: You can use decorators to supply specific contexts or providers, which are sometimes necessary for components to render correctly. For detailed instructions on using decorators, please visit the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: 你可以使用装饰器来提供特定的上下文或提供者，这在某些情况下是组件正确渲染所必需的。有关使用装饰器的详细说明，请访问{{text:1}}。"
+      },
+      {
+        "key": "{{text:0}}: Your Storybook may require specific environment variables to function as intended. You can set up custom environment variables as outlined in the{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}}: 您的 Storybook 可能需要特定的环境变量才能按预期运行。您可以按照 {{text:1}} 中所述设置自定义环境变量。"
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "",
+        "value": "{{text:0}}：循序渐进地采用该库。"
+      },
+      {
+        "key": "{{text:0}}: an ordered approach to adopting the library.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}：循序渐进地采用该库。"
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "",
+        "value": "{{text:0}}：针对各框架的迁移指南。"
+      },
+      {
+        "key": "{{text:0}}: framework-specific migration guidance.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}：针对各框架的迁移指南。"
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "",
+        "value": "{{text:0}}：现有应用的集成陷阱与迁移路径。"
+      },
+      {
+        "key": "{{text:0}}: integration pitfalls and migration paths for existing applications.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}：现有应用的集成陷阱与迁移路径。"
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "",
+        "value": "{{text:0}}：品牌体系与视觉令牌。"
+      },
+      {
+        "key": "{{text:0}}: the brand system and visual tokens.",
+        "context": "Go Deeper",
+        "value": "{{text:0}}：品牌体系与视觉令牌。"
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "",
+        "value": "{{text:0}} 比较 {{text:1}} 和 {{text:2}}。目录（TOC）提供具名的跳转目标和导航。阅读进度条只是装饰性的滚动提示，既不是导航，也不能证明已阅读。两者可以互补；内容较短时可能都不需要。"
+      },
+      {
+        "key": "{{text:0}}compare{{text:1}}and{{text:2}}. A TOC provides named destinations and navigation. A reading bar is a decorative document-scroll cue, not navigation or proof of reading. They can complement each other; neither may be needed for short content.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} 比较 {{text:1}} 和 {{text:2}}。目录（TOC）提供具名的跳转目标和导航。阅读进度条只是装饰性的滚动提示，既不是导航，也不能证明已阅读。两者可以互补；内容较短时可能都不需要。"
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "",
+        "value": "{{text:0}} 浏览 {{text:1}}。观察导航、页眉和内容如何配合，然后根据你的工作流调整组合方式，而不是照搬布局。"
+      },
+      {
+        "key": "{{text:0}}explore the{{text:1}}. Inspect how navigation, headers, and content fit together, then adapt the composition to your workflow rather than copying the layout indiscriminately.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} 浏览 {{text:1}}。观察导航、页眉和内容如何配合，然后根据你的工作流调整组合方式，而不是照搬布局。"
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "",
+        "value": "{{text:0}} 用于专有产品或商业用途，请联系 {{text:1}}。"
+      },
+      {
+        "key": "{{text:0}}for proprietary products or commercial use, contact{{text:1}}.",
+        "context": "License",
+        "value": "{{text:0}} 用于专有产品或商业用途，请联系 {{text:1}}。"
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "",
+        "value": "{{text:0}} 个人项目、教育和研究。"
+      },
+      {
+        "key": "{{text:0}}personal projects, education, and research.",
+        "context": "License",
+        "value": "{{text:0}} 个人项目、教育和研究。"
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "",
+        "value": "{{text:0}} 从 {{text:1}} 开始，并与 {{text:2}} 比较。NITRO 提供集成的数据工具；Table 提供更底层的标记。请考虑你的应用需要自行提供哪些行为，并在选择例外方案前查阅选择规则。"
+      },
+      {
+        "key": "{{text:0}}start with{{text:1}}and compare{{text:2}}. NITRO provides integrated data tooling; Table provides lower-level markup. Consider the behavior your application would need to supply and consult the selection rules before choosing an exception.",
+        "context": "Explore and Compose Components",
+        "value": "{{text:0}} 从 {{text:1}} 开始，并与 {{text:2}} 比较。NITRO 提供集成的数据工具；Table 提供更底层的标记。请考虑你的应用需要自行提供哪些行为，并在选择例外方案前查阅选择规则。"
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "",
+        "value": "{{text:0}} 查看导航、页眉、卡片和数据展示在应用布局中协同工作的效果。试试品牌和主题切换器，看看同样的组件如何适配。无需安装。"
+      },
+      {
+        "key": "{{text:0}}to see navigation, headers, cards, and data displays working together in an application layout. Try the brand and theme switchers to see how the same components adapt. No installation required.",
+        "context": "See It In Action",
+        "value": "{{text:0}} 查看导航、页眉、卡片和数据展示在应用布局中协同工作的效果。试试品牌和主题切换器，看看同样的组件如何适配。无需安装。"
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "",
+        "value": "{{text:0}} 可在开源项目中使用、修改和分发，但需注明出处。"
+      },
+      {
+        "key": "{{text:0}}use, modify, and distribute in open source projects with attribution.",
+        "context": "License",
+        "value": "{{text:0}} 可在开源项目中使用、修改和分发，但需注明出处。"
+      }
+    ]
+  },
+  "glossary": {},
+  "aria": [],
+  "timestamp": 1795472771249
+}

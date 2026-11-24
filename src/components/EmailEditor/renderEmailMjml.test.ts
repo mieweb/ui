@@ -6,6 +6,7 @@ import {
   normalizeDesignSettings,
   renderEmailMjml,
   safeColor,
+  sanitizeEmailHtml,
 } from './renderEmailMjml';
 import {
   addBlockToColumn,
@@ -203,6 +204,40 @@ describe('renderEmailMjml', () => {
     expect(mjml).not.toMatch(
       /position|inset|z-index|-40px|url\(x\)|background: white/
     );
+  });
+
+  it('keeps everything the Kerebron toolbar can produce in a text block', () => {
+    // One sample per toolbar control, serialized the way the editor emits it
+    // (see extension-basic-editor's toDOM specs). If one of these starts
+    // getting stripped, that toolbar button silently corrupts saved content.
+    const samples = [
+      '<strong>b</strong>',
+      '<em>i</em>',
+      '<u>u</u>',
+      '<strike>s</strike>',
+      '<code>c</code>',
+      '<mark style="background-color: yellow; color: inherit;">h</mark>',
+      '<sup>1</sup>',
+      '<sub>2</sub>',
+      '<a href="https://example.com">link</a>',
+      '<p style="text-align: center">centered</p>',
+      '<h1>1</h1><h2>2</h2><h3>3</h3><h4>4</h4><h5>5</h5><h6>6</h6>',
+      '<ul><li>u</li></ul><ol><li>o</li></ol>',
+      '<blockquote><p>q</p></blockquote>',
+      '<pre lang="js"><code>x</code></pre>',
+      '<hr>',
+    ];
+    for (const html of samples) {
+      const clean = sanitizeEmailHtml(html)!.replace(/ \/>/g, '>');
+      expect(clean.replace(/;"/g, '"')).toBe(html.replace(/;"/g, '"'));
+    }
+    // Task-list items are the exception — their checkboxes are form controls,
+    // which is why the email surface drops the task nodes entirely.
+    expect(
+      sanitizeEmailHtml(
+        '<li><label><input type="checkbox"><div>t</div></label></li>'
+      )
+    ).not.toContain('<input');
   });
 
   it('uses a caller-supplied sanitiser', () => {
