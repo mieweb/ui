@@ -611,7 +611,11 @@ export const ChatComposer = React.forwardRef<
   const isOverLimit = maxLength !== undefined && value.length > maxLength;
   // Without an onSend handler, sending would silently discard the draft.
   const readyToSend =
-    onSend !== undefined && !disabled && !isSending && !isStreaming;
+    onSend !== undefined &&
+    !disabled &&
+    !readOnly &&
+    !isSending &&
+    !isStreaming;
   /** Whether `text` (with `staged` attachments) is a sendable message. */
   const isSendable = (text: string, staged = attachments) =>
     (text.trim().length > 0 || staged.length > 0 || canSendWhenEmpty) &&
@@ -633,9 +637,11 @@ export const ChatComposer = React.forwardRef<
   // @mention autocomplete (opt-in via `mentionOptions`) — shared with
   // MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
-    options: mentionOptions,
+    // Off while disabled: a list left open, or a search answering late,
+    // must not write into a draft the host has locked.
+    options: disabled ? undefined : mentionOptions,
     // The rich editor handles its own triggers.
-    triggers: rich ? undefined : triggers,
+    triggers: rich || disabled ? undefined : triggers,
     value,
     setValue,
     textareaRef,
@@ -810,6 +816,12 @@ export const ChatComposer = React.forwardRef<
   // editor's own content first. One read at a time, so a second Enter or
   // click while it is pending can't send the draft twice.
   const readingDraftRef = React.useRef(false);
+  // This render's send path and eligibility, for a read that settles after
+  // the host disabled the composer, made it read-only or changed `onSend`.
+  const latestSendRef = React.useRef<{
+    readyToSend: boolean;
+    sendText: (text: string, sendOption?: string) => void;
+  } | null>(null);
   const handleSend = (sendOption?: string) => {
     if (!readyToSend || readingDraftRef.current) return;
     const editorHandle = rich ? richEditorRef.current : null;
@@ -822,10 +834,15 @@ export const ChatComposer = React.forwardRef<
       .getContent()
       .then(
         (text) => {
+          // Dropped if, meanwhile, the composer can no longer send (disabled,
+          // read-only, no `onSend`) or its editor unmounted: the draft stays
+          // as it is. (The handle itself may be rebuilt on any re-render.)
+          const latest = latestSendRef.current;
+          if (!latest?.readyToSend || !richEditorRef.current) return;
           // Publish the read draft first, so clearing it below is a change
           // the editor sees even while `value` still lagged at ''.
           if (text !== value) flushSync(() => setValue(text));
-          sendText(text, sendOption);
+          latest.sendText(text, sendOption);
         },
         () => onError?.(sendFailedLabel, { reason: 'send-failed' })
       )
@@ -877,6 +894,7 @@ export const ChatComposer = React.forwardRef<
     }
     focusInput();
   };
+  latestSendRef.current = { readyToSend, sendText };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
   // dismissing the keyboard before `handleSend` refocuses it (a visible

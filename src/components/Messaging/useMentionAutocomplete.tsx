@@ -354,6 +354,9 @@ export function useMentionAutocomplete({
     if (list.handleKey(event)) return true;
     if (event.key === 'Escape') {
       event.preventDefault();
+      // Handled here only: a surrounding Modal's document-level Escape would
+      // otherwise close it too. The next Escape reaches the host.
+      event.stopPropagation();
       setMention(null);
       return true;
     }

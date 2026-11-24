@@ -166,6 +166,37 @@ describe('ChatComposer rich input', () => {
     expect(onSend).toHaveBeenCalledTimes(1);
   });
 
+  describe('the host changes the composer while the draft is read', () => {
+    it.each([
+      ['disables it', { disabled: true }],
+      ['makes it read-only', { readOnly: true }],
+      ['removes onSend', { onSend: undefined }],
+    ] as const)(
+      'sends nothing and keeps the draft when it %s',
+      async (_, change) => {
+        const { onSend, input, rerender } = await renderRich();
+        editor.draft = 'hold on';
+        let release = () => {};
+        editor.reading = new Promise<void>((resolve) => (release = resolve));
+        fireEvent.keyDown(input, { key: 'Enter' });
+        const onValueChange = vi.fn();
+        rerender(
+          <ChatComposer
+            editor="rich"
+            onSend={onSend}
+            onValueChange={onValueChange}
+            triggers={[person]}
+            {...change}
+          />
+        );
+        await act(async () => release());
+        await act(async () => {});
+        expect(onSend).not.toHaveBeenCalled();
+        expect(onValueChange).not.toHaveBeenCalled();
+      }
+    );
+  });
+
   describe('attachments changed while the draft is read', () => {
     function holdRead() {
       let release = () => {};

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
+import type { ReferenceOption } from '../ReferenceChip/references';
 import { renderWithTheme } from '../../test/test-utils';
 import { Modal } from '../Modal';
 import {
@@ -221,6 +222,70 @@ describe('ChatComposer', () => {
       await answer(fixLogin);
       expect(input).toHaveValue('');
       expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a reference search still pending', () => {
+    let answer: (options: ReferenceOption[]) => void = () => {};
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: () =>
+        new Promise<ReferenceOption[]>((resolve) => (answer = resolve)),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    const t12 = { kind: 'ticket', id: 't-12', label: 'TH-12' };
+
+    it('opens no list once the composer is disabled', async () => {
+      const onValueChange = vi.fn();
+      const { rerender } = renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      fireEvent.change(getInput(), {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      // The search starts a microtask after the change.
+      await act(async () => {});
+      rerender(
+        <ChatComposer
+          disabled
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      onValueChange.mockClear();
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('takes Escape for itself inside a Modal, so the Modal stays open', async () => {
+      const onOpenChange = vi.fn();
+      renderWithTheme(
+        <Modal open onOpenChange={onOpenChange} aria-label="Compose">
+          <ChatComposer onSend={vi.fn()} triggers={[ticket]} />
+        </Modal>
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      await act(async () => {});
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).not.toHaveBeenCalled();
+      // The answer arriving after Escape opens nothing.
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      // The next Escape is the Modal's.
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 
