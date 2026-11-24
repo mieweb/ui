@@ -23,6 +23,8 @@ const meta: Meta<typeof ReferenceChip> = {
 - Text names records the app knows and readers should be able to open them — "Ask @Ann Lee about TH-12".
 - You need the ids a saved text refers to (to notify people, to link a post to tickets): \`referencesIn\` with the same triggers the editor used.
 
+Where references are written: [RichEditor](?path=/docs/editors-richeditor--docs) \`triggers\` for a document, [ChatComposer](?path=/docs/chat-chatcomposer--docs) \`triggers\` for a chat message (links in its textarea, chips with \`editor="rich"\`, and \`references\` on \`onSend\`). Both take the same \`ReferenceTrigger\`s.
+
 ### Don't use it when
 
 - The chip is a **status or category** with no record behind it — \`Badge\`.
@@ -63,6 +65,11 @@ The host owns the records: what a kind means, how candidates are found, and chec
           type: 'composes with',
           target: 'editors-richeditor',
           why: 'RichEditor `triggers` let people insert references while writing; ReferenceChip shows them elsewhere.',
+        },
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: 'ChatComposer `triggers` insert references into a chat message and hand them to onSend as `references`; ReferenceChip shows them in the sent message.',
         },
         {
           type: 'uses',

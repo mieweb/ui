@@ -2,6 +2,10 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { useAnchoredPosition } from '../../hooks/useAnchoredPosition';
+import type {
+  ReferenceOption,
+  ReferenceTrigger,
+} from '../ReferenceChip/references';
 
 // ============================================================================
 // @mention autocomplete — consumed by ChatComposer (and, before its
@@ -45,6 +49,41 @@ export function activeMentionQuery(
   const query = match[2];
   return { query, start: caret - query.length - 1 };
 }
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
+
+/**
+ * Like {@link activeMentionQuery}, for any of `chars`: the trigger character
+ * typed, the text after it, and where it starts.
+ */
+export function activeTriggerQuery(
+  value: string,
+  caret: number,
+  chars: readonly string[]
+): { char: string; query: string; start: number } | null {
+  if (!chars.length) return null;
+  const set = chars.map(escapeRegExp).join('');
+  const match = new RegExp(`(^|\\s)([${set}])([^\\s${set}]*)$`).exec(
+    value.slice(0, caret)
+  );
+  if (!match) return null;
+  const query = match[3];
+  return { char: match[2], query, start: caret - query.length - 1 };
+}
+
+/**
+ * `[label](href)` that reads back as exactly `label` and `href`. The label
+ * escapes what Markdown would format (`*beta*`, `` `code` ``, `$x$`, `&amp;`);
+ * the destination escapes what would end it early or decode (`issue)`), and
+ * takes angle brackets when it holds whitespace.
+ */
+function referenceLink(label: string, href: string): string {
+  const text = label.replace(/[\\[\]*_`~<>&$]/g, '\\$&');
+  const destination = href.replace(/[\\()<>&]/g, '\\$&');
+  return `[${text}](${/\s/.test(href) ? `<${destination}>` : destination})`;
+}
+
+const NO_RESULTS: ReferenceOption[] = [];
 
 /**
  * The list half of an autocomplete, shared by {@link useMentionAutocomplete}
@@ -119,6 +158,12 @@ export function useSuggestionList<T>(
 export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
   options?: MentionOption[];
+  /**
+   * Reference triggers (e.g. `#` tickets): typing one's character searches
+   * it, and a pick is inserted as a Markdown link (`[label](href)`). A
+   * trigger on `@` adds its results after `options`.
+   */
+  triggers?: ReferenceTrigger[];
   /** Current composer text. */
   value: string;
   /** Write the composer text (host handles controlled/uncontrolled). */
@@ -132,6 +177,8 @@ export interface MentionAutocomplete {
   enabled: boolean;
   /** Whether the suggestion menu is currently open. */
   menuOpen: boolean;
+  /** The open list's trigger, when a reference trigger opened it — for its accessible name. */
+  activeTrigger: ReferenceTrigger | null;
   /** Suggestions matching the active query. */
   suggestions: MentionOption[];
   /** Clamped highlight index (`-1` while the menu is closed). */
@@ -167,20 +214,95 @@ export interface MentionAutocomplete {
  */
 export function useMentionAutocomplete({
   options,
+  triggers,
   value,
   setValue,
   textareaRef,
 }: UseMentionAutocompleteOptions): MentionAutocomplete {
-  const enabled = !!options && options.length > 0;
-  const [mention, setMention] = React.useState<{
+  const hasOptions = !!options && options.length > 0;
+  const enabled = hasOptions || !!triggers?.length;
+  const chars = React.useMemo(
+    () => [
+      ...new Set([
+        ...(hasOptions ? ['@'] : []),
+        ...(triggers ?? []).map((t) => t.char),
+      ]),
+    ],
+    [hasOptions, triggers]
+  );
+  const [trackedMention, setMention] = React.useState<{
+    char: string;
     query: string;
     start: number;
   } | null>(null);
-  const suggestions = React.useMemo(() => {
-    if (!mention || !options) return [];
+  // Only while the draft still holds the query: a send that clears it, or a
+  // host that replaces it, ends the query, so a late search answer can't open
+  // the menu over a draft it no longer belongs to.
+  const mention =
+    trackedMention &&
+    value.startsWith(
+      trackedMention.char + trackedMention.query,
+      trackedMention.start
+    )
+      ? trackedMention
+      : null;
+  const activeTrigger =
+    (mention && triggers?.find((t) => t.char === mention.char)) || null;
+
+  // A reference trigger's search, newest answer only. Keyed by character and
+  // query, with the trigger read through a ref, so a host that rebuilds its
+  // `triggers` each render doesn't search again. Each answer carries the
+  // character and query it was for: while a new search runs, an older one's
+  // results (another trigger's records) must not be shown or picked.
+  const [found, setFound] = React.useState<{
+    char: string;
+    query: string;
+    results: ReferenceOption[];
+  } | null>(null);
+  const searchSeq = React.useRef(0);
+  const activeTriggerRef = React.useRef(activeTrigger);
+  activeTriggerRef.current = activeTrigger;
+  const searchChar = activeTrigger?.char;
+  const searchQuery = mention?.query;
+  React.useEffect(() => {
+    const seq = ++searchSeq.current;
+    const trigger = activeTriggerRef.current;
+    if (!trigger || searchQuery === undefined) {
+      setFound(null);
+      return;
+    }
+    const answer = (results: ReferenceOption[]) => {
+      if (seq === searchSeq.current)
+        setFound({ char: trigger.char, query: searchQuery, results });
+    };
+    Promise.resolve()
+      .then(() => trigger.search(searchQuery))
+      .then(answer, () => answer([]));
+  }, [searchChar, searchQuery]);
+  const results =
+    found &&
+    activeTrigger &&
+    found.char === activeTrigger.char &&
+    found.query === mention?.query
+      ? found.results
+      : NO_RESULTS;
+
+  // A trigger's results as entries of their own (copies), so a pick is a
+  // reference only when it came from them — a host may share one array
+  // between `mentionOptions` and a trigger's search.
+  const referenceEntries = React.useMemo(
+    () => results.map((result) => ({ ...result })),
+    [results]
+  );
+  const suggestions = React.useMemo<MentionOption[]>(() => {
+    if (!mention) return [];
     const q = mention.query.toLowerCase();
-    return options.filter((o) => o.label.toLowerCase().includes(q));
-  }, [mention, options]);
+    const listed =
+      mention.char === '@' && options
+        ? options.filter((o) => o.label.toLowerCase().includes(q))
+        : [];
+    return [...listed, ...referenceEntries];
+  }, [mention, options, referenceEntries]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -198,10 +320,13 @@ export function useMentionAutocomplete({
 
   function insert(option: MentionOption) {
     if (!mention) return;
-    const insertValue = option.value ?? option.label.split(' ')[0];
     const before = value.slice(0, mention.start);
     const after = value.slice(mention.start + 1 + mention.query.length);
-    const insertText = `@${insertValue} `;
+    // A trigger's pick is a link to its record; a listed option is `@value`.
+    const insertText =
+      activeTrigger && referenceEntries.includes(option as ReferenceOption)
+        ? `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
+        : `@${option.value ?? option.label.split(' ')[0]} `;
     setValue(before + insertText + after);
     setMention(null);
     // Restore caret just after the inserted mention.
@@ -221,19 +346,27 @@ export function useMentionAutocomplete({
   const sync = React.useCallback(
     (nextValue: string, caret: number) => {
       if (!enabled) return;
-      setMention(activeMentionQuery(nextValue, caret));
+      setMention(activeTriggerQuery(nextValue, caret, chars));
       setHighlight(0);
     },
-    [enabled, setHighlight]
+    [enabled, chars, setHighlight]
   );
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
-    if (!menuOpen) return false;
+    // An IME composing (CJK input) owns Enter and the arrows: they pick and
+    // confirm its candidates, not the list's options.
+    if (event.nativeEvent.isComposing) return false;
+    // Escape also dismisses a reference query still searching, so its late
+    // answer doesn't open the menu after the user closed it.
+    if (!menuOpen && !(event.key === 'Escape' && activeTrigger)) return false;
     if (list.handleKey(event)) return true;
     if (event.key === 'Escape') {
       event.preventDefault();
+      // Handled here only: a surrounding Modal's document-level Escape would
+      // otherwise close it too. The next Escape reaches the host.
+      event.stopPropagation();
       setMention(null);
       return true;
     }
@@ -251,6 +384,7 @@ export function useMentionAutocomplete({
   return {
     enabled,
     menuOpen,
+    activeTrigger,
     suggestions,
     highlight: list.highlight,
     listId: list.listId,
@@ -323,7 +457,9 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
       className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
     >
       {mention.suggestions.map((option, i) => (
-        <li key={option.id}>
+        // By position as well as id: one person can be both a listed mention
+        // and a trigger's result, with the same id.
+        <li key={`${i}:${option.id}`}>
           <button
             type="button"
             id={mention.optionId(i)}
