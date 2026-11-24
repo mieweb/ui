@@ -76,7 +76,9 @@ export interface ReorderableListProps<T> extends Omit<
   /**
    * Save the order in this browser (localStorage) under this key and restore
    * it on the next visit. Read once on mount. Ids added later go to the end;
-   * ids that disappear drop out. Turns reordering on by itself.
+   * ids that disappear drop out. Turns reordering on by itself. If the key can
+   * change (another list or user), also pass it as the React `key`
+   * (`key={storageKey}`), or the old order may be saved under the new key.
    */
   storageKey?: string;
   /**

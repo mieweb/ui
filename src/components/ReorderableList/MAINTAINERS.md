@@ -36,8 +36,10 @@ when `storageKey` is set, then calls `onReorder(ids)`.
 - **Without it** a no-op adapter is passed (hooks can't be conditional) and the
   list renders `items` exactly as given; the caller owns the order.
 - The saved order is **read once on mount** (`useOrderPersistence` loads in a
-  mount effect), like `CustomizableDashboard`'s `storageKey`. To switch keys at
-  runtime, remount with a React `key`.
+  mount effect), like `CustomizableDashboard`'s `storageKey`. Switching keys
+  at runtime needs a remount (`key={storageKey}`): without one the hook keeps
+  the old order and its pending debounced save, which then writes under the
+  new key. The consumer docs (Limitations, the prop's JSDoc) say so too.
 
 ## Invariants & gotchas
 
