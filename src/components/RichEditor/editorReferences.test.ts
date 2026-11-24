@@ -2,7 +2,8 @@
  * Inline references through the real Kerebron editor and Markdown converter
  * (see markdownRoundTrip.test.ts for why the WASM grammars load from disk).
  */
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CoreEditor } from '@kerebron/editor';
@@ -19,8 +20,12 @@ import {
   menuPlacement,
   referenceQueryAt,
   referencesToLinks,
+  useEditorReferences,
 } from './editorReferences';
-import type { ReferenceTrigger } from '../ReferenceChip/references';
+import type {
+  ReferenceOption,
+  ReferenceTrigger,
+} from '../ReferenceChip/references';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 const assetsDir = path.join(
@@ -61,6 +66,13 @@ const references = () => {
     }
   });
   return found;
+};
+/** Puts `view`'s caret at the end of its first paragraph. */
+const caretAtEndOf = (view: EditorView) => {
+  const end = view.state.doc.firstChild!.nodeSize - 1;
+  view.dispatch(
+    view.state.tr.setSelection(TextSelection.create(view.state.doc, end))
+  );
 };
 /** Puts the caret at the end of the first paragraph. */
 const caretAtEnd = () => {
@@ -317,6 +329,147 @@ describe('references in RichEditor', () => {
     }
     expect(backspace()).toBe(true);
     expect(references()).toEqual([]);
+  });
+});
+
+describe('useEditorReferences', () => {
+  // Searches answer only when a test says so, in any order: `${char}${query}`
+  // → its resolver.
+  const pending = new Map<string, (options: ReferenceOption[]) => void>();
+  const deferred = (kind: string, char: string, prefix: string) => ({
+    ...trigger(kind, char, prefix),
+    search: (query: string) =>
+      new Promise<ReferenceOption[]>((resolve) => {
+        pending.set(`${char}${query}`, resolve);
+      }),
+  });
+  const hookTriggers = [
+    deferred('person', '@', '/people/'),
+    deferred('ticket', '#', '/tickets/'),
+  ];
+  const ann = { kind: 'person', id: 'u-ann', label: '@Ann' };
+  const andy = { kind: 'person', id: 'u-andy', label: '@Andy' };
+
+  let hook: ReturnType<
+    typeof renderHook<ReturnType<typeof useEditorReferences>, unknown>
+  >;
+  let refEditor: CoreEditor;
+  let view: EditorView;
+  const menu = () => hook.result.current.menu;
+  const chips = () => {
+    let count = 0;
+    view.state.doc.descendants((node) => {
+      if (node.type.name === REFERENCE_NODE) count++;
+    });
+    return count;
+  };
+  const type = (text: string) =>
+    act(() => {
+      view.dispatch(view.state.tr.insertText(text));
+    });
+  const answer = (key: string, options: ReferenceOption[]) =>
+    act(async () => {
+      pending.get(key)!(options);
+    });
+  const escape = () =>
+    act(() => {
+      view.someProp('handleKeyDown', (handle) =>
+        handle(view, new KeyboardEvent('keydown', { key: 'Escape' }))
+      );
+    });
+
+  const scrollBy = window.scrollBy;
+  let kits: Awaited<ReturnType<typeof createEditorKits>>['kits'];
+  const editors: CoreEditor[] = [];
+  beforeAll(async () => {
+    // A pick scrolls the caret into view, which jsdom doesn't implement.
+    window.scrollBy = () => {};
+    ({ kits } = await createEditorKits());
+  });
+
+  // A hook and editor per test: Testing Library unmounts the hook after each.
+  beforeEach(async () => {
+    pending.clear();
+    hook = renderHook(() => useEditorReferences(hookTriggers));
+    refEditor = CoreEditor.create({
+      element: document.body.appendChild(document.createElement('div')),
+      uri: 'file:///references.md',
+      assetLoad,
+      editorKits: [...kits, hook.result.current.kit],
+    });
+    editors.push(refEditor);
+    await act(async () => {
+      await refEditor.loadDocumentText(MARKDOWN_TYPE, 'Hi ');
+    });
+    view = refEditor.view as EditorView;
+    // jsdom has no focus tracking or layout for the editable.
+    view.hasFocus = () => true;
+    view.coordsAtPos = () => ({ left: 0, right: 0, top: 0, bottom: 16 });
+    await act(async () => caretAtEndOf(view));
+  });
+
+  afterAll(async () => {
+    // Let Kerebron's debounced snapshot flush first (see the suite above).
+    await new Promise((resolve) => setTimeout(resolve, 850));
+    for (const each of editors) each.destroy();
+    window.scrollBy = scrollBy;
+  });
+
+  it('shows and inserts the answer to the current query', async () => {
+    await type('@an');
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(true);
+    expect(menu().suggestions).toEqual([ann]);
+    act(() => menu().insert(ann));
+    expect(chips()).toBe(1);
+  });
+
+  it('never shows or inserts an older query’s answer', async () => {
+    await type('@a');
+    await answer('@a', [andy]);
+    expect(menu().suggestions).toEqual([andy]);
+    // While the next query's search is pending, the last answer is gone…
+    await type('n');
+    expect(menu().suggestions).toEqual([]);
+    expect(menu().menuOpen).toBe(false);
+    act(() => menu().insert(andy));
+    expect(chips()).toBe(0);
+    // …and its own answer replaces it.
+    await answer('@an', [ann]);
+    expect(menu().suggestions).toEqual([ann]);
+  });
+
+  it('never shows another trigger’s answer under the current one', async () => {
+    await type('@a');
+    await answer('@a', [andy]);
+    expect(menu().suggestions).toEqual([andy]);
+    // `@a` becomes `#a`: same spot and query, another trigger.
+    act(() => {
+      const { from } = view.state.selection;
+      view.dispatch(view.state.tr.insertText('#', from - 2, from - 1));
+    });
+    expect(hook.result.current.activeTrigger?.kind).toBe('ticket');
+    expect(menu().suggestions).toEqual([]);
+    act(() => menu().insert(andy));
+    expect(chips()).toBe(0);
+  });
+
+  it('stays closed when a search answers after Escape', async () => {
+    await type('@an');
+    await escape();
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(false);
+    act(() => menu().insert(ann));
+    expect(chips()).toBe(0);
+    // A caret move back onto that spot doesn't search it again and open the
+    // list once that search answers; nor does typing on.
+    await act(async () => caretAtEndOf(view));
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(false);
+    expect(menu().suggestions).toEqual([]);
+    await type('n');
+    expect(pending.has('@ann')).toBe(false);
+    expect(menu().menuOpen).toBe(false);
   });
 });
 
