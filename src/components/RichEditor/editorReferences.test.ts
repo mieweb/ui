@@ -127,6 +127,39 @@ describe('references in RichEditor', () => {
     expect(references()).toEqual([]);
     expect(await save()).toBe('Ask');
   });
+
+  const ownLineTriggers = [triggers[0], { ...triggers[1], ownLine: true }];
+  const pickTicket = () => {
+    editor.view.dispatch(
+      editor.state.tr.setSelection(TextSelection.atEnd(editor.state.doc))
+    );
+    const query = referenceQueryAt(editor.state, ownLineTriggers)!;
+    editor.view.dispatch(
+      insertReference(editor.state, query, {
+        kind: 'ticket',
+        id: 't-12',
+        label: 'TH-12: Fix login',
+      })
+    );
+    // What the person types next goes on the line after the chip.
+    editor.view.dispatch(editor.state.tr.insertText('Next'));
+  };
+
+  it('puts an ownLine pick on a line of its own, the caret on the next', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Fix #lo');
+    pickTicket();
+    expect(await save()).toBe(
+      'Fix\n\n[TH-12: Fix login](/tickets/t-12)\n\nNext'
+    );
+  });
+
+  it('in a checklist, an ownLine pick is a new unchecked item', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, '- [ ] Fix #lo');
+    pickTicket();
+    expect(await save()).toBe(
+      '- [ ] Fix\n- [ ] [TH-12: Fix login](/tickets/t-12)\n- [ ] Next'
+    );
+  });
 });
 
 describe('menuPlacement', () => {

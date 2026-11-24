@@ -7,7 +7,7 @@ import {
   type CoreEditor,
   type EditorKit,
 } from '@kerebron/editor';
-import type { NodeSpec, Node as PmNode } from 'prosemirror-model';
+import type { NodeSpec, Node as PmNode, ResolvedPos } from 'prosemirror-model';
 import {
   Plugin,
   TextSelection,
@@ -215,7 +215,8 @@ export function referenceQueryAt(
 
 /**
  * Replaces the query `range` with a reference to `option` and a space, caret
- * after them — one transaction, so one undo puts the typed query back.
+ * after them — one transaction, so one undo puts the typed query back. For an
+ * `ownLine` trigger the chip takes a line of its own instead of the space.
  */
 export function insertReference(
   state: EditorState,
@@ -229,11 +230,47 @@ export function insertReference(
     label: option.label,
     href: range.trigger.toHref(option.id),
   });
+  if (range.trigger.ownLine) return insertOnOwnLine(state, range, node);
   const tr = state.tr.replaceWith(range.from, range.to, [
     node,
     schema.text(' '),
   ]);
   const caret = range.from + node.nodeSize + 1;
+  return tr.setSelection(TextSelection.create(tr.doc, caret)).scrollIntoView();
+}
+
+/**
+ * How deep a split at `$pos` goes to start a new line: the paragraph, or the
+ * list item holding it, so a line in a list is a new item. A new checklist
+ * item starts unchecked.
+ */
+function lineSplit($pos: ResolvedPos) {
+  const holder = $pos.depth >= 2 ? $pos.node($pos.depth - 1) : null;
+  if (!holder || !/item/i.test(holder.type.name)) return { depth: 1 };
+  const attrs =
+    'checked' in holder.attrs
+      ? { ...holder.attrs, checked: false }
+      : holder.attrs;
+  return { depth: 2, typesAfter: [{ type: holder.type, attrs }, null] };
+}
+
+function insertOnOwnLine(
+  state: EditorState,
+  range: ReferenceQuery,
+  node: PmNode
+): Transaction {
+  const tr = state.tr.replaceWith(range.from, range.to, node);
+  let start = range.from;
+  const $start = tr.doc.resolve(start);
+  if ($start.parentOffset > 0) {
+    const { depth, typesAfter } = lineSplit($start);
+    tr.split(start, depth, typesAfter);
+    start += 2 * depth;
+  }
+  const end = start + node.nodeSize;
+  const { depth, typesAfter } = lineSplit(tr.doc.resolve(end));
+  tr.split(end, depth, typesAfter);
+  const caret = end + 2 * depth;
   return tr.setSelection(TextSelection.create(tr.doc, caret)).scrollIntoView();
 }
 

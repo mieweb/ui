@@ -38,6 +38,12 @@ export interface ReferenceTrigger {
   toHref: (id: string) => string;
   /** The record id a link points at, or null when the link isn't this kind. */
   fromHref: (href: string) => string | null;
+  /**
+   * A pick goes on a line of its own, e.g. a ticket in a plan: text before it
+   * stays on its line, and the caret goes to a new line after it. In a list
+   * the new lines are new items. Default: the pick sits inline, in the sentence.
+   */
+  ownLine?: boolean;
 }
 
 /** A reference found in saved text. */
