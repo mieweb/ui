@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { ChevronDown, Wrench } from 'lucide-react';
+import { Check, ChevronDown, Copy, Wrench } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
@@ -78,6 +78,16 @@ export interface MCPToolCallGroupLabels {
   deny: string;
   /** Shown on a call that may or may not have run. */
   uncertainNotice?: string;
+  /** Shown on a call the user denied. */
+  deniedNotice?: string;
+  /** Shown on a call whose approval timed out. */
+  expiredNotice?: string;
+  /** Header badge for calls that may or may not have run. */
+  notConfirmed?: (count: number) => string;
+  /** Accessible name of the copy button next to raw output. */
+  copy?: string;
+  /** Announced once text has been copied. */
+  copied?: string;
   /** Heads a call's labeled arguments. */
   arguments?: string;
   /** Disclosure for the raw arguments as JSON. */
@@ -145,7 +155,12 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   allowAlways: 'Always allow',
   deny: 'Deny',
   uncertainNotice:
-    'Could not confirm completion. The action may have taken effect.',
+    'Could not confirm completion. The action may have taken effect, so check before retrying.',
+  deniedNotice: "You denied this call, so it didn't run.",
+  expiredNotice: "No decision was made in time, so this call didn't run.",
+  notConfirmed: (count) => `${count} not confirmed`,
+  copy: 'Copy',
+  copied: 'Copied',
   arguments: 'Inputs',
   showRawArguments: 'Show raw inputs',
   hints: defaultToolHintLabels,
@@ -191,6 +206,7 @@ interface ToolGroupSummary {
   total: number;
   awaitingApproval: number;
   failed: number;
+  uncertain: number;
   /** True while any call is queued, running or awaiting approval. */
   isActive: boolean;
   /** Changes whenever a call is added or changes status. */
@@ -201,11 +217,13 @@ interface ToolGroupSummary {
 
 function summarize(toolCalls: MCPToolCall[]): ToolGroupSummary {
   let failed = 0;
+  let uncertain = 0;
   let inFlight = 0;
   const awaitingIds: string[] = [];
   for (const toolCall of toolCalls) {
     if (toolCall.status === 'awaiting-approval') awaitingIds.push(toolCall.id);
     else if (toolCall.status === 'error') failed += 1;
+    else if (toolCall.status === 'uncertain') uncertain += 1;
     else if (toolCall.status === 'running' || toolCall.status === 'pending')
       inFlight += 1;
   }
@@ -213,6 +231,7 @@ function summarize(toolCalls: MCPToolCall[]): ToolGroupSummary {
     total: toolCalls.length,
     awaitingApproval: awaitingIds.length,
     failed,
+    uncertain,
     isActive: awaitingIds.length + inFlight > 0,
     signature: toolCalls.map((call) => `${call.id}:${call.status}`).join('|'),
     approvalKey: awaitingIds.join('|'),
@@ -320,25 +339,80 @@ function formatError(toolCall: MCPToolCall): string | null {
 }
 
 /** A row's own collapsed block of output text, such as a result or error. */
-function OutputDisclosure({ label, text }: { label: string; text: string }) {
+function OutputDisclosure({
+  label,
+  text,
+  labels,
+  dir = 'auto',
+}: {
+  label: string;
+  text: string;
+  labels: Pick<ResolvedLabels, 'copy' | 'copied'>;
+  dir?: 'auto' | 'ltr';
+}) {
   return (
     <Collapsible>
-      <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
-        <ChevronDown
-          aria-hidden="true"
-          className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
-        />
-        {label}
-      </CollapsibleTrigger>
+      <div className="flex items-center gap-2">
+        <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200">
+          <ChevronDown
+            aria-hidden="true"
+            className="h-3 w-3 transition-transform motion-reduce:transition-none [[data-state=open]>&]:rotate-180"
+          />
+          {label}
+        </CollapsibleTrigger>
+        <CopyTextButton text={text} labels={labels} context={label} />
+      </div>
       <CollapsibleContent className="mt-1">
         <pre
-          dir="auto"
+          dir={dir}
           className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900"
         >
           {text}
         </pre>
       </CollapsibleContent>
     </Collapsible>
+  );
+}
+
+/** Copies raw output; the confirmation is announced and then reverts. */
+function CopyTextButton({
+  text,
+  labels,
+  context,
+}: {
+  text: string;
+  labels: Pick<ResolvedLabels, 'copy' | 'copied'>;
+  context: string;
+}) {
+  const [copied, setCopied] = React.useState(false);
+  React.useEffect(() => {
+    if (!copied) return;
+    const timer = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(timer);
+  }, [copied]);
+  if (typeof navigator === 'undefined' || !navigator.clipboard) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        navigator.clipboard.writeText(text).then(
+          () => setCopied(true),
+          () => {}
+        );
+      }}
+      aria-label={`${labels.copy}: ${context}`}
+      title={labels.copy}
+      className="focus-visible:ring-primary-500 inline-flex items-center gap-1 rounded px-1 text-xs text-neutral-500 hover:text-neutral-800 focus-visible:ring-2 focus-visible:outline-none dark:hover:text-neutral-200"
+    >
+      {copied ? (
+        <Check aria-hidden="true" className="h-3 w-3" />
+      ) : (
+        <Copy aria-hidden="true" className="h-3 w-3" />
+      )}
+      <span role="status" className={copied ? undefined : 'sr-only'}>
+        {copied ? labels.copied : ''}
+      </span>
+    </button>
   );
 }
 
@@ -543,6 +617,8 @@ function ToolCallRow({
                 <OutputDisclosure
                   label={labels.showRawArguments}
                   text={formatParameters(toolCall)}
+                  labels={labels}
+                  dir="ltr"
                 />
               </>
             ) : (
@@ -563,10 +639,18 @@ function ToolCallRow({
               />
             )}
             {result && result.length > INLINE_RESULT_CHARS && (
-              <OutputDisclosure label={labels.showResult} text={result} />
+              <OutputDisclosure
+                label={labels.showResult}
+                text={result}
+                labels={labels}
+              />
             )}
             {errorText && (
-              <OutputDisclosure label={labels.showError} text={errorText} />
+              <OutputDisclosure
+                label={labels.showError}
+                text={errorText}
+                labels={labels}
+              />
             )}
           </CollapsibleContent>
         </Collapsible>
@@ -583,6 +667,17 @@ function ToolCallRow({
             className="ms-6 line-clamp-2 text-xs text-amber-700 dark:text-amber-400"
           >
             {labels.uncertainNotice}
+          </p>
+        )}
+
+        {(toolCall.status === 'denied' || toolCall.status === 'expired') && (
+          <p
+            data-slot="ai-tool-call-not-run"
+            className="ms-6 text-xs text-neutral-500 dark:text-neutral-400"
+          >
+            {toolCall.status === 'denied'
+              ? labels.deniedNotice
+              : labels.expiredNotice}
           </p>
         )}
 
@@ -754,6 +849,11 @@ export function MCPToolCallGroup({
           {summary.failed > 0 && (
             <Badge variant="danger" size="sm" className="shrink-0">
               {labels.failed(summary.failed)}
+            </Badge>
+          )}
+          {summary.uncertain > 0 && (
+            <Badge variant="warning" size="sm" className="shrink-0">
+              {labels.notConfirmed(summary.uncertain)}
             </Badge>
           )}
           <ChevronDown

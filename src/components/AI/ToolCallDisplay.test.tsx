@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MCPToolCallDisplay, ToolCallDisplay } from './MCPToolCall';
@@ -248,5 +248,65 @@ describe('structured results that JSON cannot represent', () => {
     expect(
       screen.getByText('This result cannot be displayed')
     ).toBeInTheDocument();
+  });
+});
+
+describe('MCPToolCallGroup follow-up guidance', () => {
+  it('explains why denied and expired calls did not run', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({ id: 'd', status: 'denied' }),
+          call({ id: 'e', status: 'expired' }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Used 2 tools/ }));
+    expect(screen.getByText(/You denied this call/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No decision was made in time/)
+    ).toBeInTheDocument();
+  });
+
+  it('counts unconfirmed calls in the group header', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({ id: 'a', status: 'success' }),
+          call({ id: 'b', status: 'uncertain' }),
+        ]}
+      />
+    );
+    expect(screen.getByText('1 not confirmed')).toBeInTheDocument();
+  });
+
+  it('copies raw inputs to the clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            parameters: [
+              {
+                name: 'hostname',
+                label: 'Host name',
+                type: 'string',
+                value: 'foo-dev',
+              },
+            ],
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Copy: Show raw inputs' })
+    );
+    expect(writeText).toHaveBeenCalledWith('{\n  "hostname": "foo-dev"\n}');
+    expect(await screen.findByText('Copied')).toBeInTheDocument();
   });
 });

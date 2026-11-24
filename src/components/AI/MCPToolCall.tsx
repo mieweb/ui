@@ -723,7 +723,7 @@ export function ToolCallDisplay({
   compact,
   hidden = false,
   onLinkClick,
-  uncertainNotice = 'Could not confirm completion. The action may have taken effect.',
+  uncertainNotice = 'Could not confirm completion. The action may have taken effect, so check before retrying.',
   hintLabels,
   className,
 }: ToolCallDisplayProps) {
