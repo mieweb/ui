@@ -943,8 +943,8 @@ module.exports = {
     // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
     'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
     'sm:w-[var(--superchat-sidebar-width)]',
-    '[&_a]:text-current',
-    '[&_a:hover]:text-current',
+    '[&_a:not([data-slot=reference-chip])]:text-current',
+    '[&_a:not([data-slot=reference-chip]):hover]:text-current',
     '-mx-1',
     'inset-y-0',
     'w-0.5',
