@@ -227,6 +227,69 @@ describe('ChatComposer rich input', () => {
     expect(sendToB).not.toHaveBeenCalled();
   });
 
+  it('sends nothing, and clears nothing, when the host swaps in another draft meanwhile', async () => {
+    const sendToA = vi.fn();
+    const sendToB = vi.fn();
+    const onValueChange = vi.fn();
+    const { input, rerender } = await renderRich({
+      onSend: sendToA,
+      value: 'for A',
+      onValueChange,
+    });
+    editor.draft = 'for A';
+    let release = () => {};
+    editor.reading = new Promise<void>((resolve) => (release = resolve));
+    fireEvent.keyDown(input, { key: 'Enter' });
+    // The host switches to B: its callback, reply target and draft.
+    rerender(
+      <ChatComposer
+        editor="rich"
+        onSend={sendToB}
+        value="for B"
+        onValueChange={onValueChange}
+        triggers={[person]}
+        replyTo={{ id: 'b-1', senderName: 'Bo', content: 'In B' }}
+      />
+    );
+    // The editor reloads B's draft, so its read now returns it.
+    editor.draft = 'for B';
+    await act(async () => release());
+    await act(async () => {});
+
+    expect(sendToA).not.toHaveBeenCalled();
+    expect(sendToB).not.toHaveBeenCalled();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('still sends when the host only echoes the composer’s own edits', async () => {
+    function Host({ onSend }: { onSend: (m: unknown) => void }) {
+      const [value, setValue] = React.useState('');
+      return (
+        <ChatComposer
+          editor="rich"
+          onSend={onSend}
+          value={value}
+          onValueChange={setValue}
+        />
+      );
+    }
+    const onSend = vi.fn();
+    renderWithTheme(<Host onSend={onSend} />);
+    const input = await screen.findByRole('textbox', {
+      name: /message input/i,
+    });
+    act(() => (editor.props!.onChange as (v: string) => void)('hel'));
+    editor.draft = 'hello';
+    let release = () => {};
+    editor.reading = new Promise<void>((resolve) => (release = resolve));
+    fireEvent.keyDown(input, { key: 'Enter' });
+    act(() => (editor.props!.onChange as (v: string) => void)('hello'));
+    await act(async () => release());
+
+    await waitFor(() => expect(onSend).toHaveBeenCalledTimes(1));
+    expect(onSend.mock.calls[0][0]).toMatchObject({ content: 'hello' });
+  });
+
   describe('attachments changed while the draft is read', () => {
     function holdRead() {
       let release = () => {};

@@ -626,8 +626,20 @@ export const ChatComposer = React.forwardRef<
   // Input handling
   // --------------------------------------------------------------------
 
+  // The draft's generation: bumped when `value` is replaced from outside
+  // (a host swapping in another conversation's draft), not by the
+  // composer's own edits. A pending rich send belongs to one generation.
+  const emittedValueRef = React.useRef(value);
+  const draftGenerationRef = React.useRef(0);
+  const seenValueRef = React.useRef(value);
+  if (value !== seenValueRef.current) {
+    seenValueRef.current = value;
+    if (value !== emittedValueRef.current) draftGenerationRef.current += 1;
+  }
+
   const setValue = React.useCallback(
     (next: string) => {
+      emittedValueRef.current = next;
       if (!isControlled) setInternalValue(next);
       onValueChange?.(next);
     },
@@ -828,6 +840,7 @@ export const ChatComposer = React.forwardRef<
       return;
     }
     readingDraftRef.current = true;
+    const generation = draftGenerationRef.current;
     editorHandle
       .getContent()
       .then(
@@ -836,6 +849,10 @@ export const ChatComposer = React.forwardRef<
           // read-only, no `onSend`) or its editor unmounted: the draft stays
           // as it is. (The handle itself may be rebuilt on any re-render.)
           if (!readyToSendRef.current || !richEditorRef.current) return;
+          // Dropped too if the host replaced the draft meanwhile: the editor
+          // now holds that other draft, which is not this send's to send or
+          // clear.
+          if (draftGenerationRef.current !== generation) return;
           // Publish the read draft first, so clearing it below is a change
           // the editor sees even while `value` still lagged at ''.
           if (text !== value) flushSync(() => setValue(text));
