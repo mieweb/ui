@@ -136,10 +136,24 @@ export interface SuperChatProps {
    * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
    * `mentionOptions: []` to turn @mentions off. With your own `mentionOptions`,
    * `onMessageSent`'s `mentions` holds the ids of the options whose token
-   * (`value`, or the first word of `label`) appears in the text. `className`
-   * is merged.
+   * (`value`, or the first word of `label`) appears in the text; with
+   * `onMentionSearch`, the ids of the options picked from its results that
+   * are still in the text. `onMentionSelect` can confirm a pick first, and
+   * `resolveAttachments` decides what stays staged. `className` is merged.
    */
   composerProps?: SuperChatComposerProps;
+  /**
+   * Imperative access to the message box: `addFiles`, `appendText`,
+   * `setDraft` and `focus`, for host controls outside it (a page-level drop
+   * zone, dictation, a screenshot tool).
+   */
+  composerRef?: React.Ref<SuperChatComposerHandle>;
+  /**
+   * Called with the draft text whenever it changes, e.g. to hold off a page
+   * reload while something is unsent. Staged files are reported through
+   * `composerProps.onAttachmentsChange`.
+   */
+  onDraftChange?: (text: string) => void;
   /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
@@ -279,6 +293,22 @@ export type SuperChatComposerProps = Omit<
 >;
 
 /**
+ * Imperative access to the panel's message box (`composerRef`), for host
+ * controls outside it: a page-level drop zone, dictation, a screenshot tool,
+ * or a prompt the host fills in.
+ */
+export interface SuperChatComposerHandle {
+  /** Stage files, with the same checks as the picker. */
+  addFiles: (files: File[]) => void;
+  /** Append text to the draft, separated by a space. Never sends. */
+  appendText: (text: string) => void;
+  /** Replace the draft text. */
+  setDraft: (text: string) => void;
+  /** Focus the text input. */
+  focus: () => void;
+}
+
+/**
  * Phone-sized screens, upright (under 40rem wide) or sideways (under 30rem
  * tall): with the `overlay` media view open, the panel covers the screen
  * there, the media above the message box.
@@ -388,6 +418,8 @@ export function SuperChat({
   trustedContent,
   readOnly,
   composerProps,
+  composerRef: hostComposerRef,
+  onDraftChange,
   acceptedFileTypes,
   attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
@@ -1133,10 +1165,30 @@ export function SuperChat({
   }, []);
   const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
+  // Reports only real changes, not the initial empty draft.
+  const onDraftChangeRef = React.useRef(onDraftChange);
+  onDraftChangeRef.current = onDraftChange;
+  const reportedDraftRef = React.useRef(draft);
+  React.useEffect(() => {
+    if (reportedDraftRef.current === draft) return;
+    reportedDraftRef.current = draft;
+    onDraftChangeRef.current?.(draft);
+  }, [draft]);
+
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + attachments: each one's File, and
   // its base64 `data:` URL unless `attachmentDataUrls` is off).
   const composerRef = React.useRef<ChatComposerHandle>(null);
+  React.useImperativeHandle(
+    hostComposerRef,
+    () => ({
+      addFiles: (files) => composerRef.current?.addFiles(files),
+      appendText: appendDictation,
+      setDraft: handleDraftChange,
+      focus: () => composerRef.current?.focus(),
+    }),
+    [appendDictation, handleDraftChange]
+  );
   // The conversations a send is pending in: SuperChatInbox reuses this panel
   // (and its composer) for every conversation, and only those are busy. Each
   // send takes its own off when it settles, so sends can overlap.
@@ -1151,18 +1203,22 @@ export function SuperChat({
       setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
-        // A host's own `mentionOptions` decide what counts as a mention, by
-        // the token each one inserts; `[]` turns mentions off entirely.
+        // With `onMentionSearch` the composer reports the options picked from
+        // its results; otherwise a host's own `mentionOptions` decide what
+        // counts as a mention, by the token each one inserts (`[]` turns
+        // mentions off entirely), and by default the participants do.
         const hostOptions = composerProps?.mentionOptions;
-        const mentions = hostOptions
-          ? matchMentionTokens(
-              text,
-              hostOptions.map((o) => ({
-                id: o.id,
-                token: o.value ?? o.label.split(' ')[0],
-              }))
-            )
-          : detectMentions(text, conversation.participants);
+        const mentions = composerProps?.onMentionSearch
+          ? (message.mentions ?? []).map((option) => option.id)
+          : hostOptions
+            ? matchMentionTokens(
+                text,
+                hostOptions.map((o) => ({
+                  id: o.id,
+                  token: o.value ?? o.label.split(' ')[0],
+                }))
+              )
+            : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
           message.attachments ?? [],
           { dataUrls: attachmentDataUrls }
@@ -1204,6 +1260,7 @@ export function SuperChat({
       conversation,
       onMessageSent,
       composerProps?.mentionOptions,
+      composerProps?.onMentionSearch,
       readOnly,
       attachmentDataUrls,
     ]

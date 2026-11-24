@@ -35,7 +35,11 @@ export {
 
 // `MessageComposer` retired in 0.10.0 — superseded by ChatComposer
 // (see MIGRATION.md#chat-composer). The shared mention module stays.
-export { type MentionOption } from './useMentionAutocomplete';
+export {
+  type MentionOption,
+  type MentionSearchHandler,
+  type MentionSelectHandler,
+} from './useMentionAutocomplete';
 
 export {
   AttachmentPicker,

@@ -16,6 +16,7 @@ export {
   SuperChat,
   type SuperChatProps,
   type SuperChatComposerProps,
+  type SuperChatComposerHandle,
 } from './SuperChat';
 
 export {

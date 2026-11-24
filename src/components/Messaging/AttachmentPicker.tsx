@@ -100,6 +100,8 @@ export interface AttachmentPreviewItemProps {
   onRetry?: () => void;
   /** Disables the remove/retry actions. */
   disabled?: boolean;
+  /** Accessible name of the remove button. @default `Remove ${file.name}` */
+  removeLabel?: string;
   className?: string;
 }
 
@@ -111,6 +113,7 @@ function AttachmentPreviewItem({
   onRemove,
   onRetry,
   disabled = false,
+  removeLabel,
   className,
 }: AttachmentPreviewItemProps) {
   const { file, previewUrl, type, state, progress } = attachment;
@@ -265,7 +268,7 @@ function AttachmentPreviewItem({
           'transition-opacity',
           'disabled:cursor-not-allowed disabled:group-hover:opacity-0'
         )}
-        aria-label={`Remove ${file.name}`}
+        aria-label={removeLabel ?? `Remove ${file.name}`}
       >
         <svg
           aria-hidden="true"

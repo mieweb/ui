@@ -20,6 +20,8 @@ import {
   MentionMenu,
   useMentionAutocomplete,
   type MentionOption,
+  type MentionSearchHandler,
+  type MentionSelectHandler,
 } from '../Messaging/useMentionAutocomplete';
 import type { AttachmentType, NewMessage } from '../Messaging/types';
 import {
@@ -45,6 +47,20 @@ interface StagedAttachment {
   file: File;
   previewUrl?: string;
   type: AttachmentType;
+}
+
+/** Stage one file; images and videos get an object-URL preview to revoke later. */
+function stageFile(file: File): StagedAttachment {
+  const type = getFileType(file.type);
+  return {
+    id: generateAttachmentId(),
+    file,
+    type,
+    previewUrl:
+      type === 'image' || type === 'video'
+        ? URL.createObjectURL(file)
+        : undefined,
+  };
 }
 
 /** An entry in the composer's `+` menu. */
@@ -198,6 +214,12 @@ export interface ChatComposerProps {
    * disabled state when the composer is `disabled`.
    */
   leadingSlot?: React.ReactNode;
+  /**
+   * Custom node directly above the card, e.g. a toolbar of capture actions
+   * pinned to the input. Same `disabled` contract as `micSlot`: pass your own
+   * disabled state when the composer is `disabled`.
+   */
+  headerSlot?: React.ReactNode;
   /** Extra entries for the `+` menu, rendered after the built-in items. */
   addMenuItems?: ChatComposerMenuItem[];
   /**
@@ -219,6 +241,17 @@ export interface ChatComposerProps {
   maxFileSize?: number | ((file: File) => number | undefined);
   /** Maximum number of staged attachments. @default 10 */
   maxAttachments?: number;
+  /**
+   * Decide what stays staged when files arrive (picker, paste, drop or
+   * `addFiles`), e.g. "one kind of attachment at a time". Called with the new
+   * files that passed the type and size checks and the files already staged;
+   * return the full list to keep. Staged files left out are removed, new ones
+   * included are added, in the returned order. `maxAttachments` applies to
+   * the result. Omit to append every new file.
+   */
+  resolveAttachments?: (incoming: File[], staged: File[]) => File[];
+  /** Called with the staged files whenever they change. */
+  onAttachmentsChange?: (files: File[]) => void;
 
   /**
    * Candidates for `@mention` autocomplete. When provided (non-empty), typing
@@ -226,6 +259,21 @@ export interface ChatComposerProps {
    * Omit to disable mentions entirely (default).
    */
   mentionOptions?: MentionOption[];
+  /**
+   * Look up candidates for each `@query` instead of filtering
+   * `mentionOptions`, e.g. a server search that also finds people outside
+   * the conversation. Only the latest query's result is shown, and the query
+   * may hold an email address (`@someone@example.com`). The sent
+   * `NewMessage` then lists the picked options still in the text as
+   * `mentions`, since the host has no full list to detect them from.
+   */
+  onMentionSearch?: MentionSearchHandler;
+  /**
+   * Called when the user picks a mention, before it is inserted. Return or
+   * resolve `false` to cancel, e.g. when the host asks for a role or an
+   * invitation first and the user backs out.
+   */
+  onMentionSelect?: MentionSelectHandler;
 
   /**
    * Message being replied to. When set, a dismissible preview row renders at
@@ -325,6 +373,8 @@ export interface ChatComposerProps {
   replyingToLabel?: string;
   /** Accessible label for the reply preview's cancel button. @default 'Cancel reply' */
   cancelReplyLabel?: string;
+  /** Accessible label for a staged attachment's remove button. @default (name) => `Remove ${name}` */
+  removeAttachmentLabel?: (fileName: string) => string;
 
   className?: string;
 }
@@ -416,13 +466,18 @@ export const ChatComposer = React.forwardRef<
     maxHeight = MAX_INPUT_HEIGHT,
     textareaProps,
     leadingSlot,
+    headerSlot,
     addMenuItems,
     sendOptions,
     allowAttachments = true,
     acceptedFileTypes,
     maxFileSize,
     maxAttachments = 10,
+    resolveAttachments,
+    onAttachmentsChange,
     mentionOptions,
+    onMentionSearch,
+    onMentionSelect,
     replyTo = null,
     onCancelReply,
     showMic = false,
@@ -456,6 +511,7 @@ export const ChatComposer = React.forwardRef<
     dropFilesLabel = 'Drop files here',
     replyingToLabel = 'Replying to',
     cancelReplyLabel = 'Cancel reply',
+    removeAttachmentLabel,
     className,
   },
   ref
@@ -568,10 +624,32 @@ export const ChatComposer = React.forwardRef<
     [isControlled, onValueChange]
   );
 
-  // @mention autocomplete (opt-in via `mentionOptions`) — shared with
-  // MessageComposer so both composers behave identically.
+  // Options picked through `onMentionSearch`, by id: the host has no full
+  // list to detect mentions from, so the send reports the ones still typed.
+  const pickedMentionsRef = React.useRef(new Map<string, MentionOption>());
+  const handleMentionSelect = React.useCallback<MentionSelectHandler>(
+    (option) => {
+      const remember = (confirmed: boolean | void) => {
+        if (confirmed !== false && onMentionSearch) {
+          pickedMentionsRef.current.set(option.id, option);
+        }
+        return confirmed;
+      };
+      const decision = onMentionSelect?.(option);
+      return decision instanceof Promise
+        ? decision.then(remember)
+        : remember(decision);
+    },
+    [onMentionSearch, onMentionSelect]
+  );
+
+  // @mention autocomplete (opt-in via `mentionOptions` or `onMentionSearch`)
+  // — shared with MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
     options: mentionOptions,
+    search: onMentionSearch,
+    onSelect:
+      onMentionSearch || onMentionSelect ? handleMentionSelect : undefined,
     value,
     setValue,
     textareaRef,
@@ -619,6 +697,34 @@ export const ChatComposer = React.forwardRef<
   // Attachments
   // --------------------------------------------------------------------
 
+  // Type and size checks for one file, reporting a refusal through onError.
+  const acceptsFile = React.useCallback(
+    (file: File) => {
+      const typeCheck = validateFile(file, acceptedFileTypes, undefined);
+      if (!typeCheck.valid) {
+        onError?.(`${file.name}: ${typeCheck.error}`, {
+          reason: 'file-type',
+          file,
+        });
+        return false;
+      }
+      const sizeCheck = validateFile(
+        file,
+        undefined,
+        typeof maxFileSize === 'function' ? maxFileSize(file) : maxFileSize
+      );
+      if (!sizeCheck.valid) {
+        onError?.(`${file.name}: ${sizeCheck.error}`, {
+          reason: 'file-size',
+          file,
+        });
+        return false;
+      }
+      return true;
+    },
+    [acceptedFileTypes, maxFileSize, onError]
+  );
+
   const addFiles = React.useCallback(
     (files: File[]) => {
       // No `allowAttachments` gate here: every user-facing entry point
@@ -631,44 +737,48 @@ export const ChatComposer = React.forwardRef<
       const limitMessage =
         attachmentLimitLabel ??
         `Attachment limit reached (max ${maxAttachments})`;
+
+      if (resolveAttachments) {
+        const accepted = files.filter(acceptsFile);
+        if (accepted.length === 0) return;
+        const current = attachmentsRef.current;
+        let next = Array.from(
+          new Set(
+            resolveAttachments(
+              accepted,
+              current.map((attachment) => attachment.file)
+            )
+          )
+        );
+        if (next.length > maxAttachments) {
+          onError?.(limitMessage, { reason: 'attachment-limit' });
+          next = next.slice(0, maxAttachments);
+        }
+        const stagedByFile = new Map(
+          current.map((attachment) => [attachment.file, attachment])
+        );
+        const resolved = next.map(
+          (file) => stagedByFile.get(file) ?? stageFile(file)
+        );
+        for (const attachment of current) {
+          if (!next.includes(attachment.file) && attachment.previewUrl) {
+            URL.revokeObjectURL(attachment.previewUrl);
+          }
+        }
+        attachmentsRef.current = resolved;
+        setAttachments(resolved);
+        return;
+      }
+
       const room = maxAttachments - attachmentsRef.current.length;
       if (files.length > room) {
         onError?.(limitMessage, { reason: 'attachment-limit' });
         if (room <= 0) return;
       }
-      const staged: StagedAttachment[] = [];
-      for (const file of files.slice(0, Math.max(room, 0))) {
-        const typeCheck = validateFile(file, acceptedFileTypes, undefined);
-        if (!typeCheck.valid) {
-          onError?.(`${file.name}: ${typeCheck.error}`, {
-            reason: 'file-type',
-            file,
-          });
-          continue;
-        }
-        const sizeCheck = validateFile(
-          file,
-          undefined,
-          typeof maxFileSize === 'function' ? maxFileSize(file) : maxFileSize
-        );
-        if (!sizeCheck.valid) {
-          onError?.(`${file.name}: ${sizeCheck.error}`, {
-            reason: 'file-size',
-            file,
-          });
-          continue;
-        }
-        const type = getFileType(file.type);
-        staged.push({
-          id: generateAttachmentId(),
-          file,
-          type,
-          previewUrl:
-            type === 'image' || type === 'video'
-              ? URL.createObjectURL(file)
-              : undefined,
-        });
-      }
+      const staged = files
+        .slice(0, Math.max(room, 0))
+        .filter(acceptsFile)
+        .map(stageFile);
       if (staged.length > 0) {
         // Reserve slots synchronously: a second addFiles call in the same
         // React batch reads attachmentsRef before re-render, so without this
@@ -679,12 +789,24 @@ export const ChatComposer = React.forwardRef<
     },
     [
       maxAttachments,
-      acceptedFileTypes,
-      maxFileSize,
+      acceptsFile,
+      resolveAttachments,
       onError,
       attachmentLimitLabel,
     ]
   );
+
+  // Skips the initial empty list: only real changes are reported.
+  const onAttachmentsChangeRef = React.useRef(onAttachmentsChange);
+  onAttachmentsChangeRef.current = onAttachmentsChange;
+  const reportedAttachmentsRef = React.useRef(attachments);
+  React.useEffect(() => {
+    if (reportedAttachmentsRef.current === attachments) return;
+    reportedAttachmentsRef.current = attachments;
+    onAttachmentsChangeRef.current?.(
+      attachments.map((attachment) => attachment.file)
+    );
+  }, [attachments]);
 
   const removeAttachment = React.useCallback((id: string) => {
     // Same discipline as addFiles: revoke and update the ref synchronously,
@@ -743,11 +865,19 @@ export const ChatComposer = React.forwardRef<
 
   const handleSend = (sendOption?: string) => {
     if (!canSend || !onSend) return;
+    const content = value.trim();
+    const mentions = onMentionSearch
+      ? Array.from(pickedMentionsRef.current.values()).filter((option) =>
+          content.includes(`@${option.value ?? option.label.split(' ')[0]}`)
+        )
+      : [];
+    pickedMentionsRef.current.clear();
     const message: NewMessage = {
-      content: value.trim(),
+      content,
       attachments: attachments.map((attachment) => attachment.file),
       // Only add the key when replying — hosts may key-check the payload.
       ...(replyTo ? { replyToId: replyTo.id } : {}),
+      ...(mentions.length > 0 ? { mentions } : {}),
     };
     for (const attachment of attachments) {
       if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
@@ -913,6 +1043,7 @@ export const ChatComposer = React.forwardRef<
               key={attachment.id}
               attachment={{ ...attachment, state: 'pending' }}
               onRemove={() => removeAttachment(attachment.id)}
+              removeLabel={removeAttachmentLabel?.(attachment.file.name)}
               disabled={disabled}
             />
           ))}
@@ -1280,6 +1411,9 @@ export const ChatComposer = React.forwardRef<
         className
       )}
     >
+      {headerSlot != null && (
+        <div data-slot="chat-composer-header-slot">{headerSlot}</div>
+      )}
       {allowAttachments ? (
         <DragDropZone
           onFilesDropped={addFiles}

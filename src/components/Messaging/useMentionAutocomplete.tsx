@@ -33,22 +33,49 @@ export interface MentionOption {
 /**
  * Find the active `@query` immediately before the caret, if any. The `@` must
  * start the string or follow whitespace, and the token must contain no spaces
- * or further `@`.
+ * or further `@` — unless `allowEmail` is set, which lets the query hold one
+ * more `@` so an email address can be typed (`@someone@example.com`).
  */
 export function activeMentionQuery(
   value: string,
-  caret: number
+  caret: number,
+  { allowEmail = false }: { allowEmail?: boolean } = {}
 ): { query: string; start: number } | null {
   const upToCaret = value.slice(0, caret);
-  const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
+  const match = (
+    allowEmail ? /(^|\s)@([^\s@]*(?:@[^\s@]*)?)$/ : /(^|\s)@([^\s@]*)$/
+  ).exec(upToCaret);
   if (!match) return null;
   const query = match[2];
   return { query, start: caret - query.length - 1 };
 }
 
+/**
+ * Called when the user picks a mention, before it is inserted. Return (or
+ * resolve) `false` to leave the text as it was, e.g. when a confirmation the
+ * host opens is cancelled.
+ */
+export type MentionSelectHandler = (
+  option: MentionOption
+) => boolean | void | Promise<boolean | void>;
+
+/** Supplies the candidates for an `@query`, e.g. from a server search. */
+export type MentionSearchHandler = (
+  query: string
+) => MentionOption[] | Promise<MentionOption[]>;
+
 export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
   options?: MentionOption[];
+  /**
+   * Candidates for each `@query`, used instead of filtering `options`. Only
+   * the latest query's result is shown, so a slow earlier response never
+   * replaces a newer one. The query may hold one more `@`, so a search can
+   * match an email address (`@someone@example.com`).
+   */
+  search?: MentionSearchHandler;
+  /** Runs before a picked option is inserted; `false` cancels the insert. */
+  onSelect?: MentionSelectHandler;
   /** Current composer text. */
   value: string;
   /** Write the composer text (host handles controlled/uncontrolled). */
@@ -58,7 +85,7 @@ export interface UseMentionAutocompleteOptions {
 }
 
 export interface MentionAutocomplete {
-  /** Whether mention support is active (options provided and non-empty). */
+  /** Whether mention support is active (non-empty `options`, or a `search`). */
   enabled: boolean;
   /** Whether the suggestion menu is currently open. */
   menuOpen: boolean;
@@ -97,11 +124,13 @@ export interface MentionAutocomplete {
  */
 export function useMentionAutocomplete({
   options,
+  search,
+  onSelect,
   value,
   setValue,
   textareaRef,
 }: UseMentionAutocompleteOptions): MentionAutocomplete {
-  const enabled = !!options && options.length > 0;
+  const enabled = (!!options && options.length > 0) || !!search;
   const [mention, setMention] = React.useState<{
     query: string;
     start: number;
@@ -113,11 +142,36 @@ export function useMentionAutocomplete({
     [listId]
   );
 
+  // Hosts usually pass `search` inline, so it is read through a ref: an
+  // identity dependency would start a new search on every render.
+  const searchRef = React.useRef(search);
+  searchRef.current = search;
+  const hasSearch = !!search;
+  const query = mention?.query;
+  const [searchResults, setSearchResults] = React.useState<MentionOption[]>([]);
+  const searchRequestRef = React.useRef(0);
+  React.useEffect(() => {
+    const request = ++searchRequestRef.current;
+    const run = searchRef.current;
+    if (!hasSearch || !run || query === undefined) {
+      setSearchResults([]);
+      return;
+    }
+    const latest = (results: MentionOption[]) => {
+      if (request === searchRequestRef.current) setSearchResults(results);
+    };
+    Promise.resolve()
+      .then(() => run(query))
+      .then(latest, () => latest([]));
+  }, [hasSearch, query]);
+
   const suggestions = React.useMemo(() => {
-    if (!mention || !options) return [];
+    if (!mention) return [];
+    if (hasSearch) return searchResults;
+    if (!options) return [];
     const q = mention.query.toLowerCase();
     return options.filter((o) => o.label.toLowerCase().includes(q));
-  }, [mention, options]);
+  }, [mention, options, hasSearch, searchResults]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -146,20 +200,34 @@ export function useMentionAutocomplete({
   const sync = React.useCallback(
     (nextValue: string, caret: number) => {
       if (!enabled) return;
-      setMention(activeMentionQuery(nextValue, caret));
+      // A host search can look people up by email, so let the query hold one.
+      setMention(
+        activeMentionQuery(nextValue, caret, { allowEmail: hasSearch })
+      );
       setHighlight(0);
     },
-    [enabled]
+    [enabled, hasSearch]
   );
 
-  const insert = (option: MentionOption) => {
-    if (!mention) return;
+  // Read at insert time: a confirmation can resolve after later renders.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  const insertAt = (
+    option: MentionOption,
+    token: { query: string; start: number }
+  ) => {
+    const current = valueRef.current;
+    const typed = `@${token.query}`;
+    // The text changed while a confirmation was open: the token is gone.
+    if (current.slice(token.start, token.start + typed.length) !== typed) {
+      return;
+    }
     const insertValue = option.value ?? option.label.split(' ')[0];
-    const before = value.slice(0, mention.start);
-    const after = value.slice(mention.start + 1 + mention.query.length);
+    const before = current.slice(0, token.start);
+    const after = current.slice(token.start + typed.length);
     const insertText = `@${insertValue} `;
     setValue(before + insertText + after);
-    setMention(null);
     // Restore caret just after the inserted mention.
     const caret = before.length + insertText.length;
     requestAnimationFrame(() => {
@@ -169,6 +237,24 @@ export function useMentionAutocomplete({
         el.setSelectionRange(caret, caret);
       }
     });
+  };
+
+  const insert = (option: MentionOption) => {
+    if (!mention) return;
+    const token = mention;
+    setMention(null);
+    const decision = onSelect?.(option);
+    if (decision === false) return;
+    if (decision instanceof Promise) {
+      decision.then(
+        (confirmed) => {
+          if (confirmed !== false) insertAt(option, token);
+        },
+        () => {}
+      );
+      return;
+    }
+    insertAt(option, token);
   };
 
   const handleKeyDown = (

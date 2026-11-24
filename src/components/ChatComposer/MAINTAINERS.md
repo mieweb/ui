@@ -15,6 +15,8 @@ must be revoked exactly once. The three revoke paths are:
 2. `handleSend` — draft is sent, previews are no longer needed.
 3. Unmount cleanup effect — reads `attachmentsRef.current` (a ref mirror of
    state) because the effect runs once.
+4. `addFiles` with `resolveAttachments` — staged files the host's resolver
+   leaves out of its result.
 
 If you add a new path that drops attachments, revoke their `previewUrl`s.
 
@@ -55,9 +57,18 @@ its own open state; change the look there, not per selector. It is internal
 'send-failed'`) is the stable machine-readable key hosts localize on. Don't
 change reason strings without a major-version note.
 
+## Host attachment rules
+
+`resolveAttachments(incoming, staged)` lets a host decide what stays staged
+(e.g. one kind of attachment at a time). Type and size checks run first, so
+it only sees files that passed them; `maxAttachments` applies to its result.
+Staged entries are matched by `File` identity, so kept files keep their id
+and preview URL. Without it, `addFiles` appends as before.
+
 ## Shared mention module
 
-`mentionOptions` delegates to `useMentionAutocomplete` / `MentionMenu` in
+`mentionOptions` / `onMentionSearch` / `onMentionSelect` delegate to
+`useMentionAutocomplete` / `MentionMenu` in
 `../Messaging/useMentionAutocomplete.tsx` — the module extracted from the
 retired MessageComposer; its invariants live in
 [Messaging/MAINTAINERS.md](../Messaging/MAINTAINERS.md). ChatComposer-specific
@@ -118,6 +129,9 @@ auto-clear-on-send; hosts own the state.
   it inherits the cell's responsive row placement; the cell renders even when
   the `+` menu is hidden. Same `h-8` wrapper and `disabled` contract as
   `micSlot` (`data-slot="chat-composer-leading-slot"`).
+- `headerSlot` — host node directly above the card (e.g. a docked toolbar of
+  capture actions), in `data-slot="chat-composer-header-slot"`. No sizing
+  wrapper; same `disabled` contract as `micSlot`.
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`

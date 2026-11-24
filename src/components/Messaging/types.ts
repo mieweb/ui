@@ -6,6 +6,8 @@
  * SMS, MMS, and enterprise messaging.
  */
 
+import type { MentionOption } from './useMentionAutocomplete';
+
 // ============================================================================
 // Message Status Types
 // ============================================================================
@@ -249,6 +251,11 @@ export interface NewMessage {
   attachments?: File[];
   /** Reply-to message ID */
   replyToId?: string;
+  /**
+   * Mentions picked from a composer's `onMentionSearch` results that are
+   * still in `content`. Absent when there are none.
+   */
+  mentions?: MentionOption[];
   /** Custom metadata */
   metadata?: Record<string, unknown>;
 }
