@@ -10,3 +10,4 @@ export {
 } from './RichEditor';
 
 export { CodeEditor, type CodeEditorProps } from './CodeEditor';
+export { createReferencesKit } from './editorReferences';
