@@ -18,7 +18,8 @@ import { Animated, AnimatedPresence } from '../../motion';
 import { SearchIcon } from '../Icons';
 import { Input } from '../Input';
 import { sidebarItem, lastActivityOf, lastMessageByTime } from './parts';
-import type { SuperChatConversation } from './types';
+import { messagePreview, previewOfAttachments } from './media';
+import type { SuperChatConversation, SuperChatMediaLabels } from './types';
 
 // ============================================================================
 // SuperChatConversations (conversation list)
@@ -59,6 +60,13 @@ export interface SuperChatConversationsProps {
   search?: SuperChatConversationsSearch;
   /** Additional class name. */
   className?: string;
+  /**
+   * Content rendered after the last conversation, inside the scrolling list.
+   * Hosts use it for "load older" controls or an end-of-list marker.
+   */
+  listFooter?: React.ReactNode;
+  /** `attachmentsPreview` words a preview of a last message with no text. */
+  mediaLabels?: Partial<SuperChatMediaLabels>;
 
   // --- callbacks ---
   onConversationOpened?: (conversation: SuperChatConversation) => void;
@@ -76,6 +84,8 @@ export function SuperChatConversations({
   listHeader,
   search,
   className,
+  listFooter,
+  mediaLabels,
   onConversationOpened,
   onNewConversation,
 }: SuperChatConversationsProps) {
@@ -194,6 +204,12 @@ export function SuperChatConversations({
       >
         {sortedConversations.map((c) => {
           const last = lastMessageByTime(c.thread);
+          const preview = last
+            ? messagePreview(
+                last,
+                mediaLabels?.attachmentsPreview ?? previewOfAttachments
+              )
+            : '';
           const isActive = c.id === activeId;
           return (
             <div key={c.id} role="listitem">
@@ -205,9 +221,9 @@ export function SuperChatConversations({
               >
                 <span className="flex-1 truncate">
                   <span className="block truncate font-medium">{c.title}</span>
-                  {last?.text && (
+                  {preview && (
                     <span className="block truncate text-xs text-neutral-600 dark:text-neutral-400">
-                      {last.text}
+                      {preview}
                     </span>
                   )}
                 </span>
@@ -230,6 +246,11 @@ export function SuperChatConversations({
             </div>
           );
         })}
+        {listFooter && (
+          <div role="listitem" data-slot="superchat-conversation-list-footer">
+            {listFooter}
+          </div>
+        )}
       </div>
     </aside>
   );

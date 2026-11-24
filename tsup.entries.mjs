@@ -80,6 +80,7 @@ export const entries = {
   'components/ReadingProgressBar/index':
     'src/components/ReadingProgressBar/index.ts',
   'components/RecordButton/index': 'src/components/RecordButton/index.ts',
+  'components/ReferenceChip/index': 'src/components/ReferenceChip/index.ts',
   'components/DictationButton/index': 'src/components/DictationButton/index.ts',
   'components/ReorderableList/index': 'src/components/ReorderableList/index.ts',
   'components/RichTextEditor/index': 'src/components/RichTextEditor/index.ts',

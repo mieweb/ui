@@ -23,6 +23,7 @@ A **compact one-of-N picker for toolbars**: a single rounded pill reading \`"Lab
 ### Don't use it when
 
 - The choice is a form field with validation — \`Select\` (label, \`error\`, \`helperText\`, \`required\`, \`multiple\`, search).
+- Each option needs a sentence of explanation before the user picks it — e.g. a "Group by" choice whose options each say what they group. PillSelect options are label-only; use \`Select\` with option \`description\`s, which wrap under each label in the open list while the trigger shows the label alone.
 - Options should all be visible to compare — \`Radio\` / \`RadioGroup\`.
 - Several options can be on at once — \`Checkbox\`, or \`Dropdown multiSelect\`.
 - Independent pressed/unpressed toolbar buttons — \`Toggle\`; navigating between views with their own content — \`Tabs\`.
@@ -67,7 +68,7 @@ const [range, setRange] = useState<'7d' | '30d' | '90d'>('30d');
         {
           type: 'alternative to',
           target: 'choice-inputs-select',
-          why: 'PillSelect is a compact toolbar pill for one-of-N view choices; Select is a form field with label/error.',
+          why: 'PillSelect is a compact toolbar pill for one-of-N view choices whose labels speak for themselves; Select is a form field with label/error, and its options can carry descriptions for choices that need explaining.',
         },
         {
           type: 'alternative to',

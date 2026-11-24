@@ -772,6 +772,16 @@ describe('RichEditor', () => {
     expect(names).toContain('bold');
   });
 
+  // The textbox-surface attributes from the most recent `setProps` call.
+  const lastSurfaceAttributes = () =>
+    setProps.mock.calls
+      .map(
+        ([props]) =>
+          (props as { attributes?: Record<string, string> }).attributes
+      )
+      .filter(Boolean)
+      .pop();
+
   it('disabled makes the surface read-only and labelled', async () => {
     const { container } = renderWithTheme(
       <RichEditor disabled id="note-body" aria-labelledby="note-label" />
@@ -801,14 +811,7 @@ describe('RichEditor', () => {
     expect(container.querySelector('#note-body')).not.toHaveAttribute(
       'aria-readonly'
     );
-    const attributes = setProps.mock.calls
-      .map(
-        ([props]) =>
-          (props as { attributes?: Record<string, string> }).attributes
-      )
-      .filter(Boolean)
-      .pop();
-    expect(attributes).toMatchObject({
+    expect(lastSurfaceAttributes()).toMatchObject({
       role: 'textbox',
       'aria-readonly': 'true',
     });
@@ -821,6 +824,35 @@ describe('RichEditor', () => {
     // it back with an owned tabindex (disabled surfaces must not).
     expect(editorMock.view.dom.getAttribute('tabindex')).toBe('0');
   });
+
+  it.each([
+    { label: 'aria-label', props: { 'aria-label': 'Note body' } },
+    { label: 'aria-labelledby', props: { 'aria-labelledby': 'note-label' } },
+  ])(
+    'restates kb-editor in the surface attributes set for $label',
+    async ({ props }) => {
+      // `setProps({ attributes })` REPLACES the attributes createView
+      // installed — including Kerebron's own `class: 'kb-editor'`, which every
+      // kerebron.css rule is scoped to. Dropping it leaves headings/lists
+      // rendering as plain text (mieweb/ui#796), so the class must survive
+      // both the initial labelling pass and later read-state updates.
+      const { rerender } = renderWithTheme(<RichEditor {...props} />);
+      await waitFor(() => expect(coreEditorCreate).toHaveBeenCalled());
+      expect(lastSurfaceAttributes()).toMatchObject({
+        class: 'kb-editor',
+        ...props,
+      });
+
+      setProps.mockClear();
+      rerender(<RichEditor {...props} readOnly />);
+      await waitFor(() => expect(setProps).toHaveBeenCalled());
+      expect(lastSurfaceAttributes()).toMatchObject({
+        class: 'kb-editor',
+        'aria-readonly': 'true',
+        ...props,
+      });
+    }
+  );
 
   it('follows dark mode changes without remounting the editor', async () => {
     const root = document.documentElement;

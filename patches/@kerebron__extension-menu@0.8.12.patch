@@ -272,3 +272,44 @@ index 85b1f4762033ee4dc68d1c9ceaa69dbd55f746de..9abcc3ba868130cd89c6653b942a6c5d
          }));
      }
      // Group 6: Insert tools (Image, Lists, HR, Table, Type)
+diff --git a/esm/menu.js b/esm/menu.js
+index 3b88b30606744997cbb12f21265d4182e0fdaac6..361694e0dab793f8e69e41fb811eccce16ed52e6 100644
+--- a/esm/menu.js
++++ b/esm/menu.js
+@@ -55,21 +55,33 @@ export class MenuItem {
+                 spec.run(view.state, view.dispatch);
+             }
+         });
++        // mieweb/ui patch: composite command probes (e.g. toggleList) can throw
++        // TransformError mid-document-load instead of returning false. Treat a
++        // throwing probe as "not applicable" so menu updates never abort
++        // transactions or document loads.
++        const safeProbe = (probe, state) => {
++            try {
++                return probe(state);
++            }
++            catch {
++                return false;
++            }
++        };
+         const update = (state) => {
+             if (spec.select) {
+-                let selected = spec.select(state);
++                let selected = safeProbe(spec.select, state);
+                 dom.style.display = selected ? '' : 'none';
+                 if (!selected)
+                     return false;
+             }
+             let enabled = true;
+             if (spec.enable) {
+-                enabled = spec.enable(state) || false;
++                enabled = safeProbe(spec.enable, state) || false;
+                 setClass(dom, this.CSS_PREFIX + '--disabled', !enabled);
+                 dom.setAttribute('aria-disabled', (!enabled).toString());
+             }
+             if (spec.active) {
+-                let active = enabled && spec.active(state) || false;
++                let active = enabled && safeProbe(spec.active, state) || false;
+                 setClass(dom, this.CSS_PREFIX + '--active', active);
+                 dom.setAttribute('aria-pressed', active.toString());
+             }
