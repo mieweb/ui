@@ -8,7 +8,8 @@
     "./preview.tsx",
     "./mobile-preview.ts",
     "./MobilePreview.tsx",
-    "./mobile-preview.test.ts"
+    "./mobile-preview.test.ts",
+    "./loco/*.ts"
   ],
   "exclude": []
 }
