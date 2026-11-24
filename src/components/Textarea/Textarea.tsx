@@ -3,18 +3,11 @@ import { cn } from '../../utils/cn';
 import { RequiredMark } from '../Input';
 import { TextAreaPlain } from '../TextAreaPlain';
 import type { TextAreaPlainProps } from '../TextAreaPlain';
-
-/**
- * The Kerebron surface, loaded the first time a rich `Textarea` renders. It
- * brings the editor (ProseMirror, the Kerebron kits): imported statically, it
- * would ride into every app bundle that imports anything from `@mieweb/ui`,
- * including apps that only ever render `richText={false}` or no Textarea.
- */
-const TextAreaRichKerebron = React.lazy(() =>
-  import('../TextAreaRich/TextAreaRichKerebron').then((module) => ({
-    default: module.TextAreaRichKerebron,
-  }))
-);
+// Lazy: keeps the Kerebron editor out of the main entry's startup code.
+import {
+  TextAreaRichKerebronLazy as TextAreaRichKerebron,
+  TextAreaRichLoadingFrame,
+} from '../TextAreaRich/TextAreaRichKerebronLazy';
 
 /**
  * `Textarea` keeps `TextAreaPlain`'s prop surface so existing call sites
@@ -572,16 +565,10 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
         >
           <React.Suspense
             fallback={
-              // The surface's frame, as tall as its empty editor will be, so
-              // nothing below the field moves when the editor arrives. The
-              // height sits inside the frame, its borders outside it.
-              <div
-                data-slot="textarea-rich-loading"
-                aria-hidden="true"
-                className={cn('border-input rounded-lg border', frameClassName)}
-              >
-                <div style={{ minHeight: emptyEditorHeight }} />
-              </div>
+              <TextAreaRichLoadingFrame
+                className={frameClassName}
+                minHeight={emptyEditorHeight}
+              />
             }
           >
             <TextAreaRichKerebron

@@ -31,11 +31,11 @@ export const renderWithDarkTheme = (
 };
 
 /**
- * Loads the rich `Textarea`'s surface, which `Textarea` imports lazily (it
- * brings the Kerebron editor). React keeps a lazy component once it has
- * loaded, so after this every rich `Textarea` in the file renders its surface
- * synchronously. Call it from `beforeAll` in suites that query the field
- * right after rendering.
+ * Loads the Kerebron surface, which `Textarea` and `EmailEditor`'s text block
+ * import lazily (TextAreaRich/TextAreaRichKerebronLazy). React keeps a lazy
+ * component once it has loaded, so after this every rich field in the file
+ * renders its surface synchronously. Call it from `beforeAll` in suites that
+ * query the field right after rendering.
  */
 export async function loadTextareaSurface(): Promise<void> {
   const { Textarea } = await import('../components/Textarea');
