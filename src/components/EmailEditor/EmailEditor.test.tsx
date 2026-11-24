@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen } from '@testing-library/react';
 
-import { renderWithTheme } from '../../test/test-utils';
+import { loadTextareaSurface, renderWithTheme } from '../../test/test-utils';
 import { EmailEditor } from './EmailEditor';
 import {
   createEmailBlock,
   type EmailContentTree,
   type EmailDesignSettings,
 } from './types';
+
+beforeAll(loadTextareaSurface);
 
 const heading = { ...createEmailBlock('heading'), text: 'Welcome' };
 const text = createEmailBlock('text');
