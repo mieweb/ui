@@ -998,9 +998,9 @@ describe('SuperChat media view', () => {
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.type(editor, 'Gone');
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
-    // Enter with nothing left closes the editor as Cancel would.
+    // Ctrl+Enter with nothing left closes the editor as Cancel would.
     await user.clear(editor);
-    await user.type(editor, '{Enter}');
+    await user.keyboard('{Control>}{Enter}{/Control}');
     expect(onMessageEdited).not.toHaveBeenCalled();
     expect(
       screen.getByRole('button', { name: 'Open in media feed, First image' })
