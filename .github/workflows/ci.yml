@@ -141,11 +141,9 @@ jobs:
       - name: Build eSheet submodule
         run: pnpm build:esheet
 
-      - name: Build package
-        run: pnpm build
-        env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
-
+      # No `pnpm build` here: Storybook compiles the components from src/
+      # (.storybook/main.ts aliases @mieweb/ui/* there) and the tests only
+      # load storybook-static/. Build Test covers the package build.
       - name: Install Playwright browsers
         run: pnpm playwright:install
 
@@ -242,11 +240,9 @@ jobs:
       - name: Build eSheet submodule
         run: pnpm build:esheet
 
-      - name: Build package
-        run: pnpm build
-        env:
-          NODE_OPTIONS: '--max-old-space-size=8192'
-
+      # No `pnpm build` here: Storybook compiles the components from src/
+      # (.storybook/main.ts aliases @mieweb/ui/* there) and the tests only
+      # load storybook-static/. Build Test covers the package build.
       - name: Install Playwright browsers
         run: pnpm playwright:install
 
