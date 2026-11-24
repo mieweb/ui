@@ -213,12 +213,19 @@ jobs:
             dist/
             storybook-static/
 
-  accessibility-tests:
-    name: Accessibility Tests
+  # The suite (~280 story files, ~12 minutes in one job) is split across three
+  # runners. Each keeps test:storybook's --maxWorkers 2, which stabilised the
+  # full run; sharding adds machines instead of crowding one.
+  accessibility-tests-shard:
+    name: Accessibility Tests (${{ matrix.shard }}/3)
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     # Pinned: see visual-tests — Playwright 1.58 cannot install browsers on
     # the Ubuntu 26.04 image ubuntu-latest now resolves to.
     runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -260,16 +267,27 @@ jobs:
         run: pnpm exec wait-on http://localhost:6006
 
       - name: Run Storybook tests
-        run: pnpm test:storybook
+        run: pnpm test:storybook --shard=${{ matrix.shard }}/3
 
       - name: Upload accessibility report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: accessibility-report
+          name: accessibility-report-${{ matrix.shard }}
           path: |
             test-results/
             coverage/
+
+  # "Accessibility Tests" is a required status check on main. This job keeps
+  # that name and passes only when every shard passed.
+  accessibility-tests:
+    name: Accessibility Tests
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    needs: accessibility-tests-shard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all shards passed
+        run: test "${{ needs.accessibility-tests-shard.result }}" = success
 
   security-audit:
     name: Security Audit
