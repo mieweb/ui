@@ -258,9 +258,7 @@ describe('MCPToolCallGroup', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
-    expect(
-      screen.getByRole('button', { name: 'Show result' })
-    ).toBeInTheDocument();
+    expect(screen.getByText('3 of 10 rows written')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show error' }));
     expect(screen.getAllByText('Disk quota exceeded')).toHaveLength(2);
   });
@@ -453,9 +451,24 @@ describe('MCPToolCallGroup', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Show result' }));
     expect(screen.getByText(/"path": "\/"/)).toHaveAttribute('dir', 'ltr');
     expect(screen.getByText('done')).toHaveAttribute('dir', 'auto');
+  });
+
+  it('puts long result text behind a disclosure', () => {
+    const long = 'x'.repeat(400);
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', { result: { type: 'text', data: long } }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(screen.queryByText(long)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show result' }));
+    expect(screen.getByText(long)).toBeInTheDocument();
   });
 
   it('renders a lone call as a bare row with no header', () => {
@@ -481,11 +494,27 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).queryByText('tool_a')).toBeNull();
 
     fireEvent.click(within(row).getByRole('button', { name: /Read notes.md/ }));
+    // Short names fit the row, so the details do not repeat them.
     expect(
       row.querySelector('[data-slot="ai-tool-call-display-name"]')
-    ).toHaveTextContent('Read notes.md');
+    ).toBeNull();
     expect(within(row).getByText('Tool ID')).toBeInTheDocument();
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
+  });
+
+  it('repeats a long display name in full in the details', () => {
+    const name = 'Read src/components/AI/MCPToolCallGroup.test.tsx in full';
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'success', { displayName: name })]}
+      />
+    );
+
+    const [row] = rows();
+    fireEvent.click(within(row).getByRole('button', { name: /Read src/ }));
+    expect(
+      row.querySelector('[data-slot="ai-tool-call-display-name"]')
+    ).toHaveTextContent(name);
   });
 
   it('shows the tool id in the row when there is no display name', () => {

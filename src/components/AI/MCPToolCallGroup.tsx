@@ -84,6 +84,8 @@ export interface MCPToolCallGroupLabels {
   showRawArguments?: string;
   /** Provider-declared behavior hints, shown as explanation only. */
   hints?: Partial<Record<keyof ToolBehaviorHints, string>>;
+  /** Introduces the hints as the provider's claims, e.g. "Provider notes:". */
+  hintsLead?: string;
   /** Strings for structured, media and embedded results. */
   result?: Partial<ToolCallResultLabels>;
 }
@@ -147,8 +149,14 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   arguments: 'Inputs',
   showRawArguments: 'Show raw inputs',
   hints: defaultToolHintLabels,
+  hintsLead: 'Provider notes:',
   result: defaultToolCallResultLabels,
 };
+
+/** Display names longer than this may be truncated in the row, so details repeat them. */
+const LONG_NAME_CHARS = 40;
+/** Result text up to this length is shown directly; longer text sits behind a disclosure. */
+const INLINE_RESULT_CHARS = 280;
 
 function resolveLabels(
   overrides: MCPToolCallGroupLabelOverrides | undefined
@@ -469,13 +477,15 @@ function ToolCallRow({
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
             {toolCall.displayName && (
               <>
-                {/* The row truncates the name; here it wraps so it can be read in full. */}
-                <p
-                  data-slot="ai-tool-call-display-name"
-                  className="break-words"
-                >
-                  <bdi>{toolCall.displayName}</bdi>
-                </p>
+                {/* Repeated only when long enough that the row may have truncated it. */}
+                {toolCall.displayName.length > LONG_NAME_CHARS && (
+                  <p
+                    data-slot="ai-tool-call-display-name"
+                    className="break-words"
+                  >
+                    <bdi>{toolCall.displayName}</bdi>
+                  </p>
+                )}
                 <p
                   data-slot="ai-tool-call-id"
                   className="text-xs break-words text-neutral-600 dark:text-neutral-400"
@@ -485,16 +495,32 @@ function ToolCallRow({
                 </p>
               </>
             )}
-            <ToolCallMetadata toolCall={toolCall} hintLabels={labels.hints} />
+            <ToolCallMetadata
+              toolCall={toolCall}
+              hintLabels={labels.hints}
+              hintsLead={labels.hintsLead}
+            />
             {toolCall.result && hasLinks && (
               <ToolResultLinks
                 result={toolCall.result}
                 onLinkClick={onLinkClick}
               />
             )}
+            {result && result.length <= INLINE_RESULT_CHARS && (
+              <p
+                data-slot="ai-tool-call-result-text"
+                dir="auto"
+                className="text-sm break-words whitespace-pre-wrap"
+              >
+                {result}
+              </p>
+            )}
             {hasLabels ? (
               <>
-                <div data-slot="ai-tool-call-arguments">
+                <div
+                  data-slot="ai-tool-call-arguments"
+                  className="rounded bg-neutral-50 p-2 dark:bg-neutral-800/60"
+                >
                   <h4 className="mb-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
                     {labels.arguments}
                   </h4>
@@ -503,7 +529,7 @@ function ToolCallRow({
                       <React.Fragment key={param.name}>
                         <dt
                           title={param.description}
-                          className="font-medium break-words text-neutral-600 dark:text-neutral-400"
+                          className="font-semibold break-words text-neutral-700 dark:text-neutral-300"
                         >
                           {param.label ?? param.name}
                         </dt>
@@ -536,7 +562,7 @@ function ToolCallRow({
                 labels={labels.result}
               />
             )}
-            {result && (
+            {result && result.length > INLINE_RESULT_CHARS && (
               <OutputDisclosure label={labels.showResult} text={result} />
             )}
             {errorText && (
@@ -572,7 +598,7 @@ function ToolCallRow({
 
         {isAwaitingApproval && (onApprove || onDeny) && (
           <div
-            className="ms-6 mt-1 flex flex-wrap gap-2 pb-1"
+            className="ms-6 mt-2 flex flex-wrap gap-2 border-t border-neutral-200 pt-2 pb-1 dark:border-neutral-700"
             onFocus={() => {
               focusInActionsRef.current = true;
             }}

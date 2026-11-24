@@ -179,7 +179,7 @@ describe('MCPToolCallGroup outcomes', () => {
       />
     );
     fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
-    expect(screen.getByText('Show result')).toBeInTheDocument();
+    expect(screen.getByText('3 of 10 rows written')).toBeInTheDocument();
   });
 
   it('opens approval details when an existing row starts awaiting approval', () => {

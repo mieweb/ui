@@ -9,6 +9,7 @@
  */
 
 import * as React from 'react';
+import { cn } from '../../utils/cn';
 import { Badge } from '../Badge';
 import type {
   MCPResourceLink,
@@ -33,9 +34,12 @@ export const defaultToolHintLabels: ToolHintLabels = {
 export function ToolCallMetadata({
   toolCall,
   hintLabels = defaultToolHintLabels,
+  hintsLead = 'Provider notes:',
 }: {
   toolCall: ToolCall;
   hintLabels?: ToolHintLabels;
+  /** Introduces the hints as the provider's claims. */
+  hintsLead?: string;
 }) {
   const hints = toolCall.hints;
   const shown = hints
@@ -56,15 +60,23 @@ export function ToolCallMetadata({
         </p>
       )}
       {shown.length > 0 && (
-        <ul data-slot="ai-tool-call-hints" className="flex flex-wrap gap-1">
-          {shown.map((key) => (
-            <li key={key}>
-              <Badge variant="secondary" size="sm">
-                {hintLabels[key]}
-              </Badge>
-            </li>
-          ))}
-        </ul>
+        <div
+          data-slot="ai-tool-call-hints"
+          className="flex flex-wrap items-center gap-1"
+        >
+          <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            {hintsLead}
+          </span>
+          <ul className="contents">
+            {shown.map((key) => (
+              <li key={key}>
+                <Badge variant="secondary" size="sm">
+                  {hintLabels[key]}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </>
   );
@@ -120,7 +132,10 @@ export const defaultToolCallResultLabels: ToolCallResultLabels = {
   fields: 'Fields',
   mediaUnsupported: (mimeType) => `Preview not available (${mimeType})`,
   download: 'Download',
-  unsupportedContent: (types) => `Not shown: ${types.join(', ')}`,
+  unsupportedContent: (types) =>
+    types.length === 1
+      ? "1 item can't be displayed here"
+      : `${types.length} items can't be displayed here`,
   truncated: (shown, total) => `Showing ${shown} of ${total}`,
   columnsTruncated: (shown, total) => `Showing ${shown} of ${total} columns`,
   downloadFull: 'Download full result (JSON)',
@@ -264,26 +279,36 @@ function StructuredFields({
     const allColumns = Array.from(new Set(rows.flatMap(Object.keys)));
     const columns = allColumns.slice(0, MAX_COLUMNS);
     return (
-      <div data-slot="ai-tool-result-table" className="overflow-x-auto">
-        <table className="w-full text-start text-xs">
-          <thead>
-            <tr>
+      <div
+        data-slot="ai-tool-result-table"
+        className="w-fit max-w-full overflow-x-auto rounded border border-neutral-200 dark:border-neutral-700"
+      >
+        <table className="text-start text-xs">
+          <thead className="bg-neutral-50 dark:bg-neutral-800">
+            <tr className="border-b border-neutral-200 dark:border-neutral-700">
               {columns.map((column) => (
                 <th
                   key={column}
                   scope="col"
-                  className="pe-3 text-start font-medium text-neutral-600 dark:text-neutral-400"
+                  className="px-2 py-1 text-start font-semibold whitespace-nowrap text-neutral-700 dark:text-neutral-300"
                 >
                   {fieldLabels?.[column] ?? column}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {rows.map((row, index) => (
               <tr key={index}>
                 {columns.map((column) => (
-                  <td key={column} dir="auto" className="pe-3 align-top">
+                  <td
+                    key={column}
+                    dir="auto"
+                    className={cn(
+                      'px-2 py-1 align-top',
+                      typeof row[column] === 'number' && 'text-end tabular-nums'
+                    )}
+                  >
                     {row[column] === undefined ? '' : cellText(row[column])}
                   </td>
                 ))}
@@ -382,14 +407,23 @@ function EmbeddedResource({
 }) {
   const name = resource.uri.split('/').pop() || resource.uri;
   return (
-    <div data-slot="ai-tool-result-embedded" className="space-y-1 text-xs">
-      <p className="font-mono break-all text-neutral-600 dark:text-neutral-400">
-        {resource.uri}
+    <div
+      data-slot="ai-tool-result-embedded"
+      className="overflow-hidden rounded border border-neutral-200 text-xs dark:border-neutral-700"
+    >
+      <p
+        title={resource.uri}
+        className="flex items-center gap-2 border-b border-neutral-200 bg-neutral-50 px-2 py-1 dark:border-neutral-700 dark:bg-neutral-800"
+      >
+        <bdi className="truncate font-medium">{name}</bdi>
+        {resource.mimeType && (
+          <span className="shrink-0 text-neutral-500">{resource.mimeType}</span>
+        )}
       </p>
       {resource.text !== undefined && (
         <pre
           dir="auto"
-          className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 whitespace-pre-wrap dark:bg-neutral-900"
+          className="max-h-40 overflow-auto p-2 whitespace-pre-wrap"
         >
           {resource.text}
         </pre>
@@ -399,7 +433,7 @@ function EmbeddedResource({
         <a
           href={`data:application/octet-stream;base64,${resource.blob}`}
           download={name}
-          className="text-primary-700 dark:text-primary-300 underline"
+          className="text-primary-700 dark:text-primary-300 block p-2 underline"
         >
           {labels.download} <bdi>{name}</bdi>
         </a>
@@ -440,7 +474,10 @@ export function ToolCallResultContent({
         <EmbeddedResource key={index} resource={resource} labels={labels} />
       ))}
       {result.unsupported && result.unsupported.length > 0 && (
-        <p className="text-xs text-neutral-500">
+        <p
+          title={result.unsupported.join(', ')}
+          className="text-xs text-neutral-500"
+        >
           {labels.unsupportedContent(result.unsupported)}
         </p>
       )}

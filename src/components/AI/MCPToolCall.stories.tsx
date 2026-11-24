@@ -310,9 +310,9 @@ export const GroupDisplayNames: Story = {
   ),
 };
 
-// 1x1 transparent PNG.
-const PIXEL_PNG =
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+// Small bar chart, so the preview reads as an image rather than a dot.
+const CHART_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAHgAAABACAIAAABeLyRFAAAA2UlEQVR4nO3bsQ3CQBBEUefkdICLoQ36IqEZiqADYmJTAJZWWsRYh9/XxqfRy29aFGnaesBeAh0KdCjQoUCHAh0KdCjQoUCHAh0KdKjBoF/XQ+O2Xr2AzgU6FOhQoEOBDgU6FOhQBfTp8mzc7+aCBl0EOhToUKBDgQ4FOhToUDuFfsxz475ZDhr0WqBBF4EGvRZo0EWg/wv6eDs37vMd0KCLQIMGDboRaNCgQTcCDRo06EagQYMG3Qg0aNCgG4EGDRp0I9CgQYNuBDoFfVekwX7OjhvoUKBDvQHIvfMBloSxEQAAAABJRU5ErkJggg==';
 
 /**
  * An MCP call before approval: title, description, server, behavior hints and
@@ -397,6 +397,10 @@ export const GroupRichResults: Story = {
     <MCPToolCallGroup
       toolCalls={[
         groupCall('r1', 'list_hosts', 'success', {
+          serverName: 'Proxmox',
+          parameters: [
+            { name: 'cluster', label: 'Cluster', type: 'string', value: 'lab' },
+          ],
           result: {
             type: 'json',
             data: '',
@@ -404,18 +408,35 @@ export const GroupRichResults: Story = {
               { name: 'alpha', cpu: 4, memory: '8 GB' },
               { name: 'beta', cpu: 8, memory: '16 GB' },
             ],
+            fieldLabels: { name: 'Host', cpu: 'vCPUs', memory: 'Memory' },
           },
         }),
-        groupCall('r2', 'snapshot', 'success', {
+        groupCall('r2', 'capture_usage_chart', 'success', {
+          serverName: 'Proxmox',
+          parameters: [
+            {
+              name: 'range',
+              label: 'Time range',
+              type: 'string',
+              value: '24h',
+            },
+          ],
           result: {
             type: 'text',
-            data: 'Snapshot captured',
-            media: [{ type: 'image', mimeType: 'image/png', data: PIXEL_PNG }],
+            data: 'Usage chart captured for the last 24 hours.',
+            media: [
+              {
+                type: 'image',
+                mimeType: 'image/png',
+                data: CHART_PNG,
+                alt: 'CPU usage per host over 24 hours',
+              },
+            ],
             embedded: [
               {
-                uri: 'file:///logs/run.txt',
+                uri: 'file:///var/log/pve/usage-run.txt',
                 mimeType: 'text/plain',
-                text: 'ok\n',
+                text: 'collected 4 samples\nok\n',
               },
             ],
             unsupported: ['ui_resource'],
