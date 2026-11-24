@@ -73,6 +73,99 @@ describe('ChatComposer', () => {
     );
   });
 
+  it('reads references from the trimmed text it sends', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    // Untrimmed, four spaces make this an indented code block.
+    fireEvent.change(input, {
+      target: { value: '    [@Ann](/people/u-ann)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0]).toMatchObject({
+      content: '[@Ann](/people/u-ann)',
+      references: [{ kind: 'person', id: 'u-ann', label: '@Ann' }],
+    });
+  });
+
+  it('inserts a pick whose label and address read back unchanged', async () => {
+    const onSend = vi.fn();
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async () => [
+        { kind: 'ticket', id: 'issue) & <x>', label: 'Fix *beta* `now` $5' },
+      ],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/tickets/') ? href.slice('/tickets/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+    });
+    fireEvent.mouseDown(await screen.findByRole('option'));
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      {
+        kind: 'ticket',
+        id: 'issue) & <x>',
+        label: 'Fix *beta* `now` $5',
+        href: '/tickets/issue) & <x>',
+      },
+    ]);
+  });
+
+  it("never shows one trigger's results for another's query", async () => {
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => [{ kind: 'person', id: 'u-ann', label: 'Ann Lee' }],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      // Still searching.
+      search: () => new Promise<never>(() => {}),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(
+      <ChatComposer onSend={vi.fn()} triggers={[person, ticket]} />
+    );
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '@a', selectionStart: 2, selectionEnd: 2 },
+    });
+    expect(
+      await screen.findByRole('option', { name: 'Ann Lee' })
+    ).toBeInTheDocument();
+    fireEvent.change(input, {
+      target: { value: '@a #a', selectionStart: 5, selectionEnd: 5 },
+    });
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);

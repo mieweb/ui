@@ -71,8 +71,19 @@ export function activeTriggerQuery(
   return { char: match[2], query, start: caret - query.length - 1 };
 }
 
-/** `label` safe inside a Markdown link's `[…]`. */
-const linkLabel = (label: string) => label.replace(/[[\]\\]/g, '\\$&');
+/**
+ * `[label](href)` that reads back as exactly `label` and `href`. The label
+ * escapes what Markdown would format (`*beta*`, `` `code` ``, `$x$`, `&amp;`);
+ * the destination escapes what would end it early or decode (`issue)`), and
+ * takes angle brackets when it holds whitespace.
+ */
+function referenceLink(label: string, href: string): string {
+  const text = label.replace(/[\\[\]*_`~<>&$]/g, '\\$&');
+  const destination = href.replace(/[\\()<>&]/g, '\\$&');
+  return `[${text}](${/\s/.test(href) ? `<${destination}>` : destination})`;
+}
+
+const NO_RESULTS: ReferenceOption[] = [];
 
 export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
@@ -160,7 +171,14 @@ export function useMentionAutocomplete({
   // A reference trigger's search, newest answer only. Keyed by character and
   // query, with the trigger read through a ref, so a host that rebuilds its
   // `triggers` each render doesn't search again.
-  const [found, setFound] = React.useState<ReferenceOption[]>([]);
+  // Each answer carries the character and query it was for: while a new
+  // search runs, an older one's results (another trigger's records) must
+  // not be shown or picked.
+  const [found, setFound] = React.useState<{
+    char: string;
+    query: string;
+    results: ReferenceOption[];
+  } | null>(null);
   const searchSeq = React.useRef(0);
   const activeTriggerRef = React.useRef(activeTrigger);
   activeTriggerRef.current = activeTrigger;
@@ -170,20 +188,24 @@ export function useMentionAutocomplete({
     const seq = ++searchSeq.current;
     const trigger = activeTriggerRef.current;
     if (!trigger || searchQuery === undefined) {
-      setFound([]);
+      setFound(null);
       return;
     }
+    const answer = (results: ReferenceOption[]) => {
+      if (seq === searchSeq.current)
+        setFound({ char: trigger.char, query: searchQuery, results });
+    };
     Promise.resolve()
       .then(() => trigger.search(searchQuery))
-      .then(
-        (results) => {
-          if (seq === searchSeq.current) setFound(results);
-        },
-        () => {
-          if (seq === searchSeq.current) setFound([]);
-        }
-      );
+      .then(answer, () => answer([]));
   }, [searchChar, searchQuery]);
+  const results =
+    found &&
+    activeTrigger &&
+    found.char === activeTrigger.char &&
+    found.query === mention?.query
+      ? found.results
+      : NO_RESULTS;
   const [highlight, setHighlight] = React.useState(0);
   const listId = React.useId();
   const optionId = React.useCallback(
@@ -198,8 +220,8 @@ export function useMentionAutocomplete({
       mention.char === '@' && options
         ? options.filter((o) => o.label.toLowerCase().includes(q))
         : [];
-    return [...listed, ...found];
-  }, [mention, options, found]);
+    return [...listed, ...results];
+  }, [mention, options, results]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -240,8 +262,8 @@ export function useMentionAutocomplete({
     const after = value.slice(mention.start + 1 + mention.query.length);
     // A trigger's pick is a link to its record; a listed option is `@value`.
     const insertText =
-      activeTrigger && found.includes(option as ReferenceOption)
-        ? `[${linkLabel(option.label)}](${activeTrigger.toHref(option.id)}) `
+      activeTrigger && results.includes(option as ReferenceOption)
+        ? `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
         : `@${option.value ?? option.label.split(' ')[0]} `;
     setValue(before + insertText + after);
     setMention(null);

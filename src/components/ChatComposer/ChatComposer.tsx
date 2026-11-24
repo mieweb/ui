@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
@@ -492,8 +493,29 @@ export const ChatComposer = React.forwardRef<
   },
   ref
 ) {
-  const richEditorRef = React.useRef<RichEditorHandle>(null);
+  const richEditorRef = React.useRef<RichEditorHandle | null>(null);
   const rich = editor === 'rich';
+  // A focus asked for before the lazy rich editor mounted, replayed on mount.
+  const pendingRichFocusRef = React.useRef(false);
+  const attachRichEditor = React.useCallback(
+    (handle: RichEditorHandle | null) => {
+      richEditorRef.current = handle;
+      if (handle && pendingRichFocusRef.current) {
+        pendingRichFocusRef.current = false;
+        handle.focus();
+      }
+    },
+    []
+  );
+  const focusInput = React.useCallback(() => {
+    if (!rich) {
+      textareaRef.current?.focus();
+      return;
+    }
+    if (richEditorRef.current) richEditorRef.current.focus();
+    else pendingRichFocusRef.current = true;
+  }, [rich]);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [internalValue, setInternalValue] = React.useState('');
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
@@ -502,7 +524,6 @@ export const ChatComposer = React.forwardRef<
   const attachmentsRef = React.useRef(attachments);
   attachmentsRef.current = attachments;
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
@@ -561,9 +582,9 @@ export const ChatComposer = React.forwardRef<
   // parent render while the user is typing.
   const replyToId = replyTo?.id;
   React.useEffect(() => {
-    if (replyToId !== undefined) {
-      textareaRef.current?.focus();
-    }
+    if (replyToId !== undefined) focusInput();
+    // Keyed on the reply target alone; `focusInput` changes only with `editor`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replyToId]);
 
   // Host-opt-in autofocus, applied on the client only after confirming a
@@ -573,7 +594,7 @@ export const ChatComposer = React.forwardRef<
   React.useEffect(() => {
     if (!autoFocus) return;
     if (window.matchMedia?.(TOUCH_DEVICE_QUERY).matches) return;
-    textareaRef.current?.focus();
+    focusInput();
     // Mount-only, matching native `autofocus` semantics.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -582,13 +603,13 @@ export const ChatComposer = React.forwardRef<
   const hasContent = hasText || attachments.length > 0;
   const isOverLimit = maxLength !== undefined && value.length > maxLength;
   // Without an onSend handler, sending would silently discard the draft.
-  const canSend =
-    (hasContent || canSendWhenEmpty) &&
-    onSend !== undefined &&
-    !disabled &&
-    !isSending &&
-    !isStreaming &&
-    !isOverLimit;
+  const readyToSend =
+    onSend !== undefined && !disabled && !isSending && !isStreaming;
+  /** Whether `text` (with the staged attachments) is a sendable message. */
+  const isSendable = (text: string) =>
+    (text.trim().length > 0 || attachments.length > 0 || canSendWhenEmpty) &&
+    !(maxLength !== undefined && text.length > maxLength);
+  const canSend = readyToSend && isSendable(value);
 
   // --------------------------------------------------------------------
   // Input handling
@@ -767,26 +788,56 @@ export const ChatComposer = React.forwardRef<
     ref,
     () => ({
       addFiles,
-      focus: () =>
-        rich ? richEditorRef.current?.focus() : textareaRef.current?.focus(),
+      focus: focusInput,
       getTextarea: () => textareaRef.current,
     }),
-    [addFiles, rich]
+    [addFiles, focusInput]
   );
 
   // --------------------------------------------------------------------
   // Sending
   // --------------------------------------------------------------------
 
+  // The rich editor publishes `onChange` after an async serialization, so
+  // `value` can lag the last keystroke or chip: a rich send reads the
+  // editor's own content first. One read at a time, so a second Enter or
+  // click while it is pending can't send the draft twice.
+  const readingDraftRef = React.useRef(false);
   const handleSend = (sendOption?: string) => {
-    if (!canSend || !onSend) return;
+    if (!readyToSend || readingDraftRef.current) return;
+    const editorHandle = rich ? richEditorRef.current : null;
+    if (!editorHandle) {
+      sendText(value, sendOption);
+      return;
+    }
+    readingDraftRef.current = true;
+    editorHandle
+      .getContent()
+      .then(
+        (text) => {
+          // Publish the read draft first, so clearing it below is a change
+          // the editor sees even while `value` still lagged at ''.
+          if (text !== value) flushSync(() => setValue(text));
+          sendText(text, sendOption);
+        },
+        () => onError?.(sendFailedLabel, { reason: 'send-failed' })
+      )
+      .finally(() => {
+        readingDraftRef.current = false;
+      });
+  };
+
+  const sendText = (text: string, sendOption?: string) => {
+    if (!onSend || !isSendable(text)) return;
+    const content = text.trim();
     const message: NewMessage = {
-      content: value.trim(),
+      content,
       attachments: attachments.map((attachment) => attachment.file),
       // Only add the key when replying — hosts may key-check the payload.
       ...(replyTo ? { replyToId: replyTo.id } : {}),
+      // Read from the text actually sent, so the two always agree.
       ...(triggers?.length
-        ? { references: referencesIn(value, triggers) }
+        ? { references: referencesIn(content, triggers) }
         : {}),
     };
     for (const attachment of attachments) {
@@ -813,8 +864,7 @@ export const ChatComposer = React.forwardRef<
     } catch {
       onError?.(sendFailedLabel, { reason: 'send-failed' });
     }
-    if (rich) richEditorRef.current?.focus();
-    else textareaRef.current?.focus();
+    focusInput();
   };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
@@ -833,8 +883,7 @@ export const ChatComposer = React.forwardRef<
     const target = event.target as HTMLElement;
     if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
     event.preventDefault();
-    if (rich) richEditorRef.current?.focus();
-    else textareaRef.current?.focus();
+    focusInput();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1005,9 +1054,12 @@ export const ChatComposer = React.forwardRef<
                 }
               >
                 <LazyRichEditor
-                  ref={richEditorRef}
+                  ref={attachRichEditor}
                   value={value}
                   onChange={setValue}
+                  // A controlled composer keeps native controlled-input
+                  // semantics: an edit the host rejects reverts on screen too.
+                  strictValue={isControlled}
                   triggers={triggers}
                   modifyMenu={NO_MENU}
                   disabled={disabled}
