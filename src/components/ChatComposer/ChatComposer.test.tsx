@@ -289,6 +289,76 @@ describe('ChatComposer', () => {
     });
   });
 
+  describe('an @ trigger beside mentionOptions', () => {
+    // A host may hand the same objects to both.
+    const shared = [
+      { id: 'u-ann', kind: 'person', label: 'Ann Lee', value: 'ann' },
+    ];
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => shared,
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    async function openList() {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          mentionOptions={shared}
+          triggers={[person]}
+        />
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      return input;
+    }
+
+    it('lists one person from both with distinct keys', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await openList();
+        expect(
+          error.mock.calls.some((call) => String(call[0]).includes('same key'))
+        ).toBe(false);
+      } finally {
+        error.mockRestore();
+      }
+    });
+
+    it('inserts the listed entry as a mention, the result as a link', async () => {
+      const input = await openList();
+      fireEvent.mouseDown(screen.getAllByRole('option')[0]);
+      expect(input).toHaveValue('@ann ');
+
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      fireEvent.mouseDown(screen.getAllByRole('option')[1]);
+      expect(input).toHaveValue('[Ann Lee](/people/u-ann) ');
+    });
+
+    it('leaves Enter and the arrows to an IME while it composes', async () => {
+      const input = await openList();
+      fireEvent.keyDown(input, { key: 'ArrowDown', isComposing: true });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+      expect(input).toHaveValue('@an');
+      expect(screen.getAllByRole('option')[0]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    });
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);

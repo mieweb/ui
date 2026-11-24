@@ -354,6 +354,11 @@ describe('ChatComposer rich input', () => {
     await waitFor(() => expect(editor.focus).toHaveBeenCalled());
   });
 
+  it('takes no pasted or dropped media, which would skip the attachment checks', async () => {
+    await renderRich();
+    expect(editor.props!.omitExtensions).toContain('mediaUpload');
+  });
+
   it('keeps a controlled composer strict, so a rejected edit reverts', async () => {
     await renderRich({ value: 'fixed', onValueChange: vi.fn() });
     expect(editor.props!.strictValue).toBe(true);

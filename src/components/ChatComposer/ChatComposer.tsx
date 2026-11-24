@@ -357,6 +357,10 @@ const LazyRichEditor = React.lazy(() =>
   import('../RichEditor/RichEditor').then((m) => ({ default: m.RichEditor }))
 );
 const NO_MENU = () => [];
+// Pasted or dropped media would embed in the message (a data: URL, or a
+// sender-local blob: URL for video) and skip the attachment checks; until the
+// rich input attaches files the way the textarea does, it takes none.
+const RICH_OMITTED_EXTENSIONS = ['mediaUpload'] as const;
 
 // ============================================================================
 // Styles
@@ -1106,6 +1110,7 @@ export const ChatComposer = React.forwardRef<
                 <LazyRichEditor
                   ref={richEditorRef}
                   onReady={handleRichReady}
+                  omitExtensions={RICH_OMITTED_EXTENSIONS}
                   value={value}
                   onChange={setValue}
                   // A controlled composer keeps native controlled-input

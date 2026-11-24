@@ -287,6 +287,13 @@ export function useMentionAutocomplete({
       ? found.results
       : NO_RESULTS;
 
+  // A trigger's results as entries of their own (copies), so a pick is a
+  // reference only when it came from them — a host may share one array
+  // between `mentionOptions` and a trigger's search.
+  const referenceEntries = React.useMemo(
+    () => results.map((result) => ({ ...result })),
+    [results]
+  );
   const suggestions = React.useMemo<MentionOption[]>(() => {
     if (!mention) return [];
     const q = mention.query.toLowerCase();
@@ -294,8 +301,8 @@ export function useMentionAutocomplete({
       mention.char === '@' && options
         ? options.filter((o) => o.label.toLowerCase().includes(q))
         : [];
-    return [...listed, ...results];
-  }, [mention, options, results]);
+    return [...listed, ...referenceEntries];
+  }, [mention, options, referenceEntries]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -317,7 +324,7 @@ export function useMentionAutocomplete({
     const after = value.slice(mention.start + 1 + mention.query.length);
     // A trigger's pick is a link to its record; a listed option is `@value`.
     const insertText =
-      activeTrigger && results.includes(option as ReferenceOption)
+      activeTrigger && referenceEntries.includes(option as ReferenceOption)
         ? `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
         : `@${option.value ?? option.label.split(' ')[0]} `;
     setValue(before + insertText + after);
@@ -348,6 +355,9 @@ export function useMentionAutocomplete({
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
+    // An IME composing (CJK input) owns Enter and the arrows: they pick and
+    // confirm its candidates, not the list's options.
+    if (event.nativeEvent.isComposing) return false;
     // Escape also dismisses a reference query still searching, so its late
     // answer doesn't open the menu after the user closed it.
     if (!menuOpen && !(event.key === 'Escape' && activeTrigger)) return false;
@@ -447,7 +457,9 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
       className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
     >
       {mention.suggestions.map((option, i) => (
-        <li key={option.id}>
+        // By position as well as id: one person can be both a listed mention
+        // and a trigger's result, with the same id.
+        <li key={`${i}:${option.id}`}>
           <button
             type="button"
             id={mention.optionId(i)}
