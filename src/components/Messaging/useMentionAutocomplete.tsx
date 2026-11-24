@@ -46,6 +46,76 @@ export function activeMentionQuery(
   return { query, start: caret - query.length - 1 };
 }
 
+/**
+ * The list half of an autocomplete, shared by {@link useMentionAutocomplete}
+ * and RichEditor's references: the highlighted option, its ids for ARIA, and
+ * arrow / Enter / Tab handling. Where the query comes from and what a pick
+ * inserts stay with each caller.
+ */
+export interface SuggestionList {
+  /** Clamped highlight index (`-1` while the list is closed). */
+  highlight: number;
+  /** Move the highlight (mouse hover); `0` starts a new query at the top. */
+  setHighlight: (index: number) => void;
+  /** id of the listbox element. */
+  listId: string;
+  /** id for the option at `index`. */
+  optionId: (index: number) => string;
+  /** id of the highlighted option while open, for `aria-activedescendant`. */
+  activeOptionId: string | undefined;
+  /**
+   * Arrows move the highlight (wrapping), Enter or Tab picks it. Returns
+   * `true` when the key was consumed (callers skip their own handling).
+   */
+  handleKey: (event: Pick<KeyboardEvent, 'key' | 'preventDefault'>) => boolean;
+}
+
+export function useSuggestionList<T>(
+  suggestions: readonly T[],
+  open: boolean,
+  pick: (option: T) => void
+): SuggestionList {
+  const [highlight, setHighlight] = React.useState(0);
+  const listId = React.useId();
+  const optionId = React.useCallback(
+    (index: number) => `${listId}-option-${index}`,
+    [listId]
+  );
+  // Clamp the highlight to the current suggestion range so the active option
+  // never points at a stale/out-of-range index (the list can shrink while the
+  // menu is open as the query narrows). The same clamped index drives
+  // `aria-activedescendant`, `aria-selected`, the visual highlight and the
+  // keys, so they can never disagree.
+  const clamped = open ? Math.min(highlight, suggestions.length - 1) : -1;
+
+  const handleKey: SuggestionList['handleKey'] = (event) => {
+    if (!open) return false;
+    const count = suggestions.length;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      setHighlight((h) => (Math.min(h, count - 1) + step + count) % count);
+      return true;
+    }
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      const chosen = suggestions[clamped];
+      if (chosen !== undefined) pick(chosen);
+      return true;
+    }
+    return false;
+  };
+
+  return {
+    highlight: clamped,
+    setHighlight,
+    listId,
+    optionId,
+    activeOptionId: open ? optionId(clamped) : undefined,
+    handleKey,
+  };
+}
+
 export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
   options?: MentionOption[];
@@ -106,13 +176,6 @@ export function useMentionAutocomplete({
     query: string;
     start: number;
   } | null>(null);
-  const [highlight, setHighlight] = React.useState(0);
-  const listId = React.useId();
-  const optionId = React.useCallback(
-    (index: number) => `${listId}-option-${index}`,
-    [listId]
-  );
-
   const suggestions = React.useMemo(() => {
     if (!mention || !options) return [];
     const q = mention.query.toLowerCase();
@@ -133,26 +196,7 @@ export function useMentionAutocomplete({
     maxHeight: 224,
   });
 
-  // Clamp the highlight to the current suggestion range so the active option
-  // never points at a stale/out-of-range index (the list can shrink while the
-  // menu is open as the query narrows). The same clamped index drives
-  // `aria-activedescendant`, `aria-selected`, and the visual highlight so they
-  // can never disagree.
-  const clampedHighlight = menuOpen
-    ? Math.min(highlight, suggestions.length - 1)
-    : -1;
-  const activeOptionId = menuOpen ? optionId(clampedHighlight) : undefined;
-
-  const sync = React.useCallback(
-    (nextValue: string, caret: number) => {
-      if (!enabled) return;
-      setMention(activeMentionQuery(nextValue, caret));
-      setHighlight(0);
-    },
-    [enabled]
-  );
-
-  const insert = (option: MentionOption) => {
+  function insert(option: MentionOption) {
     if (!mention) return;
     const insertValue = option.value ?? option.label.split(' ')[0];
     const before = value.slice(0, mention.start);
@@ -169,38 +213,25 @@ export function useMentionAutocomplete({
         el.setSelectionRange(caret, caret);
       }
     });
-  };
+  }
+
+  const list = useSuggestionList(suggestions, menuOpen, insert);
+  const { setHighlight } = list;
+
+  const sync = React.useCallback(
+    (nextValue: string, caret: number) => {
+      if (!enabled) return;
+      setMention(activeMentionQuery(nextValue, caret));
+      setHighlight(0);
+    },
+    [enabled, setHighlight]
+  );
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
     if (!menuOpen) return false;
-    // All keyboard branches index with the clamped highlight so keyboard
-    // behavior always agrees with the visible/ARIA selection, even when the
-    // list shrank while the menu was open (e.g. the host swapped `options`
-    // asynchronously).
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setHighlight(
-        (h) => (Math.min(h, suggestions.length - 1) + 1) % suggestions.length
-      );
-      return true;
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setHighlight(
-        (h) =>
-          (Math.min(h, suggestions.length - 1) - 1 + suggestions.length) %
-          suggestions.length
-      );
-      return true;
-    }
-    if (event.key === 'Enter' || event.key === 'Tab') {
-      event.preventDefault();
-      const chosen = suggestions[clampedHighlight];
-      if (chosen) insert(chosen);
-      return true;
-    }
+    if (list.handleKey(event)) return true;
     if (event.key === 'Escape') {
       event.preventDefault();
       setMention(null);
@@ -211,8 +242,8 @@ export function useMentionAutocomplete({
 
   const inputProps: React.TextareaHTMLAttributes<HTMLTextAreaElement> = enabled
     ? {
-        'aria-controls': menuOpen ? listId : undefined,
-        'aria-activedescendant': activeOptionId,
+        'aria-controls': menuOpen ? list.listId : undefined,
+        'aria-activedescendant': list.activeOptionId,
         'aria-autocomplete': 'list' as const,
       }
     : {};
@@ -221,9 +252,9 @@ export function useMentionAutocomplete({
     enabled,
     menuOpen,
     suggestions,
-    highlight: clampedHighlight,
-    listId,
-    optionId,
+    highlight: list.highlight,
+    listId: list.listId,
+    optionId: list.optionId,
     anchorRef,
     floatingRef,
     menuStyle,

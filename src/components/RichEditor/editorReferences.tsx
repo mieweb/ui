@@ -18,7 +18,10 @@ import type { EditorView } from 'prosemirror-view';
 
 import { badgeVariants } from '../Badge/Badge';
 import { safeHref } from '../../templates/Section';
-import type { MentionMenuState } from '../Messaging/useMentionAutocomplete';
+import {
+  useSuggestionList,
+  type MentionMenuState,
+} from '../Messaging/useMentionAutocomplete';
 import {
   matchReference,
   type ReferenceOption,
@@ -559,7 +562,6 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     query: string;
     options: ReferenceOption[];
   } | null>(null);
-  const [highlight, setHighlight] = React.useState(0);
   const [anchor, setAnchor] = React.useState<{
     left: number;
     top: number;
@@ -574,11 +576,6 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
   const floatingRef = React.useRef<HTMLUListElement | null>(null);
   const triggersRef = React.useRef(triggers);
   triggersRef.current = triggers;
-  const listId = React.useId();
-  const optionId = React.useCallback(
-    (index: number) => `${listId}-option-${index}`,
-    [listId]
-  );
 
   // Search as the query changes; only the latest search's answer is kept.
   const searchSeq = React.useRef(0);
@@ -608,9 +605,8 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     answer.query === range.query;
   const results = answered ? answer.options : NO_OPTIONS;
   const menuOpen = answered && results.length > 0 && !!anchor;
-  const clamped = menuOpen ? Math.min(highlight, results.length - 1) : -1;
 
-  const insert = (option: ReferenceOption) => {
+  function insert(option: ReferenceOption) {
     const view = viewRef.current;
     if (!view || !range || !answered) return;
     setRange(null);
@@ -624,7 +620,12 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     if (!trigger) return;
     view.dispatch(insertReference(view.state, { ...range, trigger }, option));
     view.focus();
-  };
+  }
+
+  // Highlight, option ids and arrow / Enter / Tab: the same list logic as
+  // the `@mention` autocomplete. Range detection and insertion stay here.
+  const list = useSuggestionList(results, menuOpen, insert);
+  const { highlight, setHighlight, listId, optionId, activeOptionId } = list;
 
   // Read through a ref so the plugin, created once with the editor, always
   // sees this render's triggers, results and range.
@@ -665,24 +666,16 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
         event.stopPropagation();
         return true;
       }
-      if (!menuOpen) return false;
-      const count = results.length;
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        const step = event.key === 'ArrowDown' ? 1 : -1;
-        setHighlight((h) => (Math.min(h, count - 1) + step + count) % count);
-        return true;
-      }
-      if (event.key === 'Enter' || event.key === 'Tab') {
-        insert(results[clamped]);
-        return true;
-      }
-      return false;
+      return list.handleKey(event);
     },
     blur: () => setRange(null),
   };
 
   // A new query starts at the first match.
-  React.useEffect(() => setHighlight(0), [range?.from, range?.query]);
+  React.useEffect(
+    () => setHighlight(0),
+    [setHighlight, range?.from, range?.query]
+  );
 
   // The list is fixed to the viewport, so it follows the caret when the page
   // or an editor ancestor scrolls, the window resizes, or an on-screen
@@ -721,22 +714,24 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
       dom.setAttribute('aria-multiline', 'true');
     }
     dom.setAttribute('aria-autocomplete', 'list');
-    if (menuOpen) {
+    if (activeOptionId) {
       dom.setAttribute('aria-controls', listId);
-      dom.setAttribute('aria-activedescendant', optionId(clamped));
+      dom.setAttribute('aria-activedescendant', activeOptionId);
     } else {
       dom.removeAttribute('aria-controls');
       dom.removeAttribute('aria-activedescendant');
     }
-  }, [surface, menuOpen, clamped, listId, optionId]);
+  }, [surface, activeOptionId, listId]);
 
-  // Measured once the list renders, before paint, so it never shows clipped.
+  // Measured once the list renders, before paint, so it never shows clipped
+  // — and again whenever the caret is re-measured (scroll, resize, zoom), as
+  // a wider viewport lets the list grow past the width it opened at.
   const [menuWidth, setMenuWidth] = React.useState(0);
   React.useLayoutEffect(() => {
     if (menuOpen && floatingRef.current) {
       setMenuWidth(floatingRef.current.offsetWidth);
     }
-  }, [menuOpen, results]);
+  }, [menuOpen, results, anchor]);
 
   const kit = React.useMemo(
     () => createReferencesKit(() => triggersRef.current, handlers),
@@ -754,7 +749,7 @@ export function useEditorReferences(triggers: readonly ReferenceTrigger[]): {
     menu: {
       menuOpen,
       suggestions: results,
-      highlight: clamped,
+      highlight,
       listId,
       optionId,
       floatingRef,
