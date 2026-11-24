@@ -179,16 +179,24 @@ function unmask(
 
 // The text a reader sees in inline `tokens`: escapes and character
 // references resolved, emphasis marks and inline HTML tags dropped,
-// code-span contents kept literal, and a hard line break read as a space —
-// a label is one line, and `[Ann  \nLee](…)` names "Ann Lee", not "AnnLee".
+// code-span contents kept literal, and a line break — hard (`  \n`) or an
+// HTML `<br>` — read as a space: a label is one line, and `[Ann  \nLee](…)`
+// and `[Ann<br>Lee](…)` name "Ann Lee", not "AnnLee".
+const same = (part: string) => part;
+const htmlBreak = /^<br\s*\/?>$/i;
+
+/** `text` exactly as written: each stand-in back to the escaped `\&`. */
+function literal(text: string, amp: string): string {
+  return unmask(text, amp, same, '\\&');
+}
+
 function plainText(tokens: readonly Nested[], amp: string): string {
-  const same = (part: string) => part;
   return tokens
     .map((token) => {
       const text = token.text ?? '';
-      if (token.type === 'html') return '';
+      if (token.type === 'html') return htmlBreak.test(text.trim()) ? ' ' : '';
       if (token.type === 'br') return ' ';
-      if (token.type === 'codespan') return unmask(text, amp, same, '\\&');
+      if (token.type === 'codespan') return literal(text, amp);
       if (token.tokens) return plainText(token.tokens, amp);
       return token.type === 'text'
         ? unmask(text, amp, decodeReferences)
@@ -214,9 +222,16 @@ export function referencesIn(
     // Marked resolves backslash escapes in a destination but keeps character
     // references as written; a Markdown renderer decodes them, so
     // `/people/u&#45;ann` is the link to `u-ann` here too — and, the escaped
-    // `&` masked above, `/people/u\&#45;ann` stays `u&#45;ann`.
-    const href = unmask(link.href, masked.amp, decodeReferences);
-    const label = plainText(link.tokens as Nested[], masked.amp);
+    // `&` masked above, `/people/u\&#45;ann` stays `u&#45;ann`. An autolink
+    // (`<https://…>`, or a bare URL) is the exception: it resolves neither
+    // escapes nor references, so its destination and label stay as written.
+    const autolink = !link.raw.startsWith('[');
+    const href = autolink
+      ? literal(link.href, masked.amp)
+      : unmask(link.href, masked.amp, decodeReferences);
+    const label = autolink
+      ? literal(link.text, masked.amp)
+      : plainText(link.tokens as Nested[], masked.amp);
     const match = matchReference(href, triggers);
     if (!match) continue;
     const key = `${match.kind}\u0000${match.id}`;

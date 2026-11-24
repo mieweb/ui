@@ -24,6 +24,38 @@ describe('referencesIn', () => {
     ]);
   });
 
+  it('reads an HTML line break in a label as a space', () => {
+    const label = (text: string) =>
+      referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
+    expect(label('Ann<br>Lee')).toBe('Ann Lee');
+    expect(label('Ann<br/>Lee')).toBe('Ann Lee');
+    expect(label('Ann<BR />Lee')).toBe('Ann Lee');
+  });
+
+  it('keeps an autolink as written, resolving neither references nor escapes', () => {
+    const url = (text: string) =>
+      referencesIn(text, [trigger('person', 'https://e.com/people/')]).map(
+        ({ id, label, href }) => ({ id, label, href })
+      );
+    expect(url('<https://e.com/people/u&#45;ann>')).toEqual([
+      {
+        id: 'u&#45;ann',
+        label: 'https://e.com/people/u&#45;ann',
+        href: 'https://e.com/people/u&#45;ann',
+      },
+    ]);
+    expect(url('<https://e.com/people/u\\&#45;ann>')).toEqual([
+      {
+        id: 'u\\&#45;ann',
+        label: 'https://e.com/people/u\\&#45;ann',
+        href: 'https://e.com/people/u\\&#45;ann',
+      },
+    ]);
+    expect(url('see https://e.com/people/u&#45;ann now')[0].id).toBe(
+      'u&#45;ann'
+    );
+  });
+
   it('decodes character references in a destination, inline or reference-style', () => {
     const ann = {
       kind: 'person',
