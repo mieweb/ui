@@ -108,14 +108,22 @@ jobs:
           flags: unittests
           name: unit-tests-coverage
 
-  visual-tests:
-    name: Visual Regression Tests
+  # The suite (377 tests, ~10.5 minutes on one runner) is split across three
+  # runners, each keeping playwright.config.ts's single CI worker. More
+  # workers per runner was tried: on 4 vCPUs, 2 and 4 workers slowed the
+  # EncounterVisit editor past its 5 s waits and those tests flaked.
+  visual-tests-shard:
+    name: Visual Regression Tests (${{ matrix.shard }}/3)
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     # Pinned: ubuntu-latest moved to 26.04 (2026-10), which Playwright 1.58
     # cannot install browsers on. Unpin after upgrading @playwright/test to
     # >=1.61 and regenerating the visual baselines its new Chromium shifts.
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -153,19 +161,30 @@ jobs:
           NODE_OPTIONS: '--max-old-space-size=8192'
 
       - name: Run Playwright tests
-        run: pnpm test:visual
+        run: pnpm test:visual --shard=${{ matrix.shard }}/3
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           # playwright.config.ts: html report -> playwright-report/,
           # outputDir (failure screenshots, diffs, traces) -> playwright-results/
           path: |
             playwright-report/
             playwright-results/
           retention-days: 30
+
+  # "Visual Regression Tests" is a required status check on main. This job
+  # keeps that name and passes only when every shard passed.
+  visual-tests:
+    name: Visual Regression Tests
+    if: always() && (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+    needs: visual-tests-shard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all shards passed
+        run: test "${{ needs.visual-tests-shard.result }}" = success
 
   build-test:
     name: Build Test
