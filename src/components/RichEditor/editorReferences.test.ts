@@ -333,6 +333,21 @@ describe('menuPlacement', () => {
     expect(above).not.toHaveProperty('top');
   });
 
+  it('stays on screen when the caret scrolls out of view', () => {
+    // Caret scrolled above the 800px viewport: the list pins to its top.
+    expect(
+      menuPlacement({ left: 40, top: -60, bottom: -40 }, 200, screen(800))
+    ).toMatchObject({ top: 8, maxHeight: 224 });
+    // Caret scrolled below it: the list opens above, pinned to its bottom.
+    const pinned = menuPlacement(
+      { left: 40, top: 900, bottom: 920 },
+      200,
+      screen(800)
+    );
+    expect(pinned).toMatchObject({ bottom: 8, maxHeight: 224 });
+    expect(pinned).not.toHaveProperty('top');
+  });
+
   it('is never wider than the screen', () => {
     const narrow = {
       visibleLeft: 0,

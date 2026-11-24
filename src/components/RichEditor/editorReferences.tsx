@@ -464,17 +464,27 @@ export interface MenuViewport {
  * fits there or below has at least as much room, otherwise above, with its
  * height capped to the room on that side so its first options are never off
  * screen (as useAnchoredPosition does). Kept inside the viewport sideways
- * (a caret near the end of a line).
+ * (a caret near the end of a line), and up and down: a caret scrolled out of
+ * view pins the list to the visible area's edge instead of carrying it off.
  */
 export function menuPlacement(
   anchor: { left: number; top: number; bottom: number },
   menuWidth: number,
   viewport: MenuViewport
 ): React.CSSProperties {
-  const spaceBelow =
-    viewport.visibleBottom - anchor.bottom - CARET_GAP - VIEWPORT_MARGIN;
-  const spaceAbove =
-    anchor.top - CARET_GAP - VIEWPORT_MARGIN - viewport.visibleTop;
+  // The list's edge on each side of the caret, kept on screen.
+  const firstTop = viewport.visibleTop + VIEWPORT_MARGIN;
+  const lastBottom = viewport.visibleBottom - VIEWPORT_MARGIN;
+  const topIfBelow = Math.min(
+    lastBottom,
+    Math.max(firstTop, anchor.bottom + CARET_GAP)
+  );
+  const bottomIfAbove = Math.max(
+    firstTop,
+    Math.min(lastBottom, anchor.top - CARET_GAP)
+  );
+  const spaceBelow = lastBottom - topIfBelow;
+  const spaceAbove = bottomIfAbove - firstTop;
   const below = spaceBelow >= MENU_MAX_HEIGHT || spaceBelow >= spaceAbove;
   // Never wider than the visible area (MentionMenu is a fixed w-64), and
   // kept inside it sideways, so a narrow window, or a phone zoomed in and
@@ -499,8 +509,8 @@ export function menuPlacement(
       Math.min(MENU_MAX_HEIGHT, below ? spaceBelow : spaceAbove)
     ),
     ...(below
-      ? { top: anchor.bottom + CARET_GAP }
-      : { bottom: viewport.height - anchor.top + CARET_GAP }),
+      ? { top: topIfBelow }
+      : { bottom: viewport.height - bottomIfAbove }),
   };
 }
 
