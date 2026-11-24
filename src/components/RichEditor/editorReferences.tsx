@@ -163,14 +163,16 @@ export function linksToReferences(
         }
         return;
       }
-      if (!node.isText) return;
+      if (!node.isInline) return;
       const mark = node.marks.find((m) => m.type === link);
       if (!mark) return;
       // One link split over several text nodes (bold inside it) is one span.
+      // A linked image or other inline atom joins the span too, so the link
+      // stays whole, but leaves it a link: a chip's label is text alone.
       if (last && last.to === pos && last.link.eq(mark)) {
         last.to = pos + node.nodeSize;
-        last.label += node.text;
-        last.uniform &&= Mark.sameSet(last.marks, node.marks);
+        last.label += node.text ?? '';
+        last.uniform &&= node.isText && Mark.sameSet(last.marks, node.marks);
         return;
       }
       spans.push({
@@ -179,7 +181,7 @@ export function linksToReferences(
         link: mark,
         marks: node.marks,
         label: node.text ?? '',
-        uniform: true,
+        uniform: node.isText,
       });
     });
     const tr = state.tr;

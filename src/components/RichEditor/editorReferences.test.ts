@@ -213,6 +213,28 @@ describe('references in RichEditor', () => {
     expect(kinds.filter(Boolean)).toEqual(['u-raj']);
   });
 
+  it('leaves a link with an image in its text a link, not chips of its pieces', () => {
+    const { schema } = editor;
+    const link = schema.marks.link.create({ href: '/people/u-ann' });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, [
+        schema.text('@Ann ', [link]),
+        schema.nodes.image.create({ src: '/a.png' }, null, [link]),
+        schema.text(' Lee', [link]),
+      ]),
+    ]);
+    let result = EditorState.create({ doc });
+    linksToReferences(() => triggers)(result, (tr) => {
+      result = result.apply(tr);
+    });
+    let chips = 0;
+    result.doc.descendants((node) => {
+      if (node.type.name === REFERENCE_NODE) chips++;
+    });
+    expect(chips).toBe(0);
+    expect(result.doc.eq(doc)).toBe(true);
+  });
+
   it('makes a pasted chip only from a link a trigger claims, and never draws an unsafe href', () => {
     const { schema } = editor;
     const parse = (html: string) => {
