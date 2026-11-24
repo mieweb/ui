@@ -952,6 +952,9 @@ export const miewebUISafelist = [
   'overflow-auto',
   // Select component
   'truncate',
+  // ReferenceChip: sits on the text baseline, underlined only on hover
+  'align-baseline',
+  'no-underline',
   // AIReconciliationPanel
   'ring-primary-200',
   'dark:ring-primary-900',
