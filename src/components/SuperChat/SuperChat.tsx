@@ -28,6 +28,7 @@ import type {
   ChatComposerError,
   ChatComposerHandle,
   ChatComposerProps,
+  ChatComposerSendMeta,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
@@ -50,6 +51,7 @@ import {
   MessageRow,
   byTime,
   detectMentions,
+  matchMentionTokens,
   filesToComposerAttachments,
   acceptTokensFor,
   DEFAULT_ATTACHMENT_LABELS,
@@ -67,6 +69,7 @@ import type {
   SuperChatMediaFeedProps,
   SuperChatMediaItem,
   SuperChatMediaLabels,
+  SuperChatMessageLabels,
   SuperChatRenderMessageMedia,
   SuperChatView,
   SuperChatRef,
@@ -101,6 +104,8 @@ export interface SuperChatProps {
   mediaFeedProps?: SuperChatMediaFeedProps;
   /** Labels for media launches and returning to the conversation. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
+  /** Labels for per-message states, e.g. a scheduled message's indicator. */
+  messageLabels?: Partial<SuperChatMessageLabels>;
   /**
    * Renders an attachment in the thread in place of the built-in card, e.g. the
    * host's own video card. Its `open` opens the media view at that attachment,
@@ -125,6 +130,16 @@ export interface SuperChatProps {
   trustedContent?: boolean;
   /** Disable the composer. */
   readOnly?: boolean;
+  /**
+   * Props for the message box (`ChatComposer`), applied over SuperChat's own
+   * defaults: e.g. `placeholder`, `leadingSlot` for the host's own buttons
+   * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
+   * `mentionOptions: []` to turn @mentions off. With your own `mentionOptions`,
+   * `onMessageSent`'s `mentions` holds the ids of the options whose token
+   * (`value`, or the first word of `label`) appears in the text. `className`
+   * is merged.
+   */
+  composerProps?: SuperChatComposerProps;
   /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
@@ -213,7 +228,8 @@ export interface SuperChatProps {
    * promise it is awaited, the send button shows it's sending meanwhile, and
    * a rejected send puts the typed text and the attachments back in the
    * composer to try again (the declared `void` return keeps every previously
-   * valid callback assignable).
+   * valid callback assignable). `sendOption` is the id of the
+   * `composerProps.sendOptions` entry the user sent with, if any.
    */
   onMessageSent?: (
     text: string,
@@ -221,6 +237,7 @@ export interface SuperChatProps {
       conversation: SuperChatConversation;
       mentions: string[];
       attachments: ComposerAttachment[];
+      sendOption?: string;
     }
   ) => void | Promise<void>;
   /**
@@ -243,6 +260,23 @@ export interface SuperChatProps {
    */
   onBack?: () => void;
 }
+
+/**
+ * Message box props a host may set through `composerProps`. SuperChat owns the
+ * draft and the send path, so `value`, `onValueChange`, `onSend` and
+ * `isSending` stay its.
+ * `replyTo` / `onCancelReply` are left out: SuperChat's send path doesn't pass
+ * a reply target on to `onMessageSent` yet.
+ */
+export type SuperChatComposerProps = Omit<
+  ChatComposerProps,
+  | 'value'
+  | 'onValueChange'
+  | 'onSend'
+  | 'isSending'
+  | 'replyTo'
+  | 'onCancelReply'
+>;
 
 /**
  * Phone-sized screens, upright (under 40rem wide) or sideways (under 30rem
@@ -345,6 +379,7 @@ export function SuperChat({
   onViewChange,
   mediaFeedProps,
   mediaLabels,
+  messageLabels,
   renderMessageMedia,
   mediaMaxSize = '18rem',
   currentParticipantId,
@@ -352,6 +387,7 @@ export function SuperChat({
   renderTextContent,
   trustedContent,
   readOnly,
+  composerProps,
   acceptedFileTypes,
   attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
@@ -412,6 +448,7 @@ export function SuperChat({
       playMedia,
     };
   }, [hostLabels]);
+  const scheduledLabel = messageLabels?.scheduled ?? 'Scheduled';
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
     return order === 'desc' ? items.reverse() : items;
@@ -1035,6 +1072,7 @@ export function SuperChat({
       attachmentLabels={labels}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
+      scheduledLabel={scheduledLabel}
       renderMessageMedia={renderMessageMedia}
       mediaMaxSize={mediaBox}
     />
@@ -1106,13 +1144,25 @@ export function SuperChat({
     () => new Set()
   );
   const handleComposerSend = React.useCallback(
-    async (message: NewMessage) => {
+    async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
+      if (readOnly) return;
       const epoch = draftEpochRef.current;
       const conversationId = conversation.id;
       setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
-        const mentions = detectMentions(text, conversation.participants);
+        // A host's own `mentionOptions` decide what counts as a mention, by
+        // the token each one inserts; `[]` turns mentions off entirely.
+        const hostOptions = composerProps?.mentionOptions;
+        const mentions = hostOptions
+          ? matchMentionTokens(
+              text,
+              hostOptions.map((o) => ({
+                id: o.id,
+                token: o.value ?? o.label.split(' ')[0],
+              }))
+            )
+          : detectMentions(text, conversation.participants);
         const attachments = await filesToComposerAttachments(
           message.attachments ?? [],
           { dataUrls: attachmentDataUrls }
@@ -1121,7 +1171,14 @@ export function SuperChat({
         // returned promise (e.g. an async host callback) is awaited so its
         // rejection follows the same restore path as a synchronous throw.
         await Promise.resolve(
-          onMessageSent?.(text, { conversation, mentions, attachments })
+          onMessageSent?.(text, {
+            conversation,
+            mentions,
+            attachments,
+            ...(sendMeta?.sendOption !== undefined
+              ? { sendOption: sendMeta.sendOption }
+              : {}),
+          })
         );
       } catch (error) {
         // Put the message back to try again, text and files, when file
@@ -1143,7 +1200,13 @@ export function SuperChat({
         });
       }
     },
-    [conversation, onMessageSent, attachmentDataUrls]
+    [
+      conversation,
+      onMessageSent,
+      composerProps?.mentionOptions,
+      readOnly,
+      attachmentDataUrls,
+    ]
   );
 
   return (
@@ -1354,6 +1417,7 @@ export function SuperChat({
               attachmentLabels={labels}
               mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
               mediaRetryLabel={mediaFeedProps?.labels?.retry}
+              scheduledLabel={scheduledLabel}
               renderMessageMedia={renderMessageMedia}
               mediaMaxSize={mediaBox}
               scrollRef={threadRef}
@@ -1425,15 +1489,7 @@ export function SuperChat({
 
       <ChatComposer
         ref={composerRef}
-        value={draft}
-        isSending={sendingIn.has(conversation.id)}
         onError={onComposerError}
-        onValueChange={handleDraftChange}
-        onSend={handleComposerSend}
-        disabled={readOnly}
-        // Matches the thread's p-4 gutter so the composer card lines up with
-        // the messages instead of running flush against the panel edges.
-        className="px-4 pb-4"
         placeholder={
           readOnly
             ? 'Read-only conversation'
@@ -1469,6 +1525,16 @@ export function SuperChat({
             />
           ) : undefined
         }
+        {...composerProps}
+        // A host may disable a writable composer, never enable a read-only one.
+        disabled={readOnly || composerProps?.disabled}
+        // Matches the thread's p-4 gutter so the composer card lines up with
+        // the messages instead of running flush against the panel edges.
+        className={cn('px-4 pb-4', composerProps?.className)}
+        value={draft}
+        isSending={sendingIn.has(conversation.id)}
+        onValueChange={handleDraftChange}
+        onSend={handleComposerSend}
       />
     </section>
   );

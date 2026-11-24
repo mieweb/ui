@@ -60,6 +60,11 @@ export interface SuperChatConversationsProps {
   search?: SuperChatConversationsSearch;
   /** Additional class name. */
   className?: string;
+  /**
+   * Content rendered after the last conversation, inside the scrolling list.
+   * Hosts use it for "load older" controls or an end-of-list marker.
+   */
+  listFooter?: React.ReactNode;
   /** `attachmentsPreview` words a preview of a last message with no text. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
 
@@ -79,6 +84,7 @@ export function SuperChatConversations({
   listHeader,
   search,
   className,
+  listFooter,
   mediaLabels,
   onConversationOpened,
   onNewConversation,
@@ -240,6 +246,11 @@ export function SuperChatConversations({
             </div>
           );
         })}
+        {listFooter && (
+          <div role="listitem" data-slot="superchat-conversation-list-footer">
+            {listFooter}
+          </div>
+        )}
       </div>
     </aside>
   );
