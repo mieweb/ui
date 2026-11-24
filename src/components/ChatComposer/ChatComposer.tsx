@@ -816,12 +816,10 @@ export const ChatComposer = React.forwardRef<
   // editor's own content first. One read at a time, so a second Enter or
   // click while it is pending can't send the draft twice.
   const readingDraftRef = React.useRef(false);
-  // This render's send path and eligibility, for a read that settles after
-  // the host disabled the composer, made it read-only or changed `onSend`.
-  const latestSendRef = React.useRef<{
-    readyToSend: boolean;
-    sendText: (text: string, sendOption?: string) => void;
-  } | null>(null);
+  // Whether the composer can send *now*, for a read that settles after the
+  // host disabled it, made it read-only or removed `onSend`.
+  const readyToSendRef = React.useRef(readyToSend);
+  readyToSendRef.current = readyToSend;
   const handleSend = (sendOption?: string) => {
     if (!readyToSend || readingDraftRef.current) return;
     const editorHandle = rich ? richEditorRef.current : null;
@@ -837,12 +835,15 @@ export const ChatComposer = React.forwardRef<
           // Dropped if, meanwhile, the composer can no longer send (disabled,
           // read-only, no `onSend`) or its editor unmounted: the draft stays
           // as it is. (The handle itself may be rebuilt on any re-render.)
-          const latest = latestSendRef.current;
-          if (!latest?.readyToSend || !richEditorRef.current) return;
+          if (!readyToSendRef.current || !richEditorRef.current) return;
           // Publish the read draft first, so clearing it below is a change
           // the editor sees even while `value` still lagged at ''.
           if (text !== value) flushSync(() => setValue(text));
-          latest.sendText(text, sendOption);
+          // Through the `onSend` and reply target the send began with: a host
+          // that reuses the composer (SuperChatInbox switching conversations)
+          // binds `onSend` to what is on screen now, and this draft belongs
+          // where it was written.
+          sendText(text, sendOption);
         },
         () => onError?.(sendFailedLabel, { reason: 'send-failed' })
       )
@@ -894,7 +895,6 @@ export const ChatComposer = React.forwardRef<
     }
     focusInput();
   };
-  latestSendRef.current = { readyToSend, sendText };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
   // dismissing the keyboard before `handleSend` refocuses it (a visible

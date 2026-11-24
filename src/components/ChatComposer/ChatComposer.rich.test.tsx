@@ -197,6 +197,36 @@ describe('ChatComposer rich input', () => {
     );
   });
 
+  it('sends to the conversation it was written in when the host switches meanwhile', async () => {
+    const sendToA = vi.fn();
+    const sendToB = vi.fn();
+    const { input, rerender } = await renderRich({
+      onSend: sendToA,
+      replyTo: { id: 'a-1', senderName: 'Ann', content: 'In A' },
+    });
+    editor.draft = 'for A';
+    let release = () => {};
+    editor.reading = new Promise<void>((resolve) => (release = resolve));
+    fireEvent.keyDown(input, { key: 'Enter' });
+    // SuperChatInbox reuses the composer; its onSend now targets B.
+    rerender(
+      <ChatComposer
+        editor="rich"
+        onSend={sendToB}
+        triggers={[person]}
+        replyTo={{ id: 'b-1', senderName: 'Bo', content: 'In B' }}
+      />
+    );
+    await act(async () => release());
+
+    await waitFor(() => expect(sendToA).toHaveBeenCalledTimes(1));
+    expect(sendToA.mock.calls[0][0]).toMatchObject({
+      content: 'for A',
+      replyToId: 'a-1',
+    });
+    expect(sendToB).not.toHaveBeenCalled();
+  });
+
   describe('attachments changed while the draft is read', () => {
     function holdRead() {
       let release = () => {};
