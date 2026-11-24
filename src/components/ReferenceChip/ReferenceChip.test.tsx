@@ -24,6 +24,38 @@ describe('referencesIn', () => {
     ]);
   });
 
+  it('reads an HTML line break in a label as a space', () => {
+    const label = (text: string) =>
+      referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
+    expect(label('Ann<br>Lee')).toBe('Ann Lee');
+    expect(label('Ann<br/>Lee')).toBe('Ann Lee');
+    expect(label('Ann<BR />Lee')).toBe('Ann Lee');
+  });
+
+  it('keeps an autolink as written, resolving neither references nor escapes', () => {
+    const url = (text: string) =>
+      referencesIn(text, [trigger('person', 'https://e.com/people/')]).map(
+        ({ id, label, href }) => ({ id, label, href })
+      );
+    expect(url('<https://e.com/people/u&#45;ann>')).toEqual([
+      {
+        id: 'u&#45;ann',
+        label: 'https://e.com/people/u&#45;ann',
+        href: 'https://e.com/people/u&#45;ann',
+      },
+    ]);
+    expect(url('<https://e.com/people/u\\&#45;ann>')).toEqual([
+      {
+        id: 'u\\&#45;ann',
+        label: 'https://e.com/people/u\\&#45;ann',
+        href: 'https://e.com/people/u\\&#45;ann',
+      },
+    ]);
+    expect(url('see https://e.com/people/u&#45;ann now')[0].id).toBe(
+      'u&#45;ann'
+    );
+  });
+
   it('decodes character references in a destination, inline or reference-style', () => {
     const ann = {
       kind: 'person',
@@ -124,6 +156,38 @@ describe('referencesIn', () => {
       referencesIn('[TH-1: Fix \\*beta\\* **now**](/tickets/t-1)', triggers)[0]
         .label
     ).toBe('TH-1: Fix *beta* now');
+  });
+
+  it('keeps an escaped ampersand in a destination literal, inline or reference-style', () => {
+    const ids = (text: string) => referencesIn(text, triggers).map((r) => r.id);
+    // `\&` is a literal `&`: no character reference follows it.
+    expect(ids('[@Ann](/people/u\\&#45;ann)')).toEqual(['u&#45;ann']);
+    expect(ids('[@Ann][a]\n\n[a]: /people/u\\&#45;ann')).toEqual(['u&#45;ann']);
+    // An escaped backslash, then a real reference.
+    expect(ids('[@Ann](/people/u\\\\&#45;ann)')).toEqual(['u\\-ann']);
+    // Unescaped, it decodes as before.
+    expect(ids('[@Ann](/people/u&#45;ann)')).toEqual(['u-ann']);
+  });
+
+  it('never mistakes U+E000 in the text, literal or encoded, for an escaped ampersand', () => {
+    const ids = (text: string) => referencesIn(text, triggers).map((r) => r.id);
+    // Encoded U+E000 decodes to itself, not to `&`.
+    expect(ids('[Ann](/people/u&#xE000;ann)')).toEqual(['u\uE000ann']);
+    expect(
+      ids('[Ann](/people/u&#xE000;ann) [Raj](/people/u\\&#45;raj)')
+    ).toEqual(['u\uE000ann', 'u&#45;raj']);
+    // A literal U+E000 elsewhere doesn't switch masking off for the post.
+    expect(ids('\uE000 [Ann](/people/u\\&#45;ann)')).toEqual(['u&#45;ann']);
+    expect(ids('[Ann](/people/u\uE000ann) [Raj](/people/u\\&#45;raj)')).toEqual(
+      ['u\uE000ann', 'u&#45;raj']
+    );
+  });
+
+  it('keeps an escaped ampersand literal in a label, and in code as written', () => {
+    const label = (text: string) =>
+      referencesIn(`[${text}](/people/u-ann)`, triggers)[0].label;
+    expect(label('R\\&amp;D')).toBe('R&amp;D');
+    expect(label('`R\\&D`')).toBe('R\\&D');
   });
 
   it('decodes every HTML5 entity name and numeric references by CommonMark rules', () => {

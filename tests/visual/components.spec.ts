@@ -89,6 +89,29 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await page.mouse.up();
   });
 
+  test('SuperChat Inbox - Edit message with multi-line draft', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'superchat-inbox--playground');
+    // The first self-authored message carries the overflow menu with Edit.
+    await page.getByRole('button', { name: 'Message actions' }).first().click();
+    await page.getByRole('menuitem', { name: 'Edit message' }).click();
+    const editor = page.getByRole('textbox', { name: 'Edit message' });
+    await editor.fill('First line of the edit');
+    // Plain Enter must add a newline, not save.
+    await editor.press('End');
+    await editor.press('Enter');
+    await editor.pressSequentially('Second line of the edit');
+    await expect(editor).toHaveValue(
+      'First line of the edit\nSecond line of the edit'
+    );
+    // Capture the editor itself: the thread scrolls, so a page shot would
+    // show unrelated messages instead of the edit state.
+    await expect(
+      page.locator('[data-slot="superchat-message-editor"]')
+    ).toHaveScreenshot('superchat-inbox-edit-multiline.png');
+  });
+
   test('Input - Default', async ({ page }) => {
     await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
@@ -1325,6 +1348,37 @@ test.describe('Visual Regression Tests - Core Components', () => {
   test('Select - Default', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-select--default');
     await expect(page).toHaveScreenshot('select-default.png');
+  });
+
+  test('Select - With descriptions (open, narrow)', async ({ page }) => {
+    // Narrow enough that the longest description wraps to a second line.
+    await page.setViewportSize({ width: 320, height: 480 });
+    await gotoStory(page, 'choice-inputs-select--with-descriptions', {
+      args: 'defaultValue:ticket',
+    });
+    await page.getByRole('combobox').click();
+    const option = page.getByRole('option', { name: 'Ticket' });
+    await expect(option).toHaveAttribute('aria-selected', 'true');
+
+    const description = option.locator(
+      "[data-slot='select-option-description']"
+    );
+    const label = option.getByText('Ticket', { exact: true });
+    const check = option.locator('svg');
+    const [descriptionBox, labelBox, checkBox] = await Promise.all([
+      description.boundingBox(),
+      label.boundingBox(),
+      check.boundingBox(),
+    ]);
+    // Wraps rather than truncating: taller than one line of the label.
+    expect(descriptionBox!.height).toBeGreaterThan(labelBox!.height * 1.5);
+    // Starts under the label, and never runs into the checkmark.
+    expect(Math.abs(descriptionBox!.x - labelBox!.x)).toBeLessThan(1);
+    expect(descriptionBox!.x + descriptionBox!.width).toBeLessThanOrEqual(
+      checkBox!.x
+    );
+
+    await expect(page).toHaveScreenshot('select-with-descriptions-open.png');
   });
 
   test('Select - Search stays anchored inside a transformed dialog', async ({

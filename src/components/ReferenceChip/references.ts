@@ -140,20 +140,67 @@ function decodeReferences(text: string): string {
   );
 }
 
+// An escaped `&` (`\&#45;`) is a literal ampersand, so what follows is no
+// character reference. Marked drops the backslash from destinations before
+// we decode, which would lose that, so each escaped `&` (not `\\&`, an
+// escaped backslash then a real `&`) is swapped for a stand-in first: a
+// private-use character the text doesn't contain, chosen per call. Decoding
+// then runs only on the text between stand-ins, so nothing it produces —
+// `&#xE000;` included — can be taken for one, and each stand-in becomes `&`
+// again (`\&` inside code, where escapes are literal).
+interface Masked {
+  text: string;
+  /** The stand-in for an escaped `&`; empty when none was needed. */
+  amp: string;
+}
+
+function maskEscapedAmpersands(text: string): Masked {
+  const escaped = /(?<!\\)((?:\\\\)*)\\&/g;
+  if (!escaped.test(text)) return { text, amp: '' };
+  for (let code = 0xe000; code <= 0xf8ff; code++) {
+    const amp = String.fromCharCode(code);
+    if (!text.includes(amp)) {
+      return { text: text.replace(escaped, `$1${amp}`), amp };
+    }
+  }
+  // Every private-use character is in the text: leave it as written.
+  return { text, amp: '' };
+}
+
+/** `text` with each stand-in `amp` read as `restore`, the rest by `read`. */
+function unmask(
+  text: string,
+  amp: string,
+  read: (part: string) => string,
+  restore = '&'
+): string {
+  return amp ? text.split(amp).map(read).join(restore) : read(text);
+}
+
 // The text a reader sees in inline `tokens`: escapes and character
 // references resolved, emphasis marks and inline HTML tags dropped,
-// code-span contents kept literal, and a hard line break read as a space —
-// a label is one line, and `[Ann  \nLee](…)` names "Ann Lee", not "AnnLee".
-function plainText(tokens: readonly Nested[]): string {
+// code-span contents kept literal, and a line break — hard (`  \n`) or an
+// HTML `<br>` — read as a space: a label is one line, and `[Ann  \nLee](…)`
+// and `[Ann<br>Lee](…)` name "Ann Lee", not "AnnLee".
+const same = (part: string) => part;
+const htmlBreak = /^<br\s*\/?>$/i;
+
+/** `text` exactly as written: each stand-in back to the escaped `\&`. */
+function literal(text: string, amp: string): string {
+  return unmask(text, amp, same, '\\&');
+}
+
+function plainText(tokens: readonly Nested[], amp: string): string {
   return tokens
     .map((token) => {
-      if (token.type === 'html') return '';
+      const text = token.text ?? '';
+      if (token.type === 'html') return htmlBreak.test(text.trim()) ? ' ' : '';
       if (token.type === 'br') return ' ';
-      if (token.type === 'codespan') return token.text ?? '';
-      if (token.tokens) return plainText(token.tokens);
+      if (token.type === 'codespan') return literal(text, amp);
+      if (token.tokens) return plainText(token.tokens, amp);
       return token.type === 'text'
-        ? decodeReferences(token.text ?? '')
-        : (token.text ?? '');
+        ? unmask(text, amp, decodeReferences)
+        : unmask(text, amp, same);
     })
     .join('');
 }
@@ -169,12 +216,22 @@ export function referencesIn(
 ): Reference[] {
   const seen = new Set<string>();
   const found: Reference[] = [];
-  for (const link of linksIn(new Lexer().lex(text) as Nested[])) {
+  const masked = maskEscapedAmpersands(text);
+  const tokens = new Lexer().lex(masked.text);
+  for (const link of linksIn(tokens as Nested[])) {
     // Marked resolves backslash escapes in a destination but keeps character
     // references as written; a Markdown renderer decodes them, so
-    // `/people/u&#45;ann` is the link to `u-ann` here too.
-    const href = decodeReferences(link.href);
-    const label = plainText(link.tokens as Nested[]);
+    // `/people/u&#45;ann` is the link to `u-ann` here too — and, the escaped
+    // `&` masked above, `/people/u\&#45;ann` stays `u&#45;ann`. An autolink
+    // (`<https://…>`, or a bare URL) is the exception: it resolves neither
+    // escapes nor references, so its destination and label stay as written.
+    const autolink = !link.raw.startsWith('[');
+    const href = autolink
+      ? literal(link.href, masked.amp)
+      : unmask(link.href, masked.amp, decodeReferences);
+    const label = autolink
+      ? literal(link.text, masked.amp)
+      : plainText(link.tokens as Nested[], masked.amp);
     const match = matchReference(href, triggers);
     if (!match) continue;
     const key = `${match.kind}\u0000${match.id}`;
