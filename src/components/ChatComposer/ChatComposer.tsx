@@ -495,25 +495,32 @@ export const ChatComposer = React.forwardRef<
 ) {
   const richEditorRef = React.useRef<RichEditorHandle | null>(null);
   const rich = editor === 'rich';
-  // A focus asked for before the lazy rich editor mounted, replayed on mount.
+  // A focus asked for before the lazy rich editor is ready, replayed from its
+  // `onReady`: its `focus()` is a no-op until its setup has started, which is
+  // after the ref attaches.
+  // Ready is kept across ref re-attachment (a rebuilt handle detaches and
+  // re-attaches the ref on a re-render) and dropped only with the editor.
+  const richReadyRef = React.useRef(false);
   const pendingRichFocusRef = React.useRef(false);
-  const attachRichEditor = React.useCallback(
-    (handle: RichEditorHandle | null) => {
-      richEditorRef.current = handle;
-      if (handle && pendingRichFocusRef.current) {
-        pendingRichFocusRef.current = false;
-        handle.focus();
-      }
-    },
-    []
-  );
+  React.useEffect(() => {
+    if (!rich) richReadyRef.current = false;
+  }, [rich]);
+  const handleRichReady = React.useCallback(() => {
+    richReadyRef.current = true;
+    if (!pendingRichFocusRef.current) return;
+    pendingRichFocusRef.current = false;
+    richEditorRef.current?.focus();
+  }, []);
   const focusInput = React.useCallback(() => {
     if (!rich) {
       textareaRef.current?.focus();
       return;
     }
-    if (richEditorRef.current) richEditorRef.current.focus();
-    else pendingRichFocusRef.current = true;
+    if (richEditorRef.current && richReadyRef.current) {
+      richEditorRef.current.focus();
+    } else {
+      pendingRichFocusRef.current = true;
+    }
   }, [rich]);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [internalValue, setInternalValue] = React.useState('');
@@ -1058,7 +1065,8 @@ export const ChatComposer = React.forwardRef<
                 }
               >
                 <LazyRichEditor
-                  ref={attachRichEditor}
+                  ref={richEditorRef}
+                  onReady={handleRichReady}
                   value={value}
                   onChange={setValue}
                   // A controlled composer keeps native controlled-input

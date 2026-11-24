@@ -28,6 +28,22 @@ vi.mock('../RichEditor/RichEditor', async () => {
   const RichEditor = React.forwardRef<RichEditorHandle, RichEditorProps>(
     function RichEditor(props, ref) {
       editor.props = props as Record<string, unknown>;
+      // Ready a tick after mount, as the real editor is after its setup;
+      // until then `focus()` does nothing, as the real one does.
+      const ready = React.useRef(false);
+      const onReady = React.useRef(props.onReady);
+      onReady.current = props.onReady;
+      React.useEffect(() => {
+        let live = true;
+        void Promise.resolve().then(() => {
+          if (!live) return;
+          ready.current = true;
+          onReady.current?.(null as never);
+        });
+        return () => {
+          live = false;
+        };
+      }, []);
       // Clearing the value empties the document, as the real editor reloads.
       React.useEffect(() => {
         if (!props.value) editor.draft = '';
@@ -37,7 +53,9 @@ vi.mock('../RichEditor/RichEditor', async () => {
           if (editor.reading) await editor.reading;
           return editor.draft;
         },
-        focus: editor.focus,
+        focus: () => {
+          if (ready.current) editor.focus();
+        },
       }));
       return <div role="textbox" aria-label={props['aria-label']} />;
     }
@@ -88,7 +106,7 @@ describe('ChatComposer rich input', () => {
     ref.current!.focus();
     expect(editor.focus).not.toHaveBeenCalled();
     await screen.findByRole('textbox', { name: /message input/i });
-    expect(editor.focus).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(editor.focus).toHaveBeenCalledTimes(1));
   });
 
   it.each([
@@ -196,7 +214,7 @@ describe('ChatComposer rich input', () => {
 
   it('autofocuses the editor once it has loaded', async () => {
     await renderRich({ autoFocus: true });
-    expect(editor.focus).toHaveBeenCalled();
+    await waitFor(() => expect(editor.focus).toHaveBeenCalledTimes(1));
   });
 
   it('focuses the editor for a reply target', async () => {
@@ -209,7 +227,7 @@ describe('ChatComposer rich input', () => {
         replyTo={{ id: 'm1', senderName: 'Ann', content: 'Hi' }}
       />
     );
-    expect(editor.focus).toHaveBeenCalled();
+    await waitFor(() => expect(editor.focus).toHaveBeenCalled());
   });
 
   it('keeps a controlled composer strict, so a rejected edit reverts', async () => {
