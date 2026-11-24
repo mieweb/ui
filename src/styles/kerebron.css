@@ -197,6 +197,12 @@
   text-decoration: none;
   vertical-align: baseline;
 }
+/* The label, cut short inside the chip rather than spilling out of it. */
+.kb-component .ProseMirror [data-slot='reference-chip-label'] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 [data-theme='dark'] .kb-component .ProseMirror [data-slot='reference-chip'],
 .dark .kb-component .ProseMirror [data-slot='reference-chip'] {
   background-color: var(--mieweb-neutral-800, #262626);
