@@ -98,6 +98,30 @@ describe('createReferencesPlugin', () => {
     );
   });
 
+  it.each([
+    ['$x^2$', 'x^2'],
+    ['$\\frac{1}{2}$', '\\frac{1}{2}'],
+    ['$\\sqrt{x}$', '\\sqrt{x}'],
+  ])(
+    'names a chip holding %s by its TeX, which keeps the structure',
+    (math, tex) => {
+      const onOpen = vi.fn();
+      const renderText = createMarkdownRenderer({
+        plugins: [
+          createMathPlugin(),
+          createReferencesPlugin({ triggers, onOpen }),
+        ],
+      });
+      render(<>{renderText(`[Ticket ${math}](/tickets/t-12)`, CONTEXT)}</>);
+      const chip = screen.getByRole('link', { name: /Ticket/ });
+      expect(chip).toHaveTextContent(`Ticket ${tex}`);
+      fireEvent.click(chip);
+      expect(onOpen).toHaveBeenCalledWith(
+        expect.objectContaining({ label: `Ticket ${tex}` })
+      );
+    }
+  );
+
   it.each(['altKey', 'metaKey', 'ctrlKey', 'shiftKey'] as const)(
     'leaves a %s click to the browser',
     (modifier) => {
@@ -223,6 +247,19 @@ describe('createReferencesPlugin', () => {
         createReferencesPlugin({ triggers }),
       ])
     ).toBe('Ask @Ann Lee about x.');
+  });
+
+  it.each([
+    ['$x^2$', 'x^2'],
+    ['$\\frac{1}{2}$', '\\frac{1}{2}'],
+    ['$\\sqrt{x}$', '\\sqrt{x}'],
+  ])('copies %s as its TeX, which keeps the structure', async (math, tex) => {
+    expect(
+      await plainCopy(`Is it ${math}?`, [
+        createMathPlugin(),
+        createReferencesPlugin({ triggers }),
+      ])
+    ).toBe(`Is it ${tex}?`);
   });
 
   it('exports MarkdownLink from the SuperChat entry for other link plugins', () => {

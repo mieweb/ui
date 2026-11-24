@@ -46,19 +46,34 @@ interface HastNode {
   children?: HastNode[];
 }
 
+/** The first descendant of `node` (or `node` itself) that is a `tagName`. */
+function findElement(node: HastNode, tagName: string): HastNode | undefined {
+  if (node.tagName === tagName) return node;
+  for (const child of node.children ?? []) {
+    const found = findElement(child, tagName);
+    if (found) return found;
+  }
+  return undefined;
+}
+
 /**
  * The plain text of a rendered link, its label — read as a screen reader
  * reads it. An image counts by its alt text: `[![@Ann Lee](/a.png)](/people/u-ann)`
  * is named "@Ann Lee", not left an empty chip. Anything hidden from
- * assistive tech and MathML's source annotation are skipped: KaTeX renders
- * `$x$` as MathML, its TeX source and an aria-hidden visual copy, and only
- * the MathML counts, so `[Ticket $x$](…)` reads "Ticket x", not "Ticket xxx".
+ * assistive tech is skipped, and a formula reads once, as its TeX source:
+ * KaTeX renders `$x^2$` as MathML, that source and an aria-hidden visual
+ * copy, and MathML's own text drops what its structure says (`x2`), so
+ * `[Ticket $x^2$](…)` reads "Ticket x^2".
  */
 function textOf(node: HastNode | undefined): string {
   if (!node) return '';
   if (node.type === 'text') return node.value ?? '';
   const hidden = node.properties?.ariaHidden;
   if (hidden === true || hidden === 'true') return '';
+  if (node.tagName === 'math') {
+    const tex = findElement(node, 'annotation');
+    if (tex) return textOf({ children: tex.children });
+  }
   if (node.tagName === 'annotation') return '';
   // A hard line break reads as a space, as `referencesIn` reads it.
   if (node.tagName === 'br') return ' ';
