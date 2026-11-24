@@ -126,6 +126,11 @@ The badge owns nothing: the host maps its domain state to a \`variant\` and supp
           target: 'layout-productversion',
           why: 'ProductVersionBadge is a fixed monospace version + environment chip; Badge is the generic status label with variants you choose.',
         },
+        {
+          type: 'alternative to',
+          target: 'editors-referencechip',
+          why: 'ReferenceChip has the Badge look but names a record (a person, a ticket) and links to it; Badge is a status or tag with no record behind it.',
+        },
       ],
     },
   },
