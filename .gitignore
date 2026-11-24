@@ -30,3 +30,6 @@ weighbridge-report.json
 weighbridge-baseline.json
 weighbridge-summary.md
 weigh-ins.jsonl
+
+# Playwright MCP local artifacts
+.playwright-mcp/
