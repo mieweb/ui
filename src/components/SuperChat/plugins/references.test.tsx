@@ -204,13 +204,32 @@ describe('createReferencesPlugin', () => {
   it('exports MarkdownLink from the SuperChat entry for other link plugins', () => {
     expect(superChat.MarkdownLink).toBe(MarkdownLink);
   });
-  it('names a chip with a line break in its label as one line', () => {
+  it('names a chip with a line break in its label as one line', async () => {
+    const onOpen = vi.fn();
     const renderText = createMarkdownRenderer({
-      plugins: [createReferencesPlugin({ triggers })],
+      plugins: [createReferencesPlugin({ triggers, onOpen })],
     });
     render(<>{renderText('[Ann  \nLee](/people/u-ann)', CONTEXT)}</>);
     const chip = screen.getByRole('link', { name: 'Ann Lee' });
     expect(chip).toHaveAttribute('data-reference-kind', 'person');
     expect(chip).toHaveTextContent('Ann Lee');
+    await userEvent.click(chip);
+    expect(onOpen).toHaveBeenCalledWith({
+      kind: 'person',
+      id: 'u-ann',
+      label: 'Ann Lee',
+      href: '/people/u-ann',
+    });
+  });
+  it('keeps other whitespace in a label as written', async () => {
+    const onOpen = vi.fn();
+    const renderText = createMarkdownRenderer({
+      plugins: [createReferencesPlugin({ triggers, onOpen })],
+    });
+    render(<>{renderText('[Ann  Lee](/people/u-ann)', CONTEXT)}</>);
+    await userEvent.click(screen.getByRole('link'));
+    expect(onOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'Ann  Lee' })
+    );
   });
 });

@@ -66,7 +66,17 @@ function textOf(node: HastNode | undefined): string {
     const alt = node.properties?.alt;
     return typeof alt === 'string' ? alt : '';
   }
-  return (node.children ?? []).map(textOf).join('');
+  // The converter follows each `<br>` with a newline text node; the break
+  // already reads as a space, so that newline (and only it) is dropped.
+  const children = node.children ?? [];
+  return children
+    .map((child, i) => {
+      const text = textOf(child);
+      return children[i - 1]?.tagName === 'br' && child.type === 'text'
+        ? text.replace(/^\r?\n/, '')
+        : text;
+    })
+    .join('');
 }
 
 /** Create the references (link → chip) render plugin. */
