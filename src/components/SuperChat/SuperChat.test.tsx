@@ -1335,6 +1335,97 @@ describe('SuperChat', () => {
     });
   });
 
+  it('inserts a newline on Enter instead of saving the edit', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    await user.clear(editor);
+    await user.type(editor, 'line one{Enter}line two');
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(editor).toHaveValue('line one\nline two');
+
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    expect(onMessageEdited).toHaveBeenCalledWith('m1', 'line one\nline two', {
+      removedMedia: [],
+      removedFiles: [],
+      conversation,
+    });
+  });
+
+  it.each([['Control'], ['Meta']])(
+    'saves the edit on %s+Enter',
+    async (modifier) => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onMessageEdited = vi.fn();
+      render(
+        <div style={{ height: 400 }}>
+          <SuperChat
+            conversation={conversation}
+            currentParticipantId="u1"
+            onMessageEdited={onMessageEdited}
+          />
+        </div>
+      );
+      await startEditViaMenu(user);
+      const editor = screen.getByRole('textbox', { name: 'Edit message' });
+      await user.clear(editor);
+      await user.type(editor, 'shortcut save');
+      await user.keyboard(`{${modifier}>}{Enter}{/${modifier}}`);
+
+      expect(onMessageEdited).toHaveBeenCalledWith('m1', 'shortcut save', {
+        removedMedia: [],
+        removedFiles: [],
+        conversation,
+      });
+      expect(
+        screen.queryByRole('textbox', { name: 'Edit message' })
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    ['Ctrl+Enter', { key: 'Enter', ctrlKey: true }],
+    ['Cmd+Enter', { key: 'Enter', metaKey: true }],
+    ['Escape', { key: 'Escape' }],
+  ])('ignores %s while an IME is composing', async (_label, keyInit) => {
+    const { fireEvent } = await import('@testing-library/react');
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onMessageEdited = vi.fn();
+    render(
+      <div style={{ height: 400 }}>
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          onMessageEdited={onMessageEdited}
+        />
+      </div>
+    );
+    await startEditViaMenu(user);
+    const editor = screen.getByRole('textbox', { name: 'Edit message' });
+    fireEvent.change(editor, { target: { value: 'こんにちは' } });
+    fireEvent.keyDown(editor, { ...keyInit, isComposing: true });
+
+    expect(onMessageEdited).not.toHaveBeenCalled();
+    expect(screen.getByRole('textbox', { name: 'Edit message' })).toHaveValue(
+      'こんにちは'
+    );
+  });
+
   it('pastes an image into the edit window as Markdown', async () => {
     const { fireEvent } = await import('@testing-library/react');
     const { default: userEvent } = await import('@testing-library/user-event');
