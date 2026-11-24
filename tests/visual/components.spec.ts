@@ -3226,3 +3226,63 @@ test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () 
     await expect(page.locator('[aria-label="Letter body"]')).toBeFocused();
   });
 });
+
+test.describe('Visual Regression Tests - ReorderableList', () => {
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ReorderableList - With move buttons${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'views-reorderablelist--with-move-buttons', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+      const list = page.locator("[data-slot='reorderable-list']");
+      const row = list.locator("[data-slot='reorderable-list-item']").first();
+      await expect(row).toBeVisible();
+      // The grip leads the row and the move buttons close it: grip right of
+      // the buttons under RTL, left of them otherwise.
+      const [grip, buttons] = await Promise.all([
+        row.locator("[data-slot='reorderable-list-handle']").boundingBox(),
+        row
+          .locator("[data-slot='reorderable-list-move-buttons']")
+          .boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(grip!.x).toBeGreaterThan(buttons!.x);
+      } else {
+        expect(grip!.x).toBeLessThan(buttons!.x);
+      }
+      if (viewport) {
+        const box = await list.boundingBox();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(list).toHaveScreenshot(
+        `reorderable-list-with-move-buttons${name}.png`
+      );
+    });
+  }
+
+  test('ReorderableList - Rows slide aside mid-drag', async ({ page }) => {
+    await gotoStory(page, 'views-reorderablelist--with-move-buttons');
+    const rows = page.locator("[data-slot='reorderable-list-item']");
+    const grip = rows.first().locator("[data-slot='reorderable-list-handle']");
+    const from = (await grip.boundingBox())!;
+    const second = (await rows.nth(1).boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(from.x + from.width / 2, second.y + second.height, {
+      steps: 8,
+    });
+    await expect(rows.first()).toHaveAttribute('data-dragging', 'true');
+    // The second row has moved up into the dragged row's slot.
+    await expect
+      .poll(async () => (await rows.nth(1).boundingBox())!.y)
+      .toBeLessThan(second.y);
+    await page.mouse.up();
+  });
+});

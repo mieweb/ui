@@ -179,6 +179,7 @@ export * from './components/RecordLayout';
 export * from './components/RecurringServiceCard';
 export * from './components/ReferenceChip';
 export * from './components/RejectionModal';
+export * from './components/ReorderableList';
 export * from './components/ReportDashboard';
 export * from './components/ResultsEntryForm';
 export * from './components/TextAreaPlain';
