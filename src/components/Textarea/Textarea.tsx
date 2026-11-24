@@ -6,8 +6,14 @@ import type { TextAreaPlainProps } from '../TextAreaPlain';
 // Lazy: keeps the Kerebron editor out of the main entry's startup code.
 import {
   TextAreaRichKerebronLazy as TextAreaRichKerebron,
+  TextAreaRichLoadBoundary,
   TextAreaRichLoadingFrame,
 } from '../TextAreaRich/TextAreaRichKerebronLazy';
+
+// The field's editable: the surface's contenteditable, or the plain textarea
+// standing in when the surface failed to load.
+const EDITABLE_SELECTOR =
+  '[role="textbox"], [data-slot="textarea-rich-unavailable"]';
 
 /**
  * `Textarea` keeps `TextAreaPlain`'s prop surface so existing call sites
@@ -308,14 +314,14 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
     const focusEditor = React.useCallback(() => {
       const wrapper = editorWrapperRef.current;
       if (!wrapper) return;
-      const editable = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+      const editable = wrapper.querySelector<HTMLElement>(EDITABLE_SELECTOR);
       if (editable) {
         editable.focus();
         return;
       }
       pendingFocusRef.current?.disconnect();
       const observer = new MutationObserver(() => {
-        const target = wrapper.querySelector<HTMLElement>('[role="textbox"]');
+        const target = wrapper.querySelector<HTMLElement>(EDITABLE_SELECTOR);
         if (!target) return;
         observer.disconnect();
         pendingFocusRef.current = null;
@@ -348,7 +354,7 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
         pendingFocusRef.current = null;
         const editable =
           editorWrapperRef.current?.querySelector<HTMLElement>(
-            '[role="textbox"]'
+            EDITABLE_SELECTOR
           );
         if (document.activeElement === editable) editable?.blur();
       };
@@ -421,8 +427,7 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
       );
     };
 
-    const handleHtmlChange = (html: string) => {
-      const plain = htmlToPlain(html);
+    const commitValue = (html: string, plain: string) => {
       setState({ html, plain });
       const node = hiddenRef.current;
       if (onChange && node) {
@@ -447,6 +452,10 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
         } as React.ChangeEvent<HTMLTextAreaElement>);
       }
     };
+    const handleHtmlChange = (html: string) =>
+      commitValue(html, htmlToPlain(html));
+    const handlePlainChange = (plain: string) =>
+      commitValue(plainToHtml(plain), plain);
 
     const showError = !!error;
     const invalid = hasError || showError;
@@ -563,42 +572,78 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextAreaPlainProps>(
               onKeyUp(retargetEvent(event) as unknown as MirrorKeyboardEvent))
           }
         >
-          <React.Suspense
+          <TextAreaRichLoadBoundary
             fallback={
-              <TextAreaRichLoadingFrame
-                className={frameClassName}
-                minHeight={emptyEditorHeight}
+              // The surface failed to load: the field stays usable as plain
+              // text, on the same value, mirror and onChange.
+              <textarea
+                data-slot="textarea-rich-unavailable"
+                id={id}
+                value={state.plain}
+                onChange={(event) =>
+                  handlePlainChange(normalizeNewlines(event.target.value))
+                }
+                placeholder={placeholder}
+                disabled={disabled}
+                readOnly={readOnly}
+                rows={rows}
+                aria-label={ariaLabel ?? label}
+                aria-labelledby={ariaLabelledBy ?? externalLabelId}
+                aria-describedby={describedByIds}
+                aria-invalid={invalid || undefined}
+                aria-required={required || undefined}
+                className={cn(
+                  'border-input w-full rounded-lg border bg-transparent',
+                  frameClassName
+                )}
+                // The editable's metrics (kerebron.css), so nothing moves.
+                style={{
+                  ...editorStyle,
+                  minHeight: emptyEditorHeight,
+                  padding: '7px 12px',
+                  fontSize: 'var(--textarea-rich-font-size, 1rem)',
+                  lineHeight: 'var(--textarea-rich-line-height, 1.5rem)',
+                }}
               />
             }
           >
-            <TextAreaRichKerebron
-              value={state.html}
-              onChange={handleHtmlChange}
-              placeholder={placeholder}
-              disabled={disabled}
-              readOnly={readOnly}
-              id={id}
-              // Paste flattening: honored by the legacy engine (which the unit
-              // tests stub in — see src/test/textAreaRichKerebronStub); the
-              // Kerebron engine instead filters pastes through its ProseMirror
-              // schema, so markup never reaches the live document raw.
-              sanitizeHtml={sanitizePastedHtml}
-              aria-label={ariaLabel ?? label}
-              aria-labelledby={ariaLabelledBy ?? externalLabelId}
-              aria-describedby={describedByIds}
-              aria-invalid={invalid || undefined}
-              aria-required={required || undefined}
-              editorClassName={cn(
-                // A native textarea renders repeated spaces and tabs
-                // faithfully; normal HTML layout would collapse them.
-                // (Font metrics ride editorStyle's CSS variables — text-sm/
-                // text-lg utilities lose to unlayered package CSS here.)
-                'whitespace-pre-wrap'
-              )}
-              editorStyle={editorStyle}
-              className={frameClassName}
-            />
-          </React.Suspense>
+            <React.Suspense
+              fallback={
+                <TextAreaRichLoadingFrame
+                  className={frameClassName}
+                  minHeight={emptyEditorHeight}
+                />
+              }
+            >
+              <TextAreaRichKerebron
+                value={state.html}
+                onChange={handleHtmlChange}
+                placeholder={placeholder}
+                disabled={disabled}
+                readOnly={readOnly}
+                id={id}
+                // Paste flattening: honored by the legacy engine (which the unit
+                // tests stub in — see src/test/textAreaRichKerebronStub); the
+                // Kerebron engine instead filters pastes through its ProseMirror
+                // schema, so markup never reaches the live document raw.
+                sanitizeHtml={sanitizePastedHtml}
+                aria-label={ariaLabel ?? label}
+                aria-labelledby={ariaLabelledBy ?? externalLabelId}
+                aria-describedby={describedByIds}
+                aria-invalid={invalid || undefined}
+                aria-required={required || undefined}
+                editorClassName={cn(
+                  // A native textarea renders repeated spaces and tabs
+                  // faithfully; normal HTML layout would collapse them.
+                  // (Font metrics ride editorStyle's CSS variables — text-sm/
+                  // text-lg utilities lose to unlayered package CSS here.)
+                  'whitespace-pre-wrap'
+                )}
+                editorStyle={editorStyle}
+                className={frameClassName}
+              />
+            </React.Suspense>
+          </TextAreaRichLoadBoundary>
         </div>
         {/* Mirrors the plain value for form posts and the forwarded ref. */}
         <textarea

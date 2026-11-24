@@ -18,6 +18,28 @@ export const TextAreaRichKerebronLazy = React.lazy(() =>
   }))
 );
 
+/**
+ * Contains a surface that failed: Suspense only covers the pending import,
+ * and React.lazy throws a failed one (a dropped connection, or chunk names a
+ * new deploy replaced) on render. Without a boundary that error would unmount
+ * the host app; with it, the field shows `fallback` instead. React keeps a
+ * failed lazy import, so the fallback stays until the page reloads.
+ */
+export class TextAreaRichLoadBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
+
 export interface TextAreaRichLoadingFrameProps {
   /** The surface's frame classes, so the stand-in matches it. */
   className?: string;

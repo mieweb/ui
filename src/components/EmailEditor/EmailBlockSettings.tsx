@@ -13,6 +13,7 @@ import { Textarea } from '../Textarea';
 // import would put the editor in every app's startup code.
 import {
   TextAreaRichKerebronLazy as TextAreaRichKerebron,
+  TextAreaRichLoadBoundary,
   TextAreaRichLoadingFrame,
 } from '../TextAreaRich/TextAreaRichKerebronLazy';
 import type { EmailEditorLabels } from './labels';
@@ -274,46 +275,58 @@ export function EmailBlockSettings({
     case 'text':
       return (
         <>
-          <React.Suspense
+          <TextAreaRichLoadBoundary
             fallback={
-              // One empty line in the frame (kerebron.css's 38px floor).
-              <TextAreaRichLoadingFrame minHeight="max(38px, calc(1.5rem + 14px))" />
+              // The block's value is HTML: a plain stand-in would show markup.
+              <p
+                role="alert"
+                className="text-destructive-700 dark:text-destructive-400 text-sm"
+              >
+                {labels.textEditorUnavailable}
+              </p>
             }
           >
-            <TextAreaRichKerebron
-              aria-label={f.content}
-              value={
-                block.content === emitted.current
-                  ? block.content
-                  : (sanitizeEmailHtml(block.content) ?? '')
+            <React.Suspense
+              fallback={
+                // One empty line in the frame (kerebron.css's 38px floor).
+                <TextAreaRichLoadingFrame minHeight="max(38px, calc(1.5rem + 14px))" />
               }
-              onChange={(content) => {
-                emitted.current = content;
-                set({ content });
-              }}
-              // Declares the policy pasted markup must pass. The Kerebron
-              // surface filters pastes through the ProseMirror schema (a
-              // stricter subset); stored content is still sanitised on every
-              // exit (canvas preview and MJML render).
-              sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
-              // A pasted image file must not become a base64 `data:` URL — the
-              // email URL policy (`isSafeUrl`) strips those on render, leaving a
-              // broken image. The always-present stable handler routes files
-              // through the host's current uploader, or rejects (= skips the
-              // file) without one. No videos in email text blocks.
-              mediaUpload={{
-                uploadHandler: uploadPastedImage,
-                allowedVideoTypes: [],
-              }}
-              // Task lists serialize checkbox <input>s, which the sanitiser
-              // forbids and no mail client would honour — dropping the nodes
-              // removes the menu item, input rule and paste handling together.
-              omitExtensions={EMAIL_OMITTED_EXTENSIONS}
-              variableGroups={variableGroups}
-              enableDictation={false}
-              defaultToolbar="visible"
-            />
-          </React.Suspense>
+            >
+              <TextAreaRichKerebron
+                aria-label={f.content}
+                value={
+                  block.content === emitted.current
+                    ? block.content
+                    : (sanitizeEmailHtml(block.content) ?? '')
+                }
+                onChange={(content) => {
+                  emitted.current = content;
+                  set({ content });
+                }}
+                // Declares the policy pasted markup must pass. The Kerebron
+                // surface filters pastes through the ProseMirror schema (a
+                // stricter subset); stored content is still sanitised on every
+                // exit (canvas preview and MJML render).
+                sanitizeHtml={(html) => sanitizeEmailHtml(html) ?? ''}
+                // A pasted image file must not become a base64 `data:` URL — the
+                // email URL policy (`isSafeUrl`) strips those on render, leaving a
+                // broken image. The always-present stable handler routes files
+                // through the host's current uploader, or rejects (= skips the
+                // file) without one. No videos in email text blocks.
+                mediaUpload={{
+                  uploadHandler: uploadPastedImage,
+                  allowedVideoTypes: [],
+                }}
+                // Task lists serialize checkbox <input>s, which the sanitiser
+                // forbids and no mail client would honour — dropping the nodes
+                // removes the menu item, input rule and paste handling together.
+                omitExtensions={EMAIL_OMITTED_EXTENSIONS}
+                variableGroups={variableGroups}
+                enableDictation={false}
+                defaultToolbar="visible"
+              />
+            </React.Suspense>
+          </TextAreaRichLoadBoundary>
           {alignment(block.alignment, 'left')}
           <ColorField
             label={f.color}
