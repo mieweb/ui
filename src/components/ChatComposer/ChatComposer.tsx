@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
@@ -12,10 +13,18 @@ import {
 import {
   AttachmentPreviewItem,
   DragDropZone,
-  getFileType,
   validateFile,
-  generateAttachmentId,
 } from '../Messaging/AttachmentPicker';
+import {
+  hasBusyUpload,
+  useAttachmentUploads,
+  type AttachmentUpload,
+  type AttachmentUploadState,
+  type DiscardAttachment,
+  type UploadAttachment,
+  type UploadedAttachment,
+} from './useAttachmentUploads';
+import { UploadAnnouncer } from './UploadAnnouncer';
 import {
   MentionMenu,
   useMentionAutocomplete,
@@ -23,7 +32,12 @@ import {
   type MentionSearchHandler,
   type MentionSelectHandler,
 } from '../Messaging/useMentionAutocomplete';
-import type { AttachmentType, NewMessage } from '../Messaging/types';
+import type { AttachmentState, NewMessage } from '../Messaging/types';
+import {
+  referencesIn,
+  type ReferenceTrigger,
+} from '../ReferenceChip/references';
+import type { RichEditorHandle } from '../RichEditor/RichEditor';
 import {
   AlertTriangleIcon,
   ArrowUpIcon,
@@ -41,27 +55,45 @@ import {
 // Types
 // ============================================================================
 
-/** A file staged for sending, with preview metadata. */
-interface StagedAttachment {
-  id: string;
-  file: File;
-  previewUrl?: string;
-  type: AttachmentType;
+/**
+ * What the composer says about uploads (`uploadAttachment`), each overridable
+ * through `uploadLabels`.
+ */
+export interface ChatComposerUploadLabels {
+  /** A file uploading: its tile's progress name, and what's announced. */
+  uploading: (name: string) => string;
+  /** On a tile once the last byte is in and the host is still finishing. */
+  processing: string;
+  /** Announced when a file has uploaded. */
+  uploaded: (name: string) => string;
+  /** Announced, and reported through `onError`, when a file didn't upload. */
+  failed: (name: string) => string;
+  /** The failed tile's button. */
+  retry: string;
+  /** The remove button while a file is uploading. */
+  cancel: (name: string) => string;
+  /** The remove button once a file has uploaded or failed. */
+  remove: (name: string) => string;
 }
 
-/** Stage one file; images and videos get an object-URL preview to revoke later. */
-function stageFile(file: File): StagedAttachment {
-  const type = getFileType(file.type);
-  return {
-    id: generateAttachmentId(),
-    file,
-    type,
-    previewUrl:
-      type === 'image' || type === 'video'
-        ? URL.createObjectURL(file)
-        : undefined,
-  };
-}
+/** How each upload state shows on its tile (processing is still a busy tile). */
+const TILE_STATE = {
+  pending: 'pending',
+  uploading: 'uploading',
+  processing: 'uploading',
+  uploaded: 'uploaded',
+  failed: 'failed',
+} as const satisfies Record<AttachmentUploadState, AttachmentState>;
+
+const DEFAULT_UPLOAD_LABELS: ChatComposerUploadLabels = {
+  uploading: (name) => `Uploading ${name}`,
+  processing: 'Processing…',
+  uploaded: (name) => `${name} uploaded`,
+  failed: (name) => `${name} didn't upload`,
+  retry: 'Retry',
+  cancel: (name) => `Cancel upload of ${name}`,
+  remove: (name) => `Remove ${name}`,
+};
 
 /** An entry in the composer's `+` menu. */
 export interface ChatComposerMenuItem {
@@ -117,18 +149,29 @@ export interface ChatComposerHandle {
    * are explicit host actions; validation and `onError` still apply.
    */
   addFiles: (files: File[]) => void;
+  /**
+   * Stage files that were uploaded already (`uploadAttachment`), without
+   * uploading them again: e.g. putting a failed send's attachments back.
+   */
+  restoreAttachments: (uploads: UploadedAttachment[]) => void;
   /** Focus the text input. */
   focus: () => void;
   /**
    * The underlying textarea element, for host integrations that need caret
-   * access (e.g. mention insertion via `setSelectionRange`).
+   * access (e.g. mention insertion via `setSelectionRange`). Null with
+   * `editor="rich"`.
    */
   getTextarea: () => HTMLTextAreaElement | null;
 }
 
 /** Structured context passed to `onError` so hosts can localize by reason. */
 export interface ChatComposerError {
-  reason: 'file-type' | 'file-size' | 'attachment-limit' | 'send-failed';
+  reason:
+    | 'file-type'
+    | 'file-size'
+    | 'attachment-limit'
+    | 'send-failed'
+    | 'upload-failed';
   /** The rejected file, when the error concerns a single file. */
   file?: File;
 }
@@ -242,16 +285,31 @@ export interface ChatComposerProps {
   /** Maximum number of staged attachments. @default 10 */
   maxAttachments?: number;
   /**
+  /**
    * Decide what stays staged when files arrive (picker, paste, drop or
    * `addFiles`), e.g. "one kind of attachment at a time". Called with the new
    * files that passed the type and size checks and the files already staged;
-   * return the full list to keep. Staged files left out are removed, new ones
-   * included are added, in the returned order. `maxAttachments` applies to
-   * the result. Omit to append every new file.
+   * return the files to keep. Staged files left out are removed (an upload
+   * in flight is aborted, a finished one discarded); new ones included are
+   * added after the staged ones kept. `maxAttachments` applies to the result.
+   * Omit to append every new file.
    */
   resolveAttachments?: (incoming: File[], staged: File[]) => File[];
   /** Called with the staged files whenever they change. */
   onAttachmentsChange?: (files: File[]) => void;
+  /**
+   * Upload each file as soon as it's attached, instead of handing the host
+   * `File`s at send. The tile shows its progress; removing it aborts
+   * `context.signal`; a failure shows Retry. Send stays enabled: pressed
+   * while files are uploading, it waits for them, then calls `onSend` with
+   * `message.uploads` (each file and what this resolved to). If one failed,
+   * nothing is sent and `onError` reports `'upload-failed'`.
+   */
+  uploadAttachment?: UploadAttachment<unknown>;
+  /** Undo a finished upload removed (or abandoned on unmount) before it was sent. */
+  discardAttachment?: DiscardAttachment<unknown>;
+  /** Overrides for the upload wording (`uploadAttachment`). */
+  uploadLabels?: Partial<ChatComposerUploadLabels>;
 
   /**
    * Candidates for `@mention` autocomplete. When provided (non-empty), typing
@@ -376,8 +434,34 @@ export interface ChatComposerProps {
   /** Accessible label for a staged attachment's remove button. @default (name) => `Remove ${name}` */
   removeAttachmentLabel?: (fileName: string) => string;
 
+  /**
+   * The text input. `'rich'` is a compact Markdown editor (Kerebron, loaded
+   * on first use) in which {@link triggers} insert references as chips;
+   * `'plain'` is the textarea. Experimental. @default 'plain'
+   */
+  editor?: 'plain' | 'rich';
+  /**
+   * Inline references — e.g. `@` people, `#` tickets. Typing a trigger's
+   * character searches it; a pick is a chip in the `'rich'` editor and a
+   * Markdown link (`[label](href)`) in the textarea. A trigger on `@` lists
+   * after `mentionOptions`. Sent messages carry `references`, read from the
+   * text.
+   */
+  triggers?: ReferenceTrigger[];
+
   className?: string;
 }
+
+// The rich input's editor: loaded only when a composer asks for it, so the
+// plain composer never downloads Kerebron.
+const LazyRichEditor = React.lazy(() =>
+  import('../RichEditor/RichEditor').then((m) => ({ default: m.RichEditor }))
+);
+const NO_MENU = () => [];
+// Pasted or dropped media would embed in the message (a data: URL, or a
+// sender-local blob: URL for video) and skip the attachment checks; until the
+// rich input attaches files the way the textarea does, it takes none.
+const RICH_OMITTED_EXTENSIONS = ['mediaUpload'] as const;
 
 // ============================================================================
 // Styles
@@ -431,6 +515,8 @@ const CARD_INTERACTIVE_SELECTOR = [
   'label',
   'video',
   '[role="listbox"]',
+  // The rich input: the editor and its toolbar take their own clicks.
+  '[data-slot="chat-composer-rich-input"]',
   '[role="menu"]',
   '[data-slot="chat-composer-reply-preview"]',
   '[data-slot="chat-composer-attachments"]',
@@ -439,6 +525,21 @@ const CARD_INTERACTIVE_SELECTOR = [
 // ============================================================================
 // Component
 // ============================================================================
+
+/**
+ * Where a send goes, fixed when Send is pressed: the `onSend` and reply
+ * target of that moment, and the draft's generation. A host that reuses the
+ * composer (SuperChatInbox switching conversations) binds `onSend` to what
+ * is on screen, so a send that waits — for uploads or the rich editor —
+ * still goes where it was written, and is dropped if the host swapped in
+ * another draft meanwhile.
+ */
+interface SendTarget {
+  send: ChatComposerProps['onSend'];
+  reply: ChatComposerProps['replyTo'];
+  generation: number;
+  sendOption?: string;
+}
 
 /**
  * Standardized chat input. At `md+` it renders as a single-row pill — `+`
@@ -475,6 +576,9 @@ export const ChatComposer = React.forwardRef<
     maxAttachments = 10,
     resolveAttachments,
     onAttachmentsChange,
+    uploadAttachment,
+    discardAttachment,
+    uploadLabels,
     mentionOptions,
     onMentionSearch,
     onMentionSelect,
@@ -512,19 +616,61 @@ export const ChatComposer = React.forwardRef<
     replyingToLabel = 'Replying to',
     cancelReplyLabel = 'Cancel reply',
     removeAttachmentLabel,
+    editor = 'plain',
+    triggers,
     className,
   },
   ref
 ) {
+  const richEditorRef = React.useRef<RichEditorHandle | null>(null);
+  const rich = editor === 'rich';
+  // A focus asked for before the lazy rich editor is ready, replayed from its
+  // `onReady`: its `focus()` is a no-op until its setup has started, which is
+  // after the ref attaches.
+  // Ready is kept across ref re-attachment (a rebuilt handle detaches and
+  // re-attaches the ref on a re-render) and dropped only with the editor.
+  const richReadyRef = React.useRef(false);
+  const pendingRichFocusRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!rich) richReadyRef.current = false;
+  }, [rich]);
+  const handleRichReady = React.useCallback(() => {
+    richReadyRef.current = true;
+    if (!pendingRichFocusRef.current) return;
+    pendingRichFocusRef.current = false;
+    richEditorRef.current?.focus();
+  }, []);
+  const focusInput = React.useCallback(() => {
+    if (!rich) {
+      textareaRef.current?.focus();
+      return;
+    }
+    if (richEditorRef.current && richReadyRef.current) {
+      richEditorRef.current.focus();
+    } else {
+      pendingRichFocusRef.current = true;
+    }
+  }, [rich]);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [internalValue, setInternalValue] = React.useState('');
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
 
-  const [attachments, setAttachments] = React.useState<StagedAttachment[]>([]);
-  const attachmentsRef = React.useRef(attachments);
-  attachmentsRef.current = attachments;
+  // The staged files, each uploading as soon as it's added when the host
+  // gives `uploadAttachment` (useAttachmentUploads).
+  const uploads = useAttachmentUploads<unknown>({
+    upload: uploadAttachment,
+    discard: discardAttachment,
+  });
+  const attachments = uploads.items;
+  const labels = React.useMemo(
+    () => ({ ...DEFAULT_UPLOAD_LABELS, ...uploadLabels }),
+    [uploadLabels]
+  );
+  // A send waiting for its files to finish uploading.
+  const [awaitingUploads, setAwaitingUploads] = React.useState(false);
+  const showSending = isSending || awaitingUploads;
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
@@ -583,9 +729,9 @@ export const ChatComposer = React.forwardRef<
   // parent render while the user is typing.
   const replyToId = replyTo?.id;
   React.useEffect(() => {
-    if (replyToId !== undefined) {
-      textareaRef.current?.focus();
-    }
+    if (replyToId !== undefined) focusInput();
+    // Keyed on the reply target alone; `focusInput` changes only with `editor`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replyToId]);
 
   // Host-opt-in autofocus, applied on the client only after confirming a
@@ -595,7 +741,7 @@ export const ChatComposer = React.forwardRef<
   React.useEffect(() => {
     if (!autoFocus) return;
     if (window.matchMedia?.(TOUCH_DEVICE_QUERY).matches) return;
-    textareaRef.current?.focus();
+    focusInput();
     // Mount-only, matching native `autofocus` semantics.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -604,20 +750,37 @@ export const ChatComposer = React.forwardRef<
   const hasContent = hasText || attachments.length > 0;
   const isOverLimit = maxLength !== undefined && value.length > maxLength;
   // Without an onSend handler, sending would silently discard the draft.
-  const canSend =
-    (hasContent || canSendWhenEmpty) &&
+  const readyToSend =
     onSend !== undefined &&
     !disabled &&
+    !readOnly &&
     !isSending &&
-    !isStreaming &&
-    !isOverLimit;
+    !isStreaming;
+  /** Whether `text` (with `staged` attachments) is a sendable message. */
+  const isSendable = (text: string, staged: readonly unknown[] = attachments) =>
+    (text.trim().length > 0 || staged.length > 0 || canSendWhenEmpty) &&
+    !(maxLength !== undefined && text.length > maxLength);
+  // Pressed while files upload, Send waits for them (see handleSend).
+  const canSend = readyToSend && !awaitingUploads && isSendable(value);
 
   // --------------------------------------------------------------------
   // Input handling
   // --------------------------------------------------------------------
 
+  // The draft's generation: bumped when `value` is replaced from outside
+  // (a host swapping in another conversation's draft), not by the
+  // composer's own edits. A pending rich send belongs to one generation.
+  const emittedValueRef = React.useRef(value);
+  const draftGenerationRef = React.useRef(0);
+  const seenValueRef = React.useRef(value);
+  if (value !== seenValueRef.current) {
+    seenValueRef.current = value;
+    if (value !== emittedValueRef.current) draftGenerationRef.current += 1;
+  }
+
   const setValue = React.useCallback(
     (next: string) => {
+      emittedValueRef.current = next;
       if (!isControlled) setInternalValue(next);
       onValueChange?.(next);
     },
@@ -646,10 +809,14 @@ export const ChatComposer = React.forwardRef<
   // @mention autocomplete (opt-in via `mentionOptions` or `onMentionSearch`)
   // — shared with MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
-    options: mentionOptions,
-    search: onMentionSearch,
+    // Off while disabled: a list left open, or a search answering late,
+    // must not write into a draft the host has locked.
+    options: disabled ? undefined : mentionOptions,
+    search: disabled ? undefined : onMentionSearch,
     onSelect:
       onMentionSearch || onMentionSelect ? handleMentionSelect : undefined,
+    // The rich editor handles its own triggers.
+    triggers: rich || disabled ? undefined : triggers,
     value,
     setValue,
     textareaRef,
@@ -741,51 +908,37 @@ export const ChatComposer = React.forwardRef<
       if (resolveAttachments) {
         const accepted = files.filter(acceptsFile);
         if (accepted.length === 0) return;
-        const current = attachmentsRef.current;
-        let next = Array.from(
+        const staged = uploads.current();
+        let keep = Array.from(
           new Set(
             resolveAttachments(
               accepted,
-              current.map((attachment) => attachment.file)
+              staged.map((item) => item.file)
             )
           )
         );
-        if (next.length > maxAttachments) {
+        if (keep.length > maxAttachments) {
           onError?.(limitMessage, { reason: 'attachment-limit' });
-          next = next.slice(0, maxAttachments);
+          keep = keep.slice(0, maxAttachments);
         }
-        const stagedByFile = new Map(
-          current.map((attachment) => [attachment.file, attachment])
-        );
-        const resolved = next.map(
-          (file) => stagedByFile.get(file) ?? stageFile(file)
-        );
-        for (const attachment of current) {
-          if (!next.includes(attachment.file) && attachment.previewUrl) {
-            URL.revokeObjectURL(attachment.previewUrl);
-          }
+        // Left out: removed as a user removal would (abort or discard).
+        for (const item of staged) {
+          if (!keep.includes(item.file)) uploads.remove(item.id);
         }
-        attachmentsRef.current = resolved;
-        setAttachments(resolved);
+        const stagedFiles = new Set(staged.map((item) => item.file));
+        uploads.add(keep.filter((file) => !stagedFiles.has(file)));
         return;
       }
 
-      const room = maxAttachments - attachmentsRef.current.length;
+      const room = maxAttachments - uploads.current().length;
       if (files.length > room) {
         onError?.(limitMessage, { reason: 'attachment-limit' });
         if (room <= 0) return;
       }
-      const staged = files
-        .slice(0, Math.max(room, 0))
-        .filter(acceptsFile)
-        .map(stageFile);
-      if (staged.length > 0) {
-        // Reserve slots synchronously: a second addFiles call in the same
-        // React batch reads attachmentsRef before re-render, so without this
-        // both calls could see the same free room and overshoot the cap.
-        attachmentsRef.current = [...attachmentsRef.current, ...staged];
-        setAttachments((current) => [...current, ...staged]);
-      }
+      const accepted = files.slice(0, Math.max(room, 0)).filter(acceptsFile);
+      // Staged synchronously (uploads.current() sees them at once), so a
+      // second addFiles call in the same React batch can't overshoot the cap.
+      uploads.add(accepted);
     },
     [
       maxAttachments,
@@ -793,44 +946,30 @@ export const ChatComposer = React.forwardRef<
       resolveAttachments,
       onError,
       attachmentLimitLabel,
+      uploads,
     ]
   );
 
-  // Skips the initial empty list: only real changes are reported.
+  // Reported when the staged files change, not on upload progress; the
+  // initial empty list isn't a change.
   const onAttachmentsChangeRef = React.useRef(onAttachmentsChange);
   onAttachmentsChangeRef.current = onAttachmentsChange;
-  const reportedAttachmentsRef = React.useRef(attachments);
+  const reportedFilesRef = React.useRef<File[]>([]);
   React.useEffect(() => {
-    if (reportedAttachmentsRef.current === attachments) return;
-    reportedAttachmentsRef.current = attachments;
-    onAttachmentsChangeRef.current?.(
-      attachments.map((attachment) => attachment.file)
-    );
+    const files = attachments.map((attachment) => attachment.file);
+    const reported = reportedFilesRef.current;
+    if (
+      files.length === reported.length &&
+      files.every((file, index) => file === reported[index])
+    ) {
+      return;
+    }
+    reportedFilesRef.current = files;
+    onAttachmentsChangeRef.current?.(files);
   }, [attachments]);
 
-  const removeAttachment = React.useCallback((id: string) => {
-    // Same discipline as addFiles: revoke and update the ref synchronously,
-    // keep the state updater pure (StrictMode may re-invoke it).
-    const target = attachmentsRef.current.find(
-      (attachment) => attachment.id === id
-    );
-    if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
-    attachmentsRef.current = attachmentsRef.current.filter(
-      (attachment) => attachment.id !== id
-    );
-    setAttachments((current) =>
-      current.filter((attachment) => attachment.id !== id)
-    );
-  }, []);
-
-  // Revoke any outstanding preview URLs on unmount.
-  React.useEffect(() => {
-    return () => {
-      for (const attachment of attachmentsRef.current) {
-        if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
-      }
-    };
-  }, []);
+  // Preview URLs are revoked, uploads aborted and unsent ones discarded by
+  // useAttachmentUploads, on removal and on unmount.
 
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -853,19 +992,130 @@ export const ChatComposer = React.forwardRef<
     ref,
     () => ({
       addFiles,
-      focus: () => textareaRef.current?.focus(),
+      restoreAttachments: uploads.restore,
+      focus: focusInput,
       getTextarea: () => textareaRef.current,
     }),
-    [addFiles]
+    [addFiles, focusInput, uploads.restore]
   );
 
   // --------------------------------------------------------------------
   // Sending
   // --------------------------------------------------------------------
 
+  // A send that waits for its uploads goes out with the text as it is when
+  // they finish (the user may keep typing), read here.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+  const alive = React.useRef(true);
+  React.useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
+  const reportFailedUpload = (failed: AttachmentUpload) =>
+    onError?.(labels.failed(failed.file.name), {
+      reason: 'upload-failed',
+      file: failed.file,
+    });
+
+  // The rich editor publishes `onChange` after an async serialization, so
+  // `value` can lag the last keystroke or chip: a rich send reads the
+  // editor's own content first. One read at a time, so a second Enter or
+  // click while it is pending can't send the draft twice.
+  const readingDraftRef = React.useRef(false);
+  // Whether the composer can send *now*, for a read that settles after the
+  // host disabled it, made it read-only or removed `onSend`.
+  const readyToSendRef = React.useRef(readyToSend);
+  readyToSendRef.current = readyToSend;
   const handleSend = (sendOption?: string) => {
-    if (!canSend || !onSend) return;
-    const content = value.trim();
+    if (!readyToSend || awaitingUploads || readingDraftRef.current) return;
+    sendWhenUploaded({
+      send: onSend,
+      reply: replyTo,
+      generation: draftGenerationRef.current,
+      sendOption,
+    });
+  };
+
+  // Send stays pressable while files upload: wait for them, keeping the
+  // draft and tiles in place, then send — or stop, keeping the draft, if one
+  // didn't make it. Checked again after every wait and every rich read, so a
+  // file added meanwhile is waited for too.
+  const sendWhenUploaded = (target: SendTarget) => {
+    if (draftGenerationRef.current !== target.generation) return;
+    const staged = uploads.current();
+    const failed = staged.find((item) => item.state === 'failed');
+    if (failed) {
+      reportFailedUpload(failed);
+      focusInput();
+      return;
+    }
+    if (!hasBusyUpload(staged)) {
+      sendDraft(target);
+      return;
+    }
+    focusInput();
+    setAwaitingUploads(true);
+    void uploads.settle().then(() => {
+      if (!alive.current) return;
+      setAwaitingUploads(false);
+      if (!readyToSendRef.current) return;
+      sendWhenUploaded(target);
+    });
+  };
+
+  const sendDraft = (target: SendTarget) => {
+    const editorHandle = rich ? richEditorRef.current : null;
+    if (!editorHandle) {
+      sendText(valueRef.current, target);
+      return;
+    }
+    readingDraftRef.current = true;
+    editorHandle
+      .getContent()
+      .then(
+        (text) => {
+          // Dropped if, meanwhile, the composer can no longer send (disabled,
+          // read-only, no `onSend`) or its editor unmounted: the draft stays
+          // as it is. (The handle itself may be rebuilt on any re-render.)
+          if (!readyToSendRef.current || !richEditorRef.current) return;
+          // Dropped too if the host replaced the draft meanwhile: the editor
+          // now holds that other draft, which is not this send's to send or
+          // clear.
+          if (draftGenerationRef.current !== target.generation) return;
+          // Publish the read draft first, so clearing it below is a change
+          // the editor sees even while `value` still lagged at ''.
+          if (text !== valueRef.current) flushSync(() => setValue(text));
+          // A file added during the read is still uploading (or has failed):
+          // back through the upload check, which waits and reads again.
+          const staged = uploads.current();
+          if (
+            hasBusyUpload(staged) ||
+            staged.some((item) => item.state === 'failed')
+          ) {
+            sendWhenUploaded(target);
+            return;
+          }
+          sendText(text, target);
+        },
+        () => onError?.(sendFailedLabel, { reason: 'send-failed' })
+      )
+      .finally(() => {
+        readingDraftRef.current = false;
+      });
+  };
+
+  const sendText = (text: string, { send, reply, sendOption }: SendTarget) => {
+    // The attachments staged now, not when the send began: a file added or
+    // removed meanwhile is sent or left out as it shows. Every tile taken off
+    // while Send waited, and no text: nothing to send.
+    if (!send || !isSendable(text, uploads.current())) return;
+    const content = text.trim();
+    const staged = uploads.take();
+    // Picked through `onMentionSearch` and still in the text sent.
     const mentions = onMentionSearch
       ? Array.from(pickedMentionsRef.current.values()).filter((option) =>
           content.includes(`@${option.value ?? option.label.split(' ')[0]}`)
@@ -874,19 +1124,21 @@ export const ChatComposer = React.forwardRef<
     pickedMentionsRef.current.clear();
     const message: NewMessage = {
       content,
-      attachments: attachments.map((attachment) => attachment.file),
+      attachments: staged.map((attachment) => attachment.file),
+      // Only with uploadAttachment: what each file's upload resolved to.
+      ...(uploadAttachment
+        ? {
+            uploads: staged.map(({ file, result }) => ({ file, result })),
+          }
+        : {}),
       // Only add the key when replying — hosts may key-check the payload.
-      ...(replyTo ? { replyToId: replyTo.id } : {}),
+      ...(reply ? { replyToId: reply.id } : {}),
       ...(mentions.length > 0 ? { mentions } : {}),
+      // Read from the text actually sent, so the two always agree.
+      ...(triggers?.length
+        ? { references: referencesIn(content, triggers) }
+        : {}),
     };
-    for (const attachment of attachments) {
-      if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
-    }
-    // Clear the ref alongside the state: the unmount cleanup reads the ref,
-    // so if onSend unmounts the composer synchronously it must not see (and
-    // re-revoke) the already-revoked preview URLs.
-    attachmentsRef.current = [];
-    setAttachments([]);
     setValue('');
     // The draft is cleared optimistically; hosts own retry/restore. Both a
     // synchronous throw and a rejected promise surface through onError
@@ -895,15 +1147,15 @@ export const ChatComposer = React.forwardRef<
       // `meta` only for an option send, so plain-send payloads stay unchanged.
       const sent =
         sendOption === undefined
-          ? onSend(message)
-          : onSend(message, { sendOption });
+          ? send(message)
+          : send(message, { sendOption });
       Promise.resolve(sent).catch(() => {
         onError?.(sendFailedLabel, { reason: 'send-failed' });
       });
     } catch {
       onError?.(sendFailedLabel, { reason: 'send-failed' });
     }
-    textareaRef.current?.focus();
+    focusInput();
   };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
@@ -922,7 +1174,7 @@ export const ChatComposer = React.forwardRef<
     const target = event.target as HTMLElement;
     if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
     event.preventDefault();
-    textareaRef.current?.focus();
+    focusInput();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1038,16 +1290,57 @@ export const ChatComposer = React.forwardRef<
           data-slot="chat-composer-attachments"
           className="flex flex-wrap gap-2 px-3 pt-3"
         >
-          {attachments.map((attachment) => (
-            <AttachmentPreviewItem
-              key={attachment.id}
-              attachment={{ ...attachment, state: 'pending' }}
-              onRemove={() => removeAttachment(attachment.id)}
-              removeLabel={removeAttachmentLabel?.(attachment.file.name)}
-              disabled={disabled}
-            />
-          ))}
+          {attachments.map((attachment) => {
+            const busy =
+              attachment.state === 'uploading' ||
+              attachment.state === 'processing';
+            const name = attachment.file.name;
+            return (
+              <AttachmentPreviewItem
+                key={attachment.id}
+                attachment={{
+                  ...attachment,
+                  state: TILE_STATE[attachment.state],
+                  // Processing is the state's, not a rounded 100%.
+                  progress:
+                    attachment.state === 'processing'
+                      ? 100
+                      : busy
+                        ? Math.min(99, Math.round(attachment.progress * 100))
+                        : undefined,
+                }}
+                // The button goes with the tile (or the retry): focus back to the
+                // input, the rich editor or the textarea.
+                onRemove={() => {
+                  uploads.remove(attachment.id);
+                  focusInput();
+                }}
+                onRetry={
+                  uploadAttachment
+                    ? () => {
+                        uploads.retry(attachment.id);
+                        focusInput();
+                      }
+                    : undefined
+                }
+                disabled={disabled}
+                progressLabel={labels.uploading(name)}
+                processingLabel={labels.processing}
+                retryLabel={labels.retry}
+                removeLabel={
+                  busy
+                    ? labels.cancel(name)
+                    : (removeAttachmentLabel?.(name) ??
+                      (uploadAttachment ? labels.remove(name) : undefined))
+                }
+              />
+            );
+          })}
         </div>
+      )}
+
+      {uploadAttachment && (
+        <UploadAnnouncer items={attachments} labels={labels} />
       )}
 
       <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]">
@@ -1059,72 +1352,125 @@ export const ChatComposer = React.forwardRef<
         <div className={cells.input} ref={mention.anchorRef}>
           <MentionMenu
             mention={mention}
-            label={mentionListLabel}
+            label={mention.activeTrigger?.label ?? mentionListLabel}
             dataSlot="chat-composer-mention-list"
           />
-          <textarea
-            // Mobile keyboard hints; overridable via `textareaProps`.
-            enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
-            inputMode="text"
-            autoCapitalize="sentences"
-            autoCorrect="on"
-            spellCheck
-            // Follows the typed script, so RTL text aligns correctly.
-            dir="auto"
-            {...textareaProps}
-            ref={textareaRef}
-            data-slot="chat-composer-input"
-            value={value}
-            onChange={(event) => {
-              textareaProps?.onChange?.(event);
-              setValue(event.target.value);
-              mention.sync(
-                event.target.value,
-                event.target.selectionStart ?? event.target.value.length
-              );
-            }}
-            // Host handlers run first; preventDefault() opts out of the
-            // built-in behavior (mention menu, Enter-to-send,
-            // paste-to-attach).
-            onKeyDown={(event) => {
-              textareaProps?.onKeyDown?.(event);
-              if (event.defaultPrevented) return;
-              handleKeyDown(event);
-            }}
-            onClick={(event) => {
-              textareaProps?.onClick?.(event);
-              if (event.defaultPrevented) return;
-              const el = event.currentTarget;
-              mention.sync(el.value, el.selectionStart ?? el.value.length);
-            }}
-            onPaste={(event) => {
-              textareaProps?.onPaste?.(event);
-              if (event.defaultPrevented) return;
-              handlePaste(event);
-            }}
-            placeholder={placeholder}
-            disabled={disabled}
-            rows={1}
-            aria-label={inputLabel}
-            {...mention.inputProps}
-            style={{
-              ...textareaProps?.style,
-              maxHeight:
-                typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
-            }}
-            className={cn(
-              'block w-full resize-none bg-transparent',
-              // 16px below `sm`: iOS zooms the page when focusing an input
-              // with a smaller font.
-              'rounded-lg text-base sm:text-sm',
-              cells.textarea,
-              'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
-              // Ring the input itself on focus rather than the whole shell.
-              'focus:ring-primary-500 focus:ring-1 focus:outline-none',
-              'disabled:cursor-not-allowed',
-              textareaProps?.className
-            )}
-          />
+          {rich ? (
+            <div
+              data-slot="chat-composer-rich-input"
+              className={cn('min-w-0', cells.textarea)}
+              style={{
+                maxHeight:
+                  typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+                overflowY: 'auto',
+              }}
+              // Enter sends (Shift+Enter is a new line), before the editor
+              // splits the paragraph — unless the reference list is open, in
+              // which case Enter picks (the editor then carries aria-controls).
+              onKeyDownCapture={(event) => {
+                if (
+                  event.key !== 'Enter' ||
+                  event.shiftKey ||
+                  !sendsOnEnter ||
+                  event.nativeEvent.isComposing ||
+                  (event.target as HTMLElement).hasAttribute?.('aria-controls')
+                )
+                  return;
+                event.preventDefault();
+                event.stopPropagation();
+                handleSend();
+              }}
+            >
+              <React.Suspense
+                fallback={
+                  // Real text (not a ::placeholder), so it must meet AA
+                  // contrast: the theme's muted-text token does.
+                  <div className="text-muted-foreground text-sm">
+                    {placeholder}
+                  </div>
+                }
+              >
+                <LazyRichEditor
+                  ref={richEditorRef}
+                  onReady={handleRichReady}
+                  omitExtensions={RICH_OMITTED_EXTENSIONS}
+                  value={value}
+                  onChange={setValue}
+                  // A controlled composer keeps native controlled-input
+                  // semantics: an edit the host rejects reverts on screen too.
+                  strictValue={isControlled}
+                  triggers={triggers}
+                  modifyMenu={NO_MENU}
+                  disabled={disabled}
+                  aria-label={inputLabel}
+                />
+              </React.Suspense>
+            </div>
+          ) : (
+            <textarea
+              // Mobile keyboard hints; overridable via `textareaProps`.
+              enterKeyHint={sendsOnEnter ? 'send' : 'enter'}
+              inputMode="text"
+              autoCapitalize="sentences"
+              autoCorrect="on"
+              spellCheck
+              // Follows the typed script, so RTL text aligns correctly.
+              dir="auto"
+              {...textareaProps}
+              ref={textareaRef}
+              data-slot="chat-composer-input"
+              value={value}
+              onChange={(event) => {
+                textareaProps?.onChange?.(event);
+                setValue(event.target.value);
+                mention.sync(
+                  event.target.value,
+                  event.target.selectionStart ?? event.target.value.length
+                );
+              }}
+              // Host handlers run first; preventDefault() opts out of the
+              // built-in behavior (mention menu, Enter-to-send,
+              // paste-to-attach).
+              onKeyDown={(event) => {
+                textareaProps?.onKeyDown?.(event);
+                if (event.defaultPrevented) return;
+                handleKeyDown(event);
+              }}
+              onClick={(event) => {
+                textareaProps?.onClick?.(event);
+                if (event.defaultPrevented) return;
+                const el = event.currentTarget;
+                mention.sync(el.value, el.selectionStart ?? el.value.length);
+              }}
+              onPaste={(event) => {
+                textareaProps?.onPaste?.(event);
+                if (event.defaultPrevented) return;
+                handlePaste(event);
+              }}
+              placeholder={placeholder}
+              disabled={disabled}
+              rows={1}
+              aria-label={inputLabel}
+              {...mention.inputProps}
+              style={{
+                ...textareaProps?.style,
+                maxHeight:
+                  typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
+              }}
+              className={cn(
+                'block w-full resize-none bg-transparent',
+                // 16px below `sm`: iOS zooms the page when focusing an input
+                // with a smaller font.
+                'rounded-lg text-base sm:text-sm',
+                cells.textarea,
+                'text-neutral-900 placeholder:text-neutral-400 dark:text-white dark:placeholder:text-neutral-500',
+                // Ring the input itself on focus rather than the whole shell.
+                'focus:ring-primary-500 focus:ring-1 focus:outline-none',
+                'disabled:cursor-not-allowed',
+                textareaProps?.className
+              )}
+            />
+          )}
         </div>
 
         {(showAddMenu || leadingSlot != null) && (
@@ -1274,8 +1620,8 @@ export const ChatComposer = React.forwardRef<
             <button
               type="button"
               data-slot="chat-composer-send-button"
-              aria-label={isSending ? sendingLabel : sendLabel}
-              aria-busy={isSending || undefined}
+              aria-label={showSending ? sendingLabel : sendLabel}
+              aria-busy={showSending || undefined}
               disabled={!canSend}
               onMouseDown={keepInputFocus}
               onClick={() => handleSend()}
@@ -1285,7 +1631,7 @@ export const ChatComposer = React.forwardRef<
                   'bg-primary-800 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white hover:text-white dark:hover:text-white'
               )}
             >
-              {isSending ? (
+              {showSending ? (
                 <LoaderIcon
                   className="h-4 w-4 animate-spin"
                   aria-hidden="true"

@@ -18,6 +18,9 @@ import {
   type KeyboardInsetSource,
 } from '../../hooks/useKeyboardInset';
 import { CameraIcon, FileTextIcon, GlobeIcon } from '../Icons';
+import { ReferenceChip } from '../ReferenceChip';
+import { sampleTriggers } from '../ReferenceChip/storyData';
+import type { NewMessage } from '../Messaging/types';
 
 const sampleAgents: ChatComposerAgentOption[] = [
   { id: 'general', label: 'General assistant' },
@@ -125,6 +128,14 @@ Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus),
 
 Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding. \`sendOptions\` (\`{ id, label, icon?, disabled? }[]\`) adds a chevron beside send with other ways to send the draft ("Send later…", "Send without notifying"): choosing one sends exactly like the send button and calls \`onSend(message, { sendOption: id })\` — the host decides what the option means; Enter and the send button still do a plain send, with no second argument. Label the trigger with \`sendOptionsLabel\`.
 
+### Inline references and the rich input
+
+\`triggers\` (one \`ReferenceTrigger\` per kind — \`@\` people, \`#\` tickets; the contract is on [ReferenceChip](?path=/docs/editors-referencechip--docs)) let the writer name records while typing. In the default textarea a pick is inserted as a Markdown link (\`[@Ann Lee](/people/u-ann)\`); with \`editor="rich"\` (**experimental**) the textarea becomes a compact [RichEditor](?path=/docs/editors-richeditor--docs) and a pick is an atomic chip. Either way \`onSend\` gets the Markdown in \`content\` and the records it names in \`references\` (\`referencesIn\` over the sent text).
+
+\`editor="rich"\` needs RichEditor's setup in the host, as the [RichEditor docs](?path=/docs/editors-richeditor--docs) describe: the \`@kerebron/*\` peers (and the Kerebron patches listed there), \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and \`@kerebron/wasm\`'s \`assets/\` served at \`/kerebron-wasm\`. Without the CSS the editor is unstyled; without the WASM it does not start. The editor is lazy-loaded, so a composer without \`editor="rich"\` never downloads Kerebron. Not yet in rich mode: \`mentionOptions\`, paste-to-attach and the placeholder.
+
+Choose the **rich composer** for a chat message that is sent and cleared — Enter sends, there is no formatting toolbar, and attachments, send options and the selector rows still apply. Choose **RichEditor** itself for a document that is written and saved — headings, lists, tables, a toolbar, live collaboration.
+
 ### Use it when
 
 - Building **any new chat surface** — AI assistants, patient messaging, support chat. This is the canonical composer (the legacy \`MessageComposer\` was retired in 0.10.0 — see \`MIGRATION.md#chat-composer\`).
@@ -167,7 +178,7 @@ const composerRef = useRef<ChatComposerHandle>(null);
 ### Limitations
 
 - The mic button is a hook, not a recorder: \`onMicClick\` only fires a callback. For actual audio capture pass \`micSlot={<RecordButton … />}\`. Use \`leadingSlot\` for a host control before the \`+\` menu. Both slots are constrained to a 32px-tall row so they line up with the other controls; taller content (like \`RecordButton\`) overflows and stays vertically centered without inflating the composer. \`selectorsEndSlot\` renders after the model selector in the row below the card and shows that row on its own. Interaction state is yours — disable your own control when the composer is \`disabled\`.
-- Attachment upload state is the host's job: files are staged locally and handed over on send as \`File[]\`; there is no built-in upload progress.
+- Attachments are handed over on send as \`File[]\`, unless the host passes \`uploadAttachment(file, { signal, onProgress })\`: then each file uploads as it's attached, with progress on its tile, cancel on remove, Retry on failure, and Send waits for the rest (see *Upload On Attach*). The lifecycle is exported as \`useAttachmentUploads\`, its announcements as \`UploadAnnouncer\`.
 - i18n: all strings are props with English defaults (\`placeholder\`, \`inputLabel\`, \`addMenuLabel\`, \`attachFilesLabel\`, \`micLabel\`, \`sendLabel\`, \`sendingLabel\`, \`stopLabel\`, \`agentSelectorLabel\`, \`readOnlyMessage\`, \`attachmentLimitLabel\`, \`sendFailedLabel\`, \`mentionListLabel\`, \`dropFilesLabel\`, \`replyingToLabel\`, \`cancelReplyLabel\`); file-validation messages from \`onError\` carry a machine-readable \`context.reason\` so hosts can substitute localized copy. RTL: uses logical properties (\`ms-auto\`, \`pe-*\`, the reply preview's \`border-s-4\` accent) throughout.
 - Accessibility: every icon button has an \`aria-label\`; the \`+\` and agent menus are \`Dropdown\`s (Tab-based item access, Escape/outside-click to close — no arrow-key navigation or typeahead yet) that close on selection; \`addMenuItems\` with \`checked\` render as \`menuitemcheckbox\`, agent options as \`menuitemradio\`; the send button exposes \`aria-busy\` while \`isSending\`; the character counter is \`aria-live="polite"\`. The textarea is labelled via \`inputLabel\`; with \`mentionOptions\` it gains \`aria-autocomplete="list"\` plus \`aria-controls\` / \`aria-activedescendant\` into the mention \`listbox\` (labelled via \`mentionListLabel\`).
 - Types exported: \`ChatComposerProps\`, \`ChatComposerHandle\`, \`ChatComposerError\`, \`ChatComposerMenuItem\`, \`ChatComposerAgentOption\`, \`MentionOption\` (shared with Messaging); the send payload reuses \`NewMessage\` from the Messaging module. Entry \`@mieweb/ui\`.`,
@@ -176,6 +187,16 @@ const composerRef = useRef<ChatComposerHandle>(null);
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'editors-richeditor',
+          why: 'editor="rich" (experimental) swaps the textarea for a compact, lazy-loaded RichEditor and needs its peers, CSS and WASM setup. Use the composer for a message that is sent and cleared; RichEditor for a document with a toolbar that is saved.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-referencechip',
+          why: 'triggers take ReferenceChip’s ReferenceTrigger contract; picks become Markdown links (chips in the rich input) and onSend gets them as references, which ReferenceChip then shows in the sent message.',
+        },
         {
           type: 'alternative to',
           target: 'chat-messaging',
@@ -260,6 +281,36 @@ export const WithAttachments: Story = {
   ),
 };
 
+/**
+ * `uploadAttachment` uploads each file as it's attached. This fake takes about
+ * four seconds and fails any file named `fail…`: attach one, press Send early,
+ * remove a tile mid-upload, or Retry a failed one.
+ */
+export const UploadOnAttach: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      uploadAttachment={(file, { signal, onProgress }) =>
+        new Promise((resolve, reject) => {
+          let sent = 0;
+          const tick = window.setInterval(() => {
+            sent = Math.min(1, sent + 0.05);
+            onProgress(sent);
+            if (sent < 1) return;
+            window.clearInterval(tick);
+            window.setTimeout(() => {
+              if (file.name.startsWith('fail'))
+                reject(new Error('The server said no.'));
+              else resolve({ id: file.name });
+            }, 800);
+          }, 160);
+          signal.addEventListener('abort', () => window.clearInterval(tick));
+        })
+      }
+    />
+  ),
+};
+
 export const WithMentions: Story = {
   render: () => (
     <ChatComposerDemo
@@ -282,6 +333,81 @@ export const WithMentions: Story = {
       description: {
         story:
           'Typing `@` opens the shared Messaging mention autocomplete (arrow keys to navigate, Enter/Tab to insert, Escape to dismiss).',
+      },
+    },
+  },
+};
+
+function RichReferencesDemo() {
+  const [sent, setSent] = React.useState<NewMessage | null>(null);
+  return (
+    <div className="w-[560px] max-w-full space-y-3">
+      <ChatComposerDemo
+        editor="rich"
+        triggers={sampleTriggers}
+        placeholder="Type @ for people or # for tickets…"
+        onSend={setSent}
+      />
+      {sent && (
+        <div
+          data-slot="story-sent"
+          className="rounded-lg border border-neutral-200 p-3 text-sm dark:border-neutral-700"
+        >
+          <p className="font-mono text-xs break-all">{sent.content}</p>
+          <p className="mt-2 flex flex-wrap gap-1">
+            {sent.references?.map((r) => (
+              <ReferenceChip
+                key={`${r.kind}:${r.id}`}
+                kind={r.kind}
+                label={r.label}
+                href={r.href}
+              />
+            ))}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * `triggers` in the plain textarea: `#` searches tickets, and a pick goes in
+ * as a Markdown link. `@` still lists `mentionOptions`.
+ */
+export const ReferenceTriggers: Story = {
+  render: () => (
+    <ChatComposerDemo
+      onSend={() => {}}
+      placeholder="Type @ to mention, # for a ticket…"
+      mentionOptions={[
+        { id: 'u1', label: 'Dr. Sarah Chen', description: 'physician' },
+        { id: 'u2', label: 'Tom Rivera', description: 'nurse' },
+      ]}
+      triggers={sampleTriggers.filter((t) => t.char === '#')}
+    />
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`triggers` work in the plain textarea too: typing `#` searches tickets (async) and a pick is inserted as a Markdown link `[TH-12: …](/tickets/t-12)`, which SuperChat’s references plugin shows as a chip once sent. `@` keeps listing `mentionOptions`.',
+      },
+    },
+  },
+};
+
+/**
+ * Experimental: `editor="rich"` swaps the textarea for a compact RichEditor
+ * in which `triggers` insert references as chips. Enter sends; the message
+ * carries `references`.
+ */
+export const RichReferences: Story = {
+  render: () => <RichReferencesDemo />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Experimental. `editor="rich"` loads a compact RichEditor (Kerebron) on first use; `triggers` (`@` people, `#` tickets) insert references as atomic chips. Enter sends unless the list is open (then it picks); Shift+Enter is a new line. `onSend` receives the Markdown in `content` and the references in `references`. Not yet in rich mode: `mentionOptions`, paste-to-attach and the placeholder.',
       },
     },
   },

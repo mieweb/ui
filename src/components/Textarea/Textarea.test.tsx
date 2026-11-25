@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest';
 import * as React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
-import { renderWithTheme } from '../../test/test-utils';
+import { loadTextareaSurface, renderWithTheme } from '../../test/test-utils';
 import { Textarea, plainToHtml, htmlToPlain } from './Textarea';
 
 afterEach(() => {
@@ -13,6 +13,8 @@ const editEditor = (editor: HTMLElement, html: string) => {
   editor.innerHTML = html;
   fireEvent.input(editor);
 };
+
+beforeAll(loadTextareaSurface);
 
 describe('plainToHtml / htmlToPlain', () => {
   it.each([

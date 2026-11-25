@@ -31,6 +31,7 @@ export { getConversationMediaItems } from './media';
 
 export {
   createMarkdownRenderer,
+  MarkdownLink,
   type CreateMarkdownRendererOptions,
 } from './render/createMarkdownRenderer';
 

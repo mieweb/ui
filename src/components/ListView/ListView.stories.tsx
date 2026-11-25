@@ -88,6 +88,11 @@ The page owns \`items\`, \`selectedId\` and the fetch; the view owns how they lo
           target: 'grids-datavis-nitro',
           why: 'Reach for the grid when rows need sorting, filtering, paging or export; ListView is a read-down layout.',
         },
+        {
+          type: 'alternative to',
+          target: 'views-reorderablelist',
+          why: 'ReorderableList is a plain list the user puts in order; ListView groups a collection by stage or group and has no manual order.',
+        },
       ],
     },
   },

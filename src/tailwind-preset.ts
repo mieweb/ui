@@ -39,6 +39,8 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // ToolCallDisplay: labeled inputs and structured result fields.
+  'grid-cols-[minmax(0,auto)_minmax(0,1fr)]',
   // EncounterVisit: report layout, expanding narratives, and coordinated vitals.
   'z-40',
   'sm:inset-8',
@@ -410,8 +412,8 @@ export const miewebUISafelist = [
   // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
   'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
   'sm:w-[var(--superchat-sidebar-width)]',
-  '[&_a]:text-current',
-  '[&_a:hover]:text-current',
+  '[&_a:not([data-slot=reference-chip])]:text-current',
+  '[&_a:not([data-slot=reference-chip]):hover]:text-current',
   '-mx-1',
   'inset-y-0',
   'w-0.5',
@@ -812,6 +814,8 @@ export const miewebUISafelist = [
   'me-auto',
   'ms-auto',
   '-end-1',
+  '-end-1.5',
+  '-top-1.5',
   'start-0',
   'end-0',
   'ps-4',
@@ -952,6 +956,9 @@ export const miewebUISafelist = [
   'overflow-auto',
   // Select component
   'truncate',
+  // ReferenceChip: sits on the text baseline, underlined only on hover
+  'align-baseline',
+  'no-underline',
   // AIReconciliationPanel
   'ring-primary-200',
   'dark:ring-primary-900',
@@ -1198,6 +1205,9 @@ export const miewebUISafelist = [
   'leading-snug',
   'mb-1',
   'mt-2',
+  'mt-4',
+  'px-0.5',
+  'm-auto',
   'normal-case',
   'outline-none',
   'p-0',
@@ -1304,6 +1314,9 @@ export const miewebUISafelist = [
   'cursor-grab',
   'active:cursor-grabbing',
   'touch-none',
+  // ReorderableList: whole-row drag and the lifted dragged row
+  'touch-manipulation',
+  'opacity-80',
   'opacity-40',
   'group-hover/portlet:opacity-100',
   'focus-visible:opacity-100',

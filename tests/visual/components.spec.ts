@@ -1259,6 +1259,81 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   }
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 900 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Approval metadata${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-approval-metadata', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Approval opens the details: description, hints and labeled inputs.
+      await expect(page.getByText('Provider notes:')).toBeVisible();
+      await expect(page.getByText('Host name', { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-approval-metadata${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Outcomes${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-outcomes', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Collapsed, the failed and unconfirmed calls stay listed and counted.
+      await expect(
+        page.getByText('1 not confirmed', { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.locator("[data-slot='ai-tool-call-uncertain']")
+      ).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-outcomes${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Rich results${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-rich-results', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      await page.getByRole('button', { name: /^Used 2 tools/ }).click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      for (const index of [0, 1]) {
+        await rows.nth(index).getByRole('button').first().click();
+      }
+      await expect(rows.locator('table')).toBeVisible();
+      await expect(
+        page.getByRole('img', { name: 'CPU usage per host over 24 hours' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-rich-results${name}.png`
+      );
+    });
+  }
+
   for (const [name, reducedMotion] of [
     ['', 'no-preference'],
     ['-reduced-motion', 'reduce'],
@@ -3224,5 +3299,65 @@ test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () 
     });
     await expect(menu).toBeHidden();
     await expect(page.locator('[aria-label="Letter body"]')).toBeFocused();
+  });
+});
+
+test.describe('Visual Regression Tests - ReorderableList', () => {
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`ReorderableList - With move buttons${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'views-reorderablelist--with-move-buttons', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+      const list = page.locator("[data-slot='reorderable-list']");
+      const row = list.locator("[data-slot='reorderable-list-item']").first();
+      await expect(row).toBeVisible();
+      // The grip leads the row and the move buttons close it: grip right of
+      // the buttons under RTL, left of them otherwise.
+      const [grip, buttons] = await Promise.all([
+        row.locator("[data-slot='reorderable-list-handle']").boundingBox(),
+        row
+          .locator("[data-slot='reorderable-list-move-buttons']")
+          .boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(grip!.x).toBeGreaterThan(buttons!.x);
+      } else {
+        expect(grip!.x).toBeLessThan(buttons!.x);
+      }
+      if (viewport) {
+        const box = await list.boundingBox();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(list).toHaveScreenshot(
+        `reorderable-list-with-move-buttons${name}.png`
+      );
+    });
+  }
+
+  test('ReorderableList - Rows slide aside mid-drag', async ({ page }) => {
+    await gotoStory(page, 'views-reorderablelist--with-move-buttons');
+    const rows = page.locator("[data-slot='reorderable-list-item']");
+    const grip = rows.first().locator("[data-slot='reorderable-list-handle']");
+    const from = (await grip.boundingBox())!;
+    const second = (await rows.nth(1).boundingBox())!;
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(from.x + from.width / 2, second.y + second.height, {
+      steps: 8,
+    });
+    await expect(rows.first()).toHaveAttribute('data-dragging', 'true');
+    // The second row has moved up into the dragged row's slot.
+    await expect
+      .poll(async () => (await rows.nth(1).boundingBox())!.y)
+      .toBeLessThan(second.y);
+    await page.mouse.up();
   });
 });

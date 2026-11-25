@@ -33,6 +33,13 @@ function textOf(node: HastNode): string {
   return (node.children ?? []).map(textOf).join('');
 }
 
+// Whether `node` holds a link. The grid takes cells as strings, so a table
+// with links — or reference chips drawn from them — stays on the HTML path,
+// where they keep working.
+function hasLink(node: HastNode): boolean {
+  return node.tagName === 'a' || (node.children ?? []).some(hasLink);
+}
+
 function rowsOf(parent: HastNode | undefined): HastNode[] {
   return (parent?.children ?? []).filter((c) => c.tagName === 'tr');
 }
@@ -47,7 +54,7 @@ interface ParsedTable {
 }
 
 function parseTable(node: HastNode | undefined): ParsedTable | null {
-  if (!node || node.tagName !== 'table') return null;
+  if (!node || node.tagName !== 'table' || hasLink(node)) return null;
 
   const thead = node.children?.find((c) => c.tagName === 'thead');
   const tbody = node.children?.find((c) => c.tagName === 'tbody');

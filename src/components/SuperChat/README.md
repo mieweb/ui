@@ -636,6 +636,17 @@ third larger again in memory, and past a few hundred MB it is more than a browse
 string can hold, so large videos need it off. Raise the cap with `maxFileSize`, which also takes a function, e.g.
 `(file) => (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024`.
 
+To upload each file **as soon as it's attached**, pass
+`composerProps.uploadAttachment(file, { signal, onProgress })`. The composer
+starts it on attach and shows its progress on the tile, aborts `signal` when
+the tile is removed, offers Retry when it fails, and calls
+`composerProps.discardAttachment(result, file)` for a finished upload taken off
+before sending. Send stays enabled: pressed while files upload, it waits for
+them, then `onMessageSent` gets each attachment's `result`; nothing to upload
+at send. If the send fails, the files go back as uploaded. The same lifecycle
+is exported as `useAttachmentUploads` for composers of your own, and its
+screen-reader announcements as `UploadAnnouncer`. Pair it with a per-file `maxFileSize`.
+
 ### Rendering video / audio / PDF inline
 
 Add `createAttachmentPlugin()` to render non-image attachments (video, audio, PDF,

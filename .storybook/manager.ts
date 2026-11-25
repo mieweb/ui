@@ -187,7 +187,11 @@ const TAG_BADGES: Record<string, { label: string; color: string }> = {
 function renderSidebarLabel(item: { name: string; tags?: string[]; type: string }) {
   const badges = (item.tags ?? []).filter((tag) => tag in TAG_BADGES);
   // Badge the component node only; its docs/story children repeat the same tags.
-  if (badges.length === 0 || item.type !== 'component') {
+  // Standalone docs pages (unattached MDX, e.g. "AI Design Agents") collapse to
+  // a single docs row carrying the page name — attached docs children are
+  // always named "Docs", so they stay unbadged.
+  const standaloneDocs = item.type === 'docs' && item.name !== 'Docs';
+  if (badges.length === 0 || (item.type !== 'component' && !standaloneDocs)) {
     return item.name;
   }
   return React.createElement(
@@ -385,8 +389,10 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       background-color: ${brand.primary} !important;
     }
     
-    /* Selected sidebar item text styling */
-    [data-selected="true"] span,
+    /* Selected sidebar item text styling. Badges keep their own white-on-color
+       text (a standalone docs page can be the selected row itself, unlike
+       component nodes whose children get selected). */
+    [data-selected="true"] span:not(.mieweb-sidebar-badge),
     [data-selected="true"] a,
     [data-selected="true"] button {
       color: ${textColor} !important;

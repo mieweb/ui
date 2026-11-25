@@ -1,0 +1,392 @@
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithTheme } from '../../test/test-utils';
+import { MCPToolCallDisplay, ToolCallDisplay } from './MCPToolCall';
+import { MCPToolCallGroup } from './MCPToolCallGroup';
+import {
+  isSafeHref,
+  linkHost,
+  ToolCallResultContent,
+} from './ToolCallResultContent';
+import type { ToolCall } from './types';
+
+function call(extra: Partial<ToolCall> = {}): ToolCall {
+  return {
+    id: 'c1',
+    toolName: 'create_container',
+    parameters: [],
+    status: 'success',
+    startedAt: new Date('2026-01-01T10:00:00Z'),
+    ...extra,
+  };
+}
+
+describe('ToolCallDisplay', () => {
+  it('keeps the MCP-prefixed export as an alias of the same component', () => {
+    expect(MCPToolCallDisplay).toBe(ToolCallDisplay);
+  });
+
+  it('shows description and hints while awaiting approval', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          status: 'awaiting-approval',
+          description: 'Creates a container.',
+          hints: { idempotent: true },
+        })}
+      />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Provider says repeating has no extra effect')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps focus on the pill when a call starts awaiting approval', () => {
+    const toolCall = call({
+      status: 'running',
+      description: 'Creates a container.',
+    });
+    const { rerender } = renderWithTheme(
+      <ToolCallDisplay toolCall={toolCall} defaultCollapsed />
+    );
+    const pill = screen.getByRole('button', { name: /create container/i });
+    pill.focus();
+    rerender(
+      <ToolCallDisplay
+        toolCall={{ ...toolCall, status: 'awaiting-approval' }}
+        defaultCollapsed
+      />
+    );
+    expect(document.activeElement).toBe(pill);
+    expect(pill).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('translates rich result content through resultLabels', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: { type: 'json', data: '', structured: { a: 1 } },
+        })}
+        resultLabels={{ fields: 'Campos' }}
+      />
+    );
+    expect(screen.getByText('Campos')).toBeInTheDocument();
+  });
+
+  it('keeps links and rich content on an error result', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          status: 'error',
+          result: {
+            type: 'error',
+            data: 'Quota exceeded',
+            links: [{ href: 'https://a.example/logs', label: 'Open logs' }],
+            truncated: true,
+          },
+        })}
+      />
+    );
+    expect(screen.getByText('Quota exceeded')).toBeInTheDocument();
+    expect(screen.getByText('Open logs')).toBeInTheDocument();
+    expect(screen.getByText(/too large to keep/)).toBeInTheDocument();
+  });
+});
+
+describe('isSafeHref', () => {
+  it('allows http(s) and same-origin paths only', () => {
+    expect(isSafeHref('https://example.com/a')).toBe(true);
+    expect(isSafeHref('/chat/1')).toBe(true);
+    expect(isSafeHref('//evil.example')).toBe(false);
+    expect(isSafeHref('javascript:alert(1)')).toBe(false);
+    expect(isSafeHref('data:text/html,<b>x</b>')).toBe(false);
+  });
+});
+
+describe('ToolCallResultContent', () => {
+  it('renders structured fields with labels', () => {
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{
+          type: 'json',
+          data: '',
+          structured: { vmid: 101 },
+          fieldLabels: { vmid: 'Container ID' },
+        }}
+      />
+    );
+    expect(screen.getByText('Container ID')).toBeInTheDocument();
+    expect(screen.getByText('101')).toBeInTheDocument();
+  });
+
+  it('falls back for media it cannot preview', () => {
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{
+          type: 'text',
+          data: '',
+          media: [
+            { type: 'image', mimeType: 'image/svg+xml', data: 'PHN2Zz4=' },
+          ],
+        }}
+      />
+    );
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByText(/Preview not available/)).toBeInTheDocument();
+  });
+});
+
+describe('MCPToolCallGroup outcomes', () => {
+  it('shows the uncertain notice without expanding', () => {
+    renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call({ status: 'uncertain' })]} />
+    );
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-uncertain"]')
+    ).toHaveTextContent(/Could not confirm completion/);
+    expect(screen.getByText('Not confirmed')).toBeInTheDocument();
+  });
+
+  it('renders unsafe links as text rather than anchors', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: {
+              type: 'text',
+              data: 'ok',
+              links: [{ href: 'javascript:alert(1)', label: 'Bad link' }],
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.getByText('Bad link').closest('a')).toBeNull();
+  });
+
+  it('does not repeat structured content as JSON text', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: { type: 'json', data: '{"a":1}', structured: { a: 1 } },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.queryByText('Show result')).toBeNull();
+  });
+
+  it('keeps independent text next to structured fields', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: {
+              type: 'json',
+              data: '3 of 10 rows written',
+              structured: { written: 3 },
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.getByText('3 of 10 rows written')).toBeInTheDocument();
+  });
+
+  it('opens approval details when an existing row starts awaiting approval', () => {
+    const details = {
+      description: 'Creates a container.',
+      result: undefined,
+    };
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call({ status: 'pending', ...details })]} />
+    );
+    expect(screen.queryByText('Creates a container.')).toBeNull();
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval', ...details })]}
+        onApprove={() => {}}
+      />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+  });
+
+  it('never hands an unsafe href to a host click handler', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        onLinkClick={() => {}}
+        toolCalls={[
+          call({
+            result: {
+              type: 'text',
+              data: 'ok',
+              links: [{ href: '/\\evil.example', label: 'Sneaky' }],
+            },
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    expect(screen.getByText('Sneaky').closest('a')).toBeNull();
+  });
+});
+
+describe('ToolCallDisplay uncertain outcome', () => {
+  it('explains the outcome outside the disclosure', () => {
+    renderWithTheme(
+      <ToolCallDisplay toolCall={call({ status: 'uncertain' })} />
+    );
+    expect(
+      screen.getByText(/Could not confirm completion/)
+    ).toBeInTheDocument();
+  });
+});
+
+describe('structured results that JSON cannot represent', () => {
+  it('shows a fallback instead of throwing', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: [1n] }}
+      />
+    );
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: { a: cyclic } }}
+      />
+    );
+    expect(
+      screen.getByText('This result cannot be displayed')
+    ).toBeInTheDocument();
+  });
+});
+
+describe('MCPToolCallGroup follow-up guidance', () => {
+  it('explains why denied and expired calls did not run', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({ id: 'd', status: 'denied' }),
+          call({ id: 'e', status: 'expired' }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /Used 2 tools/ }));
+    expect(screen.getByText(/You denied this call/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/No decision was made in time/)
+    ).toBeInTheDocument();
+  });
+
+  it('counts unconfirmed calls in the group header', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({ id: 'a', status: 'success' }),
+          call({ id: 'b', status: 'uncertain' }),
+        ]}
+      />
+    );
+    expect(screen.getByText('1 not confirmed')).toBeInTheDocument();
+  });
+
+  it('copies raw inputs to the clipboard', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            parameters: [
+              {
+                name: 'hostname',
+                label: 'Host name',
+                type: 'string',
+                value: 'foo-dev',
+              },
+            ],
+          }),
+        ]}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Copy: Show raw inputs' })
+    );
+    expect(writeText).toHaveBeenCalledWith('{\n  "hostname": "foo-dev"\n}');
+    expect(await screen.findByText('Copied')).toBeInTheDocument();
+  });
+});
+
+describe('review hardening', () => {
+  it('shows the host for an absolute link even with leading whitespace', () => {
+    expect(linkHost(' https://untrusted.example/logs')).toBe(
+      'untrusted.example'
+    );
+    expect(linkHost('/chat/1')).toBeNull();
+  });
+
+  it('renders a __proto__ field without crashing', () => {
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{
+          type: 'json',
+          data: '',
+          structured: JSON.parse('{"__proto__": 1, "a": 2}'),
+          fieldLabels: { a: 'A' },
+        }}
+      />
+    );
+    expect(screen.getByText('__proto__')).toBeInTheDocument();
+  });
+
+  it('previews only part of a large primitive array', () => {
+    const values = Array.from({ length: 1000 }, (_, i) => `v${i}`);
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: values }}
+      />
+    );
+    expect(screen.queryByText(/v999/)).toBeNull();
+    expect(screen.getByText('Showing 50 of 1000')).toBeInTheDocument();
+  });
+
+  it('builds the full-result download only when clicked', () => {
+    const createObjectURL = vi.fn(() => 'blob:x');
+    const revokeObjectURL = vi.fn();
+    Object.assign(URL, { createObjectURL, revokeObjectURL });
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: { a: 1 } }}
+      />
+    );
+    expect(createObjectURL).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Download full result (JSON)' })
+    );
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a successful call summary outside the collapsed pill', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        defaultCollapsed
+        toolCall={call({
+          result: { type: 'text', data: 'x', summary: 'Opened foo-dev' },
+        })}
+      />
+    );
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary"]')
+    ).toHaveTextContent('Opened foo-dev');
+  });
+});

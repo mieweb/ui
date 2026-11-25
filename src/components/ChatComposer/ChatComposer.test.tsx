@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as React from 'react';
-import { fireEvent, screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
+import type { ReferenceOption } from '../ReferenceChip/references';
 import { renderWithTheme } from '../../test/test-utils';
 import { Modal } from '../Modal';
 import {
@@ -19,6 +20,345 @@ function getInput() {
 }
 
 describe('ChatComposer', () => {
+  it('sends the references its triggers claim with the message', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'Ask [@Ann Lee](/people/u-ann) [docs](https://x.y)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann Lee', href: '/people/u-ann' },
+    ]);
+  });
+
+  it('inserts a # trigger pick in the textarea as a Markdown link', async () => {
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async (query: string) =>
+        'fix login'.includes(query.toLowerCase())
+          ? [{ kind: 'ticket', id: 't-12', label: 'TH-12: Fix [beta] login' }]
+          : [],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: 'On #fix', selectionStart: 7, selectionEnd: 7 },
+    });
+    const option = await screen.findByRole('option', {
+      name: 'TH-12: Fix [beta] login',
+    });
+    expect(
+      screen.getByRole('listbox', { name: 'Tickets' })
+    ).toBeInTheDocument();
+    fireEvent.mouseDown(option);
+    expect(input).toHaveValue(
+      'On [TH-12: Fix \\[beta\\] login](/tickets/t-12) '
+    );
+  });
+
+  it('reads references from the trimmed text it sends', () => {
+    const onSend = vi.fn();
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: () => [],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/people/') ? href.slice('/people/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[person]} />);
+
+    const input = getInput();
+    // Untrimmed, four spaces make this an indented code block.
+    fireEvent.change(input, {
+      target: { value: '    [@Ann](/people/u-ann)' },
+    });
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0]).toMatchObject({
+      content: '[@Ann](/people/u-ann)',
+      references: [{ kind: 'person', id: 'u-ann', label: '@Ann' }],
+    });
+  });
+
+  it('inserts a pick whose label and address read back unchanged', async () => {
+    const onSend = vi.fn();
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: async () => [
+        { kind: 'ticket', id: 'issue) & <x>', label: 'Fix *beta* `now` $5' },
+      ],
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: (href: string) =>
+        href.startsWith('/tickets/') ? href.slice('/tickets/'.length) : null,
+    };
+    renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+    });
+    fireEvent.mouseDown(await screen.findByRole('option'));
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onSend.mock.calls[0][0].references).toEqual([
+      {
+        kind: 'ticket',
+        id: 'issue) & <x>',
+        label: 'Fix *beta* `now` $5',
+        href: '/tickets/issue) & <x>',
+      },
+    ]);
+  });
+
+  it("never shows one trigger's results for another's query", async () => {
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => [{ kind: 'person', id: 'u-ann', label: 'Ann Lee' }],
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      // Still searching.
+      search: () => new Promise<never>(() => {}),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    renderWithTheme(
+      <ChatComposer onSend={vi.fn()} triggers={[person, ticket]} />
+    );
+
+    const input = getInput();
+    fireEvent.change(input, {
+      target: { value: '@a', selectionStart: 2, selectionEnd: 2 },
+    });
+    expect(
+      await screen.findByRole('option', { name: 'Ann Lee' })
+    ).toBeInTheDocument();
+    fireEvent.change(input, {
+      target: { value: '@a #a', selectionStart: 5, selectionEnd: 5 },
+    });
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+  });
+
+  describe('a # search still pending', () => {
+    function deferredTicket() {
+      let answer: (
+        results: { kind: string; id: string; label: string }[]
+      ) => void = () => {};
+      const ticket = {
+        kind: 'ticket',
+        char: '#',
+        label: 'Tickets',
+        search: () =>
+          new Promise<{ kind: string; id: string; label: string }[]>(
+            (resolve) => (answer = resolve)
+          ),
+        toHref: (id: string) => `/tickets/${id}`,
+        fromHref: () => null,
+      };
+      return {
+        ticket,
+        answer: (results: { kind: string; id: string; label: string }[]) =>
+          React.act(async () => {
+            // The search starts a microtask after the query does.
+            await Promise.resolve();
+            answer(results);
+          }),
+      };
+    }
+    const fixLogin = [
+      { kind: 'ticket', id: 't-12', label: 'TH-12: Fix login' },
+    ];
+
+    it('stays dismissed after Escape when its answer arrives', async () => {
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={vi.fn()} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      await answer(fixLogin);
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+
+    it('opens nothing on the emptied composer once the draft is sent', async () => {
+      const onSend = vi.fn();
+      const { ticket, answer } = deferredTicket();
+      renderWithTheme(<ChatComposer onSend={onSend} triggers={[ticket]} />);
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#fix', selectionStart: 4, selectionEnd: 4 },
+      });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      expect(onSend).toHaveBeenCalledTimes(1);
+      await answer(fixLogin);
+      expect(input).toHaveValue('');
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a reference search still pending', () => {
+    let answer: (options: ReferenceOption[]) => void = () => {};
+    const ticket = {
+      kind: 'ticket',
+      char: '#',
+      label: 'Tickets',
+      search: () =>
+        new Promise<ReferenceOption[]>((resolve) => (answer = resolve)),
+      toHref: (id: string) => `/tickets/${id}`,
+      fromHref: () => null,
+    };
+    const t12 = { kind: 'ticket', id: 't-12', label: 'TH-12' };
+
+    it('opens no list once the composer is disabled', async () => {
+      const onValueChange = vi.fn();
+      const { rerender } = renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      fireEvent.change(getInput(), {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      // The search starts a microtask after the change.
+      await act(async () => {});
+      rerender(
+        <ChatComposer
+          disabled
+          onSend={vi.fn()}
+          onValueChange={onValueChange}
+          triggers={[ticket]}
+        />
+      );
+      onValueChange.mockClear();
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('takes Escape for itself inside a Modal, so the Modal stays open', async () => {
+      const onOpenChange = vi.fn();
+      renderWithTheme(
+        <Modal open onOpenChange={onOpenChange} aria-label="Compose">
+          <ChatComposer onSend={vi.fn()} triggers={[ticket]} />
+        </Modal>
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '#th', selectionStart: 3, selectionEnd: 3 },
+      });
+      await act(async () => {});
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).not.toHaveBeenCalled();
+      // The answer arriving after Escape opens nothing.
+      await act(async () => answer([t12]));
+      expect(screen.queryByRole('option')).not.toBeInTheDocument();
+      // The next Escape is the Modal's.
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('an @ trigger beside mentionOptions', () => {
+    // A host may hand the same objects to both.
+    const shared = [
+      { id: 'u-ann', kind: 'person', label: 'Ann Lee', value: 'ann' },
+    ];
+    const person = {
+      kind: 'person',
+      char: '@',
+      label: 'People',
+      search: async () => shared,
+      toHref: (id: string) => `/people/${id}`,
+      fromHref: () => null,
+    };
+    async function openList() {
+      renderWithTheme(
+        <ChatComposer
+          onSend={vi.fn()}
+          mentionOptions={shared}
+          triggers={[person]}
+        />
+      );
+      const input = getInput();
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      return input;
+    }
+
+    it('lists one person from both with distinct keys', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      try {
+        await openList();
+        expect(
+          error.mock.calls.some((call) => String(call[0]).includes('same key'))
+        ).toBe(false);
+      } finally {
+        error.mockRestore();
+      }
+    });
+
+    it('inserts the listed entry as a mention, the result as a link', async () => {
+      const input = await openList();
+      fireEvent.mouseDown(screen.getAllByRole('option')[0]);
+      expect(input).toHaveValue('@ann ');
+
+      fireEvent.change(input, {
+        target: { value: '@an', selectionStart: 3, selectionEnd: 3 },
+      });
+      await vi.waitFor(() =>
+        expect(screen.getAllByRole('option')).toHaveLength(2)
+      );
+      fireEvent.mouseDown(screen.getAllByRole('option')[1]);
+      expect(input).toHaveValue('[Ann Lee](/people/u-ann) ');
+    });
+
+    it('leaves Enter and the arrows to an IME while it composes', async () => {
+      const input = await openList();
+      fireEvent.keyDown(input, { key: 'ArrowDown', isComposing: true });
+      fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+      expect(input).toHaveValue('@an');
+      expect(screen.getAllByRole('option')[0]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+    });
+  });
+
   it('sends trimmed text on Enter and clears the input', () => {
     const onSend = vi.fn();
     renderWithTheme(<ChatComposer onSend={onSend} />);
@@ -1222,6 +1562,41 @@ describe('ChatComposer', () => {
     });
 
     describe('onMentionSearch', () => {
+      it('searches @ through the host and # through its trigger', async () => {
+        const onMentionSearch = vi.fn((query: string) =>
+          Promise.resolve(
+            mentionOptions.filter((o) => o.label.toLowerCase().includes(query))
+          )
+        );
+        const ticket = {
+          kind: 'ticket',
+          char: '#',
+          label: 'Tickets',
+          search: vi.fn(async () => [
+            { kind: 'ticket', id: '42', label: 'Fix login' },
+          ]),
+          toHref: (id: string) => `/tickets/${id}`,
+          fromHref: () => null,
+        };
+        renderWithTheme(
+          <ChatComposer onMentionSearch={onMentionSearch} triggers={[ticket]} />
+        );
+        const input = getInput();
+
+        fireEvent.change(input, { target: { value: 'Hi @sam' } });
+        expect(
+          await screen.findByRole('option', { name: /Sam Clerk/ })
+        ).toBeInTheDocument();
+        expect(ticket.search).not.toHaveBeenCalled();
+
+        fireEvent.change(input, { target: { value: 'Hi #fix' } });
+        expect(
+          await screen.findByRole('option', { name: 'Fix login' })
+        ).toBeInTheDocument();
+        expect(ticket.search).toHaveBeenLastCalledWith('fix');
+        expect(onMentionSearch).toHaveBeenCalledTimes(1);
+      });
+
       it('shows the host results for the typed query', async () => {
         const onMentionSearch = vi.fn((query: string) =>
           Promise.resolve(
@@ -1696,5 +2071,242 @@ describe('ChatComposer', () => {
         screen.getByRole('button', { name: /cancel reply/i })
       ).toBeDisabled();
     });
+  });
+});
+
+describe('ChatComposer uploads on attach', () => {
+  /** An upload the test settles by hand. */
+  function fakeUpload() {
+    const calls: {
+      signal: AbortSignal;
+      onProgress: (fraction: number) => void;
+      resolve: (value: unknown) => void;
+      reject: (error: Error) => void;
+    }[] = [];
+    const upload = vi.fn(
+      (
+        _file: File,
+        ctx: { signal: AbortSignal; onProgress: (fraction: number) => void }
+      ) =>
+        new Promise<unknown>((resolve, reject) => {
+          calls.push({ ...ctx, resolve, reject });
+        })
+    );
+    return { upload, calls };
+  }
+  const clip = () => new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+  const sendButton = () =>
+    screen.getByRole('button', { name: /send message/i });
+
+  function setup(
+    props: Partial<React.ComponentProps<typeof ChatComposer>> = {}
+  ) {
+    const { upload, calls } = fakeUpload();
+    const onSend = vi.fn();
+    const onError = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onSend={onSend}
+        onError={onError}
+        uploadAttachment={upload}
+        {...props}
+      />
+    );
+    return { upload, calls, onSend, onError, ref };
+  }
+
+  it('uploads a file as soon as it is attached, showing its progress', () => {
+    const { upload, calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    expect(upload).toHaveBeenCalledTimes(1);
+    React.act(() => calls[0].onProgress(0.42));
+    const bar = screen.getByRole('progressbar', { name: 'Uploading clip.mp4' });
+    expect(bar).toHaveAttribute('aria-valuenow', '42');
+  });
+
+  it('shows Processing once every byte is in', () => {
+    const { calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    React.act(() => calls[0].onProgress(1));
+    expect(screen.getByText('Processing…')).toBeInTheDocument();
+  });
+
+  it('cancels the upload when the tile is removed', () => {
+    const { calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    expect(calls[0].signal.aborted).toBe(true);
+    expect(screen.queryByRole('progressbar')).toBeNull();
+  });
+
+  it('aborts an upload that resolveAttachments leaves out, and keeps the rest', () => {
+    const report = new File(['pdf'], 'report.pdf', {
+      type: 'application/pdf',
+    });
+    const { calls, upload, ref } = setup({
+      // A document replaces whatever is staged.
+      resolveAttachments: (incoming) => incoming.slice(0, 1),
+    });
+    React.act(() => ref.current?.addFiles([clip()]));
+    React.act(() => ref.current?.addFiles([report]));
+
+    expect(calls[0].signal.aborted).toBe(true);
+    expect(upload).toHaveBeenCalledTimes(2);
+    expect(calls[1].signal.aborted).toBe(false);
+    expect(screen.queryByText('clip.mp4')).toBeNull();
+    expect(screen.getByText('report.pdf')).toBeInTheDocument();
+  });
+
+  it('reports staged files on change, not on upload progress', () => {
+    const onAttachmentsChange = vi.fn();
+    const { calls, ref } = setup({ onAttachmentsChange });
+    const file = clip();
+    React.act(() => ref.current?.addFiles([file]));
+    expect(onAttachmentsChange).toHaveBeenCalledTimes(1);
+    expect(onAttachmentsChange).toHaveBeenLastCalledWith([file]);
+
+    React.act(() => calls[0].onProgress(0.5));
+    React.act(() => calls[0].onProgress(1));
+    expect(onAttachmentsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps Send enabled while uploading and sends once the upload finishes', async () => {
+    const { calls, onSend, ref } = setup();
+    const file = clip();
+    React.act(() => ref.current?.addFiles([file]));
+    fireEvent.change(getInput(), { target: { value: 'Demo' } });
+    expect(sendButton()).not.toBeDisabled();
+    fireEvent.click(sendButton());
+    expect(onSend).not.toHaveBeenCalled();
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: 'Demo',
+        attachments: [file],
+        uploads: [{ file, result: { id: 'v1' } }],
+      })
+    );
+    expect(getInput()).toHaveValue('');
+  });
+
+  it('keeps the draft and reports upload-failed when an upload fails at send', async () => {
+    const { calls, onSend, onError, ref } = setup();
+    const file = clip();
+    React.act(() => ref.current?.addFiles([file]));
+    fireEvent.change(getInput(), { target: { value: 'Demo' } });
+    fireEvent.click(sendButton());
+    await React.act(async () => calls[0].reject(new Error('offline')));
+    expect(onSend).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith("clip.mp4 didn't upload", {
+      reason: 'upload-failed',
+      file,
+    });
+    expect(getInput()).toHaveValue('Demo');
+    expect(
+      screen.getByRole('button', { name: 'Retry clip.mp4' })
+    ).toBeInTheDocument();
+  });
+
+  it('sends nothing when every tile is taken off while Send waits', async () => {
+    const { onSend, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('stops waiting for a removed upload even if it ignores its signal', async () => {
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    // Never settles, whatever its signal says.
+    const upload = vi.fn(() => new Promise<unknown>(() => {}));
+    renderWithTheme(
+      <ChatComposer ref={ref} onSend={onSend} uploadAttachment={upload} />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'Text too' } });
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Text too', uploads: [] })
+    );
+  });
+
+  it('sends a waiting send through the onSend and reply of when Send was pressed', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSendA = vi.fn();
+    const onSendB = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onSend={onSendA}
+        replyTo={{ id: 'm-a', senderName: 'Ann', content: 'Hi' }}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'For A' } });
+    fireEvent.click(sendButton());
+    // The host moves on (another conversation) before the upload finishes.
+    view.rerender(
+      <ChatComposer ref={ref} onSend={onSendB} uploadAttachment={upload} />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSendB).not.toHaveBeenCalled();
+    expect(onSendA).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'For A', replyToId: 'm-a' })
+    );
+  });
+
+  it('drops a waiting send when the host swaps in another draft', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        value="Draft A"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    view.rerender(
+      <ChatComposer
+        ref={ref}
+        value="Draft B"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSend).not.toHaveBeenCalled();
+    // The tile stays, for whoever sends it next.
+    expect(screen.getByText('clip.mp4')).toBeInTheDocument();
+  });
+
+  it('restoreAttachments stages uploaded files without uploading them', async () => {
+    const { upload, onSend, ref } = setup();
+    const file = clip();
+    React.act(() =>
+      ref.current?.restoreAttachments([{ file, result: { id: 'v1' } }])
+    );
+    expect(upload).not.toHaveBeenCalled();
+    fireEvent.click(sendButton());
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({ uploads: [{ file, result: { id: 'v1' } }] })
+    );
   });
 });

@@ -6,28 +6,65 @@ Short notes on the invariants that are easy to break. User-facing docs live in
 In-repo hosts: `SuperChat`, `AIChat` and Messaging's `MessageThread` all mount
 this composer — run their suites too when changing send/attachment behavior.
 
-## Object-URL lifecycle
+## Staged files live in `useAttachmentUploads`
 
-Staged image/video attachments get a `URL.createObjectURL` preview. Every URL
-must be revoked exactly once. The three revoke paths are:
+The composer's staged files are the `useAttachmentUploads` hook's list
+(exported for hosts' own composers). `addFiles` only validates (type, size,
+room) and calls `uploads.add`; everything else is the hook's:
 
-1. `removeAttachment` — user removes a chip.
-2. `handleSend` — draft is sent, previews are no longer needed.
-3. Unmount cleanup effect — reads `attachmentsRef.current` (a ref mirror of
-   state) because the effect runs once.
-4. `addFiles` with `resolveAttachments` — staged files the host's resolver
-   leaves out of its result.
+- **Object URLs.** Images and videos get one preview URL each, revoked exactly
+  once: on `remove`, on `take` (a send) and `clear`, and at unmount. A new
+  path that drops items must go through `drop()` in the hook, which revokes.
+  `resolveAttachments` drops the staged files its result leaves out with
+  `remove`, so they are revoked (and their uploads aborted or discarded) too.
+- **Synchronous list.** `uploads.current()` (a ref) is updated synchronously
+  on every add/remove/take, so same-batch `addFiles` calls see accurate room.
+  State updaters stay pure; side effects (URLs, ids, aborts, `onError`) happen
+  outside them, because StrictMode may run updaters twice.
+- **Uploads start in `add`,** never in an effect, so StrictMode's
+  double-mount can't start one twice.
 
-If you add a new path that drops attachments, revoke their `previewUrl`s.
+## Upload on attach (`uploadAttachment`)
 
-## `addFiles` stays pure-ish
+With `uploadAttachment`, each file uploads as it's staged: progress on its
+tile (`processing` once every byte is in), `signal` aborted on remove,
+`discardAttachment` for a finished one removed before sending, Retry on
+failure. Without it, files stay `pending` and nothing below applies.
 
-All side effects (URL creation/revocation, id generation, `onError`) happen
-**outside** the state updaters — React may invoke updaters more than once in
-StrictMode. `attachmentsRef.current` is updated **synchronously** on every
-add/remove/send so same-batch calls see accurate room and the unmount cleanup
-never re-revokes. The updaters themselves are pure merges/filters. Keep it
-that way.
+- **Send waits, it isn't disabled.** Pressed with uploads in flight it sets
+  `awaitingUploads` (busy spinner, Enter blocked) and awaits `settle()`, which
+  loops until nothing is in flight. Each in-flight entry is raced against its
+  abort, so a removed upload stops holding the wait up even when the host
+  ignores `signal`.
+- **Where it goes is fixed at press, what goes is read at the end.** Send
+  captures a `SendTarget`: the `onSend` and reply target of that moment and
+  the draft's generation. A host that reuses the composer (SuperChatInbox
+  switching conversations) rebinds `onSend`, and a waiting send must still
+  land where it was written; if the host swaps in another draft meanwhile,
+  it's dropped and the tiles stay. The text is read when the wait ends (with
+  `editor="rich"`, from the editor, after the wait), and nothing is sent if
+  every tile was removed and the text is empty. A failed upload stops the
+  send (`'upload-failed'`) and keeps the draft.
+- **Checked again before every send.** `handleSend` → `sendWhenUploaded` →
+  `sendDraft` → `sendText`. A file attached during the rich editor's
+  `getContent()` sends the flow back to `sendWhenUploaded`, so `take()` never
+  sees an upload still in flight.
+- **`take()` before `onSend`.** It empties the list without discarding: the
+  results now belong to the message. If the host's send fails, SuperChat puts
+  them back with `restoreAttachments` (no re-upload).
+- **Unmount** aborts uploads in flight and discards finished ones — nothing
+  will send them — unless `keepUploadingOnUnmount` (for uploads that land
+  where they're going by themselves). It also clears the list, so effects that
+  rerun without a real unmount don't keep dead tiles.
+- **An aborted upload that succeeds anyway is discarded.** A host may ignore
+  `signal`, or the server may finish before the abort lands: its result goes
+  to `discardAttachment`, as a finished upload taken off does. A rejected one
+  is left alone.
+- **Announcements** are `UploadAnnouncer`'s (shared with hosts that draw their
+  own tiles): starts and finishes politely, failures as an alert, never each
+  percent. Messages wait in a per-file queue with its own 50 ms timer, apart
+  from the render effect, so a progress update can't cancel one; a file taken
+  off takes its queued message with it.
 
 ## Imperative `addFiles` bypasses `allowAttachments`
 
@@ -62,8 +99,10 @@ change reason strings without a major-version note.
 `resolveAttachments(incoming, staged)` lets a host decide what stays staged
 (e.g. one kind of attachment at a time). Type and size checks run first, so
 it only sees files that passed them; `maxAttachments` applies to its result.
-Staged entries are matched by `File` identity, so kept files keep their id
-and preview URL. Without it, `addFiles` appends as before.
+Staged entries are matched by `File` identity, so kept files keep their id,
+preview URL and upload; the ones left out go through `uploads.remove`
+(aborted while uploading, discarded once uploaded), and new ones kept are
+added after them. Without it, `addFiles` appends as before.
 
 ## Shared mention module
 

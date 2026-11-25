@@ -10,6 +10,8 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
+    // ToolCallDisplay: labeled inputs and structured result fields.
+    'grid-cols-[minmax(0,auto)_minmax(0,1fr)]',
     // EncounterVisit: report layout, expanding narratives, and coordinated vitals.
     'z-40',
     'sm:inset-8',
@@ -441,6 +443,8 @@ module.exports = {
     'me-auto',
     'ms-auto',
     '-end-1',
+    '-end-1.5',
+    '-top-1.5',
     'start-0',
     'end-0',
     'ps-4',
@@ -579,6 +583,9 @@ module.exports = {
     'overflow-auto',
     // Select component
     'truncate',
+    // ReferenceChip: sits on the text baseline, underlined only on hover
+    'align-baseline',
+    'no-underline',
     // Kbd / KeyboardShortcutsOverlay — key chips and shortcut rows
     'px-1.5',
     'font-mono',
@@ -700,6 +707,9 @@ module.exports = {
     'mb-1',
     'mb-1.5',
     'mt-2',
+    'mt-4',
+    'px-0.5',
+    'm-auto',
     'normal-case',
     'outline-none',
     'p-0',
@@ -856,6 +866,10 @@ module.exports = {
     'cursor-grab',
     'active:cursor-grabbing',
     'touch-none',
+    // ReorderableList: whole-row drag and the lifted dragged row
+    'touch-manipulation',
+    'select-none',
+    'opacity-80',
     'opacity-40',
     'group-hover/portlet:opacity-100',
     'focus-visible:opacity-100',
@@ -936,8 +950,8 @@ module.exports = {
     // ChatComposer row, SuperChatInbox resizable sidebar, AIMessage user-bubble links
     'grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]',
     'sm:w-[var(--superchat-sidebar-width)]',
-    '[&_a]:text-current',
-    '[&_a:hover]:text-current',
+    '[&_a:not([data-slot=reference-chip])]:text-current',
+    '[&_a:not([data-slot=reference-chip]):hover]:text-current',
     '-mx-1',
     'inset-y-0',
     'w-0.5',

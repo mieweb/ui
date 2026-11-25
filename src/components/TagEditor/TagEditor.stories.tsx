@@ -77,6 +77,11 @@ The caller owns \`value\`. \`onChange\` may return a promise: the field shows a 
           target: 'data-display-badge',
           why: 'Each tag chip is a removable Badge (onRemove + removeLabel); TagEditor adds the input, suggestions and async save around them.',
         },
+        {
+          type: 'alternative to',
+          target: 'editors-referencechip',
+          why: 'ReferenceChip names a record inline in text and links to it; TagEditor edits a list of removable tags in a form.',
+        },
       ],
     },
   },

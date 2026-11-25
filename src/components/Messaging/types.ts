@@ -7,6 +7,7 @@
  */
 
 import type { MentionOption } from './useMentionAutocomplete';
+import type { Reference } from '../ReferenceChip/references';
 
 // ============================================================================
 // Message Status Types
@@ -249,6 +250,11 @@ export interface NewMessage {
   content: string;
   /** Attachments to include */
   attachments?: File[];
+  /**
+   * Set when the composer uploaded each file on attach (ChatComposer
+   * `uploadAttachment`): every file with what its upload resolved to.
+   */
+  uploads?: { file: File; result: unknown }[];
   /** Reply-to message ID */
   replyToId?: string;
   /**
@@ -256,6 +262,11 @@ export interface NewMessage {
    * still in `content`. Absent when there are none.
    */
   mentions?: MentionOption[];
+  /**
+   * The people, tickets, … the text references, read from its links by the
+   * composer's `triggers` (each once). Present only when it has triggers.
+   */
+  references?: Reference[];
   /** Custom metadata */
   metadata?: Record<string, unknown>;
 }
