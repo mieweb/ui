@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
+import { ToolCallDisplay } from './MCPToolCall';
 import { MCPToolCallGroup } from './MCPToolCallGroup';
 import type { ToolCall } from './types';
 
@@ -78,6 +79,64 @@ describe('MCPToolCallGroup collapsed success', () => {
     expect(screen.queryByText('Opened foo-dev')).toBeNull();
     expand();
     expect(screen.getByText('Opened foo-dev')).toBeInTheDocument();
+  });
+});
+
+describe('review follow-ups', () => {
+  it('ToolCallDisplay still shows wrapped text it no longer lists as a field', () => {
+    const answer = 'React is a JavaScript library.';
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: {
+            type: 'json',
+            data: answer,
+            structured: { result: answer },
+          },
+        })}
+      />
+    );
+    expect(screen.getByText(answer)).toBeInTheDocument();
+    expect(screen.queryByText('Fields')).toBeNull();
+  });
+
+  it('keeps a row the user opened before approval open after it settles', () => {
+    const details = { description: 'Creates a container.', result: undefined };
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call({ status: 'pending', ...details })]} />
+    );
+    expand();
+    for (const status of ['awaiting-approval', 'running', 'success'] as const) {
+      rerender(
+        <MCPToolCallGroup
+          toolCalls={[call({ status, ...details })]}
+          onApprove={() => {}}
+        />
+      );
+    }
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+  });
+
+  it('moves focus to the row when auto-closing details that held it', () => {
+    const details = {
+      result: undefined,
+      parameters: [
+        { name: 'host', label: 'Host', type: 'string', value: 'foo' },
+      ],
+    };
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval', ...details })]}
+        onApprove={() => {}}
+      />
+    );
+    screen.getByRole('button', { name: 'Show raw inputs' }).focus();
+    rerender(
+      <MCPToolCallGroup toolCalls={[call({ status: 'success', ...details })]} />
+    );
+    expect(document.activeElement).toBe(
+      screen.getByRole('button', { name: /create_container/ })
+    );
   });
 });
 

@@ -11,6 +11,7 @@ import { cn } from '../../utils/cn';
 import { CollapsiblePill } from './CollapsiblePill';
 import {
   hasRichResult,
+  isWrappedText,
   hasToolCallMetadata,
   defaultToolHintLabels,
   ToolCallMetadata,
@@ -522,6 +523,10 @@ function ToolResultDisplay({
   resultLabels,
   className,
 }: ToolResultDisplayProps) {
+  const wrappedText =
+    result.type !== 'error' && isWrappedText(result)
+      ? (result.data as string)
+      : null;
   return (
     <div className={cn('space-y-2', className)}>
       {result.type === 'error' && (
@@ -533,9 +538,15 @@ function ToolResultDisplay({
           </p>
         </div>
       )}
-      {result.type !== 'error' && result.summary && (
+      {result.type !== 'error' && result.summary && !wrappedText && (
         <p className="text-sm text-neutral-700 dark:text-neutral-300">
           {result.summary}
+        </p>
+      )}
+      {wrappedText && (
+        // The structured copy is hidden as a duplicate, so the text shows here.
+        <p className="text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">
+          <bdi dir="auto">{wrappedText}</bdi>
         </p>
       )}
 

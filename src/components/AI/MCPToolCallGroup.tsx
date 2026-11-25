@@ -499,7 +499,9 @@ function ToolCallRow({
     React.useState(mustShowDetails);
   if (mustShowDetails !== shownForApproval) {
     setShownForApproval(mustShowDetails);
-    if (mustShowDetails) {
+    // Only a row approval actually opened is closed again; one the user already
+    // had open stays open.
+    if (mustShowDetails && !detailsOpen) {
       setDetailsOpen(true);
       setAutoOpened(true);
     }
@@ -512,6 +514,16 @@ function ToolCallRow({
     setAutoOpened(false);
     setDetailsOpen(open);
   };
+
+  // Closing details removes whatever had focus inside them; keep it on the row.
+  const focusInDetailsRef = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (detailsOpen || !focusInDetailsRef.current) return;
+    focusInDetailsRef.current = false;
+    if (!document.activeElement || document.activeElement === document.body) {
+      triggerRef.current?.focus();
+    }
+  }, [detailsOpen]);
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
@@ -589,7 +601,17 @@ function ToolCallRow({
             />
           </CollapsibleTrigger>
 
-          <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
+          <CollapsibleContent
+            className="ms-6 mt-1 space-y-2 pb-1"
+            onFocus={() => {
+              focusInDetailsRef.current = true;
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                focusInDetailsRef.current = false;
+              }
+            }}
+          >
             {toolCall.displayName && (
               <>
                 {/* The row truncates the name; here it wraps so it can be read in full. */}
