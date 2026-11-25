@@ -84,6 +84,11 @@ export interface SuperChatInboxProps {
    */
   toolCallGroup?: SuperChatProps['toolCallGroup'];
   /**
+   * Host controls under each message in the active panel (see
+   * {@link SuperChatProps.renderMessageFooter}).
+   */
+  renderMessageFooter?: SuperChatProps['renderMessageFooter'];
+  /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
@@ -202,6 +207,7 @@ export function SuperChatInbox({
   readOnly,
   composerProps,
   toolCallGroup,
+  renderMessageFooter,
   acceptedFileTypes,
   attachmentDataUrls,
   maxFileSize,
@@ -376,6 +382,7 @@ export function SuperChatInbox({
           readOnly={readOnly}
           composerProps={composerProps}
           toolCallGroup={toolCallGroup}
+          renderMessageFooter={renderMessageFooter}
           acceptedFileTypes={acceptedFileTypes}
           attachmentDataUrls={attachmentDataUrls}
           maxFileSize={maxFileSize}

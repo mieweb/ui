@@ -18,6 +18,7 @@ import {
 } from './plugins';
 import type { MCPToolCall, SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
+import { Badge } from '../Badge';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { getSampleVideo } from '../AudioPlayer/sampleVideo';
@@ -760,6 +761,111 @@ export const ToolApprovalAndThinking: Story = {
     },
   },
   render: () => <ToolApprovalInbox />,
+};
+
+// Per-message host controls: `renderMessageFooter` renders under every
+// message, from people and agents. Here agents get a model badge and
+// thumbs feedback held in host state; the local user's messages get a
+// version switcher. Copy/Edit stay in the gutter as usual.
+function MessageFooterInbox() {
+  const [feedback, setFeedback] = React.useState<Record<string, 'up' | 'down'>>(
+    {}
+  );
+  const [versions, setVersions] = React.useState<Record<string, number>>({});
+
+  const rate = (id: string, value: 'up' | 'down') =>
+    setFeedback((prev) => {
+      const next = { ...prev };
+      if (next[id] === value) delete next[id];
+      else next[id] = value;
+      return next;
+    });
+
+  const footerButton =
+    'rounded px-1.5 py-0.5 text-xs text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 aria-pressed:text-primary-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:aria-pressed:text-primary-300';
+
+  return (
+    <SuperChatInbox
+      className="w-full"
+      conversations={[richConversation, secondConversation]}
+      defaultActiveConversationId={richConversation.id}
+      currentParticipantId="u1"
+      onMessageEdited={() => {}}
+      renderMessageFooter={(message, { participant, isSelf, streaming }) => {
+        if (streaming) return null;
+        if (isSelf) {
+          const version = versions[message.id] ?? 2;
+          return (
+            <div className="flex items-center gap-1 text-xs text-neutral-500">
+              <button
+                type="button"
+                className={footerButton}
+                aria-label="Previous version"
+                disabled={version === 1}
+                onClick={() =>
+                  setVersions((prev) => ({ ...prev, [message.id]: 1 }))
+                }
+              >
+                ‹
+              </button>
+              <span>{version} / 2</span>
+              <button
+                type="button"
+                className={footerButton}
+                aria-label="Next version"
+                disabled={version === 2}
+                onClick={() =>
+                  setVersions((prev) => ({ ...prev, [message.id]: 2 }))
+                }
+              >
+                ›
+              </button>
+            </div>
+          );
+        }
+        if (participant?.kind !== 'agent') return null;
+        return (
+          <div className="flex items-center gap-1">
+            <Badge variant="secondary" size="sm">
+              gpt-4o
+            </Badge>
+            <button
+              type="button"
+              className={footerButton}
+              aria-label="Good response"
+              aria-pressed={feedback[message.id] === 'up'}
+              onClick={() => rate(message.id, 'up')}
+            >
+              👍
+            </button>
+            <button
+              type="button"
+              className={footerButton}
+              aria-label="Bad response"
+              aria-pressed={feedback[message.id] === 'down'}
+              onClick={() => rate(message.id, 'down')}
+            >
+              👎
+            </button>
+          </div>
+        );
+      }}
+    />
+  );
+}
+
+export const MessageFooter: Story = {
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      description: {
+        story:
+          '`renderMessageFooter(message, { conversation, participant, isSelf, streaming })` renders your own controls under each message — the counterpart of `AIChat`’s `renderMessageFooter`. Use it for feedback, version arrows, model badges or "Continue". The built-in Copy/Edit actions are unchanged, and a fresh inline renderer refreshes footers without re-rendering the message bodies.',
+      },
+    },
+  },
+  render: () => <MessageFooterInbox />,
 };
 
 export const SourcesAndGuards: Story = {
