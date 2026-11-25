@@ -3,7 +3,11 @@ import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MCPToolCallDisplay, ToolCallDisplay } from './MCPToolCall';
 import { MCPToolCallGroup } from './MCPToolCallGroup';
-import { isSafeHref, ToolCallResultContent } from './ToolCallResultContent';
+import {
+  isSafeHref,
+  linkHost,
+  ToolCallResultContent,
+} from './ToolCallResultContent';
 import type { ToolCall } from './types';
 
 function call(extra: Partial<ToolCall> = {}): ToolCall {
@@ -320,5 +324,69 @@ describe('MCPToolCallGroup follow-up guidance', () => {
     );
     expect(writeText).toHaveBeenCalledWith('{\n  "hostname": "foo-dev"\n}');
     expect(await screen.findByText('Copied')).toBeInTheDocument();
+  });
+});
+
+describe('review hardening', () => {
+  it('shows the host for an absolute link even with leading whitespace', () => {
+    expect(linkHost(' https://untrusted.example/logs')).toBe(
+      'untrusted.example'
+    );
+    expect(linkHost('/chat/1')).toBeNull();
+  });
+
+  it('renders a __proto__ field without crashing', () => {
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{
+          type: 'json',
+          data: '',
+          structured: JSON.parse('{"__proto__": 1, "a": 2}'),
+          fieldLabels: { a: 'A' },
+        }}
+      />
+    );
+    expect(screen.getByText('__proto__')).toBeInTheDocument();
+  });
+
+  it('previews only part of a large primitive array', () => {
+    const values = Array.from({ length: 1000 }, (_, i) => `v${i}`);
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: values }}
+      />
+    );
+    expect(screen.queryByText(/v999/)).toBeNull();
+    expect(screen.getByText('Showing 50 of 1000')).toBeInTheDocument();
+  });
+
+  it('builds the full-result download only when clicked', () => {
+    const createObjectURL = vi.fn(() => 'blob:x');
+    const revokeObjectURL = vi.fn();
+    Object.assign(URL, { createObjectURL, revokeObjectURL });
+    renderWithTheme(
+      <ToolCallResultContent
+        result={{ type: 'json', data: '', structured: { a: 1 } }}
+      />
+    );
+    expect(createObjectURL).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Download full result (JSON)' })
+    );
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a successful call summary outside the collapsed pill', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        defaultCollapsed
+        toolCall={call({
+          result: { type: 'text', data: 'x', summary: 'Opened foo-dev' },
+        })}
+      />
+    );
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary"]')
+    ).toHaveTextContent('Opened foo-dev');
   });
 });

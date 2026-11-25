@@ -589,19 +589,17 @@ function ToolCallRow({
             {fullSummary && (
               <p
                 data-slot="ai-tool-call-summary-full"
-                dir="auto"
                 className="text-sm break-words whitespace-pre-wrap"
               >
-                {fullSummary}
+                <bdi dir="auto">{fullSummary}</bdi>
               </p>
             )}
             {result && result.length <= INLINE_RESULT_CHARS && (
               <p
                 data-slot="ai-tool-call-result-text"
-                dir="auto"
                 className="text-sm break-words whitespace-pre-wrap"
               >
-                {result}
+                <bdi dir="auto">{result}</bdi>
               </p>
             )}
             {hasLabels ? (
@@ -622,8 +620,8 @@ function ToolCallRow({
                         >
                           {param.label ?? param.name}
                         </dt>
-                        <dd dir="auto" className="break-words">
-                          {formatData(param.value)}
+                        <dd className="break-words">
+                          <bdi dir="auto">{formatData(param.value)}</bdi>
                         </dd>
                       </React.Fragment>
                     ))}
@@ -699,10 +697,9 @@ function ToolCallRow({
         {toolCall.status === 'success' && toolCall.result?.summary && (
           <p
             data-slot="ai-tool-call-summary"
-            dir="auto"
             className="ms-6 line-clamp-1 text-xs text-neutral-600 dark:text-neutral-400"
           >
-            {toolCall.result.summary}
+            <bdi dir="auto">{toolCall.result.summary}</bdi>
           </p>
         )}
 

@@ -53,10 +53,9 @@ export function ToolCallMetadata({
       {toolCall.description && (
         <p
           data-slot="ai-tool-call-description"
-          dir="auto"
           className="text-xs break-words text-neutral-600 dark:text-neutral-400"
         >
-          {toolCall.description}
+          <bdi dir="auto">{toolCall.description}</bdi>
         </p>
       )}
       {shown.length > 0 && (
@@ -148,6 +147,8 @@ const MAX_FIELDS = 20;
 const MAX_ROWS = 10;
 const MAX_COLUMNS = 6;
 const MAX_CELL_CHARS = 200;
+const MAX_FALLBACK_ITEMS = 50;
+const MAX_FALLBACK_CHARS = 5000;
 
 const IMAGE_TYPES = new Set([
   'image/png',
@@ -179,12 +180,25 @@ export function isSafeHref(href: string): boolean {
 
 /** The destination host of an absolute browser link, else null. */
 export function linkHost(href: string): string | null {
-  if (!/^https?:/i.test(href)) return null;
+  // Parsed the same way as isSafeHref, so leading whitespace cannot hide the host.
   try {
-    return new URL(href).host;
+    const url = new URL(href);
+    return url.protocol === 'http:' || url.protocol === 'https:'
+      ? url.host
+      : null;
   } catch {
     return null;
   }
+}
+
+/** A label the host supplied for this exact key, ignoring inherited properties. */
+function ownLabel(
+  labels: Record<string, string> | undefined,
+  key: string
+): string | undefined {
+  return labels && Object.prototype.hasOwnProperty.call(labels, key)
+    ? labels[key]
+    : undefined;
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -257,10 +271,10 @@ function StructuredFields({
           {shown.map(([key, field]) => (
             <React.Fragment key={key}>
               <dt className="font-medium break-words text-neutral-600 dark:text-neutral-400">
-                {fieldLabels?.[key] ?? key}
+                {ownLabel(fieldLabels, key) ?? key}
               </dt>
-              <dd dir="auto" className="break-words">
-                {cellText(field)}
+              <dd className="break-words">
+                <bdi dir="auto">{cellText(field)}</bdi>
               </dd>
             </React.Fragment>
           ))}
@@ -292,7 +306,7 @@ function StructuredFields({
                   scope="col"
                   className="px-2 py-1 text-start font-semibold whitespace-nowrap text-neutral-700 dark:text-neutral-300"
                 >
-                  {fieldLabels?.[column] ?? column}
+                  {ownLabel(fieldLabels, column) ?? column}
                 </th>
               ))}
             </tr>
@@ -330,19 +344,36 @@ function StructuredFields({
     );
   }
 
-  const json = safeStringify(value, 2);
-  if (json === null) {
+  // Large arrays and strings are previewed in part; the download has the rest.
+  const total = Array.isArray(value) ? value.length : undefined;
+  const preview =
+    Array.isArray(value) && value.length > MAX_FALLBACK_ITEMS
+      ? value.slice(0, MAX_FALLBACK_ITEMS)
+      : value;
+  const fullJson = safeStringify(preview, 2);
+  if (fullJson === null) {
     return (
       <p className="text-xs text-neutral-500">{labels.structuredUnavailable}</p>
     );
   }
+  const json =
+    fullJson.length > MAX_FALLBACK_CHARS
+      ? `${fullJson.slice(0, MAX_FALLBACK_CHARS)}…`
+      : fullJson;
   return (
-    <pre
-      dir="ltr"
-      className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900"
-    >
-      {json}
-    </pre>
+    <>
+      <pre
+        dir="ltr"
+        className="max-h-60 overflow-auto rounded bg-neutral-100 p-2 text-xs whitespace-pre-wrap dark:bg-neutral-900"
+      >
+        {json}
+      </pre>
+      {total !== undefined && total > MAX_FALLBACK_ITEMS && (
+        <p className="mt-1 text-xs text-neutral-500">
+          {labels.truncated(MAX_FALLBACK_ITEMS, total)}
+        </p>
+      )}
+    </>
   );
 }
 
@@ -354,16 +385,27 @@ function FullResultDownload({
   value: unknown;
   labels: ToolCallResultLabels;
 }) {
-  const json = safeStringify(value, 2);
-  if (json === null) return null;
+  // Serialized only when the user asks, so large results cost nothing to render.
+  const download = () => {
+    const json = safeStringify(value, 2);
+    if (json === null) return;
+    const url = URL.createObjectURL(
+      new Blob([json], { type: 'application/octet-stream' })
+    );
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'result.json';
+    anchor.click();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
   return (
-    <a
-      href={`data:application/octet-stream;charset=utf-8,${encodeURIComponent(json)}`}
-      download="result.json"
+    <button
+      type="button"
+      onClick={download}
       className="text-primary-700 dark:text-primary-300 text-xs underline"
     >
       {labels.downloadFull}
-    </a>
+    </button>
   );
 }
 

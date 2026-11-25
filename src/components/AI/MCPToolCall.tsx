@@ -896,6 +896,15 @@ export function ToolCallDisplay({
           {uncertainNotice}
         </p>
       )}
+      {toolCall.status === 'success' && toolCall.result?.summary && (
+        // One line beside the pill; the expanded box keeps the full text.
+        <p
+          data-slot="ai-tool-call-summary"
+          className="mt-1 line-clamp-1 text-xs text-neutral-600 dark:text-neutral-400"
+        >
+          <bdi dir="auto">{toolCall.result.summary}</bdi>
+        </p>
+      )}
     </div>
   );
 }
