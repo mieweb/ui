@@ -614,7 +614,19 @@ function applyBrandStyles(brand: BrandConfig, isDark: boolean) {
   document.head.appendChild(styleTag);
 }
 
-const isLocoDisabled = (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
+// `docs.story.inline: false` renders each docs story in a nested preview iframe. It gets no
+// toolbar globals but shares the tab's sessionStorage, so its "disable" would fight the docs
+// frame's mode and reload both forever (#831). Loco stays off there.
+const isNestedDocsStoryFrame = (() => {
+  try {
+    return window.parent !== window && /\/iframe(\.html)?$/.test(window.parent.location.pathname);
+  } catch {
+    return false;
+  }
+})();
+const isLocoDisabled =
+  isNestedDocsStoryFrame ||
+  (import.meta.env.VITE_DISABLE_LOCO as string | undefined)?.trim() === 'true';
 // Set by .storybook/main.ts: true only on the dev server with LOCO_API_KEY configured.
 declare const __LOCO_LIVE_SYNC__: boolean;
 const isLiveSyncEnabled = typeof __LOCO_LIVE_SYNC__ !== 'undefined' && __LOCO_LIVE_SYNC__;
@@ -823,7 +835,7 @@ function startLocoHarvest(
 
 // The preview reloads when the Loco mode changes: the runtime singleton holds one pack.
 function syncLocoToolbarMode(locoMode: string) {
-  if (typeof window === 'undefined') return;
+  if (isLocoDisabled || typeof window === 'undefined') return;
   const previousMode = window.sessionStorage.getItem(LOCO_TOOLBAR_MODE_KEY);
   window.sessionStorage.setItem(LOCO_TOOLBAR_MODE_KEY, locoMode);
   if (previousMode && previousMode !== locoMode) reloadPreviewInMode(locoMode);
@@ -940,21 +952,30 @@ function syncLocoDocsOnlyPage() {
   updateLocoDocsHarvest();
 }
 
-const syncLocoDocsPage = (id?: unknown) => {
+// Nested docs story frames (`docs.story.inline: false`) post their own setGlobals/storyRendered
+// to this frame. Storybook calls listeners with the channel event as `this`, and `source` is set
+// only on events relayed over postMessage, so this frame ignores them (#831).
+function ownFrameOnly<Args extends unknown[]>(listener: (...args: Args) => void) {
+  return function (this: { source?: string } | undefined, ...args: Args) {
+    if (!this?.source) listener(...args);
+  };
+}
+
+const syncLocoDocsPage = ownFrameOnly((id?: unknown) => {
   if (typeof id === 'string') locoDocsId = id;
   locoDocsOnlyPage = !document.querySelector(LOCO_SCAN_ROOT_SELECTOR);
   if (locoDocsOnlyPage) syncLocoDocsOnlyPage();
   else updateLocoDocsHarvest();
-};
-const leaveLocoDocsPage = () => {
+});
+const leaveLocoDocsPage = ownFrameOnly(() => {
   locoDocsOnlyPage = false;
   locoDocsGeneration++;
   updateLocoDocsHarvest();
-};
-const handleLocoGlobals = ({ globals }: { globals: Record<string, unknown> }) => {
+});
+const handleLocoGlobals = ownFrameOnly(({ globals }: { globals: Record<string, unknown> }) => {
   locoDocsGlobals = globals;
   if (locoDocsOnlyPage) syncLocoDocsOnlyPage();
-};
+});
 try {
   const globalsParam = new URLSearchParams(window.location.search).get('globals') || '';
   locoDocsGlobals = Object.fromEntries(
@@ -989,7 +1010,7 @@ const withLocoLiveSync: Decorator = (Story, context) => {
   useEffect(() => {
     if (requestedMode === 'live' && !isLiveSyncEnabled) {
       console.warn(
-        '[loco-live] Live sync is off: run the Storybook dev server with LOCO_API_KEY (and optionally LOCO_SERVER_URL) in .env.local.'
+        '[loco-live] Live sync is off: run the Storybook dev server with LOCO_API_KEY (and optionally LOCO_SERVER_URL) in .env.'
       );
     }
   }, [requestedMode]);
