@@ -10,6 +10,8 @@ module.exports = {
   // Safelist classes used by @mieweb/ui components that may not be detected
   // when components are imported from node_modules (especially with Tailwind CSS 4)
   safelist: [
+    // ToolCallDisplay: labeled inputs and structured result fields.
+    'grid-cols-[minmax(0,auto)_minmax(0,1fr)]',
     // EncounterVisit: report layout, expanding narratives, and coordinated vitals.
     'z-40',
     'sm:inset-8',
