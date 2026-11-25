@@ -13,6 +13,7 @@ import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Badge, type BadgeProps } from '../Badge';
 import { Button } from '../Button';
+import { Dropdown, DropdownItem } from '../Dropdown';
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,6 +23,7 @@ import { Spinner } from '../Spinner';
 import { hasToolResultLinks, ToolResultLinks } from './MCPToolCall';
 import {
   defaultToolCallResultLabels,
+  containsSummary,
   defaultToolHintLabels,
   hasRichResult,
   hasToolCallMetadata,
@@ -69,8 +71,14 @@ export interface MCPToolCallGroupLabels {
   toolId: string;
   /** Disclosure for a successful call's output. */
   showResult: string;
+  /** Disclosure for a call's inputs when they have no labels. */
+  showInput?: string;
   /** Disclosure for a failed call's full error. */
   showError: string;
+  /** Opens the menu of approval options. */
+  allow?: string;
+  /** Accessible name of the menu button beside Allow. */
+  moreAllowOptions?: string;
   /** Approve this call only. */
   allowOnce: string;
   /** Approve this call and stop asking for it. */
@@ -85,6 +93,8 @@ export interface MCPToolCallGroupLabels {
   expiredNotice?: string;
   /** Header badge for calls that may or may not have run. */
   notConfirmed?: (count: number) => string;
+  /** Approve every tool for the rest of this chat. */
+  allowAll?: string;
   /** Accessible name of the copy button next to raw output. */
   copy?: string;
   /** Announced once text has been copied. */
@@ -151,7 +161,10 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   },
   toolId: 'Tool ID',
   showResult: 'Show result',
+  showInput: 'Show input',
   showError: 'Show error',
+  allow: 'Allow',
+  moreAllowOptions: 'More allow options',
   allowOnce: 'Allow once',
   allowAlways: 'Always allow',
   deny: 'Deny',
@@ -160,6 +173,7 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   deniedNotice: "You denied this call, so it didn't run.",
   expiredNotice: "No decision was made in time, so this call didn't run.",
   notConfirmed: (count) => `${count} not confirmed`,
+  allowAll: 'Allow all tools in this chat',
   copy: 'Copy',
   copied: 'Copied',
   arguments: 'Inputs',
@@ -412,7 +426,7 @@ function CopyTextButton({
       ) : (
         <Copy aria-hidden="true" className="h-3 w-3" />
       )}
-      <span role="status" className={copied ? undefined : 'sr-only'}>
+      <span role="status" className="sr-only">
         {copied ? labels.copied : ''}
       </span>
     </button>
@@ -424,6 +438,7 @@ interface ToolCallRowProps {
   labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
+  onApproveAll?: MCPToolCallGroupProps['onApproveAll'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
 }
 
@@ -440,6 +455,7 @@ function ToolCallRow({
   labels,
   onApprove,
   onDeny,
+  onApproveAll,
   onLinkClick,
 }: ToolCallRowProps) {
   // `collapse` animates height, which `MotionConfig reducedMotion="user"`
@@ -456,7 +472,11 @@ function ToolCallRow({
   // The row clamps the summary to one line, so details carry it in full.
   const summary = toolCall.result?.summary;
   const fullSummary =
-    summary && summary !== result && summary !== errorText ? summary : null;
+    summary &&
+    !containsSummary(result, summary) &&
+    !containsSummary(errorText, summary)
+      ? summary
+      : null;
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasRich = hasRichResult(toolCall.result);
   const hasLabels = toolCall.parameters.some((param) => param.label);
@@ -471,7 +491,11 @@ function ToolCallRow({
 
   // Approval details must be in view before Allow/Deny, including when a row
   // already on screen starts awaiting approval or its details arrive later.
+  // Once the call settles the row folds away so the answer leads.
   const mustShowDetails = isAwaitingApproval && hasDetails;
+  const isSettled = !['awaiting-approval', 'pending', 'running'].includes(
+    toolCall.status
+  );
   const [detailsOpen, setDetailsOpen] = React.useState(mustShowDetails);
   const [shownForApproval, setShownForApproval] =
     React.useState(mustShowDetails);
@@ -479,6 +503,21 @@ function ToolCallRow({
     setShownForApproval(mustShowDetails);
     if (mustShowDetails) setDetailsOpen(true);
   }
+  const [wasSettled, setWasSettled] = React.useState(isSettled);
+  if (isSettled !== wasSettled) {
+    setWasSettled(isSettled);
+    if (isSettled) setDetailsOpen(false);
+  }
+  const toggleDetails = setDetailsOpen;
+
+  // Closing details removes whatever had focus inside them; keep it on the row.
+  // Checked by ref, not activeElement: an exit animation keeps the control mounted.
+  const focusInDetailsRef = React.useRef(false);
+  React.useLayoutEffect(() => {
+    if (detailsOpen || !focusInDetailsRef.current) return;
+    focusInDetailsRef.current = false;
+    triggerRef.current?.focus();
+  }, [detailsOpen]);
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
@@ -513,10 +552,10 @@ function ToolCallRow({
       className="overflow-hidden text-sm"
     >
       <div role="group" aria-label={labels.callLabel(toolCall)}>
-        <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <Collapsible open={detailsOpen} onOpenChange={toggleDetails}>
           <CollapsibleTrigger
             ref={triggerRef}
-            className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
+            className="focus-visible:ring-primary-500 flex w-fit max-w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
           >
             <span
               aria-hidden="true"
@@ -532,7 +571,14 @@ function ToolCallRow({
             {toolCall.displayName ? (
               // Host text may be in another script than the page; isolate it so
               // neutral characters such as a trailing "/" keep their place.
-              <bdi className="min-w-0 truncate">{toolCall.displayName}</bdi>
+              <bdi
+                className={cn(
+                  'min-w-0',
+                  detailsOpen ? 'break-words' : 'truncate'
+                )}
+              >
+                {toolCall.displayName}
+              </bdi>
             ) : (
               <code className="min-w-0 truncate font-mono text-xs">
                 {toolCall.toolName}
@@ -546,7 +592,7 @@ function ToolCallRow({
             <Badge
               variant={STATUS_BADGE_VARIANT[toolCall.status]}
               size="sm"
-              className="ms-auto shrink-0"
+              className="shrink-0"
             >
               {labels.status[toolCall.status]}
             </Badge>
@@ -556,24 +602,33 @@ function ToolCallRow({
             />
           </CollapsibleTrigger>
 
-          <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
+          <CollapsibleContent
+            className="ms-6 mt-1 space-y-2 pb-1"
+            onFocus={() => {
+              focusInDetailsRef.current = true;
+            }}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                focusInDetailsRef.current = false;
+              }
+            }}
+          >
+            {toolCall.status === 'uncertain' && (
+              <p
+                data-slot="ai-tool-call-uncertain"
+                className="text-xs text-amber-700 dark:text-amber-400"
+              >
+                {labels.uncertainNotice}
+              </p>
+            )}
             {toolCall.displayName && (
-              <>
-                {/* The row truncates the name; here it wraps so it can be read in full. */}
-                <p
-                  data-slot="ai-tool-call-display-name"
-                  className="break-words"
-                >
-                  <bdi>{toolCall.displayName}</bdi>
-                </p>
-                <p
-                  data-slot="ai-tool-call-id"
-                  className="text-xs break-words text-neutral-600 dark:text-neutral-400"
-                >
-                  <span className="font-medium">{labels.toolId}</span>{' '}
-                  <code className="font-mono">{toolCall.toolName}</code>
-                </p>
-              </>
+              <p
+                data-slot="ai-tool-call-id"
+                className="text-xs break-words text-neutral-600 dark:text-neutral-400"
+              >
+                <span className="font-medium">{labels.toolId}</span>{' '}
+                <code className="font-mono">{toolCall.toolName}</code>
+              </p>
             )}
             <ToolCallMetadata
               toolCall={toolCall}
@@ -636,13 +691,12 @@ function ToolCallRow({
               </>
             ) : (
               toolCall.parameters.length > 0 && (
-                // JSON keeps its left-to-right order in RTL documents.
-                <pre
+                <OutputDisclosure
+                  label={labels.showInput}
+                  text={formatParameters(toolCall)}
+                  labels={labels}
                   dir="ltr"
-                  className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900"
-                >
-                  {formatParameters(toolCall)}
-                </pre>
+                />
               )
             )}
             {toolCall.result && hasRich && (
@@ -674,15 +728,6 @@ function ToolCallRow({
           </p>
         )}
 
-        {toolCall.status === 'uncertain' && (
-          <p
-            data-slot="ai-tool-call-uncertain"
-            className="ms-6 line-clamp-2 text-xs text-amber-700 dark:text-amber-400"
-          >
-            {labels.uncertainNotice}
-          </p>
-        )}
-
         {(toolCall.status === 'denied' || toolCall.status === 'expired') && (
           <p
             data-slot="ai-tool-call-not-run"
@@ -694,16 +739,7 @@ function ToolCallRow({
           </p>
         )}
 
-        {toolCall.status === 'success' && toolCall.result?.summary && (
-          <p
-            data-slot="ai-tool-call-summary"
-            className="ms-6 line-clamp-1 text-xs text-neutral-600 dark:text-neutral-400"
-          >
-            <bdi dir="auto">{toolCall.result.summary}</bdi>
-          </p>
-        )}
-
-        {isAwaitingApproval && (onApprove || onDeny) && (
+        {isAwaitingApproval && (onApprove || onApproveAll || onDeny) && (
           <div
             className="ms-6 mt-2 flex flex-wrap gap-2 border-t border-neutral-200 pt-2 pb-1 dark:border-neutral-700"
             onFocus={() => {
@@ -715,29 +751,59 @@ function ToolCallRow({
               }
             }}
           >
-            {onApprove && (
-              <>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    void act(() => onApprove(toolCall, { always: false }))
-                  }
+            {(onApprove || onApproveAll) && (
+              <div role="group" className="inline-flex">
+                {onApprove && (
+                  <Button
+                    size="sm"
+                    className="rounded-e-none"
+                    title={labels.allowOnce}
+                    onClick={() =>
+                      void act(() => onApprove(toolCall, { always: false }))
+                    }
+                    disabled={acting}
+                    isLoading={acting}
+                  >
+                    {labels.allow}
+                  </Button>
+                )}
+                <Dropdown
+                  placement="bottom-start"
                   disabled={acting}
-                  isLoading={acting}
-                >
-                  {labels.allowOnce}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    void act(() => onApprove(toolCall, { always: true }))
+                  trigger={
+                    <Button
+                      size="sm"
+                      aria-label={labels.moreAllowOptions}
+                      className={cn(
+                        'px-2',
+                        onApprove && 'rounded-s-none border-s border-s-white/40'
+                      )}
+                      disabled={acting}
+                    >
+                      <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
+                    </Button>
                   }
-                  disabled={acting}
                 >
-                  {labels.allowAlways}
-                </Button>
-              </>
+                  {onApprove && (
+                    <DropdownItem
+                      disabled={acting}
+                      onClick={() =>
+                        void act(() => onApprove(toolCall, { always: true }))
+                      }
+                    >
+                      {labels.allowAlways}
+                    </DropdownItem>
+                  )}
+                  {onApproveAll && (
+                    <DropdownItem
+                      disabled={acting}
+                      onClick={() => void act(() => onApproveAll(toolCall))}
+                    >
+                      {labels.allowAll}
+                    </DropdownItem>
+                  )}
+                </Dropdown>
+              </div>
             )}
             {onDeny && (
               <Button
@@ -774,6 +840,8 @@ export interface MCPToolCallGroupProps {
   ) => void | Promise<void>;
   /** Deny a call that is `awaiting-approval`. */
   onDeny?: (toolCall: MCPToolCall) => void | Promise<void>;
+  /** Approve this call and every other tool for the rest of the chat. */
+  onApproveAll?: (toolCall: MCPToolCall) => void | Promise<void>;
   /** Intercept clicks on a result's `link` and `resources`. */
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Overrides for the English default strings. */
@@ -801,6 +869,7 @@ export function MCPToolCallGroup({
   toolCalls,
   onApprove,
   onDeny,
+  onApproveAll,
   onLinkClick,
   labels: labelOverrides,
   className,
@@ -858,12 +927,12 @@ export function MCPToolCallGroup({
               {labels.needsApproval(summary.awaitingApproval)}
             </Badge>
           )}
-          {summary.failed > 0 && (
+          {!expanded && summary.failed > 0 && (
             <Badge variant="danger" size="sm" className="shrink-0">
               {labels.failed(summary.failed)}
             </Badge>
           )}
-          {summary.uncertain > 0 && (
+          {!expanded && summary.uncertain > 0 && (
             <Badge variant="warning" size="sm" className="shrink-0">
               {labels.notConfirmed(summary.uncertain)}
             </Badge>
@@ -894,6 +963,7 @@ export function MCPToolCallGroup({
               labels={labels}
               onApprove={onApprove}
               onDeny={onDeny}
+              onApproveAll={onApproveAll}
               onLinkClick={onLinkClick}
             />
           ))}

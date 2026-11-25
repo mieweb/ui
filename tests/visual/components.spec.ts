@@ -1068,7 +1068,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
         page.getByText('ENOENT: no such file or directory, open notes.txt')
       ).toBeVisible();
       await expect(
-        page.getByRole('button', { name: 'Allow once' })
+        page.getByRole('button', { name: 'Allow', exact: true })
       ).toBeVisible();
 
       // The status badge sits at the row's inline end: physically right of
@@ -1094,11 +1094,17 @@ test.describe('Visual Regression Tests - Core Components', () => {
       );
 
       // Parameter JSON is an LTR island even in an RTL document.
+      const showInput = approvalRow.getByRole('button', {
+        name: 'Show input',
+        exact: true,
+      });
+      await showInput.click();
       const paramsDirection = await approvalRow
         .locator('pre')
         .first()
         .evaluate((el) => getComputedStyle(el).direction);
       expect(paramsDirection).toBe('ltr');
+      await showInput.click();
 
       if (viewport) {
         const scrollWidth = await page.evaluate(
@@ -1181,7 +1187,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       const rows = page.locator("[data-slot='ai-tool-call-row']");
       await expect(rows).toHaveCount(3);
       await expect(
-        page.getByRole('button', { name: 'Allow once' })
+        page.getByRole('button', { name: 'Allow', exact: true })
       ).toBeVisible();
 
       const longName = 'Read src/components/AI/MCPToolCallGroup.tsx';
@@ -1225,29 +1231,17 @@ test.describe('Visual Regression Tests - Core Components', () => {
           `Tool ID ${toolName}`
         );
       }
-      const fullName = readRow.locator(
-        "[data-slot='ai-tool-call-display-name']"
-      );
-      await expect(fullName).toHaveText(longName);
-
+      // Opened, the row wraps the long name instead of truncating it.
       if (viewport) {
-        // The row truncates the long name; its details wrap it instead.
-        const [rowLabel, details] = await Promise.all([
-          readRow
-            .getByRole('button')
-            .first()
-            .getByText(longName, { exact: true })
-            .evaluate((el) => ({
-              scrollWidth: el.scrollWidth,
-              clientWidth: el.clientWidth,
-            })),
-          fullName.evaluate((el) => ({
+        const rowLabel = await readRow
+          .getByRole('button')
+          .first()
+          .getByText(longName, { exact: true })
+          .evaluate((el) => ({
             scrollWidth: el.scrollWidth,
             clientWidth: el.clientWidth,
-          })),
-        ]);
-        expect(rowLabel.scrollWidth).toBeGreaterThan(rowLabel.clientWidth);
-        expect(details.scrollWidth).toBeLessThanOrEqual(details.clientWidth);
+          }));
+        expect(rowLabel.scrollWidth).toBeLessThanOrEqual(rowLabel.clientWidth);
         const scrollWidth = await page.evaluate(
           () => document.documentElement.scrollWidth
         );
@@ -1276,7 +1270,7 @@ test.describe('Visual Regression Tests - Core Components', () => {
       await expect(page.getByText('Provider notes:')).toBeVisible();
       await expect(page.getByText('Host name', { exact: true })).toBeVisible();
       await expect(
-        page.getByRole('button', { name: 'Allow once' })
+        page.getByRole('button', { name: 'Allow', exact: true })
       ).toBeVisible();
       if (viewport) {
         const scrollWidth = await page.evaluate(
@@ -1298,9 +1292,10 @@ test.describe('Visual Regression Tests - Core Components', () => {
       await expect(
         page.getByText('1 not confirmed', { exact: true })
       ).toBeVisible();
+      // The unconfirmed notice waits in the row's details.
       await expect(
         page.locator("[data-slot='ai-tool-call-uncertain']")
-      ).toBeVisible();
+      ).toHaveCount(0);
       await expect(page).toHaveScreenshot(
         `mcp-tool-call-group-outcomes${name}.png`
       );

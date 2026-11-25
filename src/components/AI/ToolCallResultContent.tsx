@@ -103,6 +103,34 @@ export function isStructuredTwin(result: ToolCallResult): boolean {
   }
 }
 
+/**
+ * True when the structured content is only the result text wrapped in one
+ * field, e.g. `{ result: "<same text>" }`; the text alone says it all.
+ */
+/** True when `text` already carries the summary, which hosts may shorten with "…". */
+export function containsSummary(text: string | null, summary: string): boolean {
+  if (!text) return false;
+  const core = summary.replace(/…$/, '').trim();
+  return core !== '' && text.includes(core);
+}
+
+export function isWrappedText(result: ToolCallResult): boolean {
+  const { structured, data } = result;
+  if (!isPlainObject(structured) || typeof data !== 'string') return false;
+  const values = Object.values(structured);
+  return (
+    values.length === 1 &&
+    typeof values[0] === 'string' &&
+    values[0].trim() !== '' &&
+    values[0].trim() === data.trim()
+  );
+}
+
+/** The structured value worth rendering, if any. */
+function shownStructured(result: ToolCallResult): unknown {
+  return isWrappedText(result) ? undefined : result.structured;
+}
+
 /** Strings the rich result renders; hosts translate them. */
 export interface ToolCallResultLabels {
   /** Heading for structured fields. */
@@ -242,7 +270,7 @@ export function resultLinks(
 export function hasRichResult(result: ToolCallResult | undefined): boolean {
   return Boolean(
     result &&
-    (result.structured !== undefined ||
+    (shownStructured(result) !== undefined ||
       result.truncated ||
       result.media?.length ||
       result.embedded?.length ||
@@ -499,7 +527,7 @@ export function ToolCallResultContent({
 }: ToolCallResultContentProps) {
   return (
     <div data-slot="ai-tool-result-content" className="space-y-2">
-      {result.structured !== undefined && (
+      {shownStructured(result) !== undefined && (
         <>
           <StructuredFields
             value={result.structured}

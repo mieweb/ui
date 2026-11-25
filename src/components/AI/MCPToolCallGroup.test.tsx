@@ -146,7 +146,7 @@ describe('MCPToolCallGroup', () => {
         <button type="button">Elsewhere</button>
       </>
     );
-    act(() => screen.getByRole('button', { name: 'Allow once' }).focus());
+    act(() => screen.getByRole('button', { name: 'Allow' }).focus());
 
     rerender(
       <>
@@ -275,9 +275,7 @@ describe('MCPToolCallGroup', () => {
     fireEvent.click(header());
 
     expect(header()).toHaveAttribute('aria-expanded', 'false');
-    expect(
-      screen.getByRole('button', { name: 'Allow once' })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Allow' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Deny' })).toBeInTheDocument();
   });
 
@@ -293,7 +291,8 @@ describe('MCPToolCallGroup', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Always allow' }));
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Always allow' }));
     expect(onApprove).toHaveBeenCalledWith(pending, { always: true });
 
     // The row stays busy until the callback settles.
@@ -324,7 +323,7 @@ describe('MCPToolCallGroup', () => {
       <MCPToolCallGroup toolCalls={[call('a', 'awaiting-approval')]} />
     );
 
-    expect(screen.queryByRole('button', { name: 'Allow once' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Allow' })).toBeNull();
   });
 
   it('honours a manual expand until the group changes again', () => {
@@ -460,7 +459,12 @@ describe('MCPToolCallGroup', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
-    expect(screen.getByText(/"path": "\/"/)).toHaveAttribute('dir', 'ltr');
+    expect(screen.queryByText(/"path": "\/"/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show input' }));
+    expect(screen.getByText(/"path": "\/"/).closest('[dir]')).toHaveAttribute(
+      'dir',
+      'ltr'
+    );
     expect(screen.getByText('done')).toHaveAttribute('dir', 'auto');
   });
 
@@ -503,9 +507,7 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).queryByText('tool_a')).toBeNull();
 
     fireEvent.click(within(row).getByRole('button', { name: /Read notes.md/ }));
-    expect(
-      row.querySelector('[data-slot="ai-tool-call-display-name"]')
-    ).toHaveTextContent('Read notes.md');
+    expect(within(row).getAllByText('Read notes.md')).toHaveLength(1);
     expect(within(row).getByText('Tool ID')).toBeInTheDocument();
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
   });

@@ -1,0 +1,232 @@
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithTheme } from '../../test/test-utils';
+import { ToolCallDisplay } from './MCPToolCall';
+import { MCPToolCallGroup } from './MCPToolCallGroup';
+import type { ToolCall } from './types';
+
+function call(extra: Partial<ToolCall> = {}): ToolCall {
+  return {
+    id: 'c1',
+    toolName: 'create_container',
+    parameters: [],
+    status: 'success',
+    startedAt: new Date('2026-01-01T10:00:00Z'),
+    ...extra,
+  };
+}
+
+const expand = () =>
+  fireEvent.click(screen.getByRole('button', { name: /create_container/ }));
+
+describe('MCPToolCallGroup result de-duplication', () => {
+  it('shows text wrapped in a single structured field only once', () => {
+    const answer = 'React is a JavaScript library for building interfaces.';
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: {
+              type: 'json',
+              data: answer,
+              structured: { result: answer },
+              summary: answer,
+            },
+          }),
+        ]}
+      />
+    );
+    expand();
+    expect(screen.queryByText('Fields')).toBeNull();
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary-full"]')
+    ).toBeNull();
+  });
+
+  it('skips a shortened summary already contained in the result text', () => {
+    const text = `${'word '.repeat(80)}end`;
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: {
+              type: 'text',
+              data: text,
+              summary: `${text.slice(0, 120)}…`,
+            },
+          }),
+        ]}
+      />
+    );
+    expand();
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary-full"]')
+    ).toBeNull();
+  });
+});
+
+describe('MCPToolCallGroup collapsed success', () => {
+  it('keeps the result summary inside the row details', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: { type: 'text', data: 'Done.', summary: 'Opened foo-dev' },
+          }),
+        ]}
+      />
+    );
+    expect(screen.queryByText('Opened foo-dev')).toBeNull();
+    expand();
+    expect(screen.getByText('Opened foo-dev')).toBeInTheDocument();
+  });
+});
+
+describe('review follow-ups', () => {
+  it('ToolCallDisplay still shows wrapped text it no longer lists as a field', () => {
+    const answer = 'React is a JavaScript library.';
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: {
+            type: 'json',
+            data: answer,
+            structured: { result: answer },
+          },
+        })}
+      />
+    );
+    expect(screen.getByText(answer)).toBeInTheDocument();
+    expect(screen.queryByText('Fields')).toBeNull();
+  });
+
+  it('ToolCallDisplay keeps a summary the wrapped text does not contain', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: {
+            type: 'json',
+            data: 'Done.',
+            structured: { result: 'Done.' },
+            summary: 'Check the deploy log before retrying.',
+          },
+        })}
+      />
+    );
+    // Once in the pill header, once in the result body.
+    expect(
+      screen.getAllByText('Check the deploy log before retrying.')
+    ).toHaveLength(2);
+  });
+
+  it('shows approval controls when only onApproveAll is given', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval' })]}
+        onApproveAll={() => {}}
+      />
+    );
+    expect(
+      screen.getByRole('button', { name: 'More allow options' })
+    ).toBeInTheDocument();
+  });
+
+  it('moves focus to the row when auto-closing details that held it', () => {
+    const details = {
+      result: undefined,
+      parameters: [
+        { name: 'host', label: 'Host', type: 'string', value: 'foo' },
+      ],
+    };
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval', ...details })]}
+        onApprove={() => {}}
+      />
+    );
+    screen.getByRole('button', { name: 'Show raw inputs' }).focus();
+    rerender(
+      <MCPToolCallGroup toolCalls={[call({ status: 'success', ...details })]} />
+    );
+    expect(document.activeElement).toBe(
+      screen.getByRole('button', { name: /create_container/ })
+    );
+  });
+});
+
+describe('MCPToolCallGroup allow-all-tools option', () => {
+  it('approves once from the main Allow button', () => {
+    const onApprove = vi.fn();
+    const pending = call({ status: 'awaiting-approval' });
+    renderWithTheme(
+      <MCPToolCallGroup toolCalls={[pending]} onApprove={onApprove} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Allow' }));
+    expect(onApprove).toHaveBeenCalledWith(pending, { always: false });
+  });
+  it('hands the call to onApproveAll, not onApprove', () => {
+    const onApproveAll = vi.fn();
+    const onApprove = vi.fn();
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval' })]}
+        onApprove={onApprove}
+        onApproveAll={onApproveAll}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
+    fireEvent.click(
+      screen.getByRole('menuitem', { name: 'Allow all tools in this chat' })
+    );
+    expect(onApproveAll).toHaveBeenCalledTimes(1);
+    expect(onApprove).not.toHaveBeenCalled();
+  });
+
+  it('is absent without onApproveAll', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval' })]}
+        onApprove={() => {}}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
+    expect(screen.queryByRole('menuitem', { name: /Allow all/ })).toBeNull();
+  });
+});
+
+describe('MCPToolCallGroup details after approval', () => {
+  const details = { description: 'Creates a container.', result: undefined };
+
+  it('closes details opened for approval once the call settles', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval', ...details })]}
+        onApprove={() => {}}
+      />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+
+    rerender(
+      <MCPToolCallGroup toolCalls={[call({ status: 'running', ...details })]} />
+    );
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+
+    rerender(
+      <MCPToolCallGroup toolCalls={[call({ status: 'success', ...details })]} />
+    );
+    expect(screen.queryByText('Creates a container.')).toBeNull();
+  });
+
+  it('folds details the user opened once the call settles, and reopens', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup toolCalls={[call({ status: 'running', ...details })]} />
+    );
+    expand();
+    rerender(
+      <MCPToolCallGroup toolCalls={[call({ status: 'success', ...details })]} />
+    );
+    expect(screen.queryByText('Creates a container.')).toBeNull();
+    expand();
+    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
+  });
+});
