@@ -440,6 +440,10 @@ export function useMentionAutocomplete({
   // Read at insert time: a confirmation can resolve after later renders.
   const valueRef = React.useRef(value);
   valueRef.current = value;
+  // Likewise whether mentions are still on: a host that turns them off (as
+  // ChatComposer does while disabled) locks the draft against a late pick.
+  const enabledRef = React.useRef(enabled);
+  enabledRef.current = enabled;
 
   /**
    * Replace `token` with `insertText`, if the text still holds the token as
@@ -456,6 +460,7 @@ export function useMentionAutocomplete({
     // The text changed while a confirmation was open: the token is gone, or
     // was edited (`@sam` → `@samuel`), so a pick for it no longer applies.
     if (
+      !enabledRef.current ||
       !current.startsWith(word, token.start) ||
       /\S/.test(current.charAt(token.start + word.length))
     ) {

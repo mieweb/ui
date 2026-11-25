@@ -1809,6 +1809,24 @@ describe('ChatComposer', () => {
 
         expect(input).toHaveValue('Hi @samuel');
       });
+
+      it('skips the insert when the composer was disabled while confirming', async () => {
+        let confirm: (ok: boolean) => void = () => {};
+        const props = {
+          mentionOptions,
+          onMentionSelect: () =>
+            new Promise<boolean>((resolve) => (confirm = resolve)),
+        };
+        const { rerender } = renderWithTheme(<ChatComposer {...props} />);
+        const input = getInput();
+        fireEvent.change(input, { target: { value: 'Hi @sam' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        rerender(<ChatComposer {...props} disabled />);
+
+        await React.act(async () => confirm(true));
+
+        expect(input).toHaveValue('Hi @sam');
+      });
     });
   });
 
