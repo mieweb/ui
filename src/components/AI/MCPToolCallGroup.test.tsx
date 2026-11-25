@@ -503,36 +503,11 @@ describe('MCPToolCallGroup', () => {
     expect(within(row).queryByText('tool_a')).toBeNull();
 
     fireEvent.click(within(row).getByRole('button', { name: /Read notes.md/ }));
-    // Short names fit the row, so the details do not repeat them.
     expect(
       row.querySelector('[data-slot="ai-tool-call-display-name"]')
-    ).toBeNull();
+    ).toHaveTextContent('Read notes.md');
     expect(within(row).getByText('Tool ID')).toBeInTheDocument();
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
-  });
-
-  it('repeats the display name in full when the row cuts it off', () => {
-    // jsdom has no layout, so report the name as wider than its box.
-    const scrollWidth = vi
-      .spyOn(HTMLElement.prototype, 'scrollWidth', 'get')
-      .mockReturnValue(500);
-    const clientWidth = vi
-      .spyOn(HTMLElement.prototype, 'clientWidth', 'get')
-      .mockReturnValue(100);
-    const name = 'Read notes.md';
-    renderWithTheme(
-      <MCPToolCallGroup
-        toolCalls={[call('a', 'success', { displayName: name })]}
-      />
-    );
-
-    const [row] = rows();
-    fireEvent.click(within(row).getByRole('button', { name: /Read notes/ }));
-    expect(
-      row.querySelector('[data-slot="ai-tool-call-display-name"]')
-    ).toHaveTextContent(name);
-    scrollWidth.mockRestore();
-    clientWidth.mockRestore();
   });
 
   it('survives result data JSON cannot represent', () => {

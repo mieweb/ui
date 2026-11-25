@@ -172,26 +172,6 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
 /** Result text up to this length is shown directly; longer text sits behind a disclosure. */
 const INLINE_RESULT_CHARS = 280;
 
-/** Whether the element's text is cut off by its own width, re-checked on resize. */
-function useIsTruncated(
-  ref: React.RefObject<HTMLElement | null>,
-  text: string | undefined
-): boolean {
-  const [truncated, setTruncated] = React.useState(false);
-  React.useLayoutEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-    const measure = () =>
-      setTruncated(element.scrollWidth > element.clientWidth);
-    measure();
-    if (typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [ref, text]);
-  return truncated;
-}
-
 function resolveLabels(
   overrides: MCPToolCallGroupLabelOverrides | undefined
 ): ResolvedLabels {
@@ -477,8 +457,6 @@ function ToolCallRow({
   const summary = toolCall.result?.summary;
   const fullSummary =
     summary && summary !== result && summary !== errorText ? summary : null;
-  const nameRef = React.useRef<HTMLElement>(null);
-  const nameTruncated = useIsTruncated(nameRef, toolCall.displayName);
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasRich = hasRichResult(toolCall.result);
   const hasLabels = toolCall.parameters.some((param) => param.label);
@@ -554,9 +532,7 @@ function ToolCallRow({
             {toolCall.displayName ? (
               // Host text may be in another script than the page; isolate it so
               // neutral characters such as a trailing "/" keep their place.
-              <bdi ref={nameRef} className="min-w-0 truncate">
-                {toolCall.displayName}
-              </bdi>
+              <bdi className="min-w-0 truncate">{toolCall.displayName}</bdi>
             ) : (
               <code className="min-w-0 truncate font-mono text-xs">
                 {toolCall.toolName}
@@ -583,15 +559,13 @@ function ToolCallRow({
           <CollapsibleContent className="ms-6 mt-1 space-y-2 pb-1">
             {toolCall.displayName && (
               <>
-                {/* Repeated in full only when the row actually cut it off. */}
-                {nameTruncated && (
-                  <p
-                    data-slot="ai-tool-call-display-name"
-                    className="break-words"
-                  >
-                    <bdi>{toolCall.displayName}</bdi>
-                  </p>
-                )}
+                {/* The row truncates the name; here it wraps so it can be read in full. */}
+                <p
+                  data-slot="ai-tool-call-display-name"
+                  className="break-words"
+                >
+                  <bdi>{toolCall.displayName}</bdi>
+                </p>
                 <p
                   data-slot="ai-tool-call-id"
                   className="text-xs break-words text-neutral-600 dark:text-neutral-400"
