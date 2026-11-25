@@ -258,9 +258,7 @@ describe('MCPToolCallGroup', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
-    expect(
-      screen.getByRole('button', { name: 'Show result' })
-    ).toBeInTheDocument();
+    expect(screen.getByText('3 of 10 rows written')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Show error' }));
     expect(screen.getAllByText('Disk quota exceeded')).toHaveLength(2);
   });
@@ -356,14 +354,18 @@ describe('MCPToolCallGroup', () => {
         toolCalls={[call('a', 'running'), call('b', 'awaiting-approval')]}
       />
     );
-    expect(announcements()).toEqual(['1 tool call needs your approval', '']);
+    expect(announcements()).toEqual([
+      '1 tool call needs your approval',
+      '',
+      '',
+    ]);
 
     rerender(
       <MCPToolCallGroup
         toolCalls={[call('a', 'success'), call('b', 'error')]}
       />
     );
-    expect(announcements()).toEqual(['Used 2 tools', '1 tool call failed']);
+    expect(announcements()).toEqual(['Used 2 tools', '1 tool call failed', '']);
   });
 
   it('announces a failure while other calls are still active', () => {
@@ -378,7 +380,11 @@ describe('MCPToolCallGroup', () => {
         toolCalls={[call('a', 'error'), call('b', 'running')]}
       />
     );
-    expect(announcements()).toEqual(['Running 2 tools', '1 tool call failed']);
+    expect(announcements()).toEqual([
+      'Running 2 tools',
+      '1 tool call failed',
+      '',
+    ]);
 
     rerender(
       <MCPToolCallGroup
@@ -388,6 +394,7 @@ describe('MCPToolCallGroup', () => {
     expect(announcements()).toEqual([
       '1 tool call needs your approval',
       '1 tool call failed',
+      '',
     ]);
   });
 
@@ -453,9 +460,24 @@ describe('MCPToolCallGroup', () => {
     );
 
     fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
-    fireEvent.click(screen.getByRole('button', { name: 'Show result' }));
     expect(screen.getByText(/"path": "\/"/)).toHaveAttribute('dir', 'ltr');
     expect(screen.getByText('done')).toHaveAttribute('dir', 'auto');
+  });
+
+  it('puts long result text behind a disclosure', () => {
+    const long = 'x'.repeat(400);
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', { result: { type: 'text', data: long } }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(screen.queryByText(long)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Show result' }));
+    expect(screen.getByText(long)).toBeInTheDocument();
   });
 
   it('renders a lone call as a bare row with no header', () => {
@@ -486,6 +508,59 @@ describe('MCPToolCallGroup', () => {
     ).toHaveTextContent('Read notes.md');
     expect(within(row).getByText('Tool ID')).toBeInTheDocument();
     expect(within(row).getByText('tool_a')).toBeInTheDocument();
+  });
+
+  it('survives result data JSON cannot represent', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'success', {
+            result: { type: 'json', data: { big: 1n }, summary: 'Counted' },
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(screen.getAllByText('Counted').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the full summary in the details beside other result text', () => {
+    const summary = 'Wrote 3 of 10 rows; rerun with --resume to finish';
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call('a', 'uncertain', {
+            result: {
+              type: 'json',
+              data: '{"written":3}',
+              structured: { written: 3 },
+              summary,
+            },
+          }),
+        ]}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /tool_a/ }));
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-summary-full"]')
+    ).toHaveTextContent(summary);
+  });
+
+  it('announces a newly unconfirmed call while another is still running', () => {
+    const { rerender } = renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'running')]}
+      />
+    );
+    rerender(
+      <MCPToolCallGroup
+        toolCalls={[call('a', 'running'), call('b', 'uncertain')]}
+      />
+    );
+
+    expect(announcements()[2]).toMatch(/^1 not confirmed\. Could not confirm/);
   });
 
   it('shows the tool id in the row when there is no display name', () => {

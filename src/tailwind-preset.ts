@@ -39,6 +39,8 @@
  * @deprecated For Tailwind CSS 4 users — use the `@source` directive instead.
  */
 export const miewebUISafelist = [
+  // ToolCallDisplay: labeled inputs and structured result fields.
+  'grid-cols-[minmax(0,auto)_minmax(0,1fr)]',
   // EncounterVisit: report layout, expanding narratives, and coordinated vitals.
   'z-40',
   'sm:inset-8',

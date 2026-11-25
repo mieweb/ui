@@ -41,7 +41,9 @@ const meta: Meta<typeof MCPToolCallDisplay> = {
 
 - The item is not a tool call — a plain collapsible summary should use \`CollapsiblePill\` directly, and reasoning text is the \`thinking\` block in \`AIMessage\`.
 - You need users to **approve or deny** a single call shown as a pill: \`MCPToolCallDisplay\` has no action buttons; use \`MCPToolCallGroup\`, which renders a lone call as a bare row with the controls.
-- You need to show large or structured \`result.data\`: only \`summary\`, links and resources are rendered; \`data\` is ignored unless \`result.type === 'error'\`.
+- You need to show large free-form \`result.data\` in the pill: it renders \`summary\`, links and rich content (\`structured\`, \`media\`, \`embedded\`), not raw \`data\`. \`MCPToolCallGroup\` rows show \`data\` behind "Show result".
+
+\`ToolCallDisplay\` is the current name; \`MCPToolCallDisplay\` and the \`MCP*\` types are deprecated aliases of the same implementation. Calls may carry \`description\`, \`hints\` (provider-declared, explanatory only), labeled \`parameters\`, and an \`uncertain\` status for calls that may or may not have run.
 
 ### Example
 
@@ -75,7 +77,7 @@ const [calls, setCalls] = useState<Record<string, MCPToolCall>>({});
 
 - **\`MCPToolCallDisplay\` does not announce status changes.** The pill re-renders from \`pending\` → \`running\` → \`success\`/\`error\` with only a colour and icon change (icons are \`aria-hidden\`); wrap the container in a live region if the transition matters to screen-reader users. The pill is a \`<button>\` with \`aria-expanded\` / \`aria-controls\` and a hard-coded \`title="Toggle details"\`; when there is nothing to expand it is rendered \`disabled\`.
 - **\`MCPToolCallGroup\` does.** Its header is a \`<button>\` with \`aria-expanded\` / \`aria-controls\` naming the list; Two polite \`role="status"\` regions announce changes: one the approval requests, the running count and the settled count, the other failures as they happen, so neither masks the other. Rows are \`role="listitem"\` groups named by \`labels.callLabel\`, each with its own disclosure trigger. Buttons stay disabled while \`onApprove\`/\`onDeny\` settle; reporting a rejected promise is the host's job. When the buttons go because the call left \`awaiting-approval\`, focus moves to the row's own trigger rather than dropping to the page.
-- \`ResourceLink\` is an \`<a href>\` — with \`onLinkClick\` it calls \`preventDefault\` and hands you the link; without it the browser navigates, and \`resources[]\` without \`uri\` produce \`href="#"\`. External links carry no \`rel\`.
+- \`ResourceLink\` is an \`<a href>\` — with \`onLinkClick\` it calls \`preventDefault\` and hands you the link; without it the browser navigates, and \`resources[]\` without \`uri\` produce \`href="#"\`. Only http(s) and same-origin hrefs are linked; others render as text. Absolute links open in a new tab with \`rel="noopener noreferrer"\` and show their host.
 - **\`MCPToolCallDisplay\` is English only.** The friendly-name map, tense rewriting ("Creating" → "Created"), "Parameters", the \`ms\`/\`s\` duration format and "An error occurred" are hard-coded and assume English verb forms; \`toolName\` fallbacks are shown raw. \`MCPToolCallGroup\` takes every string through \`labels\`.
 - Parameter values render via \`JSON.stringify\` (no truncation); the box is \`max-w-md\` and \`max-h-[500px]\` scrolling. Nothing is sanitised — \`summary\`, \`error\` and parameter values are text nodes, so HTML is not interpreted, but very long strings are not wrapped by word.
 - Theming uses hard-coded \`neutral-*\`, \`primary-*\`, \`green-*\`, \`red-*\`, \`amber-*\` utilities; RTL is fine (flex, logical \`ms-*\`/\`border-s\`, no physical offsets); \`MCPToolCallGroup\` renders parameters as an LTR island (\`dir="ltr"\`, since they are JSON) and result and error text with \`dir="auto"\`. Depends on \`class-variance-authority\` and \`lucide-react\`. Entry \`@mieweb/ui\`.
@@ -304,6 +306,166 @@ export const GroupDisplayNames: Story = {
       ]}
       onApprove={fn()}
       onDeny={fn()}
+    />
+  ),
+};
+
+// Small bar chart, so the preview reads as an image rather than a dot.
+const CHART_PNG =
+  'iVBORw0KGgoAAAANSUhEUgAAAHgAAABACAIAAABeLyRFAAAA2UlEQVR4nO3bsQ3CQBBEUefkdICLoQ36IqEZiqADYmJTAJZWWsRYh9/XxqfRy29aFGnaesBeAh0KdCjQoUCHAh0KdCjQoUCHAh0KdKjBoF/XQ+O2Xr2AzgU6FOhQoEOBDgU6FOhQBfTp8mzc7+aCBl0EOhToUKBDgQ4FOhToUDuFfsxz475ZDhr0WqBBF4EGvRZo0EWg/wv6eDs37vMd0KCLQIMGDboRaNCgQTcCDRo06EagQYMG3Qg0aNCgG4EGDRp0I9CgQYNuBDoFfVekwX7OjhvoUKBDvQHIvfMBloSxEQAAAABJRU5ErkJggg==';
+
+/**
+ * An MCP call before approval: title, description, server, behavior hints and
+ * labeled inputs, with the raw JSON one disclosure away.
+ */
+export const GroupApprovalMetadata: Story = {
+  render: () => (
+    <MCPToolCallGroup
+      toolCalls={[
+        groupCall('m1', 'create_container', 'awaiting-approval', {
+          serverName: 'Proxmox',
+          displayName: 'Create container',
+          description: 'Creates an LXC container from a template.',
+          hints: { destructive: false, openWorld: true },
+          parameters: [
+            {
+              name: 'hostname',
+              label: 'Host name',
+              type: 'string',
+              value: 'foo-dev',
+            },
+            {
+              name: 'template',
+              label: 'Template',
+              type: 'string',
+              value: 'debian-12',
+            },
+          ],
+          result: undefined,
+        }),
+      ]}
+      onApprove={fn()}
+      onDeny={fn()}
+    />
+  ),
+};
+
+/**
+ * Settled outcomes: completed with a labeled link and structured fields, a
+ * tool-reported error, and an uncertain transport failure.
+ */
+export const GroupOutcomes: Story = {
+  render: () => (
+    <MCPToolCallGroup
+      toolCalls={[
+        groupCall('o1', 'create_container', 'success', {
+          serverName: 'Proxmox',
+          displayName: 'Create container',
+          result: {
+            type: 'json',
+            data: '',
+            summary: 'Open container foo-dev',
+            links: [
+              {
+                href: 'https://pve.example.com/ct/101',
+                label: 'Open container foo-dev',
+                type: 'external',
+              },
+            ],
+            structured: { vmid: 101, hostname: 'foo-dev', status: 'running' },
+            fieldLabels: { vmid: 'Container ID', hostname: 'Host name' },
+          },
+        }),
+        groupCall('o2', 'create_container', 'error', {
+          serverName: 'Proxmox',
+          error: 'Template debian-13 not found',
+          result: undefined,
+        }),
+        groupCall('o3', 'create_container', 'uncertain', {
+          serverName: 'Proxmox',
+          error: 'Request timed out',
+          result: undefined,
+        }),
+      ]}
+    />
+  ),
+};
+
+/** Media, embedded resources, tables and unsupported content. */
+export const GroupRichResults: Story = {
+  render: () => (
+    <MCPToolCallGroup
+      toolCalls={[
+        groupCall('r1', 'list_hosts', 'success', {
+          serverName: 'Proxmox',
+          parameters: [
+            { name: 'cluster', label: 'Cluster', type: 'string', value: 'lab' },
+          ],
+          result: {
+            type: 'json',
+            data: '',
+            structured: [
+              { name: 'alpha', cpu: 4, memory: '8 GB' },
+              { name: 'beta', cpu: 8, memory: '16 GB' },
+            ],
+            fieldLabels: { name: 'Host', cpu: 'vCPUs', memory: 'Memory' },
+          },
+        }),
+        groupCall('r2', 'capture_usage_chart', 'success', {
+          serverName: 'Proxmox',
+          parameters: [
+            {
+              name: 'range',
+              label: 'Time range',
+              type: 'string',
+              value: '24h',
+            },
+          ],
+          result: {
+            type: 'text',
+            data: 'Usage chart captured for the last 24 hours.',
+            media: [
+              {
+                type: 'image',
+                mimeType: 'image/png',
+                data: CHART_PNG,
+                alt: 'CPU usage per host over 24 hours',
+              },
+            ],
+            embedded: [
+              {
+                uri: 'file:///var/log/pve/usage-run.txt',
+                mimeType: 'text/plain',
+                text: 'collected 4 samples\nok\n',
+              },
+            ],
+            unsupported: ['ui_resource'],
+          },
+        }),
+      ]}
+    />
+  ),
+};
+
+/** Built-in tools and skills use the same rows without a server identity. */
+export const GroupToolFamilies: Story = {
+  render: () => (
+    <MCPToolCallGroup
+      toolCalls={[
+        groupCall('f1', 'search', 'success', { serverName: 'Docs server' }),
+        groupCall('f2', 'memory_search', 'success', {
+          displayName: 'Searched memories',
+        }),
+        groupCall('f3', 'load_skill', 'success', {
+          serverName: 'Skills',
+          displayName: 'pdf-forms',
+          parameters: [],
+          result: {
+            type: 'text',
+            data: 'Loaded skill "pdf-forms" (~900 tokens).',
+          },
+        }),
+      ]}
     />
   ),
 };
