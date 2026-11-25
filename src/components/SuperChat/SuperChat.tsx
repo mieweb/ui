@@ -1250,7 +1250,13 @@ export function SuperChat({
         // is still the one shown, and the text unless the user has typed a
         // newer draft while this send was pending.
         if (conversationRef.current.id === conversationId) {
-          if (draftEpochRef.current === epoch) setDraft(message.content);
+          if (draftEpochRef.current === epoch) {
+            setDraft(message.content);
+            // With the text, the people picked for it (`onMentionSearch`).
+            if (message.mentions) {
+              composerRef.current?.restoreMentions(message.mentions);
+            }
+          }
           // Files uploaded on attach go back as uploaded, not to upload again.
           if (message.uploads) {
             composerRef.current?.restoreAttachments(message.uploads);

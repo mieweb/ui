@@ -115,6 +115,12 @@ contract: keyboard priority in the textarea `onKeyDown` is host
 `textareaProps.onKeyDown` (preventDefault claims the event) → mention menu
 navigation → Enter-to-send. Don't reorder.
 
+With `onMentionSearch`, the options picked are kept by id until a send, which
+reports the ones still in the text as whole `@tokens` (`matchMentionTokens`)
+and forgets them all. A host that puts a failed send's text back puts its
+`mentions` back with `restoreMentions` too (SuperChat does, under the same
+guard as the text), or the retry reports none.
+
 ## Mobile keyboard behavior
 
 - **Enter.** `submitOnEnter="desktop"` (default) keys off

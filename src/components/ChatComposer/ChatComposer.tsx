@@ -155,6 +155,11 @@ export interface ChatComposerHandle {
    * uploading them again: e.g. putting a failed send's attachments back.
    */
   restoreAttachments: (uploads: UploadedAttachment[]) => void;
+  /**
+   * Put back mentions picked through `onMentionSearch` (a failed send's
+   * `NewMessage.mentions`), so sending the restored text reports them again.
+   */
+  restoreMentions: (mentions: MentionOption[]) => void;
   /** Focus the text input. */
   focus: () => void;
   /**
@@ -994,6 +999,11 @@ export const ChatComposer = React.forwardRef<
     () => ({
       addFiles,
       restoreAttachments: uploads.restore,
+      restoreMentions: (mentions) => {
+        for (const option of mentions) {
+          pickedMentionsRef.current.set(option.id, option);
+        }
+      },
       focus: focusInput,
       getTextarea: () => textareaRef.current,
     }),

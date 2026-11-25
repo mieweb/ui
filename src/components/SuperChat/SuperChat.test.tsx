@@ -1293,6 +1293,43 @@ describe('SuperChat', () => {
         expect.objectContaining({ mentions: ['guest'] })
       );
     });
+
+    it('keeps the picked people when a failed send is retried', async () => {
+      const onMessageSent = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('backend down'))
+        .mockResolvedValueOnce(undefined);
+      const onMentionSearch = vi.fn(() =>
+        Promise.resolve([{ id: 'guest', label: 'Jordan Guest' }])
+      );
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ onMentionSearch }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      const input = screen.getByLabelText('Message');
+      await user.type(input, 'ask @jor');
+      await user.click(
+        await screen.findByRole('option', { name: /Jordan Guest/ })
+      );
+      await user.click(screen.getByLabelText('Send message'));
+      // The draft comes back after the failure; sending it again still
+      // reports the person picked for it.
+      await waitFor(() => expect(input).toHaveValue('ask @Jordan'));
+      await user.click(screen.getByLabelText('Send message'));
+
+      await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(2));
+      expect(onMessageSent).toHaveBeenLastCalledWith(
+        'ask @Jordan',
+        expect.objectContaining({ mentions: ['guest'] })
+      );
+    });
   });
 
   describe('composerRef and onDraftChange', () => {
