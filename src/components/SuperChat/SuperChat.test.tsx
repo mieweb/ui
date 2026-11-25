@@ -1834,6 +1834,306 @@ describe('SuperChat', () => {
     expect(document.activeElement).toBe(toggle);
   });
 
+  describe('tool-call groups and thinking', () => {
+    const call = (
+      id: string,
+      status: 'running' | 'success' | 'awaiting-approval'
+    ) => ({
+      type: 'tool_use' as const,
+      toolCall: {
+        id,
+        toolName: `tool_${id}`,
+        parameters: [],
+        status,
+        startedAt: '2026-06-07T09:01:00Z',
+      },
+    });
+    const withContent = (
+      content: NonNullable<SuperChatConversation['thread'][number]['content']>,
+      extra: Partial<SuperChatConversation['thread'][number]> = {}
+    ): SuperChatConversation => ({
+      ...conversation,
+      thread: [
+        ...conversation.thread,
+        {
+          id: 'm-ai',
+          participantId: 'a1',
+          time: '2026-06-07T09:01:00Z',
+          content,
+          ...extra,
+        },
+      ],
+    });
+    const groups = () =>
+      document.querySelectorAll('[data-slot="ai-tool-call-group"]');
+
+    it('renders consecutive tool calls as one group wired to the host callbacks', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const onApprove = vi.fn();
+      const onDeny = vi.fn();
+      render(
+        <SuperChat
+          conversation={withContent(
+            [
+              call('t1', 'awaiting-approval'),
+              call('t2', 'awaiting-approval'),
+              { type: 'text', text: 'between' },
+              call('t3', 'success'),
+            ],
+            { status: 'streaming' }
+          )}
+          currentParticipantId="u1"
+          toolCallGroup={{
+            onApprove,
+            onDeny,
+            labels: { allowOnce: 'Approve' },
+          }}
+        />
+      );
+
+      // Two runs split by the text block: [t1, t2] and [t3].
+      expect(groups()).toHaveLength(2);
+      expect(
+        within(groups()[0] as HTMLElement).getByText('Running 2 tools')
+      ).toBeInTheDocument();
+      expect(
+        document.querySelector(
+          '[data-slot="superchat-bubble"] > [data-slot="ai-tool-call"]'
+        )
+      ).toBeNull();
+
+      const [approve] = screen.getAllByRole('button', { name: 'Approve' });
+      await user.click(approve);
+      expect(onApprove).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 't1' }),
+        { always: false }
+      );
+
+      const [, alwaysAllow] = screen.getAllByRole('button', {
+        name: 'Always allow',
+      });
+      await user.click(alwaysAllow);
+      expect(onApprove).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 't2' }),
+        { always: true }
+      );
+
+      const [deny] = screen.getAllByRole('button', { name: 'Deny' });
+      await user.click(deny);
+      expect(onDeny).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 't1' })
+      );
+    });
+
+    it('calls the latest host callbacks without a new options object', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const first = vi.fn();
+      const second = vi.fn();
+      const convo = withContent([call('t1', 'awaiting-approval')]);
+      const { rerender } = render(
+        <SuperChat
+          conversation={convo}
+          currentParticipantId="u1"
+          toolCallGroup={{ onApprove: first }}
+        />
+      );
+      rerender(
+        <SuperChat
+          conversation={convo}
+          currentParticipantId="u1"
+          toolCallGroup={{ onApprove: second }}
+        />
+      );
+      await user.click(screen.getByRole('button', { name: 'Allow once' }));
+      expect(first).not.toHaveBeenCalled();
+      expect(second).toHaveBeenCalledTimes(1);
+      // No onDeny from the host: the group offers no Deny control.
+      expect(screen.queryByRole('button', { name: 'Deny' })).toBeNull();
+    });
+
+    it('collapses a finished group once the reply stops streaming', () => {
+      const header = () =>
+        within(groups()[0] as HTMLElement).getAllByRole('button')[0];
+      const { rerender } = render(
+        <SuperChat
+          conversation={withContent(
+            [call('t1', 'running'), call('t2', 'running')],
+            { status: 'streaming' }
+          )}
+          currentParticipantId="u1"
+          toolCallGroup={{}}
+        />
+      );
+      expect(header()).toHaveAttribute('aria-expanded', 'true');
+
+      rerender(
+        <SuperChat
+          conversation={withContent(
+            [call('t1', 'success'), call('t2', 'success')],
+            { status: 'complete', text: 'All done' }
+          )}
+          currentParticipantId="u1"
+          toolCallGroup={{}}
+        />
+      );
+      expect(header()).toHaveTextContent('Used 2 tools');
+      expect(header()).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('keeps one pill per call without toolCallGroup', () => {
+      render(
+        <SuperChat
+          conversation={withContent([
+            call('t1', 'success'),
+            call('t2', 'success'),
+          ])}
+          currentParticipantId="u1"
+        />
+      );
+      expect(groups()).toHaveLength(0);
+      expect(
+        document.querySelectorAll('[data-slot="ai-tool-call"]')
+      ).toHaveLength(2);
+    });
+
+    it('renders tool groups and thinking in the virtualized thread', () => {
+      const height = vi
+        .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
+        .mockReturnValue(600);
+      const width = vi
+        .spyOn(HTMLElement.prototype, 'offsetWidth', 'get')
+        .mockReturnValue(600);
+      try {
+        render(
+          <SuperChat
+            conversation={withContent([
+              { type: 'thinking', text: 'Weighing the options' },
+              call('t1', 'success'),
+              call('t2', 'success'),
+            ])}
+            currentParticipantId="u1"
+            toolCallGroup={{}}
+            virtualized
+          />
+        );
+        expect(groups()).toHaveLength(1);
+        expect(
+          document.querySelector('[data-slot="ai-message-thinking"]')
+        ).toHaveTextContent('Weighing the options');
+      } finally {
+        height.mockRestore();
+        width.mockRestore();
+      }
+    });
+
+    it('renders thinking as a collapsible block, not as the answer body', () => {
+      const { container } = render(
+        <SuperChat
+          conversation={withContent(
+            [{ type: 'thinking', text: 'Checking the **chart**' }],
+            { status: 'streaming' }
+          )}
+          currentParticipantId="u1"
+        />
+      );
+      const thinking = container.querySelector(
+        '[data-slot="ai-message-thinking"]'
+      ) as HTMLElement;
+      expect(thinking).not.toBeNull();
+      // Raw reasoning text, outside the Markdown prose body.
+      expect(thinking).toHaveTextContent('Checking the **chart**');
+      expect(thinking.closest('.prose')).toBeNull();
+      expect(
+        within(thinking).getByRole('button', { name: /Thinking/ })
+      ).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('collapses thinking once the answer starts streaming', () => {
+      const pill = () =>
+        within(
+          document.querySelector(
+            '[data-slot="ai-message-thinking"]'
+          ) as HTMLElement
+        ).getByRole('button');
+      const thinking = { type: 'thinking' as const, text: 'Considering' };
+      const { rerender } = render(
+        <SuperChat
+          conversation={withContent([thinking], { status: 'streaming' })}
+          currentParticipantId="u1"
+        />
+      );
+      expect(pill()).toHaveAttribute('aria-expanded', 'true');
+
+      rerender(
+        <SuperChat
+          conversation={withContent(
+            [thinking, { type: 'text', text: 'The answer' }],
+            { status: 'streaming' }
+          )}
+          currentParticipantId="u1"
+        />
+      );
+      expect(pill()).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.getByText('The answer')).toBeInTheDocument();
+    });
+
+    it('shows finished thinking collapsed', () => {
+      render(
+        <SuperChat
+          conversation={withContent([
+            { type: 'thinking', text: 'Old reasoning' },
+            { type: 'text', text: 'Answer' },
+          ])}
+          currentParticipantId="u1"
+        />
+      );
+      const pill = within(
+        document.querySelector(
+          '[data-slot="ai-message-thinking"]'
+        ) as HTMLElement
+      ).getByRole('button', { name: /Thought/ });
+      expect(pill).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('leaves reasoning out of a Markdown copy', async () => {
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      const writeText = vi.fn(async () => {});
+      vi.stubGlobal('navigator', {
+        ...globalThis.navigator,
+        clipboard: { writeText, write: vi.fn(async () => {}) },
+      });
+      try {
+        render(
+          <div style={{ height: 400 }}>
+            <SuperChat
+              conversation={withContent([
+                { type: 'thinking', text: 'Private reasoning' },
+                { type: 'text', text: 'Public answer' },
+              ])}
+              currentParticipantId="u1"
+            />
+          </div>
+        );
+        const copyButtons = screen.getAllByRole('button', {
+          name: 'Copy message',
+        });
+        await user.click(copyButtons[copyButtons.length - 1]);
+        await user.click(
+          screen.getByRole('menuitem', { name: 'Copy as Markdown' })
+        );
+        expect(writeText).toHaveBeenCalledWith('Public answer');
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+  });
+
   describe('scroll anchoring', () => {
     // jsdom has no layout, so scroll metrics are mocked directly on the
     // thread element and position changes are driven with scroll events.
@@ -2547,6 +2847,55 @@ describe('SuperChatInbox', () => {
         ) as HTMLElement
       ).classList.contains('hidden')
     ).toBe(false);
+  });
+
+  it('forwards toolCallGroup to the active panel', async () => {
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const onApprove = vi.fn();
+    const withTools: SuperChatConversation[] = conversations.map((c, i) =>
+      i === 0
+        ? {
+            ...c,
+            thread: [
+              ...c.thread,
+              {
+                id: 'm-tools',
+                participantId: 'a1',
+                time: '2026-06-07T10:00:00Z',
+                content: [
+                  {
+                    type: 'tool_use' as const,
+                    toolCall: {
+                      id: 'tc1',
+                      toolName: 'lookup',
+                      parameters: [],
+                      status: 'awaiting-approval' as const,
+                      startedAt: '2026-06-07T10:00:00Z',
+                    },
+                  },
+                ],
+              },
+            ],
+          }
+        : c
+    );
+    render(
+      <SuperChatInbox
+        conversations={withTools}
+        currentParticipantId="u1"
+        defaultActiveConversationId={withTools[0].id}
+        toolCallGroup={{ onApprove }}
+      />
+    );
+    expect(
+      document.querySelector('[data-slot="ai-tool-call-group"]')
+    ).not.toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Allow once' }));
+    expect(onApprove).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'tc1' }),
+      { always: false }
+    );
   });
 
   describe('resizable sidebar', () => {

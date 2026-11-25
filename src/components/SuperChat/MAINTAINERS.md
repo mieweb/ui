@@ -300,6 +300,23 @@ The composer:
   the fallback HTML table is shown (the case in CI/dev when the submodule is
   absent).
 
+## AI content blocks
+
+`MessageContentBlocks` in [parts.tsx](parts.tsx) renders a message's `content`
+with the AI module's own pieces so an agent turn matches `AIChat`:
+
+- `tool_use` → `MCPToolCallDisplay` per call, or — with `toolCallGroup` — one
+  `MCPToolCallGroup` per run of consecutive calls, keyed by the run's first call
+  id (same grouping loop as `AIMessage`'s `MessageContentBlocks`).
+- `thinking` → `ThinkingBlock`, exported from `AI/AIMessage.tsx` for this reuse
+  (not from the AI entry). Its `streaming` flag is "still thinking": the message
+  is streaming **and** nothing renders after the block, so it folds as soon as
+  the answer or a tool call starts. Copy (all formats) skips it.
+
+`SuperChat` hands rows a stable `toolCallGroup`: `onApprove`/`onDeny` are
+ref-backed wrappers, rebuilt only when a callback appears/disappears or `labels`
+changes, so a host's inline options object doesn't defeat `MessageRow`'s memo.
+
 ## Motion
 
 Opt-in via `@mieweb/ui/motion` — see [../../motion/MAINTAINERS.md](../../motion/MAINTAINERS.md).

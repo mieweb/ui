@@ -31,6 +31,7 @@ import type {
   ChatComposerSendMeta,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
+import type { MCPToolCallGroupOptions } from '../AI/MCPToolCallGroup';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
 import { DictationButton, type DictationButtonProps } from '../DictationButton';
@@ -221,6 +222,15 @@ export interface SuperChatProps {
    * a server provider. See the `Dictation` story and `DictationButton`.
    */
   dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
+  /**
+   * Opt in to grouped tool calls, as in `AIChat`: each run of consecutive
+   * `tool_use` blocks in a message renders as one `MCPToolCallGroup` (compact
+   * rows under a "Used N tools" header that collapses once every call has
+   * settled) with these approve/deny callbacks and labels. Without it, each
+   * call renders as its own pill. Callbacks are read at call time, so an
+   * inline object does not re-render every message.
+   */
+  toolCallGroup?: MCPToolCallGroupOptions;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -410,6 +420,7 @@ export function SuperChat({
   onStop,
   stopLabel,
   dictation,
+  toolCallGroup,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -1075,6 +1086,7 @@ export function SuperChat({
       scheduledLabel={scheduledLabel}
       renderMessageMedia={renderMessageMedia}
       mediaMaxSize={mediaBox}
+      toolCallGroup={stableToolCallGroup}
     />
   );
 
@@ -1094,6 +1106,35 @@ export function SuperChat({
     []
   );
   const editable = !readOnly && !!onMessageEdited;
+
+  // Stable tool-group options so memoized rows don't re-render when the host
+  // passes an inline object: the callbacks read the latest options from a
+  // ref, and only a change in which callbacks exist (or in the labels)
+  // produces a new object.
+  const toolCallGroupRef = React.useRef(toolCallGroup);
+  toolCallGroupRef.current = toolCallGroup;
+  const hasToolCallGroup = !!toolCallGroup;
+  const hasApprove = !!toolCallGroup?.onApprove;
+  const hasDeny = !!toolCallGroup?.onDeny;
+  const toolCallGroupLabels = toolCallGroup?.labels;
+  const stableToolCallGroup = React.useMemo<
+    MCPToolCallGroupOptions | undefined
+  >(
+    () =>
+      hasToolCallGroup
+        ? {
+            onApprove: hasApprove
+              ? (toolCall, options) =>
+                  toolCallGroupRef.current?.onApprove?.(toolCall, options)
+              : undefined,
+            onDeny: hasDeny
+              ? (toolCall) => toolCallGroupRef.current?.onDeny?.(toolCall)
+              : undefined,
+            labels: toolCallGroupLabels,
+          }
+        : undefined,
+    [hasToolCallGroup, hasApprove, hasDeny, toolCallGroupLabels]
+  );
 
   // Agents/humans addressable via `@` (exclude the system participant).
   const mentionOptions = React.useMemo(
@@ -1420,6 +1461,7 @@ export function SuperChat({
               scheduledLabel={scheduledLabel}
               renderMessageMedia={renderMessageMedia}
               mediaMaxSize={mediaBox}
+              toolCallGroup={stableToolCallGroup}
               scrollRef={threadRef}
               contentRef={threadContentRef}
               layoutRef={threadLayoutRef}
