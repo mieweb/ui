@@ -335,6 +335,11 @@ export interface ComposerAttachment {
    * rather than decoding `dataUrl`: it holds no copy of the bytes.
    */
   file?: File;
+  /**
+   * What the host's upload resolved to, when the composer uploaded the file
+   * on attach (`composerProps.uploadAttachment`): post this, upload nothing.
+   */
+  result?: unknown;
 }
 
 /**

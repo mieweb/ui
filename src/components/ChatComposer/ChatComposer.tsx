@@ -13,16 +13,24 @@ import {
 import {
   AttachmentPreviewItem,
   DragDropZone,
-  getFileType,
   validateFile,
-  generateAttachmentId,
 } from '../Messaging/AttachmentPicker';
+import {
+  hasBusyUpload,
+  useAttachmentUploads,
+  type AttachmentUpload,
+  type AttachmentUploadState,
+  type DiscardAttachment,
+  type UploadAttachment,
+  type UploadedAttachment,
+} from './useAttachmentUploads';
+import { UploadAnnouncer } from './UploadAnnouncer';
 import {
   MentionMenu,
   useMentionAutocomplete,
   type MentionOption,
 } from '../Messaging/useMentionAutocomplete';
-import type { AttachmentType, NewMessage } from '../Messaging/types';
+import type { AttachmentState, NewMessage } from '../Messaging/types';
 import {
   referencesIn,
   type ReferenceTrigger,
@@ -45,13 +53,45 @@ import {
 // Types
 // ============================================================================
 
-/** A file staged for sending, with preview metadata. */
-interface StagedAttachment {
-  id: string;
-  file: File;
-  previewUrl?: string;
-  type: AttachmentType;
+/**
+ * What the composer says about uploads (`uploadAttachment`), each overridable
+ * through `uploadLabels`.
+ */
+export interface ChatComposerUploadLabels {
+  /** A file uploading: its tile's progress name, and what's announced. */
+  uploading: (name: string) => string;
+  /** On a tile once the last byte is in and the host is still finishing. */
+  processing: string;
+  /** Announced when a file has uploaded. */
+  uploaded: (name: string) => string;
+  /** Announced, and reported through `onError`, when a file didn't upload. */
+  failed: (name: string) => string;
+  /** The failed tile's button. */
+  retry: string;
+  /** The remove button while a file is uploading. */
+  cancel: (name: string) => string;
+  /** The remove button once a file has uploaded or failed. */
+  remove: (name: string) => string;
 }
+
+/** How each upload state shows on its tile (processing is still a busy tile). */
+const TILE_STATE = {
+  pending: 'pending',
+  uploading: 'uploading',
+  processing: 'uploading',
+  uploaded: 'uploaded',
+  failed: 'failed',
+} as const satisfies Record<AttachmentUploadState, AttachmentState>;
+
+const DEFAULT_UPLOAD_LABELS: ChatComposerUploadLabels = {
+  uploading: (name) => `Uploading ${name}`,
+  processing: 'Processing…',
+  uploaded: (name) => `${name} uploaded`,
+  failed: (name) => `${name} didn't upload`,
+  retry: 'Retry',
+  cancel: (name) => `Cancel upload of ${name}`,
+  remove: (name) => `Remove ${name}`,
+};
 
 /** An entry in the composer's `+` menu. */
 export interface ChatComposerMenuItem {
@@ -107,6 +147,11 @@ export interface ChatComposerHandle {
    * are explicit host actions; validation and `onError` still apply.
    */
   addFiles: (files: File[]) => void;
+  /**
+   * Stage files that were uploaded already (`uploadAttachment`), without
+   * uploading them again: e.g. putting a failed send's attachments back.
+   */
+  restoreAttachments: (uploads: UploadedAttachment[]) => void;
   /** Focus the text input. */
   focus: () => void;
   /**
@@ -119,7 +164,12 @@ export interface ChatComposerHandle {
 
 /** Structured context passed to `onError` so hosts can localize by reason. */
 export interface ChatComposerError {
-  reason: 'file-type' | 'file-size' | 'attachment-limit' | 'send-failed';
+  reason:
+    | 'file-type'
+    | 'file-size'
+    | 'attachment-limit'
+    | 'send-failed'
+    | 'upload-failed';
   /** The rejected file, when the error concerns a single file. */
   file?: File;
 }
@@ -226,6 +276,19 @@ export interface ChatComposerProps {
   maxFileSize?: number | ((file: File) => number | undefined);
   /** Maximum number of staged attachments. @default 10 */
   maxAttachments?: number;
+  /**
+   * Upload each file as soon as it's attached, instead of handing the host
+   * `File`s at send. The tile shows its progress; removing it aborts
+   * `context.signal`; a failure shows Retry. Send stays enabled: pressed
+   * while files are uploading, it waits for them, then calls `onSend` with
+   * `message.uploads` (each file and what this resolved to). If one failed,
+   * nothing is sent and `onError` reports `'upload-failed'`.
+   */
+  uploadAttachment?: UploadAttachment<unknown>;
+  /** Undo a finished upload removed (or abandoned on unmount) before it was sent. */
+  discardAttachment?: DiscardAttachment<unknown>;
+  /** Overrides for the upload wording (`uploadAttachment`). */
+  uploadLabels?: Partial<ChatComposerUploadLabels>;
 
   /**
    * Candidates for `@mention` autocomplete. When provided (non-empty), typing
@@ -457,6 +520,9 @@ export const ChatComposer = React.forwardRef<
     acceptedFileTypes,
     maxFileSize,
     maxAttachments = 10,
+    uploadAttachment,
+    discardAttachment,
+    uploadLabels,
     mentionOptions,
     replyTo = null,
     onCancelReply,
@@ -531,9 +597,20 @@ export const ChatComposer = React.forwardRef<
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
 
-  const [attachments, setAttachments] = React.useState<StagedAttachment[]>([]);
-  const attachmentsRef = React.useRef(attachments);
-  attachmentsRef.current = attachments;
+  // The staged files, each uploading as soon as it's added when the host
+  // gives `uploadAttachment` (useAttachmentUploads).
+  const uploads = useAttachmentUploads<unknown>({
+    upload: uploadAttachment,
+    discard: discardAttachment,
+  });
+  const attachments = uploads.items;
+  const labels = React.useMemo(
+    () => ({ ...DEFAULT_UPLOAD_LABELS, ...uploadLabels }),
+    [uploadLabels]
+  );
+  // A send waiting for its files to finish uploading.
+  const [awaitingUploads, setAwaitingUploads] = React.useState(false);
+  const showSending = isSending || awaitingUploads;
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -621,10 +698,11 @@ export const ChatComposer = React.forwardRef<
     !isSending &&
     !isStreaming;
   /** Whether `text` (with `staged` attachments) is a sendable message. */
-  const isSendable = (text: string, staged = attachments) =>
+  const isSendable = (text: string, staged: readonly unknown[] = attachments) =>
     (text.trim().length > 0 || staged.length > 0 || canSendWhenEmpty) &&
     !(maxLength !== undefined && text.length > maxLength);
-  const canSend = readyToSend && isSendable(value);
+  // Pressed while files upload, Send waits for them (see handleSend).
+  const canSend = readyToSend && !awaitingUploads && isSendable(value);
 
   // --------------------------------------------------------------------
   // Input handling
@@ -717,12 +795,12 @@ export const ChatComposer = React.forwardRef<
       const limitMessage =
         attachmentLimitLabel ??
         `Attachment limit reached (max ${maxAttachments})`;
-      const room = maxAttachments - attachmentsRef.current.length;
+      const room = maxAttachments - uploads.current().length;
       if (files.length > room) {
         onError?.(limitMessage, { reason: 'attachment-limit' });
         if (room <= 0) return;
       }
-      const staged: StagedAttachment[] = [];
+      const accepted: File[] = [];
       for (const file of files.slice(0, Math.max(room, 0))) {
         const typeCheck = validateFile(file, acceptedFileTypes, undefined);
         if (!typeCheck.valid) {
@@ -744,24 +822,11 @@ export const ChatComposer = React.forwardRef<
           });
           continue;
         }
-        const type = getFileType(file.type);
-        staged.push({
-          id: generateAttachmentId(),
-          file,
-          type,
-          previewUrl:
-            type === 'image' || type === 'video'
-              ? URL.createObjectURL(file)
-              : undefined,
-        });
+        accepted.push(file);
       }
-      if (staged.length > 0) {
-        // Reserve slots synchronously: a second addFiles call in the same
-        // React batch reads attachmentsRef before re-render, so without this
-        // both calls could see the same free room and overshoot the cap.
-        attachmentsRef.current = [...attachmentsRef.current, ...staged];
-        setAttachments((current) => [...current, ...staged]);
-      }
+      // Staged synchronously (uploads.current() sees them at once), so a
+      // second addFiles call in the same React batch can't overshoot the cap.
+      uploads.add(accepted);
     },
     [
       maxAttachments,
@@ -769,32 +834,12 @@ export const ChatComposer = React.forwardRef<
       maxFileSize,
       onError,
       attachmentLimitLabel,
+      uploads,
     ]
   );
 
-  const removeAttachment = React.useCallback((id: string) => {
-    // Same discipline as addFiles: revoke and update the ref synchronously,
-    // keep the state updater pure (StrictMode may re-invoke it).
-    const target = attachmentsRef.current.find(
-      (attachment) => attachment.id === id
-    );
-    if (target?.previewUrl) URL.revokeObjectURL(target.previewUrl);
-    attachmentsRef.current = attachmentsRef.current.filter(
-      (attachment) => attachment.id !== id
-    );
-    setAttachments((current) =>
-      current.filter((attachment) => attachment.id !== id)
-    );
-  }, []);
-
-  // Revoke any outstanding preview URLs on unmount.
-  React.useEffect(() => {
-    return () => {
-      for (const attachment of attachmentsRef.current) {
-        if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
-      }
-    };
-  }, []);
+  // Preview URLs are revoked, uploads aborted and unsent ones discarded by
+  // useAttachmentUploads, on removal and on unmount.
 
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -817,15 +862,38 @@ export const ChatComposer = React.forwardRef<
     ref,
     () => ({
       addFiles,
+      restoreAttachments: uploads.restore,
       focus: focusInput,
       getTextarea: () => textareaRef.current,
     }),
-    [addFiles, focusInput]
+    [addFiles, focusInput, uploads.restore]
   );
 
   // --------------------------------------------------------------------
   // Sending
   // --------------------------------------------------------------------
+
+  // A send that waits for its uploads goes out with the draft as it is when
+  // they finish: the text, reply and send handler as of then, read here.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+  const replyToRef = React.useRef(replyTo);
+  replyToRef.current = replyTo;
+  const onSendRef = React.useRef(onSend);
+  onSendRef.current = onSend;
+  const alive = React.useRef(true);
+  React.useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
+  const reportFailedUpload = (failed: AttachmentUpload) =>
+    onError?.(labels.failed(failed.file.name), {
+      reason: 'upload-failed',
+      file: failed.file,
+    });
 
   // The rich editor publishes `onChange` after an async serialization, so
   // `value` can lag the last keystroke or chip: a rich send reads the
@@ -837,10 +905,41 @@ export const ChatComposer = React.forwardRef<
   const readyToSendRef = React.useRef(readyToSend);
   readyToSendRef.current = readyToSend;
   const handleSend = (sendOption?: string) => {
-    if (!readyToSend || readingDraftRef.current) return;
+    if (!readyToSend || awaitingUploads || readingDraftRef.current) return;
+    const failed = uploads.current().find((item) => item.state === 'failed');
+    if (failed) {
+      reportFailedUpload(failed);
+      focusInput();
+      return;
+    }
+    if (!hasBusyUpload(uploads.current())) {
+      sendDraft(sendOption);
+      return;
+    }
+    // Send stays pressable while files upload: wait for them, keeping the
+    // draft and tiles in place, then send — or stop if one didn't make it.
+    focusInput();
+    setAwaitingUploads(true);
+    void uploads.settle().then((result) => {
+      if (!alive.current) return;
+      setAwaitingUploads(false);
+      if (result.failed.length > 0) {
+        reportFailedUpload(result.failed[0]);
+        return;
+      }
+      if (!readyToSendRef.current) return;
+      sendDraft(sendOption);
+    });
+  };
+
+  // Sends the draft as it is now, through the `onSend` and reply target of
+  // this moment.
+  const sendDraft = (sendOption?: string) => {
+    const send = onSendRef.current;
+    const reply = replyToRef.current;
     const editorHandle = rich ? richEditorRef.current : null;
     if (!editorHandle) {
-      sendText(value, sendOption);
+      sendText(valueRef.current, send, reply, sendOption);
       return;
     }
     readingDraftRef.current = true;
@@ -859,12 +958,12 @@ export const ChatComposer = React.forwardRef<
           if (draftGenerationRef.current !== generation) return;
           // Publish the read draft first, so clearing it below is a change
           // the editor sees even while `value` still lagged at ''.
-          if (text !== value) flushSync(() => setValue(text));
-          // Through the `onSend` and reply target the send began with: a host
+          if (text !== valueRef.current) flushSync(() => setValue(text));
+          // Through the `onSend` and reply target the read began with: a host
           // that reuses the composer (SuperChatInbox switching conversations)
           // binds `onSend` to what is on screen now, and this draft belongs
           // where it was written.
-          sendText(text, sendOption);
+          sendText(text, send, reply, sendOption);
         },
         () => onError?.(sendFailedLabel, { reason: 'send-failed' })
       )
@@ -873,31 +972,35 @@ export const ChatComposer = React.forwardRef<
       });
   };
 
-  const sendText = (text: string, sendOption?: string) => {
+  const sendText = (
+    text: string,
+    send: typeof onSend,
+    reply: typeof replyTo,
+    sendOption?: string
+  ) => {
     // The attachments staged now, not when the send began: a rich send reads
     // the editor first, and a file added or removed meanwhile must be sent or
-    // left out as it shows. addFiles/removeAttachment keep the ref current.
-    const staged = attachmentsRef.current;
-    if (!onSend || !isSendable(text, staged)) return;
+    // left out as it shows. Every tile taken off while Send waited, and no
+    // text: nothing to send.
+    if (!send || !isSendable(text, uploads.current())) return;
     const content = text.trim();
+    const staged = uploads.take();
     const message: NewMessage = {
       content,
       attachments: staged.map((attachment) => attachment.file),
+      // Only with uploadAttachment: what each file's upload resolved to.
+      ...(uploadAttachment
+        ? {
+            uploads: staged.map(({ file, result }) => ({ file, result })),
+          }
+        : {}),
       // Only add the key when replying — hosts may key-check the payload.
-      ...(replyTo ? { replyToId: replyTo.id } : {}),
+      ...(reply ? { replyToId: reply.id } : {}),
       // Read from the text actually sent, so the two always agree.
       ...(triggers?.length
         ? { references: referencesIn(content, triggers) }
         : {}),
     };
-    for (const attachment of staged) {
-      if (attachment.previewUrl) URL.revokeObjectURL(attachment.previewUrl);
-    }
-    // Clear the ref alongside the state: the unmount cleanup reads the ref,
-    // so if onSend unmounts the composer synchronously it must not see (and
-    // re-revoke) the already-revoked preview URLs.
-    attachmentsRef.current = [];
-    setAttachments([]);
     setValue('');
     // The draft is cleared optimistically; hosts own retry/restore. Both a
     // synchronous throw and a rejected promise surface through onError
@@ -906,8 +1009,8 @@ export const ChatComposer = React.forwardRef<
       // `meta` only for an option send, so plain-send payloads stay unchanged.
       const sent =
         sendOption === undefined
-          ? onSend(message)
-          : onSend(message, { sendOption });
+          ? send(message)
+          : send(message, { sendOption });
       Promise.resolve(sent).catch(() => {
         onError?.(sendFailedLabel, { reason: 'send-failed' });
       });
@@ -1049,15 +1152,57 @@ export const ChatComposer = React.forwardRef<
           data-slot="chat-composer-attachments"
           className="flex flex-wrap gap-2 px-3 pt-3"
         >
-          {attachments.map((attachment) => (
-            <AttachmentPreviewItem
-              key={attachment.id}
-              attachment={{ ...attachment, state: 'pending' }}
-              onRemove={() => removeAttachment(attachment.id)}
-              disabled={disabled}
-            />
-          ))}
+          {attachments.map((attachment) => {
+            const busy =
+              attachment.state === 'uploading' ||
+              attachment.state === 'processing';
+            const name = attachment.file.name;
+            return (
+              <AttachmentPreviewItem
+                key={attachment.id}
+                attachment={{
+                  ...attachment,
+                  state: TILE_STATE[attachment.state],
+                  // Processing is the state's, not a rounded 100%.
+                  progress:
+                    attachment.state === 'processing'
+                      ? 100
+                      : busy
+                        ? Math.min(99, Math.round(attachment.progress * 100))
+                        : undefined,
+                }}
+                // The button goes with the tile (or the retry): focus back to the text.
+                onRemove={() => {
+                  uploads.remove(attachment.id);
+                  textareaRef.current?.focus();
+                }}
+                onRetry={
+                  uploadAttachment
+                    ? () => {
+                        uploads.retry(attachment.id);
+                        textareaRef.current?.focus();
+                      }
+                    : undefined
+                }
+                disabled={disabled}
+                progressLabel={labels.uploading(name)}
+                processingLabel={labels.processing}
+                retryLabel={labels.retry}
+                removeLabel={
+                  busy
+                    ? labels.cancel(name)
+                    : uploadAttachment
+                      ? labels.remove(name)
+                      : undefined
+                }
+              />
+            );
+          })}
         </div>
+      )}
+
+      {uploadAttachment && (
+        <UploadAnnouncer items={attachments} labels={labels} />
       )}
 
       <div className="grid grid-cols-[minmax(0,auto)_minmax(0,1fr)_auto]">
@@ -1337,8 +1482,8 @@ export const ChatComposer = React.forwardRef<
             <button
               type="button"
               data-slot="chat-composer-send-button"
-              aria-label={isSending ? sendingLabel : sendLabel}
-              aria-busy={isSending || undefined}
+              aria-label={showSending ? sendingLabel : sendLabel}
+              aria-busy={showSending || undefined}
               disabled={!canSend}
               onMouseDown={keepInputFocus}
               onClick={() => handleSend()}
@@ -1348,7 +1493,7 @@ export const ChatComposer = React.forwardRef<
                   'bg-primary-800 hover:bg-primary-700 dark:bg-primary-600 dark:hover:bg-primary-500 text-white hover:text-white dark:hover:text-white'
               )}
             >
-              {isSending ? (
+              {showSending ? (
                 <LoaderIcon
                   className="h-4 w-4 animate-spin"
                   aria-hidden="true"
