@@ -1742,6 +1742,26 @@ describe('ChatComposer', () => {
 
         expect(input).toHaveValue('Hi there');
       });
+
+      it('skips the insert when the token was extended while confirming', async () => {
+        let confirm: (ok: boolean) => void = () => {};
+        renderWithTheme(
+          <ChatComposer
+            mentionOptions={mentionOptions}
+            onMentionSelect={() =>
+              new Promise<boolean>((resolve) => (confirm = resolve))
+            }
+          />
+        );
+        const input = getInput();
+        fireEvent.change(input, { target: { value: 'Hi @sam' } });
+        fireEvent.keyDown(input, { key: 'Enter' });
+        fireEvent.change(input, { target: { value: 'Hi @samuel' } });
+
+        await React.act(async () => confirm(true));
+
+        expect(input).toHaveValue('Hi @samuel');
+      });
     });
   });
 

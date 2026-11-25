@@ -392,15 +392,26 @@ export function useMentionAutocomplete({
   const valueRef = React.useRef(value);
   valueRef.current = value;
 
-  /** Replace `token` with `insertText`, if the text still holds it there. */
+  /**
+   * Replace `token` with `insertText`, if the text still holds the token as
+   * it was when picked: the same word (with anything already after the caret
+   * in it), still ending there.
+   */
   const insertAt = (
-    token: { char: string; query: string; start: number },
+    token: { char: string; query: string; start: number; rest: string },
     insertText: string
   ) => {
     const current = valueRef.current;
     const typed = token.char + token.query;
-    // The text changed while a confirmation was open: the token is gone.
-    if (!current.startsWith(typed, token.start)) return;
+    const word = typed + token.rest;
+    // The text changed while a confirmation was open: the token is gone, or
+    // was edited (`@sam` → `@samuel`), so a pick for it no longer applies.
+    if (
+      !current.startsWith(word, token.start) ||
+      /\S/.test(current.charAt(token.start + word.length))
+    ) {
+      return;
+    }
     const before = current.slice(0, token.start);
     const after = current.slice(token.start + typed.length);
     setValue(before + insertText + after);
@@ -417,7 +428,13 @@ export function useMentionAutocomplete({
 
   function insert(option: MentionOption) {
     if (!mention) return;
-    const token = mention;
+    // The rest of the word after the caret, so a confirmation can tell
+    // whether the word was edited meanwhile.
+    const rest =
+      /^\S*/.exec(
+        value.slice(mention.start + mention.char.length + mention.query.length)
+      )?.[0] ?? '';
+    const token = { ...mention, rest };
     setMention(null);
     // A trigger's pick is a link to its record; a listed option is `@value`,
     // inserted once the host's `onSelect` (if any) agrees.
