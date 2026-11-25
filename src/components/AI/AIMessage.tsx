@@ -174,14 +174,26 @@ function AITypingIndicator({ className }: { className?: string }) {
 // Thinking Block
 // ============================================================================
 
+/** Localized text of the reasoning pill. */
+interface ThinkingBlockLabels {
+  /** While the model is thinking. @default 'Thinking' */
+  thinking?: string;
+  /** Once done, without a measured duration. @default 'Thought' */
+  thought?: string;
+  /** Once done, with its duration. @default (seconds) => `Thought for ${seconds}s` */
+  thoughtFor?: (seconds: number) => string;
+}
+
 function ThinkingBlock({
   text,
   streaming,
   defaultCollapsed = false,
+  labels,
 }: {
   text: string;
   streaming: boolean;
   defaultCollapsed?: boolean;
+  labels?: ThinkingBlockLabels;
 }) {
   const startedAt = React.useRef(Date.now());
   const [elapsed, setElapsed] = React.useState<number | null>(null);
@@ -203,10 +215,10 @@ function ThinkingBlock({
   }, [streaming]);
 
   const label = streaming
-    ? 'Thinking'
+    ? (labels?.thinking ?? 'Thinking')
     : elapsed !== null && elapsed > 0
-      ? `Thought for ${elapsed}s`
-      : 'Thought';
+      ? (labels?.thoughtFor?.(elapsed) ?? `Thought for ${elapsed}s`)
+      : (labels?.thought ?? 'Thought');
 
   const dot = streaming ? (
     <span

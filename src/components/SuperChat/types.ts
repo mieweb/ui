@@ -252,6 +252,138 @@ export type SuperChatAttachmentLabels = Pick<
 >;
 
 /**
+ * Every user-visible string in `SuperChatInbox`, `SuperChatConversations` and
+ * `SuperChat` (text, accessible names, titles, placeholders, screen-reader
+ * text). Pass a `Partial` as `labels`; unset keys fall back to a
+ * `MessagesProvider` translation of the English default, then to English.
+ *
+ * The narrower props that predate it win over it for the keys they share:
+ * `listTitle`, `search.{label,placeholder,noResultsLabel}`,
+ * `sidebarResizeLabel`, `mediaLabels`, `messageLabels`, `placeholder`,
+ * `agentSelectorLabel`, `stopLabel` and `composerProps`.
+ */
+export interface SuperChatLabels {
+  // --- Inbox ---
+  /** Accessible name of the inbox with a conversation open. @default (title) => `Chat: ${title}` */
+  inboxLabel: (title: string) => string;
+  /** Accessible name of the inbox with no conversation open. @default 'Chat' */
+  emptyInboxLabel: string;
+  /** Empty panel text. @default 'No conversation selected' */
+  noConversationSelected: string;
+  /** Accessible name of the list/panel divider. @default 'Resize conversation list' */
+  sidebarResize: string;
+
+  // --- Conversation list ---
+  /** The list's accessible name and default heading. @default 'Conversations' */
+  conversations: string;
+  /** "+" button's accessible name. @default 'New conversation' */
+  newConversation: string;
+  /** Screen-reader text of an unread badge. @default (count) => `${count} unread messages` */
+  unreadCount: (count: number) => string;
+  /** Search box accessible name. @default 'Search conversations' */
+  searchConversations: string;
+  /** Search box placeholder. @default 'Search…' */
+  searchPlaceholder: string;
+  /** Status when the search matches nothing. @default 'No matching conversations' */
+  noMatchingConversations: string;
+
+  // --- Panel header and thread ---
+  /** Small-screen Back button. @default 'Back to conversations' */
+  backToConversations: string;
+  /** Participant avatars group. @default 'Participants' */
+  participants: string;
+  /** Close button. @default 'Close conversation' */
+  closeConversation: string;
+  /** The message thread (`role="log"`). @default 'Messages' */
+  messages: string;
+  /** Jump-to-bottom button. @default 'Scroll to bottom' */
+  scrollToBottom: string;
+  /** Jump-to-bottom text when unseen messages arrived. @default 'New messages' */
+  newMessages: string;
+  /** Jump-to-bottom accessible name when unseen messages arrived. @default 'New messages — scroll to bottom' */
+  newMessagesScrollToBottom: string;
+
+  // --- Media ---
+  /** Media view's return button. @default 'Back to conversation' */
+  backToConversation: string;
+  /** Open an image in the media view. @default 'Open in media feed' */
+  openMedia: string;
+  /** Play a video/audio attachment. @default 'Play' */
+  playMedia: string;
+
+  // --- Composer ---
+  /** Message box accessible name. @default 'Message' */
+  messageInput: string;
+  /** Message box placeholder. @default 'Type a message… use @ to address an agent' */
+  composerPlaceholder: string;
+  /** Placeholder while `readOnly`. @default 'Read-only conversation' */
+  readOnlyPlaceholder: string;
+  /** "+" menu. @default 'Add to message' */
+  addToMessage: string;
+  /** Attach item in the "+" menu. @default 'Attach files' */
+  attachFiles: string;
+  /** Send button. @default 'Send message' */
+  sendMessage: string;
+  /** Send button while sending. @default 'Sending message…' */
+  sendingMessage: string;
+  /** Reported when a send fails. @default 'Failed to send message' */
+  sendFailed: string;
+  /** Send-options menu. @default 'More send options' */
+  moreSendOptions: string;
+  /** Stop button while streaming. @default 'Stop generating' */
+  stopGenerating: string;
+  /** Agent selector. @default 'Select agent' */
+  selectAgent: string;
+  /** `@mention` suggestion list. @default 'Mention' */
+  mentionList: string;
+  /** Drag-and-drop overlay. @default 'Drop files here' */
+  dropFiles: string;
+
+  // --- Messages ---
+  /**
+   * A message's accessible name.
+   * @default (author, time, scheduled) => [author, time, scheduled].filter(Boolean).join(', ')
+   */
+  messageLabel: (author: string, time: string, scheduled?: string) => string;
+  /** Author of a message whose participant is unknown. @default 'Unknown' */
+  unknownAuthor: string;
+  /** Prefix of a scheduled message's indicator, before its time. @default 'Scheduled' */
+  scheduled: string;
+  /** Edited indicator. @default '(edited)' */
+  edited: string;
+  /** Edited indicator's tooltip. @default (time) => `Edited ${time}` */
+  editedAt: (time: string) => string;
+  /** Overflow (⋯) menu. @default 'Message actions' */
+  messageActions: string;
+  /** Copy action. @default 'Copy message' */
+  copyMessage: string;
+  /** Copy button tooltip. @default 'Copy message (⌘/Ctrl-click: default format)' */
+  copyMessageTitle: string;
+  /** Copy-format submenu. @default 'Copy as' */
+  copyAs: string;
+  /** @default 'Copy as rich text' */
+  copyAsRichText: string;
+  /** Secondary line under "Copy as rich text". @default 'Rich text + Markdown' */
+  copyAsRichTextDescription: string;
+  /** @default 'Copy as Markdown' */
+  copyAsMarkdown: string;
+  /** @default 'Copy as plain text' */
+  copyAsPlainText: string;
+  /** Edit action and the inline editor's accessible name. @default 'Edit message' */
+  editMessage: string;
+  /** Inline editor save. @default 'Save' */
+  save: string;
+  /** Inline editor cancel. @default 'Cancel' */
+  cancel: string;
+  /** Reasoning pill while the model thinks. @default 'Thinking' */
+  thinking: string;
+  /** Reasoning pill once done. @default 'Thought' */
+  thought: string;
+  /** Reasoning pill once done, with its duration. @default (seconds) => `Thought for ${seconds}s` */
+  thoughtFor: (seconds: number) => string;
+}
+
+/**
  * A single thread item. Preserves the `chat-component` thread-item shape
  * (`senderId`/`sender_name`/`channel`/`time`/`text`) while adding a
  * `participantId` (Decision 2) and optional rich `content` blocks reused from

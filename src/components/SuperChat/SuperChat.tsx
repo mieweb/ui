@@ -59,6 +59,7 @@ import {
   DEFAULT_ATTACHMENT_LABELS,
 } from './parts';
 import { VirtualThread, type VirtualThreadLayout } from './VirtualThread';
+import { useSuperChatLabels } from './labels';
 import type {
   AIRenderTextContent,
   AttachmentKind,
@@ -73,6 +74,7 @@ import type {
   SuperChatMediaLabels,
   SuperChatMessageLabels,
   SuperChatRenderMessageMedia,
+  SuperChatLabels,
   SuperChatView,
   SuperChatRef,
   SuperChatRenderMessageFooter,
@@ -105,10 +107,11 @@ export interface SuperChatProps {
    * ChatComposer.
    */
   mediaFeedProps?: SuperChatMediaFeedProps;
-  /** Labels for media launches and returning to the conversation. */
+  /** Labels for media launches and returning to the conversation. These win over `labels` for the same keys. */
   mediaLabels?: Partial<SuperChatMediaLabels>;
-  /** Labels for per-message states, e.g. a scheduled message's indicator. */
+  /** Labels for per-message states, e.g. a scheduled message's indicator. These win over `labels` for the same keys. */
   messageLabels?: Partial<SuperChatMessageLabels>;
+  /**
   /**
    * Renders an attachment in the thread in place of the built-in card, e.g. the
    * host's own video card. Its `open` opens the media view at that attachment,
@@ -123,6 +126,20 @@ export interface SuperChatProps {
    * @default '18rem'
    */
   mediaMaxSize?: number | string;
+  /**
+   * Every user-visible string in the panel, for localization. Unset keys use
+   * the English defaults (through `MessagesProvider` when present). The
+   * narrower `mediaLabels`, `messageLabels`, `placeholder`,
+   * `agentSelectorLabel`, `stopLabel` and `composerProps` win where they
+   * overlap. Keep function labels stable (e.g. a module constant) so message
+   * rows stay memoized. See {@link SuperChatLabels}.
+   */
+  labels?: Partial<SuperChatLabels>;
+  /**
+   * BCP 47 locale for message times (e.g. `'ar'`, `'fr-CA'`). Defaults to the
+   * runtime's locale.
+   */
+  locale?: string;
   /** The participant id representing the local user (alignment + compose). */
   currentParticipantId?: string;
   /** Opt-in rich render plugins (code/math/genui/…). */
@@ -413,6 +430,8 @@ export function SuperChat({
   messageLabels,
   renderMessageMedia,
   mediaMaxSize = '18rem',
+  labels: labelOverrides,
+  locale,
   currentParticipantId,
   renderPlugins,
   renderTextContent,
@@ -462,27 +481,33 @@ export function SuperChat({
     (internalView.conversationId === conversation.id
       ? internalView.view
       : 'thread');
-  // Every message row takes these, so they keep their identity while the
-  // host's words stay the same, even passed as a new object each render.
+  // `labels` is the base; the narrower `mediaLabels` / `messageLabels` win for
+  // the keys they share. Every message row takes the result, so it keeps its
+  // identity while the host's words stay the same, even passed as a new object
+  // each render.
+  const baseLabels = useSuperChatLabels(labelOverrides);
   const hostLabels = useShallowStable(mediaLabels);
-  const labels = React.useMemo<SuperChatMediaLabels>(() => {
-    const openMedia = hostLabels?.openMedia ?? 'Open in media feed';
-    const playMedia = hostLabels?.playMedia ?? 'Play';
+  const scheduledOverride = messageLabels?.scheduled;
+  const labels = React.useMemo<SuperChatLabels & SuperChatMediaLabels>(() => {
+    const openMedia = hostLabels?.openMedia ?? baseLabels.openMedia;
+    const playMedia = hostLabels?.playMedia ?? baseLabels.playMedia;
     return {
-      backToConversation: 'Back to conversation',
+      ...baseLabels,
       ...DEFAULT_ATTACHMENT_LABELS,
       // The named forms build on `openMedia` / `playMedia` unless given, so a
       // host that translated those keeps its words on titled tiles.
       openMediaNamed: (name) => `${openMedia}, ${name}`,
       playMediaNamed: (title) => `${playMedia} ${title}`,
       attachmentsPreview: previewOfAttachments,
-      unknownAuthor: 'Unknown',
       ...hostLabels,
+      backToConversation:
+        hostLabels?.backToConversation ?? baseLabels.backToConversation,
+      unknownAuthor: hostLabels?.unknownAuthor ?? baseLabels.unknownAuthor,
       openMedia,
       playMedia,
+      scheduled: scheduledOverride ?? baseLabels.scheduled,
     };
-  }, [hostLabels]);
-  const scheduledLabel = messageLabels?.scheduled ?? 'Scheduled';
+  }, [baseLabels, hostLabels, scheduledOverride]);
   const mediaItems = React.useMemo(() => {
     const items = getConversationMediaItems(conversation);
     return order === 'desc' ? items.reverse() : items;
@@ -1101,12 +1126,11 @@ export function SuperChat({
       onMessageEdited={handleMessageEdited}
       defaultCopyFormat={defaultCopyFormat}
       onOpenMedia={handleOpenMedia}
-      openMediaLabel={labels.openMedia}
-      playMediaLabel={labels.playMedia}
+      labels={labels}
+      locale={locale}
       attachmentLabels={labels}
       mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
       mediaRetryLabel={mediaFeedProps?.labels?.retry}
-      scheduledLabel={scheduledLabel}
       renderMessageMedia={renderMessageMedia}
       mediaMaxSize={mediaBox}
       toolCallGroup={stableToolCallGroup}
@@ -1287,7 +1311,7 @@ export function SuperChat({
     <button
       type="button"
       onClick={() => onConversationClosed(conversation)}
-      aria-label="Close conversation"
+      aria-label={labels.closeConversation}
       className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
     >
       <CloseIcon />
@@ -1325,7 +1349,7 @@ export function SuperChat({
               <button
                 type="button"
                 onClick={onBack}
-                aria-label="Back to conversations"
+                aria-label={labels.backToConversations}
                 className="-ms-1 shrink-0 rounded-md p-1 text-neutral-500 hover:bg-neutral-100 sm:hidden dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
                 <svg
@@ -1353,7 +1377,7 @@ export function SuperChat({
               <div
                 data-slot="superchat-participants"
                 role="group"
-                aria-label="Participants"
+                aria-label={labels.participants}
                 className="mt-0.5 flex items-center gap-1"
               >
                 {conversation.participants.slice(0, 6).map((p) => (
@@ -1501,12 +1525,11 @@ export function SuperChat({
                 onMessageEdited={handleMessageEdited}
                 defaultCopyFormat={defaultCopyFormat}
                 onOpenMedia={handleOpenMedia}
-                openMediaLabel={labels.openMedia}
-                playMediaLabel={labels.playMedia}
+                labels={labels}
+                locale={locale}
                 attachmentLabels={labels}
                 mediaErrorLabel={mediaFeedProps?.labels?.mediaError}
                 mediaRetryLabel={mediaFeedProps?.labels?.retry}
-                scheduledLabel={scheduledLabel}
                 renderMessageMedia={renderMessageMedia}
                 mediaMaxSize={mediaBox}
                 toolCallGroup={stableToolCallGroup}
@@ -1517,7 +1540,7 @@ export function SuperChat({
                 containerProps={{
                   'data-slot': 'superchat-thread',
                   role: 'log',
-                  'aria-label': 'Messages',
+                  'aria-label': labels.messages,
                   'aria-live': 'polite',
                   // Focusable so keyboard-only users can scroll the message history.
                   tabIndex: 0,
@@ -1529,7 +1552,7 @@ export function SuperChat({
                 data-slot="superchat-thread"
                 ref={threadRef}
                 role="log"
-                aria-label="Messages"
+                aria-label={labels.messages}
                 aria-live="polite"
                 // Focusable so keyboard-only users can scroll the message history.
                 // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
@@ -1571,6 +1594,9 @@ export function SuperChat({
                   dataSlot="superchat-jump-to-bottom"
                   hasNewMessages={hasNewBelow}
                   onClick={handleJumpToBottom}
+                  label={labels.scrollToBottom}
+                  newMessagesLabel={labels.newMessages}
+                  newMessagesAriaLabel={labels.newMessagesScrollToBottom}
                 />
               </Animated>
             )}
@@ -1583,26 +1609,34 @@ export function SuperChat({
         onError={onComposerError}
         placeholder={
           readOnly
-            ? 'Read-only conversation'
-            : (placeholder ?? 'Type a message… use @ to address an agent')
+            ? labels.readOnlyPlaceholder
+            : (placeholder ?? labels.composerPlaceholder)
         }
         mentionOptions={mentionOptions}
         allowAttachments={!readOnly && (allowAttachments ?? true)}
         acceptedFileTypes={composerAccept}
         maxFileSize={maxFileSize}
         maxLength={100000}
-        inputLabel="Message"
+        inputLabel={labels.messageInput}
+        addMenuLabel={labels.addToMessage}
+        attachFilesLabel={labels.attachFiles}
+        sendLabel={labels.sendMessage}
+        sendingLabel={labels.sendingMessage}
+        sendFailedLabel={labels.sendFailed}
+        sendOptionsLabel={labels.moreSendOptions}
+        mentionListLabel={labels.mentionList}
+        dropFilesLabel={labels.dropFiles}
         showAgentSelector={!!agents?.length}
         agents={agents}
         selectedAgent={selectedAgent}
         onAgentChange={onAgentChange}
-        agentSelectorLabel={agentSelectorLabel}
+        agentSelectorLabel={agentSelectorLabel ?? labels.selectAgent}
         showModelSelector={!!modelSelectorProps}
         modelSelectorProps={modelSelectorProps}
         selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
         isStreaming={isStreaming}
         onStop={onStop}
-        stopLabel={stopLabel}
+        stopLabel={stopLabel ?? labels.stopGenerating}
         micSlot={
           dictation && !readOnly ? (
             // Keyed by conversation so switching drops any in-flight take.
