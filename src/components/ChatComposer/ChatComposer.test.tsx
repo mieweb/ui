@@ -1682,6 +1682,34 @@ describe('ChatComposer', () => {
           mentions: [mentionOptions[1]],
         });
       });
+
+      it('reports a picked mention only as a whole @token', async () => {
+        const onSend = vi.fn();
+        renderWithTheme(
+          <ChatComposer
+            onSend={onSend}
+            onMentionSearch={() => Promise.resolve(mentionOptions.slice(2))}
+          />
+        );
+        const input = getInput();
+
+        fireEvent.change(input, { target: { value: '@' } });
+        fireEvent.mouseDown(
+          await screen.findByRole('option', { name: /Sam Clerk/ })
+        );
+        expect(input).toHaveValue('@Sam ');
+        // The mention is edited into another name, and the token only
+        // survives inside an email address.
+        fireEvent.change(input, {
+          target: { value: '@Samuel, cc ann@Sam.org' },
+        });
+        fireEvent.keyDown(input, { key: 'Enter' });
+
+        expect(onSend).toHaveBeenCalledWith({
+          content: '@Samuel, cc ann@Sam.org',
+          attachments: [],
+        });
+      });
     });
 
     describe('onMentionSelect', () => {

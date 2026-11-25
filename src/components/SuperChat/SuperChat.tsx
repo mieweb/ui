@@ -45,13 +45,13 @@ import {
 import { getConversationMediaItems, previewOfAttachments } from './media';
 import { linkifyCaption } from './captionLinks';
 import type { NewMessage } from '../Messaging/types';
+import { matchMentionTokens } from '../Messaging/useMentionAutocomplete';
 import { createMarkdownRenderer } from './render/createMarkdownRenderer';
 import {
   ParticipantAvatar,
   MessageRow,
   byTime,
   detectMentions,
-  matchMentionTokens,
   filesToComposerAttachments,
   acceptTokensFor,
   DEFAULT_ATTACHMENT_LABELS,

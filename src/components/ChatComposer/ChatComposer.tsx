@@ -27,6 +27,7 @@ import {
 import { UploadAnnouncer } from './UploadAnnouncer';
 import {
   MentionMenu,
+  matchMentionTokens,
   useMentionAutocomplete,
   type MentionOption,
   type MentionSearchHandler,
@@ -1115,12 +1116,21 @@ export const ChatComposer = React.forwardRef<
     if (!send || !isSendable(text, uploads.current())) return;
     const content = text.trim();
     const staged = uploads.take();
-    // Picked through `onMentionSearch` and still in the text sent.
-    const mentions = onMentionSearch
-      ? Array.from(pickedMentionsRef.current.values()).filter((option) =>
-          content.includes(`@${option.value ?? option.label.split(' ')[0]}`)
-        )
+    // Picked through `onMentionSearch` and still in the text sent, as whole
+    // `@tokens` (not `@Samuel` for Sam, nor inside an email address).
+    const picked = onMentionSearch
+      ? Array.from(pickedMentionsRef.current.values())
       : [];
+    const stillMentioned = new Set(
+      matchMentionTokens(
+        content,
+        picked.map((option) => ({
+          id: option.id,
+          token: option.value ?? option.label.split(' ')[0],
+        }))
+      )
+    );
+    const mentions = picked.filter((option) => stillMentioned.has(option.id));
     pickedMentionsRef.current.clear();
     const message: NewMessage = {
       content,
