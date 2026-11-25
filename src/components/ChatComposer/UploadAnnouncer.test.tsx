@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import { UploadAnnouncer } from './UploadAnnouncer';
@@ -102,6 +103,30 @@ describe('UploadAnnouncer', () => {
     );
     act(() => vi.advanceTimersByTime(60));
     expect(screen.getByRole('status').textContent).toBe('Uploading b.mov');
+    vi.useRealTimers();
+  });
+  it('announces under StrictMode, where effects run twice on mount', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <React.StrictMode>
+        <UploadAnnouncer
+          items={[item('1', 'a.mov', 'uploading')]}
+          labels={labels}
+        />
+      </React.StrictMode>
+    );
+    act(() => vi.advanceTimersByTime(60));
+    expect(screen.getByRole('status').textContent).toBe('Uploading a.mov');
+    rerender(
+      <React.StrictMode>
+        <UploadAnnouncer
+          items={[item('1', 'a.mov', 'uploaded')]}
+          labels={labels}
+        />
+      </React.StrictMode>
+    );
+    act(() => vi.advanceTimersByTime(60));
+    expect(screen.getByRole('status').textContent).toBe('a.mov uploaded');
     vi.useRealTimers();
   });
 });

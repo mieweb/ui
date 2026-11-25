@@ -31,7 +31,15 @@ export function UploadAnnouncer({ items, labels }: UploadAnnouncerProps) {
     new Map<string, { alert: boolean; text: string }>()
   );
   const timer = React.useRef<number | undefined>(undefined);
-  React.useEffect(() => () => window.clearTimeout(timer.current), []);
+  // Forget the timer too, not just cancel it: under StrictMode the effects
+  // re-run after this cleanup, and the queue must be scheduled again.
+  React.useEffect(
+    () => () => {
+      window.clearTimeout(timer.current);
+      timer.current = undefined;
+    },
+    []
+  );
 
   React.useEffect(() => {
     const seen = new Map<string, string>();
