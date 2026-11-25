@@ -140,9 +140,9 @@ describe('review follow-ups', () => {
   });
 });
 
-describe('MCPToolCallGroup trust-server link', () => {
-  it('hands the call to onTrustServer without approving it', () => {
-    const onTrustServer = vi.fn();
+describe('MCPToolCallGroup allow-all-server-tools button', () => {
+  it('hands the call to onApproveServer, not onApprove', () => {
+    const onApproveServer = vi.fn();
     const onApprove = vi.fn();
     renderWithTheme(
       <MCPToolCallGroup
@@ -150,13 +150,15 @@ describe('MCPToolCallGroup trust-server link', () => {
           call({ status: 'awaiting-approval', serverName: 'DeepWiki' }),
         ]}
         onApprove={onApprove}
-        onTrustServer={onTrustServer}
+        onApproveServer={onApproveServer}
       />
     );
     fireEvent.click(
-      screen.getByRole('button', { name: 'Trust all DeepWiki tools…' })
+      screen.getByRole('button', {
+        name: 'Allow all DeepWiki tools in this chat',
+      })
     );
-    expect(onTrustServer).toHaveBeenCalledTimes(1);
+    expect(onApproveServer).toHaveBeenCalledTimes(1);
     expect(onApprove).not.toHaveBeenCalled();
   });
 
@@ -165,10 +167,10 @@ describe('MCPToolCallGroup trust-server link', () => {
       <MCPToolCallGroup
         toolCalls={[call({ status: 'awaiting-approval' })]}
         onApprove={() => {}}
-        onTrustServer={() => {}}
+        onApproveServer={() => {}}
       />
     );
-    expect(screen.queryByRole('button', { name: /Trust all/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Allow all/ })).toBeNull();
   });
 });
 

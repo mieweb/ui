@@ -85,8 +85,8 @@ export interface MCPToolCallGroupLabels {
   expiredNotice?: string;
   /** Header badge for calls that may or may not have run. */
   notConfirmed?: (count: number) => string;
-  /** Link under approval controls that opens the server's trust settings. */
-  trustServer?: (serverName: string) => string;
+  /** Approve every tool from the call's server for this chat. */
+  allowServer?: (serverName: string) => string;
   /** Accessible name of the copy button next to raw output. */
   copy?: string;
   /** Announced once text has been copied. */
@@ -162,7 +162,7 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   deniedNotice: "You denied this call, so it didn't run.",
   expiredNotice: "No decision was made in time, so this call didn't run.",
   notConfirmed: (count) => `${count} not confirmed`,
-  trustServer: (serverName) => `Trust all ${serverName} tools…`,
+  allowServer: (serverName) => `Allow all ${serverName} tools in this chat`,
   copy: 'Copy',
   copied: 'Copied',
   arguments: 'Inputs',
@@ -434,7 +434,7 @@ interface ToolCallRowProps {
   labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
-  onTrustServer?: MCPToolCallGroupProps['onTrustServer'];
+  onApproveServer?: MCPToolCallGroupProps['onApproveServer'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
 }
 
@@ -451,7 +451,7 @@ function ToolCallRow({
   labels,
   onApprove,
   onDeny,
-  onTrustServer,
+  onApproveServer,
   onLinkClick,
 }: ToolCallRowProps) {
   // `collapse` animates height, which `MotionConfig reducedMotion="user"`
@@ -785,6 +785,16 @@ function ToolCallRow({
                 </Button>
               </>
             )}
+            {onApproveServer && toolCall.serverName && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => void act(() => onApproveServer(toolCall))}
+                disabled={acting}
+              >
+                {labels.allowServer(toolCall.serverName)}
+              </Button>
+            )}
             {onDeny && (
               <Button
                 size="sm"
@@ -794,16 +804,6 @@ function ToolCallRow({
               >
                 {labels.deny}
               </Button>
-            )}
-            {onTrustServer && toolCall.serverName && (
-              // Opens the host's settings; it never approves anything itself.
-              <button
-                type="button"
-                onClick={() => onTrustServer(toolCall)}
-                className="focus-visible:ring-primary-500 basis-full rounded text-start text-xs text-neutral-600 underline hover:text-neutral-800 focus-visible:ring-2 focus-visible:outline-none dark:text-neutral-400 dark:hover:text-neutral-200"
-              >
-                {labels.trustServer(toolCall.serverName)}
-              </button>
             )}
           </div>
         )}
@@ -831,10 +831,10 @@ export interface MCPToolCallGroupProps {
   /** Deny a call that is `awaiting-approval`. */
   onDeny?: (toolCall: MCPToolCall) => void | Promise<void>;
   /**
-   * Open the host's settings for trusting every tool from the call's server.
-   * Shown under the approval buttons when the call has a `serverName`.
+   * Approve this call and every other tool from its server for the rest of the
+   * chat. Shown as a button when the call has a `serverName`.
    */
-  onTrustServer?: (toolCall: MCPToolCall) => void;
+  onApproveServer?: (toolCall: MCPToolCall) => void | Promise<void>;
   /** Intercept clicks on a result's `link` and `resources`. */
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Overrides for the English default strings. */
@@ -862,7 +862,7 @@ export function MCPToolCallGroup({
   toolCalls,
   onApprove,
   onDeny,
-  onTrustServer,
+  onApproveServer,
   onLinkClick,
   labels: labelOverrides,
   className,
@@ -956,7 +956,7 @@ export function MCPToolCallGroup({
               labels={labels}
               onApprove={onApprove}
               onDeny={onDeny}
-              onTrustServer={onTrustServer}
+              onApproveServer={onApproveServer}
               onLinkClick={onLinkClick}
             />
           ))}
