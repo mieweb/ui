@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import { renderWithTheme } from '../../test/test-utils';
 import { MCPToolCallGroup } from './MCPToolCallGroup';
@@ -61,6 +61,38 @@ describe('MCPToolCallGroup result de-duplication', () => {
     expect(
       document.querySelector('[data-slot="ai-tool-call-summary-full"]')
     ).toBeNull();
+  });
+});
+
+describe('MCPToolCallGroup trust-server link', () => {
+  it('hands the call to onTrustServer without approving it', () => {
+    const onTrustServer = vi.fn();
+    const onApprove = vi.fn();
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({ status: 'awaiting-approval', serverName: 'DeepWiki' }),
+        ]}
+        onApprove={onApprove}
+        onTrustServer={onTrustServer}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Trust all DeepWiki tools…' })
+    );
+    expect(onTrustServer).toHaveBeenCalledTimes(1);
+    expect(onApprove).not.toHaveBeenCalled();
+  });
+
+  it('is absent for calls without a server', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval' })]}
+        onApprove={() => {}}
+        onTrustServer={() => {}}
+      />
+    );
+    expect(screen.queryByRole('button', { name: /Trust all/ })).toBeNull();
   });
 });
 

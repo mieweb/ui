@@ -346,6 +346,8 @@ export const GroupApprovalMetadata: Story = {
       ]}
       onApprove={fn()}
       onDeny={fn()}
+      onTrustServer={fn()}
+      labels={{ allowAlways: 'Allow this tool for this chat' }}
     />
   ),
 };

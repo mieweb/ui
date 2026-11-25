@@ -85,6 +85,8 @@ export interface MCPToolCallGroupLabels {
   expiredNotice?: string;
   /** Header badge for calls that may or may not have run. */
   notConfirmed?: (count: number) => string;
+  /** Link under approval controls that opens the server's trust settings. */
+  trustServer?: (serverName: string) => string;
   /** Accessible name of the copy button next to raw output. */
   copy?: string;
   /** Announced once text has been copied. */
@@ -160,6 +162,7 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   deniedNotice: "You denied this call, so it didn't run.",
   expiredNotice: "No decision was made in time, so this call didn't run.",
   notConfirmed: (count) => `${count} not confirmed`,
+  trustServer: (serverName) => `Trust all ${serverName} tools…`,
   copy: 'Copy',
   copied: 'Copied',
   arguments: 'Inputs',
@@ -431,6 +434,7 @@ interface ToolCallRowProps {
   labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
+  onTrustServer?: MCPToolCallGroupProps['onTrustServer'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
 }
 
@@ -447,6 +451,7 @@ function ToolCallRow({
   labels,
   onApprove,
   onDeny,
+  onTrustServer,
   onLinkClick,
 }: ToolCallRowProps) {
   // `collapse` animates height, which `MotionConfig reducedMotion="user"`
@@ -777,6 +782,16 @@ function ToolCallRow({
                 {labels.deny}
               </Button>
             )}
+            {onTrustServer && toolCall.serverName && (
+              // Opens the host's settings; it never approves anything itself.
+              <button
+                type="button"
+                onClick={() => onTrustServer(toolCall)}
+                className="focus-visible:ring-primary-500 basis-full rounded text-start text-xs text-neutral-600 underline hover:text-neutral-800 focus-visible:ring-2 focus-visible:outline-none dark:text-neutral-400 dark:hover:text-neutral-200"
+              >
+                {labels.trustServer(toolCall.serverName)}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -802,6 +817,11 @@ export interface MCPToolCallGroupProps {
   ) => void | Promise<void>;
   /** Deny a call that is `awaiting-approval`. */
   onDeny?: (toolCall: MCPToolCall) => void | Promise<void>;
+  /**
+   * Open the host's settings for trusting every tool from the call's server.
+   * Shown under the approval buttons when the call has a `serverName`.
+   */
+  onTrustServer?: (toolCall: MCPToolCall) => void;
   /** Intercept clicks on a result's `link` and `resources`. */
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Overrides for the English default strings. */
@@ -829,6 +849,7 @@ export function MCPToolCallGroup({
   toolCalls,
   onApprove,
   onDeny,
+  onTrustServer,
   onLinkClick,
   labels: labelOverrides,
   className,
@@ -922,6 +943,7 @@ export function MCPToolCallGroup({
               labels={labels}
               onApprove={onApprove}
               onDeny={onDeny}
+              onTrustServer={onTrustServer}
               onLinkClick={onLinkClick}
             />
           ))}
