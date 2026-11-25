@@ -197,6 +197,13 @@ export interface SuperChatProps {
   className?: string;
   /** Show the conversation header (title + participants). Defaults to `true`. */
   showHeader?: boolean;
+  /**
+   * Host conversation actions (e.g. rename, share, copy link, delete, a files
+   * toggle) at the end of the header, beside the title and before Close. They
+   * also show in the small-screen header, next to Back. Pass focusable
+   * controls with accessible names; hidden with `showHeader={false}`.
+   */
+  headerActions?: React.ReactNode;
   /** Composer placeholder override. */
   placeholder?: string;
   /** Allow file attachments in the composer. Defaults to `true` unless read-only. */
@@ -422,6 +429,7 @@ export function SuperChat({
   defaultCopyFormat,
   className,
   showHeader = true,
+  headerActions,
   placeholder,
   allowAttachments,
   agents,
@@ -1275,6 +1283,17 @@ export function SuperChat({
     ]
   );
 
+  const closeButton = onConversationClosed && (
+    <button
+      type="button"
+      onClick={() => onConversationClosed(conversation)}
+      aria-label="Close conversation"
+      className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+    >
+      <CloseIcon />
+    </button>
+  );
+
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Escape out of the media view, heard from the controls inside (the dialog pattern on a phone); the panel itself takes no focus
     <section
@@ -1345,15 +1364,18 @@ export function SuperChat({
               </div>
             </div>
           </div>
-          {onConversationClosed && (
-            <button
-              type="button"
-              onClick={() => onConversationClosed(conversation)}
-              aria-label="Close conversation"
-              className="rounded-md p-1 text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          {headerActions != null && headerActions !== false ? (
+            // Host actions sit at the end of the header, before Close, so
+            // the tab order runs Back → actions → Close on every screen size.
+            <div
+              data-slot="superchat-header-actions"
+              className="flex shrink-0 items-center gap-1"
             >
-              <CloseIcon />
-            </button>
+              {headerActions}
+              {closeButton}
+            </div>
+          ) : (
+            closeButton
           )}
         </header>
       ) : (

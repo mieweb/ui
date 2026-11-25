@@ -3582,4 +3582,279 @@ describe('SuperChat composer options', () => {
     expect(screen.getByRole('group', { name: 'Agent chat' })).toBeTruthy();
     expect(document.querySelector('[data-slot="superchat-header"]')).toBeNull();
   });
+
+  describe('headerActions', () => {
+    const actions = (
+      <>
+        <button type="button">Rename</button>
+        <button type="button">Share</button>
+      </>
+    );
+
+    it('renders host actions in the header, after Back and before Close', () => {
+      render(
+        <SuperChat
+          conversation={convo}
+          currentParticipantId="u1"
+          headerActions={actions}
+          onBack={() => {}}
+          onConversationClosed={() => {}}
+        />
+      );
+      const header = document.querySelector(
+        '[data-slot="superchat-header"]'
+      ) as HTMLElement;
+      const slot = header.querySelector(
+        '[data-slot="superchat-header-actions"]'
+      ) as HTMLElement;
+      expect(
+        within(slot).getByRole('button', { name: 'Rename' })
+      ).toBeInTheDocument();
+      // DOM (and so tab) order: Back → title → host actions → Close.
+      expect(
+        within(header)
+          .getAllByRole('button')
+          .map((b) => b.getAttribute('aria-label') ?? b.textContent)
+      ).toEqual([
+        'Back to conversations',
+        'Rename',
+        'Share',
+        'Close conversation',
+      ]);
+    });
+
+    it('omits the slot when not provided or the header is hidden', () => {
+      const { rerender } = render(
+        <SuperChat
+          conversation={convo}
+          currentParticipantId="u1"
+          onConversationClosed={() => {}}
+        />
+      );
+      expect(
+        document.querySelector('[data-slot="superchat-header-actions"]')
+      ).toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Close conversation' })
+      ).toBeInTheDocument();
+
+      rerender(
+        <SuperChat
+          conversation={convo}
+          currentParticipantId="u1"
+          headerActions={actions}
+          showHeader={false}
+        />
+      );
+      expect(screen.queryByRole('button', { name: 'Rename' })).toBeNull();
+    });
+  });
+});
+
+describe('SuperChatInbox panel props', () => {
+  const conversations: SuperChatConversation[] = [
+    {
+      id: 'c1',
+      title: 'Intake',
+      participants: [
+        { id: 'u1', kind: 'human', name: 'Alice Reyes' },
+        { id: 'a1', kind: 'agent', name: 'Triage Agent' },
+      ],
+      thread: [
+        {
+          id: 'm1',
+          participantId: 'a1',
+          text: 'first conversation',
+          time: '2026-06-07T09:00:00Z',
+        },
+      ],
+    },
+    {
+      id: 'c2',
+      title: 'Follow-up',
+      participants: [{ id: 'u1', kind: 'human', name: 'Alice Reyes' }],
+      thread: [
+        {
+          id: 'm2',
+          participantId: 'u1',
+          text: 'second conversation',
+          time: '2026-06-07T10:00:00Z',
+        },
+      ],
+    },
+  ];
+  const renderInbox = (
+    props: Partial<React.ComponentProps<typeof SuperChatInbox>> = {}
+  ) =>
+    render(
+      <SuperChatInbox
+        conversations={conversations}
+        currentParticipantId="u1"
+        defaultActiveConversationId="c1"
+        {...props}
+      />
+    );
+  const panel = () =>
+    document.querySelector('section[data-slot="superchat"]') as HTMLElement;
+
+  it('forwards showHeader', () => {
+    renderInbox({ showHeader: false });
+    expect(document.querySelector('[data-slot="superchat-header"]')).toBeNull();
+    expect(screen.getByRole('group', { name: 'Intake' })).toBeInTheDocument();
+  });
+
+  it('forwards headerActions, shown beside Back in the panel header', () => {
+    renderInbox({
+      headerActions: <button type="button">Share conversation</button>,
+    });
+    const header = within(panel()).getByRole('banner');
+    expect(
+      within(header).getByRole('button', { name: 'Share conversation' })
+    ).toBeInTheDocument();
+    expect(
+      within(header).getByRole('button', { name: 'Back to conversations' })
+    ).toBeInTheDocument();
+  });
+
+  it('forwards placeholder', () => {
+    renderInbox({ placeholder: 'Ask the team' });
+    expect(screen.getByLabelText('Message')).toHaveAttribute(
+      'placeholder',
+      'Ask the team'
+    );
+  });
+
+  it('forwards allowAttachments', () => {
+    const { unmount } = renderInbox();
+    expect(
+      screen.getByRole('button', { name: 'Add to message' })
+    ).toBeInTheDocument();
+    unmount();
+    renderInbox({ allowAttachments: false });
+    expect(screen.queryByRole('button', { name: 'Add to message' })).toBeNull();
+  });
+
+  it('forwards the agent selector props', async () => {
+    const onAgentChange = vi.fn();
+    renderInbox({
+      agents: [
+        { id: 'a1', label: 'Triage Agent' },
+        { id: 'a2', label: 'Scribe' },
+      ],
+      selectedAgent: 'a1',
+      onAgentChange,
+      agentSelectorLabel: 'Pick agent',
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Pick agent: Triage Agent' })
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitemradio', { name: /Scribe/ })
+    );
+    expect(onAgentChange).toHaveBeenCalledWith('a2');
+  });
+
+  it('forwards modelSelectorProps and composerSelectorsEndSlot', () => {
+    renderInbox({
+      modelSelectorProps: {
+        models: [{ provider: 'openai', model: 'gpt-5.2', label: 'gpt-5.2' }],
+        value: { provider: 'openai', model: 'gpt-5.2' },
+        onChange: vi.fn(),
+      },
+      composerSelectorsEndSlot: <span>Voice: on</span>,
+    });
+    expect(screen.getByRole('button', { name: /gpt-5\.2/ })).toBeTruthy();
+    expect(screen.getByText('Voice: on')).toBeInTheDocument();
+  });
+
+  it('forwards isStreaming, onStop and stopLabel', () => {
+    const onStop = vi.fn();
+    renderInbox({ isStreaming: true, onStop, stopLabel: 'Halt' });
+    fireEvent.click(screen.getByRole('button', { name: 'Halt' }));
+    expect(onStop).toHaveBeenCalledTimes(1);
+  });
+
+  it('forwards dictation', () => {
+    const { unmount } = renderInbox();
+    expect(
+      screen.queryByRole('button', { name: 'Start dictation' })
+    ).toBeNull();
+    unmount();
+    renderInbox({ dictation: { transcribe: async () => '' } });
+    expect(
+      screen.getByRole('button', { name: 'Start dictation' })
+    ).toBeInTheDocument();
+  });
+
+  describe('controlled activeConversationId', () => {
+    it('shows the empty panel, not another thread, for an unknown id', () => {
+      renderInbox({
+        defaultActiveConversationId: undefined,
+        activeConversationId: 'not-loaded',
+      });
+      expect(screen.getByText('No conversation selected')).toBeInTheDocument();
+      // No thread at all (the list still previews both conversations).
+      expect(screen.queryByRole('log', { name: 'Messages' })).toBeNull();
+      expect(screen.getAllByText('first conversation')).toHaveLength(1);
+      // No list row claims to be the open conversation.
+      expect(
+        document.querySelectorAll(
+          '[data-slot="superchat-conversations"] [aria-current]'
+        )
+      ).toHaveLength(0);
+    });
+
+    it('opens the conversation once the host loads it', () => {
+      const { rerender } = render(
+        <SuperChatInbox
+          conversations={conversations}
+          currentParticipantId="u1"
+          activeConversationId="c3"
+        />
+      );
+      expect(screen.queryByRole('log', { name: 'Messages' })).toBeNull();
+      rerender(
+        <SuperChatInbox
+          conversations={[
+            ...conversations,
+            {
+              id: 'c3',
+              title: 'Deep link',
+              participants: [{ id: 'u1', kind: 'human', name: 'Alice Reyes' }],
+              thread: [
+                {
+                  id: 'm3',
+                  participantId: 'u1',
+                  text: 'third conversation',
+                  time: '2026-06-07T11:00:00Z',
+                },
+              ],
+            },
+          ]}
+          currentParticipantId="u1"
+          activeConversationId="c3"
+        />
+      );
+      expect(
+        within(screen.getByRole('log', { name: 'Messages' })).getByText(
+          'third conversation'
+        )
+      ).toBeInTheDocument();
+      expect(screen.queryByText('No conversation selected')).toBeNull();
+    });
+
+    it('still falls back to the first conversation when uncontrolled', () => {
+      renderInbox({ defaultActiveConversationId: 'not-loaded' });
+      expect(
+        within(screen.getByRole('log', { name: 'Messages' })).getByText(
+          'first conversation'
+        )
+      ).toBeInTheDocument();
+      expect(
+        document.querySelectorAll(
+          '[data-slot="superchat-conversations"] [aria-current]'
+        )
+      ).toHaveLength(1);
+    });
+  });
 });
