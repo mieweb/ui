@@ -727,15 +727,6 @@ function ToolCallRow({
           </p>
         )}
 
-        {toolCall.status === 'success' && toolCall.result?.summary && (
-          <p
-            data-slot="ai-tool-call-summary"
-            className="ms-6 line-clamp-1 text-xs text-neutral-600 dark:text-neutral-400"
-          >
-            <bdi dir="auto">{toolCall.result.summary}</bdi>
-          </p>
-        )}
-
         {isAwaitingApproval && (onApprove || onDeny) && (
           <div
             className="ms-6 mt-2 flex flex-wrap gap-2 border-t border-neutral-200 pt-2 pb-1 dark:border-neutral-700"

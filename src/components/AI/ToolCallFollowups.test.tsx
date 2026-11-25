@@ -64,6 +64,23 @@ describe('MCPToolCallGroup result de-duplication', () => {
   });
 });
 
+describe('MCPToolCallGroup collapsed success', () => {
+  it('keeps the result summary inside the row details', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[
+          call({
+            result: { type: 'text', data: 'Done.', summary: 'Opened foo-dev' },
+          }),
+        ]}
+      />
+    );
+    expect(screen.queryByText('Opened foo-dev')).toBeNull();
+    expand();
+    expect(screen.getByText('Opened foo-dev')).toBeInTheDocument();
+  });
+});
+
 describe('MCPToolCallGroup trust-server link', () => {
   it('hands the call to onTrustServer without approving it', () => {
     const onTrustServer = vi.fn();
