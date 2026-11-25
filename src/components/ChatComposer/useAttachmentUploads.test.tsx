@@ -72,6 +72,20 @@ describe('useAttachmentUploads', () => {
     expect(discard).not.toHaveBeenCalled();
   });
 
+  it('discards an upload that finishes after it was removed', async () => {
+    const { upload, calls } = fakeUpload();
+    const discard = vi.fn();
+    const { result } = renderHook(() =>
+      useAttachmentUploads({ upload, discard })
+    );
+    const file = clip();
+    act(() => void result.current.add([file]));
+    act(() => result.current.remove(result.current.items[0].id));
+    // The host ignored the signal: the upload lands anyway.
+    await act(async () => calls[0].resolve({ id: 'm1' }));
+    expect(discard).toHaveBeenCalledWith({ id: 'm1' }, file);
+  });
+
   it('discards a finished upload when it is removed', async () => {
     const { upload, calls } = fakeUpload();
     const discard = vi.fn();

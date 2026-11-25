@@ -62,4 +62,46 @@ describe('UploadAnnouncer', () => {
     expect(screen.getByRole('alert').textContent).toBe('');
     vi.useRealTimers();
   });
+  it("isn't cut off by a progress update right after a change", () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <UploadAnnouncer
+        items={[item('1', 'a.mov', 'uploading')]}
+        labels={labels}
+      />
+    );
+    act(() => vi.advanceTimersByTime(20));
+    // Same state, new objects: a progress-only re-render.
+    rerender(
+      <UploadAnnouncer
+        items={[{ ...item('1', 'a.mov', 'uploading'), progress: 0.1 }]}
+        labels={labels}
+      />
+    );
+    act(() => vi.advanceTimersByTime(60));
+    expect(screen.getByRole('status').textContent).toBe('Uploading a.mov');
+    vi.useRealTimers();
+  });
+
+  it('drops what was queued for a file taken off before it was said', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(
+      <UploadAnnouncer
+        items={[
+          item('1', 'a.mov', 'uploading'),
+          item('2', 'b.mov', 'uploading'),
+        ]}
+        labels={labels}
+      />
+    );
+    rerender(
+      <UploadAnnouncer
+        items={[item('2', 'b.mov', 'uploading')]}
+        labels={labels}
+      />
+    );
+    act(() => vi.advanceTimersByTime(60));
+    expect(screen.getByRole('status').textContent).toBe('Uploading b.mov');
+    vi.useRealTimers();
+  });
 });

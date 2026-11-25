@@ -34,11 +34,19 @@ failure. Without it, files stay `pending` and nothing below applies.
   loops until nothing is in flight. Each in-flight entry is raced against its
   abort, so a removed upload stops holding the wait up even when the host
   ignores `signal`.
-- **What goes out is read at send time:** text, reply and `onSend` come from
-  refs when the wait ends, and nothing is sent if every tile was removed and
-  the text is empty. With `editor="rich"` the editor's content is read after
-  the wait, not before (`handleSend` → `sendDraft` → `sendText`). A failed upload stops the send (`'upload-failed'`) and
-  keeps the draft.
+- **Where it goes is fixed at press, what goes is read at the end.** Send
+  captures a `SendTarget`: the `onSend` and reply target of that moment and
+  the draft's generation. A host that reuses the composer (SuperChatInbox
+  switching conversations) rebinds `onSend`, and a waiting send must still
+  land where it was written; if the host swaps in another draft meanwhile,
+  it's dropped and the tiles stay. The text is read when the wait ends (with
+  `editor="rich"`, from the editor, after the wait), and nothing is sent if
+  every tile was removed and the text is empty. A failed upload stops the
+  send (`'upload-failed'`) and keeps the draft.
+- **Checked again before every send.** `handleSend` → `sendWhenUploaded` →
+  `sendDraft` → `sendText`. A file attached during the rich editor's
+  `getContent()` sends the flow back to `sendWhenUploaded`, so `take()` never
+  sees an upload still in flight.
 - **`take()` before `onSend`.** It empties the list without discarding: the
   results now belong to the message. If the host's send fails, SuperChat puts
   them back with `restoreAttachments` (no re-upload).
@@ -46,9 +54,15 @@ failure. Without it, files stay `pending` and nothing below applies.
   will send them — unless `keepUploadingOnUnmount` (for uploads that land
   where they're going by themselves). It also clears the list, so effects that
   rerun without a real unmount don't keep dead tiles.
+- **An aborted upload that succeeds anyway is discarded.** A host may ignore
+  `signal`, or the server may finish before the abort lands: its result goes
+  to `discardAttachment`, as a finished upload taken off does. A rejected one
+  is left alone.
 - **Announcements** are `UploadAnnouncer`'s (shared with hosts that draw their
   own tiles): starts and finishes politely, failures as an alert, never each
-  percent.
+  percent. Messages wait in a per-file queue with its own 50 ms timer, apart
+  from the render effect, so a progress update can't cancel one; a file taken
+  off takes its queued message with it.
 
 ## Imperative `addFiles` bypasses `allowAttachments`
 

@@ -489,6 +489,21 @@ const CARD_INTERACTIVE_SELECTOR = [
 // ============================================================================
 
 /**
+ * Where a send goes, fixed when Send is pressed: the `onSend` and reply
+ * target of that moment, and the draft's generation. A host that reuses the
+ * composer (SuperChatInbox switching conversations) binds `onSend` to what
+ * is on screen, so a send that waits — for uploads or the rich editor —
+ * still goes where it was written, and is dropped if the host swapped in
+ * another draft meanwhile.
+ */
+interface SendTarget {
+  send: ChatComposerProps['onSend'];
+  reply: ChatComposerProps['replyTo'];
+  generation: number;
+  sendOption?: string;
+}
+
+/**
  * Standardized chat input. At `md+` it renders as a single-row pill — `+`
  * menu, text input and actions (mic, send/stop) side by side; below `md` the
  * input stacks above the icon row. The optional agent/model selector row
@@ -873,14 +888,10 @@ export const ChatComposer = React.forwardRef<
   // Sending
   // --------------------------------------------------------------------
 
-  // A send that waits for its uploads goes out with the draft as it is when
-  // they finish: the text, reply and send handler as of then, read here.
+  // A send that waits for its uploads goes out with the text as it is when
+  // they finish (the user may keep typing), read here.
   const valueRef = React.useRef(value);
   valueRef.current = value;
-  const replyToRef = React.useRef(replyTo);
-  replyToRef.current = replyTo;
-  const onSendRef = React.useRef(onSend);
-  onSendRef.current = onSend;
   const alive = React.useRef(true);
   React.useEffect(() => {
     alive.current = true;
@@ -906,44 +917,48 @@ export const ChatComposer = React.forwardRef<
   readyToSendRef.current = readyToSend;
   const handleSend = (sendOption?: string) => {
     if (!readyToSend || awaitingUploads || readingDraftRef.current) return;
-    const failed = uploads.current().find((item) => item.state === 'failed');
+    sendWhenUploaded({
+      send: onSend,
+      reply: replyTo,
+      generation: draftGenerationRef.current,
+      sendOption,
+    });
+  };
+
+  // Send stays pressable while files upload: wait for them, keeping the
+  // draft and tiles in place, then send — or stop, keeping the draft, if one
+  // didn't make it. Checked again after every wait and every rich read, so a
+  // file added meanwhile is waited for too.
+  const sendWhenUploaded = (target: SendTarget) => {
+    if (draftGenerationRef.current !== target.generation) return;
+    const staged = uploads.current();
+    const failed = staged.find((item) => item.state === 'failed');
     if (failed) {
       reportFailedUpload(failed);
       focusInput();
       return;
     }
-    if (!hasBusyUpload(uploads.current())) {
-      sendDraft(sendOption);
+    if (!hasBusyUpload(staged)) {
+      sendDraft(target);
       return;
     }
-    // Send stays pressable while files upload: wait for them, keeping the
-    // draft and tiles in place, then send — or stop if one didn't make it.
     focusInput();
     setAwaitingUploads(true);
-    void uploads.settle().then((result) => {
+    void uploads.settle().then(() => {
       if (!alive.current) return;
       setAwaitingUploads(false);
-      if (result.failed.length > 0) {
-        reportFailedUpload(result.failed[0]);
-        return;
-      }
       if (!readyToSendRef.current) return;
-      sendDraft(sendOption);
+      sendWhenUploaded(target);
     });
   };
 
-  // Sends the draft as it is now, through the `onSend` and reply target of
-  // this moment.
-  const sendDraft = (sendOption?: string) => {
-    const send = onSendRef.current;
-    const reply = replyToRef.current;
+  const sendDraft = (target: SendTarget) => {
     const editorHandle = rich ? richEditorRef.current : null;
     if (!editorHandle) {
-      sendText(valueRef.current, send, reply, sendOption);
+      sendText(valueRef.current, target);
       return;
     }
     readingDraftRef.current = true;
-    const generation = draftGenerationRef.current;
     editorHandle
       .getContent()
       .then(
@@ -955,15 +970,21 @@ export const ChatComposer = React.forwardRef<
           // Dropped too if the host replaced the draft meanwhile: the editor
           // now holds that other draft, which is not this send's to send or
           // clear.
-          if (draftGenerationRef.current !== generation) return;
+          if (draftGenerationRef.current !== target.generation) return;
           // Publish the read draft first, so clearing it below is a change
           // the editor sees even while `value` still lagged at ''.
           if (text !== valueRef.current) flushSync(() => setValue(text));
-          // Through the `onSend` and reply target the read began with: a host
-          // that reuses the composer (SuperChatInbox switching conversations)
-          // binds `onSend` to what is on screen now, and this draft belongs
-          // where it was written.
-          sendText(text, send, reply, sendOption);
+          // A file added during the read is still uploading (or has failed):
+          // back through the upload check, which waits and reads again.
+          const staged = uploads.current();
+          if (
+            hasBusyUpload(staged) ||
+            staged.some((item) => item.state === 'failed')
+          ) {
+            sendWhenUploaded(target);
+            return;
+          }
+          sendText(text, target);
         },
         () => onError?.(sendFailedLabel, { reason: 'send-failed' })
       )
@@ -972,16 +993,10 @@ export const ChatComposer = React.forwardRef<
       });
   };
 
-  const sendText = (
-    text: string,
-    send: typeof onSend,
-    reply: typeof replyTo,
-    sendOption?: string
-  ) => {
-    // The attachments staged now, not when the send began: a rich send reads
-    // the editor first, and a file added or removed meanwhile must be sent or
-    // left out as it shows. Every tile taken off while Send waited, and no
-    // text: nothing to send.
+  const sendText = (text: string, { send, reply, sendOption }: SendTarget) => {
+    // The attachments staged now, not when the send began: a file added or
+    // removed meanwhile is sent or left out as it shows. Every tile taken off
+    // while Send waited, and no text: nothing to send.
     if (!send || !isSendable(text, uploads.current())) return;
     const content = text.trim();
     const staged = uploads.take();

@@ -1893,6 +1893,61 @@ describe('ChatComposer uploads on attach', () => {
     );
   });
 
+  it('sends a waiting send through the onSend and reply of when Send was pressed', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSendA = vi.fn();
+    const onSendB = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onSend={onSendA}
+        replyTo={{ id: 'm-a', senderName: 'Ann', content: 'Hi' }}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'For A' } });
+    fireEvent.click(sendButton());
+    // The host moves on (another conversation) before the upload finishes.
+    view.rerender(
+      <ChatComposer ref={ref} onSend={onSendB} uploadAttachment={upload} />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSendB).not.toHaveBeenCalled();
+    expect(onSendA).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'For A', replyToId: 'm-a' })
+    );
+  });
+
+  it('drops a waiting send when the host swaps in another draft', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        value="Draft A"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    view.rerender(
+      <ChatComposer
+        ref={ref}
+        value="Draft B"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSend).not.toHaveBeenCalled();
+    // The tile stays, for whoever sends it next.
+    expect(screen.getByText('clip.mp4')).toBeInTheDocument();
+  });
+
   it('restoreAttachments stages uploaded files without uploading them', async () => {
     const { upload, onSend, ref } = setup();
     const file = clip();
