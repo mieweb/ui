@@ -15,10 +15,13 @@ Storybook is built on.
 
 ## What you get
 
-One entry in your editor's agent picker — the **MIE UI Design Agent** — backed
-by a team of specialists (catalog selection, forms, grids, theming, charts,
-migration, and more). The orchestrator routes your request to the right
-specialist, so you never have to know which one to ask.
+One agent to talk to — the **MIE UI Design Agent** — backed by a team of
+specialists (catalog selection, forms, grids, theming, charts, migration, and
+more). The orchestrator routes your request to the right specialist, so you
+never have to know which one to ask. Editors with native agent support (VS
+Code Copilot) show it in the agent picker; tools that only read `AGENTS.md`
+get a roster in that file pointing at the same installed agents to read and
+adopt as a persona.
 
 ## Install it in your project
 
@@ -48,10 +51,12 @@ npx @mieweb/ui init-agent --experimental-agents
 - A managed block in your `AGENTS.md` pointing any agent (not just VS Code)
   at the above
 
-Everything sits between clearly marked managed-block comments. Re-running
-`init-agent` after a package upgrade refreshes the managed content in place —
-it is idempotent and never touches your own files or edits outside the
-markers.
+Re-running `init-agent` after a package upgrade refreshes everything in
+place. The refresh replaces managed files wholesale — the instructions file
+and any agent or skill file carrying the managed marker — so don't edit
+those directly. Files you created yourself (no marker) are never overwritten,
+and in `AGENTS.md` everything outside the managed-block markers is preserved;
+keep your customizations there or in your own files.
 
 ## Got a project zip from a web-based AI?
 
@@ -64,8 +69,9 @@ handed you a zip:
    `AGENTS.md` with exactly those steps, so your agent will find them. If it
    doesn't, have it run `npx @mieweb/ui init-agent --experimental-agents`
    directly.
-3. **Switch to the MIE UI Design Agent** in your agent picker and keep
-   building.
+3. **Use the MIE UI Design Agent** — switch to it in your agent picker (or,
+   in tools without one, have your agent adopt it from the installed
+   `.github/agents/` files) and keep building.
 
 ## Using it without installing anything
 

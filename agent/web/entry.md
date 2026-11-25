@@ -119,8 +119,9 @@ This project uses the @mieweb/ui design system. Before any UI work:
 1. Run `npx @mieweb/ui init-agent --experimental-agents` (requires
    @mieweb/ui 0.12.1 or later). It installs the MIE UI instructions,
    skills, and specialist agent team into `.github/`.
-2. Ask the user to switch to the **MIE UI Design Agent** in their agent
-   picker for all design-system work.
+2. For design-system work, use the **MIE UI Design Agent**: switch to it
+   in the agent picker if your tool has one; otherwise read the installed
+   `.github/agents/` files and adopt the matching persona.
 ```
 
 This works for any IDE agent that reads `AGENTS.md`, not just VS Code. Also

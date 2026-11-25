@@ -23,6 +23,12 @@ const MULTI_DOCS_PATH = '/?path=/docs/dashboards-dashboard-demo--docs';
 const MULTI_NAME = 'Dashboard (Demo)';
 const MULTI_BADGES = ['Experimental', 'Demo'];
 
+// Standalone docs page (unattached MDX) whose single docs row carries a badge
+// and is itself selectable.
+const STANDALONE_DOCS_PATH = '/?path=/docs/ai-design-agents--docs';
+const STANDALONE_NAME = 'AI Design Agents';
+const STANDALONE_BADGE = 'Beta';
+
 // renderSidebarLabel sets lineHeight: '14px'; a wrapped badge doubles that.
 const BADGE_LINE_HEIGHT = 14;
 // A single-line sidebar row is 28px; a wrapping name or badge exceeds this,
@@ -240,5 +246,48 @@ test.describe('Sidebar badges - single line with ellipsis (#533)', () => {
       false
     );
     expect(revealed.rowHeight).toBeLessThanOrEqual(SINGLE_LINE_ROW_MAX_HEIGHT);
+  });
+
+  // Standalone docs pages (unattached MDX) collapse to a single docs row
+  // that can itself be the selected row — unlike component nodes, whose
+  // children get selected. The selected-row theme CSS must not override the
+  // badge's white-on-color text (regression: black-on-blue Beta badge).
+  test('selected standalone docs page keeps its badge white-on-color', async ({
+    page,
+  }) => {
+    await gotoSidebar(page, STANDALONE_DOCS_PATH);
+    const row = page
+      .locator('#storybook-explorer-tree [data-selected="true"]')
+      .filter({ hasText: STANDALONE_NAME });
+    await expect(row).toBeVisible();
+
+    const badgeEl = row.locator(
+      `span[aria-label="${STANDALONE_BADGE}"].mieweb-sidebar-badge`
+    );
+    await expect(badgeEl).toBeVisible();
+    const colors = await badgeEl.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { color: style.color, background: style.backgroundColor };
+    });
+    // White text on the badge's own color, even while the row is selected.
+    expect(colors.color, 'selected badge text stays white').toBe(
+      'rgb(255, 255, 255)'
+    );
+    expect(
+      colors.background,
+      'badge keeps its own background'
+    ).not.toBe('rgba(0, 0, 0, 0)');
+    await expect(row).toHaveScreenshot(
+      'sidebar-badge-standalone-docs-selected.png'
+    );
+
+    // Attached docs children (the "Docs" row under a badged component) must
+    // stay unbadged — the standalone-docs branch must not leak onto them.
+    await gotoSidebar(page, SHORT_DOCS_PATH);
+    const docsChild = page
+      .locator('#storybook-explorer-tree [data-selected="true"]')
+      .filter({ hasText: 'Docs' });
+    await expect(docsChild).toBeVisible();
+    await expect(docsChild.locator('.mieweb-sidebar-badge')).toHaveCount(0);
   });
 });
