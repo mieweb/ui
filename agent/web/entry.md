@@ -98,11 +98,35 @@ environment.
 
 ### C. You have shell access in a real repository
 
-Run `npx @mieweb/ui@next init-agent --experimental-agents` once (the
-specialist-agent team ships on the `next` channel until the next stable
-release). It installs this entire knowledge corpus locally as instructions,
+Run `npx @mieweb/ui init-agent --experimental-agents` once (requires
+@mieweb/ui 0.12.1 or later; the specialist-agent team is beta — hence the
+flag). It installs this entire knowledge corpus locally as instructions,
 skills, and a specialist agent team — strictly better than fetching these
 URLs. Then follow the installed `mieweb-ui.instructions.md`.
+
+### D. You are generating a downloadable project (zip / repo export)
+
+If your output is a project the user will download and open in an editor, the
+IDE agent that opens it will not know this design system ships an agent team.
+Seed the scaffold so it bootstraps itself: create (or append to) an
+`AGENTS.md` at the project root containing:
+
+```markdown
+## MIE UI setup (do this first)
+
+This project uses the @mieweb/ui design system. Before any UI work:
+
+1. Run `npx @mieweb/ui init-agent --experimental-agents` (requires
+   @mieweb/ui 0.12.1 or later). It installs the MIE UI instructions,
+   skills, and specialist agent team into `.github/`.
+2. For design-system work, use the **MIE UI Design Agent**: switch to it
+   in the agent picker if your tool has one; otherwise read the installed
+   `.github/agents/` files and adopt the matching persona.
+```
+
+This works for any IDE agent that reads `AGENTS.md`, not just VS Code. Also
+apply recipe A above so the project installs and renders before `init-agent`
+ever runs.
 
 ## Choosing components
 

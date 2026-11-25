@@ -1206,6 +1206,7 @@ const preview: Preview = {
         method: 'alphabetical',
         order: [
           'Introduction',
+          'AI Design Agents',
           'Branding',
           'Foundations',
           'Inputs',
