@@ -131,23 +131,6 @@ describe('review follow-ups', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps a row the user opened before approval open after it settles', () => {
-    const details = { description: 'Creates a container.', result: undefined };
-    const { rerender } = renderWithTheme(
-      <MCPToolCallGroup toolCalls={[call({ status: 'pending', ...details })]} />
-    );
-    expand();
-    for (const status of ['awaiting-approval', 'running', 'success'] as const) {
-      rerender(
-        <MCPToolCallGroup
-          toolCalls={[call({ status, ...details })]}
-          onApprove={() => {}}
-        />
-      );
-    }
-    expect(screen.getByText('Creates a container.')).toBeInTheDocument();
-  });
-
   it('moves focus to the row when auto-closing details that held it', () => {
     const details = {
       result: undefined,
@@ -234,7 +217,7 @@ describe('MCPToolCallGroup details after approval', () => {
     expect(screen.queryByText('Creates a container.')).toBeNull();
   });
 
-  it('keeps details the user opened after the call settles', () => {
+  it('folds details the user opened once the call settles, and reopens', () => {
     const { rerender } = renderWithTheme(
       <MCPToolCallGroup toolCalls={[call({ status: 'running', ...details })]} />
     );
@@ -242,6 +225,8 @@ describe('MCPToolCallGroup details after approval', () => {
     rerender(
       <MCPToolCallGroup toolCalls={[call({ status: 'success', ...details })]} />
     );
+    expect(screen.queryByText('Creates a container.')).toBeNull();
+    expand();
     expect(screen.getByText('Creates a container.')).toBeInTheDocument();
   });
 });

@@ -72,13 +72,13 @@ export interface MCPToolCallGroupLabels {
   /** Disclosure for a successful call's output. */
   showResult: string;
   /** Disclosure for a call's inputs when they have no labels. */
-  showInput: string;
+  showInput?: string;
   /** Disclosure for a failed call's full error. */
   showError: string;
   /** Opens the menu of approval options. */
-  allow: string;
+  allow?: string;
   /** Accessible name of the menu button beside Allow. */
-  moreAllowOptions: string;
+  moreAllowOptions?: string;
   /** Approve this call only. */
   allowOnce: string;
   /** Approve this call and stop asking for it. */
@@ -426,7 +426,7 @@ function CopyTextButton({
       ) : (
         <Copy aria-hidden="true" className="h-3 w-3" />
       )}
-      <span role="status" className={copied ? undefined : 'sr-only'}>
+      <span role="status" className="sr-only">
         {copied ? labels.copied : ''}
       </span>
     </button>
@@ -491,33 +491,24 @@ function ToolCallRow({
 
   // Approval details must be in view before Allow/Deny, including when a row
   // already on screen starts awaiting approval or its details arrive later.
-  // Details opened that way close again once the call settles; a row the user
-  // opened themselves stays as they left it.
+  // Once the call settles the row folds away so the answer leads.
   const mustShowDetails = isAwaitingApproval && hasDetails;
   const isSettled = !['awaiting-approval', 'pending', 'running'].includes(
     toolCall.status
   );
   const [detailsOpen, setDetailsOpen] = React.useState(mustShowDetails);
-  const [autoOpened, setAutoOpened] = React.useState(mustShowDetails);
   const [shownForApproval, setShownForApproval] =
     React.useState(mustShowDetails);
   if (mustShowDetails !== shownForApproval) {
     setShownForApproval(mustShowDetails);
-    // Only a row approval actually opened is closed again; one the user already
-    // had open stays open.
-    if (mustShowDetails && !detailsOpen) {
-      setDetailsOpen(true);
-      setAutoOpened(true);
-    }
+    if (mustShowDetails) setDetailsOpen(true);
   }
-  if (autoOpened && isSettled) {
-    setAutoOpened(false);
-    setDetailsOpen(false);
+  const [wasSettled, setWasSettled] = React.useState(isSettled);
+  if (isSettled !== wasSettled) {
+    setWasSettled(isSettled);
+    if (isSettled) setDetailsOpen(false);
   }
-  const toggleDetails = (open: boolean) => {
-    setAutoOpened(false);
-    setDetailsOpen(open);
-  };
+  const toggleDetails = setDetailsOpen;
 
   // Closing details removes whatever had focus inside them; keep it on the row.
   // Checked by ref, not activeElement: an exit animation keeps the control mounted.
@@ -777,7 +768,7 @@ function ToolCallRow({
                   </Button>
                 )}
                 <Dropdown
-                  placement="bottom-end"
+                  placement="bottom-start"
                   disabled={acting}
                   trigger={
                     <Button
@@ -795,6 +786,7 @@ function ToolCallRow({
                 >
                   {onApprove && (
                     <DropdownItem
+                      disabled={acting}
                       onClick={() =>
                         void act(() => onApprove(toolCall, { always: true }))
                       }
@@ -804,6 +796,7 @@ function ToolCallRow({
                   )}
                   {onApproveAll && (
                     <DropdownItem
+                      disabled={acting}
                       onClick={() => void act(() => onApproveAll(toolCall))}
                     >
                       {labels.allowAll}
