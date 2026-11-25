@@ -322,6 +322,13 @@ function formatData(data: unknown): string | null {
   return typeof data === 'string' ? data : safeStringify(data, 2);
 }
 
+/** True when `text` already carries the summary, which hosts may shorten with "…". */
+function containsSummary(text: string | null, summary: string): boolean {
+  if (!text) return false;
+  const core = summary.replace(/…$/, '').trim();
+  return core !== '' && text.includes(core);
+}
+
 function formatResult(toolCall: MCPToolCall): string | null {
   const { result } = toolCall;
   if (!result) return null;
@@ -456,7 +463,11 @@ function ToolCallRow({
   // The row clamps the summary to one line, so details carry it in full.
   const summary = toolCall.result?.summary;
   const fullSummary =
-    summary && summary !== result && summary !== errorText ? summary : null;
+    summary &&
+    !containsSummary(result, summary) &&
+    !containsSummary(errorText, summary)
+      ? summary
+      : null;
   const hasLinks = hasToolResultLinks(toolCall.result);
   const hasRich = hasRichResult(toolCall.result);
   const hasLabels = toolCall.parameters.some((param) => param.label);
@@ -471,14 +482,31 @@ function ToolCallRow({
 
   // Approval details must be in view before Allow/Deny, including when a row
   // already on screen starts awaiting approval or its details arrive later.
+  // Details opened that way close again once the call settles; a row the user
+  // opened themselves stays as they left it.
   const mustShowDetails = isAwaitingApproval && hasDetails;
+  const isSettled = !['awaiting-approval', 'pending', 'running'].includes(
+    toolCall.status
+  );
   const [detailsOpen, setDetailsOpen] = React.useState(mustShowDetails);
+  const [autoOpened, setAutoOpened] = React.useState(mustShowDetails);
   const [shownForApproval, setShownForApproval] =
     React.useState(mustShowDetails);
   if (mustShowDetails !== shownForApproval) {
     setShownForApproval(mustShowDetails);
-    if (mustShowDetails) setDetailsOpen(true);
+    if (mustShowDetails) {
+      setDetailsOpen(true);
+      setAutoOpened(true);
+    }
   }
+  if (autoOpened && isSettled) {
+    setAutoOpened(false);
+    setDetailsOpen(false);
+  }
+  const toggleDetails = (open: boolean) => {
+    setAutoOpened(false);
+    setDetailsOpen(open);
+  };
 
   const act = async (action: () => void | Promise<void>) => {
     setActing(true);
@@ -513,7 +541,7 @@ function ToolCallRow({
       className="overflow-hidden text-sm"
     >
       <div role="group" aria-label={labels.callLabel(toolCall)}>
-        <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
+        <Collapsible open={detailsOpen} onOpenChange={toggleDetails}>
           <CollapsibleTrigger
             ref={triggerRef}
             className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
@@ -639,7 +667,7 @@ function ToolCallRow({
                 // JSON keeps its left-to-right order in RTL documents.
                 <pre
                   dir="ltr"
-                  className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900"
+                  className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs break-words whitespace-pre-wrap dark:bg-neutral-900"
                 >
                   {formatParameters(toolCall)}
                 </pre>
