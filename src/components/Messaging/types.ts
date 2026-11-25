@@ -6,6 +6,7 @@
  * SMS, MMS, and enterprise messaging.
  */
 
+import type { MentionOption } from './useMentionAutocomplete';
 import type { Reference } from '../ReferenceChip/references';
 
 // ============================================================================
@@ -256,6 +257,11 @@ export interface NewMessage {
   uploads?: { file: File; result: unknown }[];
   /** Reply-to message ID */
   replyToId?: string;
+  /**
+   * Mentions picked from a composer's `onMentionSearch` results that are
+   * still in `content`. Absent when there are none.
+   */
+  mentions?: MentionOption[];
   /**
    * The people, tickets, … the text references, read from its links by the
    * composer's `triggers` (each once). Present only when it has triggers.

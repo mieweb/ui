@@ -14,6 +14,7 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 import {
   SuperChat,
+  type SuperChatComposerHandle,
   type SuperChatComposerProps,
   type SuperChatProps,
 } from './SuperChat';
@@ -78,6 +79,10 @@ export interface SuperChatInboxProps {
   readOnly?: boolean;
   /** Props for the active panel's message box (see {@link SuperChatProps.composerProps}). */
   composerProps?: SuperChatComposerProps;
+  /** Imperative access to the active panel's message box (see {@link SuperChatProps.composerRef}). */
+  composerRef?: React.Ref<SuperChatComposerHandle>;
+  /** Called with the draft text whenever it changes (see {@link SuperChatProps.onDraftChange}). */
+  onDraftChange?: (text: string) => void;
   /**
    * File categories the composer accepts for paste, drag-and-drop, and the
    * file picker in the `+` → “Attach files” menu.
@@ -196,6 +201,8 @@ export function SuperChatInbox({
   trustedContent,
   readOnly,
   composerProps,
+  composerRef,
+  onDraftChange,
   acceptedFileTypes,
   attachmentDataUrls,
   maxFileSize,
@@ -369,6 +376,8 @@ export function SuperChatInbox({
           trustedContent={trustedContent}
           readOnly={readOnly}
           composerProps={composerProps}
+          composerRef={composerRef}
+          onDraftChange={onDraftChange}
           acceptedFileTypes={acceptedFileTypes}
           attachmentDataUrls={attachmentDataUrls}
           maxFileSize={maxFileSize}

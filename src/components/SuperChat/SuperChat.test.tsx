@@ -30,6 +30,7 @@ import { MotionProvider } from '../../motion/MotionProvider';
 import type {
   GenUIRegistry,
   GenUIWidgetProps,
+  SuperChatComposerHandle,
   SuperChatConversation,
 } from './index';
 
@@ -1260,6 +1261,150 @@ describe('SuperChat', () => {
         'ping @Triage',
         expect.objectContaining({ mentions: [] })
       );
+    });
+
+    it('reports the people picked from onMentionSearch, even outside the conversation', async () => {
+      const onMessageSent = vi.fn();
+      const onMentionSearch = vi.fn(() =>
+        Promise.resolve([{ id: 'guest', label: 'Jordan Guest' }])
+      );
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ onMentionSearch }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      await user.type(screen.getByLabelText('Message'), 'ask @jor');
+      await user.click(
+        await screen.findByRole('option', { name: /Jordan Guest/ })
+      );
+      // The caret moves after the inserted mention on the next frame.
+      await act(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+      await user.type(screen.getByLabelText('Message'), 'and @Triage');
+      await user.click(screen.getByLabelText('Send message'));
+      expect(onMentionSearch).toHaveBeenCalledWith('jor');
+      expect(onMessageSent).toHaveBeenCalledWith(
+        'ask @Jordan and @Triage',
+        expect.objectContaining({ mentions: ['guest'] })
+      );
+    });
+
+    it('keeps the picked people when a failed send is retried', async () => {
+      const onMessageSent = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('backend down'))
+        .mockResolvedValueOnce(undefined);
+      const onMentionSearch = vi.fn(() =>
+        Promise.resolve([{ id: 'guest', label: 'Jordan Guest' }])
+      );
+      const { default: userEvent } =
+        await import('@testing-library/user-event');
+      const user = userEvent.setup();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerProps={{ onMentionSearch }}
+          onMessageSent={onMessageSent}
+        />
+      );
+      const input = screen.getByLabelText('Message');
+      await user.type(input, 'ask @jor');
+      await user.click(
+        await screen.findByRole('option', { name: /Jordan Guest/ })
+      );
+      await user.click(screen.getByLabelText('Send message'));
+      // The draft comes back after the failure; sending it again still
+      // reports the person picked for it.
+      await waitFor(() => expect(input).toHaveValue('ask @Jordan'));
+      await user.click(screen.getByLabelText('Send message'));
+
+      await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(2));
+      expect(onMessageSent).toHaveBeenLastCalledWith(
+        'ask @Jordan',
+        expect.objectContaining({ mentions: ['guest'] })
+      );
+    });
+  });
+
+  describe('composerRef and onDraftChange', () => {
+    it('lets the host stage files, append, replace and focus the draft', async () => {
+      const ref = React.createRef<SuperChatComposerHandle>();
+      const onMessageSent = vi.fn();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerRef={ref}
+          onMessageSent={onMessageSent}
+        />
+      );
+      const input = screen.getByLabelText('Message');
+
+      act(() => ref.current?.setDraft('Describe the image'));
+      expect(input).toHaveValue('Describe the image');
+      act(() => ref.current?.appendText('in detail'));
+      expect(input).toHaveValue('Describe the image in detail');
+
+      const photo = new File(['data'], 'photo.png', { type: 'image/png' });
+      act(() => ref.current?.addFiles([photo]));
+      expect(screen.getByText('photo.png')).toBeInTheDocument();
+
+      act(() => ref.current?.focus());
+      expect(input).toHaveFocus();
+
+      fireEvent.click(screen.getByLabelText('Send message'));
+      await waitFor(() =>
+        expect(onMessageSent).toHaveBeenCalledWith(
+          'Describe the image in detail',
+          expect.objectContaining({
+            attachments: [expect.objectContaining({ file: photo })],
+          })
+        )
+      );
+    });
+
+    it('reports draft changes, not the initial empty draft', () => {
+      const onDraftChange = vi.fn();
+      const ref = React.createRef<SuperChatComposerHandle>();
+      render(
+        <SuperChat
+          conversation={conversation}
+          currentParticipantId="u1"
+          composerRef={ref}
+          onDraftChange={onDraftChange}
+        />
+      );
+      expect(onDraftChange).not.toHaveBeenCalled();
+
+      fireEvent.change(screen.getByLabelText('Message'), {
+        target: { value: 'Hi' },
+      });
+      expect(onDraftChange).toHaveBeenLastCalledWith('Hi');
+      act(() => ref.current?.appendText('there'));
+      expect(onDraftChange).toHaveBeenLastCalledWith('Hi there');
+    });
+
+    it('is forwarded by SuperChatInbox to the active panel', () => {
+      const ref = React.createRef<SuperChatComposerHandle>();
+      const onDraftChange = vi.fn();
+      render(
+        <SuperChatInbox
+          conversations={[conversation]}
+          activeConversationId={conversation.id}
+          currentParticipantId="u1"
+          composerRef={ref}
+          onDraftChange={onDraftChange}
+        />
+      );
+      act(() => ref.current?.setDraft('From the inbox'));
+      expect(screen.getByLabelText('Message')).toHaveValue('From the inbox');
+      expect(onDraftChange).toHaveBeenLastCalledWith('From the inbox');
     });
   });
 

@@ -54,10 +54,17 @@ extracted **verbatim** from the retired `MessageComposer` (now in
 - Insertion is `option.value ?? option.label.split(' ')[0]`, written as
   `@X ` (trailing space), with the caret restored in a `requestAnimationFrame`
   because the value update re-renders the textarea.
-- `MentionOption.id` is only the React key / `aria-activedescendant` identity.
-  There is **no** selection callback — hosts that need structured mention data
-  detect it from the sent text (as SuperChat does). Don't document it as more
-  than a key.
+- `MentionOption.id` is the React key / `aria-activedescendant` identity, and
+  the id a host gets back for a picked mention. `onSelect` runs before an
+  option is inserted and can cancel it (`false`, or a promise resolving to
+  `false`); an async confirmation inserts at the `@query` captured when the
+  option was picked, and only if that token is still in the text. Reference
+  triggers' picks don't go through `onSelect`. With `search`, `@` candidates
+  come from the host per query (latest query wins) instead of filtering
+  `options`, a trigger on `@` still adds its results after them, and the
+  query may hold one more `@` (an email address); ChatComposer then reports
+  the picked options still in the text as `NewMessage.mentions`. Without
+  `search`, hosts detect mentions from the sent text (as SuperChat does).
 - `MentionMenu` renders through a portal positioned by `useAnchoredPosition`
   (`top-start`, `maxHeight: 224`); the anchor is the composer's textarea
   wrapper (`anchorRef`), not the textarea itself.

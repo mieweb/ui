@@ -15,6 +15,8 @@ room) and calls `uploads.add`; everything else is the hook's:
 - **Object URLs.** Images and videos get one preview URL each, revoked exactly
   once: on `remove`, on `take` (a send) and `clear`, and at unmount. A new
   path that drops items must go through `drop()` in the hook, which revokes.
+  `resolveAttachments` drops the staged files its result leaves out with
+  `remove`, so they are revoked (and their uploads aborted or discarded) too.
 - **Synchronous list.** `uploads.current()` (a ref) is updated synchronously
   on every add/remove/take, so same-batch `addFiles` calls see accurate room.
   State updaters stay pure; side effects (URLs, ids, aborts, `onError`) happen
@@ -92,15 +94,32 @@ its own open state; change the look there, not per selector. It is internal
 'send-failed'`) is the stable machine-readable key hosts localize on. Don't
 change reason strings without a major-version note.
 
+## Host attachment rules
+
+`resolveAttachments(incoming, staged)` lets a host decide what stays staged
+(e.g. one kind of attachment at a time). Type and size checks run first, so
+it only sees files that passed them; `maxAttachments` applies to its result.
+Staged entries are matched by `File` identity, so kept files keep their id,
+preview URL and upload; the ones left out go through `uploads.remove`
+(aborted while uploading, discarded once uploaded), and new ones kept are
+added after them. Without it, `addFiles` appends as before.
+
 ## Shared mention module
 
-`mentionOptions` delegates to `useMentionAutocomplete` / `MentionMenu` in
+`mentionOptions` / `onMentionSearch` / `onMentionSelect` delegate to
+`useMentionAutocomplete` / `MentionMenu` in
 `../Messaging/useMentionAutocomplete.tsx` — the module extracted from the
 retired MessageComposer; its invariants live in
 [Messaging/MAINTAINERS.md](../Messaging/MAINTAINERS.md). ChatComposer-specific
 contract: keyboard priority in the textarea `onKeyDown` is host
 `textareaProps.onKeyDown` (preventDefault claims the event) → mention menu
 navigation → Enter-to-send. Don't reorder.
+
+With `onMentionSearch`, the options picked are kept by id until a send, which
+reports the ones still in the text as whole `@tokens` (`matchMentionTokens`)
+and forgets them all. A host that puts a failed send's text back puts its
+`mentions` back with `restoreMentions` too (SuperChat does, under the same
+guard as the text), or the retry reports none.
 
 ## Mobile keyboard behavior
 
@@ -155,6 +174,9 @@ auto-clear-on-send; hosts own the state.
   it inherits the cell's responsive row placement; the cell renders even when
   the `+` menu is hidden. Same `h-8` wrapper and `disabled` contract as
   `micSlot` (`data-slot="chat-composer-leading-slot"`).
+- `headerSlot` — host node directly above the card (e.g. a docked toolbar of
+  capture actions), in `data-slot="chat-composer-header-slot"`. No sizing
+  wrapper; same `disabled` contract as `micSlot`.
 - `addMenuItems` — host actions in the `+` menu; `checked` items render as
   `menuitemcheckbox` via `DropdownItem`'s native `checked` prop.
 - `modelSelectorProps` — passed through to `ComposerModelSelector`

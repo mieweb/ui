@@ -37,18 +37,36 @@ export interface MentionOption {
 /**
  * Find the active `@query` immediately before the caret, if any. The `@` must
  * start the string or follow whitespace, and the token must contain no spaces
- * or further `@`.
+ * or further `@` — unless `allowEmail` is set, which lets the query hold one
+ * more `@` so an email address can be typed (`@someone@example.com`).
  */
 export function activeMentionQuery(
   value: string,
-  caret: number
+  caret: number,
+  { allowEmail = false }: { allowEmail?: boolean } = {}
 ): { query: string; start: number } | null {
   const upToCaret = value.slice(0, caret);
-  const match = /(^|\s)@([^\s@]*)$/.exec(upToCaret);
+  const match = (
+    allowEmail ? /(^|\s)@([^\s@]*(?:@[^\s@]*)?)$/ : /(^|\s)@([^\s@]*)$/
+  ).exec(upToCaret);
   if (!match) return null;
   const query = match[2];
   return { query, start: caret - query.length - 1 };
 }
+
+/**
+ * Called when the user picks a mention, before it is inserted. Return (or
+ * resolve) `false` to leave the text as it was, e.g. when a confirmation the
+ * host opens is cancelled.
+ */
+export type MentionSelectHandler = (
+  option: MentionOption
+) => boolean | void | Promise<boolean | void>;
+
+/** Supplies the candidates for an `@query`, e.g. from a server search. */
+export type MentionSearchHandler = (
+  query: string
+) => MentionOption[] | Promise<MentionOption[]>;
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&');
 
@@ -71,6 +89,55 @@ export function activeTriggerQuery(
   return { char: match[2], query, start: caret - query.length - 1 };
 }
 
+/** Letters, digits and combining marks in any script, plus `_`. */
+const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
+
+/**
+ * Ids whose `@token` appears in `text`, in `entries` order: the token a
+ * mention inserts is `value`, or the first word of `label`.
+ *
+ * Only whole tokens count: the `@` must not follow a letter, digit or another
+ * `@`, and the token must not run on into a letter or digit, in any script
+ * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
+ * the longest one at that spot wins, so `@john.doe` is not also `@john`;
+ * entries with the same token all match it (two people named Alex).
+ */
+export function matchMentionTokens(
+  text: string,
+  entries: { id: string; token: string }[]
+): string[] {
+  const found = new Set<string>();
+  // Indexed, so each match is checked against its own span only, not every
+  // earlier match: exact spans already taken, and every position they cover.
+  const takenSpans = new Set<string>();
+  const occupied = new Uint8Array(text.length);
+  const longestFirst = [...entries].sort(
+    (a, b) => b.token.length - a.token.length
+  );
+  for (const { id, token } of longestFirst) {
+    const pattern = new RegExp(
+      `(?<![${MENTION_WORD}@])${escapeRegExp('@' + token)}(?![${MENTION_WORD}])`,
+      'giu'
+    );
+    for (const match of text.matchAll(pattern)) {
+      const start = match.index;
+      const end = start + match[0].length;
+      // A shorter token inside a longer one's match is rejected, but the same
+      // span counts for every entry that inserts that token (two "Alex"es).
+      const span = `${start}:${end}`;
+      if (!takenSpans.has(span)) {
+        if (occupied.subarray(start, end).includes(1)) continue;
+        takenSpans.add(span);
+        occupied.fill(1, start, end);
+      }
+      found.add(id);
+    }
+  }
+  return entries
+    .map((e) => e.id)
+    .filter((id, i, all) => found.has(id) && all.indexOf(id) === i);
+}
+
 /**
  * `[label](href)` that reads back as exactly `label` and `href`. The label
  * escapes what Markdown would format (`*beta*`, `` `code` ``, `$x$`, `&amp;`);
@@ -84,6 +151,7 @@ function referenceLink(label: string, href: string): string {
 }
 
 const NO_RESULTS: ReferenceOption[] = [];
+const NO_MENTIONS: MentionOption[] = [];
 
 /**
  * The list half of an autocomplete, shared by {@link useMentionAutocomplete}
@@ -159,6 +227,18 @@ export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
   options?: MentionOption[];
   /**
+   * Candidates for each `@query`, used instead of filtering `options`. Only
+   * the latest query's result is shown, so a slow earlier response never
+   * replaces a newer one. The query may hold one more `@`, so a search can
+   * match an email address (`@someone@example.com`).
+   */
+  search?: MentionSearchHandler;
+  /**
+   * Runs before a picked mention (from `options` or `search`) is inserted;
+   * `false` cancels the insert. Reference triggers' picks don't go through it.
+   */
+  onSelect?: MentionSelectHandler;
+  /**
    * Reference triggers (e.g. `#` tickets): typing one's character searches
    * it, and a pick is inserted as a Markdown link (`[label](href)`). A
    * trigger on `@` adds its results after `options`.
@@ -173,7 +253,7 @@ export interface UseMentionAutocompleteOptions {
 }
 
 export interface MentionAutocomplete {
-  /** Whether mention support is active (options provided and non-empty). */
+  /** Whether mention support is active (non-empty `options`, a `search`, or triggers). */
   enabled: boolean;
   /** Whether the suggestion menu is currently open. */
   menuOpen: boolean;
@@ -214,21 +294,24 @@ export interface MentionAutocomplete {
  */
 export function useMentionAutocomplete({
   options,
+  search,
+  onSelect,
   triggers,
   value,
   setValue,
   textareaRef,
 }: UseMentionAutocompleteOptions): MentionAutocomplete {
   const hasOptions = !!options && options.length > 0;
-  const enabled = hasOptions || !!triggers?.length;
+  const hasSearch = !!search;
+  const enabled = hasOptions || hasSearch || !!triggers?.length;
   const chars = React.useMemo(
     () => [
       ...new Set([
-        ...(hasOptions ? ['@'] : []),
+        ...(hasOptions || hasSearch ? ['@'] : []),
         ...(triggers ?? []).map((t) => t.char),
       ]),
     ],
-    [hasOptions, triggers]
+    [hasOptions, hasSearch, triggers]
   );
   const [trackedMention, setMention] = React.useState<{
     char: string;
@@ -287,6 +370,38 @@ export function useMentionAutocomplete({
       ? found.results
       : NO_RESULTS;
 
+  // The host's `@` search (`search`), in place of filtering `options`:
+  // newest answer only, read through a ref as hosts usually pass it inline.
+  // Each answer carries its query, so an older one is never shown.
+  const searchRef = React.useRef(search);
+  searchRef.current = search;
+  const mentionQuery =
+    hasSearch && mention?.char === '@' ? mention.query : undefined;
+  const [searched, setSearched] = React.useState<{
+    query: string;
+    results: MentionOption[];
+  } | null>(null);
+  const mentionSearchSeq = React.useRef(0);
+  React.useEffect(() => {
+    const seq = ++mentionSearchSeq.current;
+    const run = searchRef.current;
+    if (!run || mentionQuery === undefined) {
+      setSearched(null);
+      return;
+    }
+    const answer = (next: MentionOption[]) => {
+      if (seq === mentionSearchSeq.current)
+        setSearched({ query: mentionQuery, results: next });
+    };
+    Promise.resolve()
+      .then(() => run(mentionQuery))
+      .then(answer, () => answer([]));
+  }, [mentionQuery]);
+  const searchResults =
+    searched && searched.query === mentionQuery
+      ? searched.results
+      : NO_MENTIONS;
+
   // A trigger's results as entries of their own (copies), so a pick is a
   // reference only when it came from them — a host may share one array
   // between `mentionOptions` and a trigger's search.
@@ -298,11 +413,15 @@ export function useMentionAutocomplete({
     if (!mention) return [];
     const q = mention.query.toLowerCase();
     const listed =
-      mention.char === '@' && options
-        ? options.filter((o) => o.label.toLowerCase().includes(q))
-        : [];
+      mention.char !== '@'
+        ? []
+        : hasSearch
+          ? searchResults
+          : options
+            ? options.filter((o) => o.label.toLowerCase().includes(q))
+            : [];
     return [...listed, ...referenceEntries];
-  }, [mention, options, referenceEntries]);
+  }, [mention, options, hasSearch, searchResults, referenceEntries]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -318,17 +437,38 @@ export function useMentionAutocomplete({
     maxHeight: 224,
   });
 
-  function insert(option: MentionOption) {
-    if (!mention) return;
-    const before = value.slice(0, mention.start);
-    const after = value.slice(mention.start + 1 + mention.query.length);
-    // A trigger's pick is a link to its record; a listed option is `@value`.
-    const insertText =
-      activeTrigger && referenceEntries.includes(option as ReferenceOption)
-        ? `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
-        : `@${option.value ?? option.label.split(' ')[0]} `;
+  // Read at insert time: a confirmation can resolve after later renders.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+  // Likewise whether mentions are still on: a host that turns them off (as
+  // ChatComposer does while disabled) locks the draft against a late pick.
+  const enabledRef = React.useRef(enabled);
+  enabledRef.current = enabled;
+
+  /**
+   * Replace `token` with `insertText`, if the text still holds the token as
+   * it was when picked: the same word (with anything already after the caret
+   * in it), still ending there.
+   */
+  const insertAt = (
+    token: { char: string; query: string; start: number; rest: string },
+    insertText: string
+  ) => {
+    const current = valueRef.current;
+    const typed = token.char + token.query;
+    const word = typed + token.rest;
+    // The text changed while a confirmation was open: the token is gone, or
+    // was edited (`@sam` → `@samuel`), so a pick for it no longer applies.
+    if (
+      !enabledRef.current ||
+      !current.startsWith(word, token.start) ||
+      /\S/.test(current.charAt(token.start + word.length))
+    ) {
+      return;
+    }
+    const before = current.slice(0, token.start);
+    const after = current.slice(token.start + typed.length);
     setValue(before + insertText + after);
-    setMention(null);
     // Restore caret just after the inserted mention.
     const caret = before.length + insertText.length;
     requestAnimationFrame(() => {
@@ -338,6 +478,40 @@ export function useMentionAutocomplete({
         el.setSelectionRange(caret, caret);
       }
     });
+  };
+
+  function insert(option: MentionOption) {
+    if (!mention) return;
+    // The rest of the word after the caret, so a confirmation can tell
+    // whether the word was edited meanwhile.
+    const rest =
+      /^\S*/.exec(
+        value.slice(mention.start + mention.char.length + mention.query.length)
+      )?.[0] ?? '';
+    const token = { ...mention, rest };
+    setMention(null);
+    // A trigger's pick is a link to its record; a listed option is `@value`,
+    // inserted once the host's `onSelect` (if any) agrees.
+    if (activeTrigger && referenceEntries.includes(option as ReferenceOption)) {
+      insertAt(
+        token,
+        `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
+      );
+      return;
+    }
+    const insertText = `@${option.value ?? option.label.split(' ')[0]} `;
+    const decision = onSelect?.(option);
+    if (decision === false) return;
+    if (decision instanceof Promise) {
+      decision.then(
+        (confirmed) => {
+          if (confirmed !== false) insertAt(token, insertText);
+        },
+        () => {}
+      );
+      return;
+    }
+    insertAt(token, insertText);
   }
 
   const list = useSuggestionList(suggestions, menuOpen, insert);
@@ -346,10 +520,20 @@ export function useMentionAutocomplete({
   const sync = React.useCallback(
     (nextValue: string, caret: number) => {
       if (!enabled) return;
-      setMention(activeTriggerQuery(nextValue, caret, chars));
+      // A host search can look people up by email, so its `@` query may hold
+      // one more `@`. Both start where the caret's word does, so the email
+      // form, when it matches, is the same token read further.
+      const email = hasSearch
+        ? activeMentionQuery(nextValue, caret, { allowEmail: true })
+        : null;
+      setMention(
+        email
+          ? { char: '@', ...email }
+          : activeTriggerQuery(nextValue, caret, chars)
+      );
       setHighlight(0);
     },
-    [enabled, chars, setHighlight]
+    [enabled, hasSearch, chars, setHighlight]
   );
 
   const handleKeyDown = (
@@ -358,9 +542,11 @@ export function useMentionAutocomplete({
     // An IME composing (CJK input) owns Enter and the arrows: they pick and
     // confirm its candidates, not the list's options.
     if (event.nativeEvent.isComposing) return false;
-    // Escape also dismisses a reference query still searching, so its late
-    // answer doesn't open the menu after the user closed it.
-    if (!menuOpen && !(event.key === 'Escape' && activeTrigger)) return false;
+    // Escape also dismisses a query still searching (a reference trigger's or
+    // the host's `@` search), so its late answer doesn't open the menu after
+    // the user closed it.
+    const searching = !!activeTrigger || mentionQuery !== undefined;
+    if (!menuOpen && !(event.key === 'Escape' && searching)) return false;
     if (list.handleKey(event)) return true;
     if (event.key === 'Escape') {
       event.preventDefault();

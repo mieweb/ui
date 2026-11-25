@@ -29,4 +29,8 @@ export {
 // Mention candidates live in the shared Messaging mention module;
 // re-exported here so ChatComposer hosts don't need to know where the type
 // lives.
-export type { MentionOption } from '../Messaging/useMentionAutocomplete';
+export type {
+  MentionOption,
+  MentionSearchHandler,
+  MentionSelectHandler,
+} from '../Messaging/useMentionAutocomplete';

@@ -16,10 +16,18 @@ import {
   attachmentMarkdown,
   attachmentCache,
 } from './plugins';
-import type { SuperChatConversation } from './index';
+import type { SuperChatComposerHandle, SuperChatConversation } from './index';
 import { richConversation, secondConversation, registry } from './storyData';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
+import {
+  Modal,
+  ModalBody,
+  ModalClose,
+  ModalFooter,
+  ModalHeader,
+  ModalTitle,
+} from '../Modal';
 import { getSampleVideo } from '../AudioPlayer/sampleVideo';
 import { useKeyboardInset } from '../../hooks/useKeyboardInset';
 import { createMediaConversations } from './mediaStoryData';
@@ -608,6 +616,119 @@ export const CustomComposer: Story = {
       }}
     />
   ),
+};
+
+// A directory the host searches on each `@query` (a server call in an app),
+// including people outside the conversation.
+const directory = [
+  { id: 'u2', label: 'Sam Carter', description: 'In this conversation' },
+  { id: 'a1', label: 'Triage Agent', description: 'In this conversation' },
+  { id: 'u7', label: 'Jordan Lee', description: 'Cardiology' },
+  { id: 'u8', label: 'Priya Shah', description: 'Pharmacy' },
+];
+const inConversation = new Set(['u2', 'a1']);
+
+// One kind of attachment at a time: images stack, a document replaces
+// whatever is staged.
+function oneKindAtATime(incoming: File[], staged: File[]) {
+  const isImage = (file: File) => file.type.startsWith('image/');
+  const images = incoming.filter(isImage);
+  if (images.length === 0) return incoming.slice(0, 1);
+  return staged.length > 0 && staged.every(isImage)
+    ? [...staged, ...images]
+    : images;
+}
+
+function HostRulesInbox() {
+  const composerRef = React.useRef<SuperChatComposerHandle>(null);
+  const [pending, setPending] = React.useState<{
+    name: string;
+    answer: (add: boolean) => void;
+  } | null>(null);
+  const answer = (add: boolean) => {
+    pending?.answer(add);
+    setPending(null);
+  };
+
+  return (
+    <>
+      <InteractiveInbox
+        className="w-full"
+        initial={[richConversation, secondConversation]}
+        currentParticipantId="u1"
+        defaultActiveConversationId="c1"
+        composerRef={composerRef}
+        composerProps={{
+          placeholder: 'Type @ to mention anyone in the directory…',
+          onMentionSearch: (query) =>
+            new Promise((resolve) =>
+              setTimeout(
+                () =>
+                  resolve(
+                    directory.filter((person) =>
+                      person.label.toLowerCase().includes(query.toLowerCase())
+                    )
+                  ),
+                250
+              )
+            ),
+          onMentionSelect: (option) =>
+            inConversation.has(option.id) ||
+            new Promise<boolean>((resolve) =>
+              setPending({ name: option.label, answer: resolve })
+            ),
+          resolveAttachments: oneKindAtATime,
+          leadingSlot: (
+            <button
+              type="button"
+              className="rounded-full border border-neutral-300 px-3 py-1 text-xs text-neutral-600 dark:border-neutral-600 dark:text-neutral-300"
+              onClick={() =>
+                composerRef.current?.setDraft('Please review the rhythm strip.')
+              }
+            >
+              Insert template
+            </button>
+          ),
+        }}
+      />
+      <Modal
+        open={pending !== null}
+        onOpenChange={(open) => !open && answer(false)}
+        size="sm"
+      >
+        <ModalHeader>
+          <ModalTitle>Add {pending?.name}?</ModalTitle>
+          <ModalClose />
+        </ModalHeader>
+        <ModalBody>
+          {pending?.name} is not in this conversation yet. Add them so they see
+          the mention.
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="outline" onClick={() => answer(false)}>
+            Cancel
+          </Button>
+          <Button onClick={() => answer(true)}>Add and mention</Button>
+        </ModalFooter>
+      </Modal>
+    </>
+  );
+}
+
+export const HostMentionsAndAttachments: Story = {
+  name: 'Host mentions & attachment rules',
+  decorators: [fullHeightChat],
+  parameters: {
+    githubSourceFooter: false,
+    docs: {
+      source: { type: 'code' },
+      description: {
+        story:
+          "An app's own rules on the built-in message box, through `composerProps` and `composerRef`. `onMentionSearch` looks up each `@query` (here a directory with people outside the conversation, after a short delay); `onMentionSelect` asks before adding someone new, and Cancel leaves the text as it was. `resolveAttachments` keeps one kind of attachment at a time: images stack, a document replaces them. **Insert template** fills the draft through `composerRef.setDraft`.",
+      },
+    },
+  },
+  render: () => <HostRulesInbox />,
 };
 
 export const SourcesAndGuards: Story = {

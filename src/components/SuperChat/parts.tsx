@@ -25,6 +25,7 @@ import { MCPToolCallDisplay } from '../AI/MCPToolCall';
 import { ChatBubble, AITypingIndicator } from '../AI/AIMessage';
 import { SparklesIcon } from '../AI/icons';
 import { MessageFiles } from './MessageFiles';
+import { matchMentionTokens } from '../Messaging/useMentionAutocomplete';
 import {
   MessageGallery,
   MessageMedia,
@@ -79,10 +80,6 @@ export function lastActivityOf(c: SuperChatConversation): number {
 }
 
 /** Compute mentioned participant ids from `@Name` tokens in the draft. */
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 export function detectMentions(
   text: string,
   participants: Participant[]
@@ -93,56 +90,6 @@ export function detectMentions(
       .filter((p) => p.kind !== 'system')
       .map((p) => ({ id: p.id, token: p.name.split(' ')[0] }))
   );
-}
-
-/** Letters, digits and combining marks in any script, plus `_`. */
-const MENTION_WORD = '\\p{L}\\p{N}\\p{M}_';
-
-/**
- * Ids whose `@token` appears in `text`, in `entries` order. Used for a host's
- * own `mentionOptions`, whose inserted token is `value`, or the first word of
- * `label` (the same default the composer inserts).
- *
- * Only whole tokens count: the `@` must not follow a letter, digit or another
- * `@`, and the token must not run on into a letter or digit, in any script
- * (`@Triage` is not `@TriageAgent`, `@李` is not `@李明`). Where tokens overlap,
- * the longest one at that spot wins, so `@john.doe` is not also `@john`;
- * entries with the same token all match it (two people named Alex).
- */
-export function matchMentionTokens(
-  text: string,
-  entries: { id: string; token: string }[]
-): string[] {
-  const found = new Set<string>();
-  // Indexed, so each match is checked against its own span only, not every
-  // earlier match: exact spans already taken, and every position they cover.
-  const takenSpans = new Set<string>();
-  const occupied = new Uint8Array(text.length);
-  const longestFirst = [...entries].sort(
-    (a, b) => b.token.length - a.token.length
-  );
-  for (const { id, token } of longestFirst) {
-    const pattern = new RegExp(
-      `(?<![${MENTION_WORD}@])${escapeRegExp('@' + token)}(?![${MENTION_WORD}])`,
-      'giu'
-    );
-    for (const match of text.matchAll(pattern)) {
-      const start = match.index;
-      const end = start + match[0].length;
-      // A shorter token inside a longer one's match is rejected, but the same
-      // span counts for every entry that inserts that token (two "Alex"es).
-      const span = `${start}:${end}`;
-      if (!takenSpans.has(span)) {
-        if (occupied.subarray(start, end).includes(1)) continue;
-        takenSpans.add(span);
-        occupied.fill(1, start, end);
-      }
-      found.add(id);
-    }
-  }
-  return entries
-    .map((e) => e.id)
-    .filter((id, i, all) => found.has(id) && all.indexOf(id) === i);
 }
 
 export function lastMessageByTime(
