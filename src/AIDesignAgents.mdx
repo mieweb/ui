@@ -23,6 +23,12 @@ Code Copilot) show it in the agent picker; tools that only read `AGENTS.md`
 get a roster in that file pointing at the same installed agents to read and
 adopt as a persona.
 
+The Design Agent plans — it answers questions and drafts specs but never
+edits files. When you approve a spec, its **Build it** handoff sends the plan
+to your default coding agent for implementation. In tools without native
+handoffs, ask your agent to implement the approved spec itself, following the
+installed `mieweb-ui.instructions.md` rules.
+
 ## Install it in your project
 
 From a project that already uses (or will use) @mieweb/ui:
@@ -69,9 +75,11 @@ handed you a zip:
    `AGENTS.md` with exactly those steps, so your agent will find them. If it
    doesn't, have it run `npx @mieweb/ui init-agent --experimental-agents`
    directly.
-3. **Use the MIE UI Design Agent** — switch to it in your agent picker (or,
-   in tools without one, have your agent adopt it from the installed
-   `.github/agents/` files) and keep building.
+3. **Plan with the MIE UI Design Agent** — switch to it in your agent picker
+   (or, in tools without one, have your agent adopt it from the installed
+   `.github/agents/` files). It plans rather than edits: once you approve a
+   spec, use its **Build it** handoff — or, without native handoffs, tell
+   your agent to implement the approved spec — to turn the plan into code.
 
 ## Using it without installing anything
 
