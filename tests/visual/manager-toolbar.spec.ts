@@ -57,6 +57,7 @@ test.describe('Manager toolbar - custom tools', () => {
         'button[aria-label*="Color mode"]',
         'button[aria-label*="density"]',
         'button[aria-label*="Locale"]',
+        'button[aria-label*="Loco i18n"]',
         'button[aria-label*="Text direction"]',
         'button[aria-label*="identity"]',
         'button[aria-label*="device-trust"]',

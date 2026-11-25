@@ -12,7 +12,6 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
@@ -77,7 +76,9 @@ export interface ReorderableListProps<T> extends Omit<
   /**
    * Save the order in this browser (localStorage) under this key and restore
    * it on the next visit. Read once on mount. Ids added later go to the end;
-   * ids that disappear drop out. Turns reordering on by itself.
+   * ids that disappear drop out. Turns reordering on by itself. If the key can
+   * change (another list or user), also pass it as the React `key`
+   * (`key={storageKey}`), or the old order may be saved under the new key.
    */
   storageKey?: string;
   /**
@@ -174,7 +175,10 @@ function Row({
       data-slot="reorderable-list-handle"
       title={handleTitle}
       className={cn(
-        'text-muted-foreground inline-flex shrink-0 cursor-grab touch-none items-center active:cursor-grabbing',
+        'text-muted-foreground inline-flex shrink-0 cursor-grab items-center active:cursor-grabbing',
+        // Only a drag-only grip blocks panning; as part of a whole row, a swipe
+        // that starts on it still scrolls the page.
+        handle && 'touch-none',
         classNames?.handle
       )}
     >
@@ -291,7 +295,8 @@ function ReorderableListInner<T>(
         if (!canDropOn(dragged, ids[i])) return;
       }
     }
-    commit?.(arrayMove(ids, from, to));
+    // Through moveBy, so a pointer drop is announced like a keyboard move.
+    moves.moveBy(String(active.id), to - from);
   };
 
   return (

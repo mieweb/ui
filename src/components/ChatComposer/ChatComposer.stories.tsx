@@ -128,6 +128,14 @@ Mobile keyboard: the input uses a 16px font below \`sm\` (no iOS zoom-on-focus),
 
 Host integration escape hatches: \`textareaProps\` spreads extra props onto the underlying textarea — host \`onKeyDown\` / \`onPaste\` / \`onChange\` run **before** the built-in handlers, and calling \`event.preventDefault()\` claims that event (e.g. a custom autocomplete overlay's arrow/Enter navigation — host key handling takes priority over the built-in mention menu and Enter-to-send — or opting out of paste-to-attach). \`ChatComposerHandle.getTextarea()\` returns the textarea element for caret work (\`setSelectionRange\` after inserting into the text). \`canSendWhenEmpty\` keeps send enabled while the composer is empty — for hosts that stage attachments outside the composer; \`onSend\` then receives \`{ content: '', attachments: [] }\` and the host owns any further guarding. \`sendOptions\` (\`{ id, label, icon?, disabled? }[]\`) adds a chevron beside send with other ways to send the draft ("Send later…", "Send without notifying"): choosing one sends exactly like the send button and calls \`onSend(message, { sendOption: id })\` — the host decides what the option means; Enter and the send button still do a plain send, with no second argument. Label the trigger with \`sendOptionsLabel\`.
 
+### Inline references and the rich input
+
+\`triggers\` (one \`ReferenceTrigger\` per kind — \`@\` people, \`#\` tickets; the contract is on [ReferenceChip](?path=/docs/editors-referencechip--docs)) let the writer name records while typing. In the default textarea a pick is inserted as a Markdown link (\`[@Ann Lee](/people/u-ann)\`); with \`editor="rich"\` (**experimental**) the textarea becomes a compact [RichEditor](?path=/docs/editors-richeditor--docs) and a pick is an atomic chip. Either way \`onSend\` gets the Markdown in \`content\` and the records it names in \`references\` (\`referencesIn\` over the sent text).
+
+\`editor="rich"\` needs RichEditor's setup in the host, as the [RichEditor docs](?path=/docs/editors-richeditor--docs) describe: the \`@kerebron/*\` peers (and the Kerebron patches listed there), \`@mieweb/ui/kerebron.css\` beside \`@mieweb/ui/styles.css\`, and \`@kerebron/wasm\`'s \`assets/\` served at \`/kerebron-wasm\`. Without the CSS the editor is unstyled; without the WASM it does not start. The editor is lazy-loaded, so a composer without \`editor="rich"\` never downloads Kerebron. Not yet in rich mode: \`mentionOptions\`, paste-to-attach and the placeholder.
+
+Choose the **rich composer** for a chat message that is sent and cleared — Enter sends, there is no formatting toolbar, and attachments, send options and the selector rows still apply. Choose **RichEditor** itself for a document that is written and saved — headings, lists, tables, a toolbar, live collaboration.
+
 ### Use it when
 
 - Building **any new chat surface** — AI assistants, patient messaging, support chat. This is the canonical composer (the legacy \`MessageComposer\` was retired in 0.10.0 — see \`MIGRATION.md#chat-composer\`).
@@ -179,6 +187,16 @@ const composerRef = useRef<ChatComposerHandle>(null);
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'editors-richeditor',
+          why: 'editor="rich" (experimental) swaps the textarea for a compact, lazy-loaded RichEditor and needs its peers, CSS and WASM setup. Use the composer for a message that is sent and cleared; RichEditor for a document with a toolbar that is saved.',
+        },
+        {
+          type: 'composes with',
+          target: 'editors-referencechip',
+          why: 'triggers take ReferenceChip’s ReferenceTrigger contract; picks become Markdown links (chips in the rich input) and onSend gets them as references, which ReferenceChip then shows in the sent message.',
+        },
         {
           type: 'alternative to',
           target: 'chat-messaging',
@@ -467,7 +485,7 @@ export const WithSendOptions: Story = {
     docs: {
       description: {
         story:
-          'Use `sendOptions` for alternative ways to send the draft. The chevron beside send opens them; the chosen id reaches `onSend` as `meta.sendOption`, and the host decides what it means (e.g. open a time picker for "Send later…"). Inside `SuperChat`, a rejected `onMessageSent` puts the draft back, so a cancelled picker can simply reject.',
+          'Use `sendOptions` for alternative ways to send the draft. The chevron beside send opens them; the chosen id reaches `onSend` as `meta.sendOption`, and the host decides what it means (e.g. open a time picker for "Send later…"). Inside `SuperChat`, a rejected `onMessageSent` puts the draft back for you, so a host whose picker cancels a send just rejects: the **text** returns unless a newer draft has been typed, and the attachments are staged again, checked against the current file limits. Both come back only while that conversation is still open. Do not restore the files yourself, or they are staged twice.',
       },
     },
   },

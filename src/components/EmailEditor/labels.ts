@@ -21,6 +21,8 @@ export const defaultEmailEditorLabels = {
   unsupportedBlock:
     'Unsupported block ({type}). It will not be included in the sent email.',
   noSelection: 'Select a block in the canvas to edit it.',
+  textEditorUnavailable:
+    'The text editor could not load. Reload the page to edit this block.',
   column: 'Column',
   selectBlock: 'Select {item}',
   announceAdded: '{item} added.',

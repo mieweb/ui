@@ -1,7 +1,6 @@
 /** @module models/speech-embedding */
 import { ONNX } from '../onnx.js';
 import { ONNXModel } from './base.js';
-import { MelSpectrogram } from './mel-spectrogram.js';
 
 /**
  * Speech Embedding model
@@ -12,7 +11,7 @@ export class SpeechEmbedding extends ONNXModel {
   /**
    * Constructor
    * @param {string} modelPath - Path to the ONNX model
-   * @param {MelSpectrogram} spectrogramModel - Mel spectrogram model
+   * @param {import('./mel-spectrogram.js').MelSpectrogram} spectrogramModel - Mel spectrogram model
    * @param {number} spectrogramMelBins - Number of Mel bins for the Mel spectrogram model
    * @param {number} embeddingDim - Dimension of the embeddings
    * @param {number} windowSize - Size of the window

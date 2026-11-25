@@ -29,15 +29,37 @@ export {
 // Collapsible Pill (shared primitive for thinking + tool display)
 export { CollapsiblePill, type CollapsiblePillProps } from './CollapsiblePill';
 
-// MCP Tool Call Display
+// Tool Call Display (MCP tools, built-in tools and skills)
 export {
+  ToolCallDisplay,
   MCPToolCallDisplay,
   ResourceLink,
   ToolStatusIcon,
   getToolIcon,
+  type ToolCallDisplayProps,
   type MCPToolCallDisplayProps,
   type ResourceLinkProps,
 } from './MCPToolCall';
+
+export {
+  ToolCallResultContent,
+  defaultToolCallResultLabels,
+  defaultToolHintLabels,
+  isSafeHref,
+  type ToolCallResultContentProps,
+  type ToolCallResultLabels,
+  type ToolHintLabels,
+} from './ToolCallResultContent';
+
+// MCP Tool Call Group — a run of calls as compact rows under one header
+export {
+  MCPToolCallGroup,
+  defaultMCPToolCallGroupLabels,
+  type MCPToolCallGroupProps,
+  type MCPToolCallGroupOptions,
+  type MCPToolCallGroupLabels,
+  type MCPToolCallGroupLabelOverrides,
+} from './MCPToolCallGroup';
 
 // AI Message Display
 export {
@@ -177,6 +199,32 @@ export {
   computePeaks,
   type WaveformPeaks,
 } from './HeyOzwell/TranscriptPlayer/peaks';
+
+// Nemotron diarization (experimental) — overlap-aware "who spoke when" and the doctor's wake-voice check.
+export {
+  defaultNemotronModel,
+  warmNemotron,
+  type NemotronModel,
+} from './HeyOzwell/nemotron/runNemotron';
+export {
+  useNemotronDiarization,
+  MIN_ENROLL_SECONDS as NEMOTRON_MIN_ENROLL_SECONDS,
+  type UseNemotronDiarizationOptions,
+  type UseNemotronDiarizationResult,
+  type NemotronDiarization,
+  type NemotronVoice,
+  type LiveDiarization,
+} from './HeyOzwell/useNemotronDiarization';
+export {
+  transcriptFromActivity,
+  type SpeakerTimeline,
+} from './HeyOzwell/nemotron/attribution';
+export {
+  useNemotronWakeVoices,
+  type UseNemotronWakeVoicesOptions,
+  type NemotronWakeVoices,
+  type WakeClip,
+} from './HeyOzwell/useNemotronWakeVoices';
 
 // Speaker diarization — on-device "who spoke when" (useDiarization) + its pure clustering/attribution core.
 export {

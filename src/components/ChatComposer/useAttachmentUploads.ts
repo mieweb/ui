@@ -205,7 +205,13 @@ export function useAttachmentUploads<R = unknown>({
       const done = sending
         .then(
           (result) => {
-            if (controller.signal.aborted) return;
+            // Removed (or unmounted) but it finished anyway — the host ignored
+            // the signal, or the server was already done: nothing will send
+            // it, so undo it like any finished upload taken off.
+            if (controller.signal.aborted) {
+              discardFinished(result, item.file);
+              return;
+            }
             if (!mounted.current) {
               // Finished after the composer went away: nothing will send it,
               // unless it lands where it's going by itself.

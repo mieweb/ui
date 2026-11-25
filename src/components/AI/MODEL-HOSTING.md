@@ -59,12 +59,18 @@ window.__ozwellAssets = 'https://huggingface.co/<user>/<repo>/resolve/main';
 window.__ozwellAssets = {
   wakeword: 'https://…/wakeword',
   svRuntime: 'https://…/sv-runtime',
+  nemotron: 'https://…/nemotron', // a copy of the pinned revision's files
+  ort: '/ort', // onnxruntime-web 1.30's dist/ files, instead of jsDelivr
 };
 ```
 
 - `WakeWord/useWakeWord.ts` — `resolveAssetBase()` reads the `assetBase` **prop** first, then the
   global, then defaults to `/wakeword`. (Prop lets a host override per-mount.)
 - `SpeakerVerify/lib/speaker-verify.js` — `SV_DIR` reads the same global, defaults to `/sv-runtime`.
+- `modelCache.ts` — `configuredAssetUrl()` reads `nemotron` and `ort` from the object form only; each must
+  be an http(s) URL or a same-origin path. Self-hosting `ort` needs `ort.min.js` (wake word),
+  `ort.webgpu.min.mjs` (Nemotron worker) and the `ort-wasm-simd-threaded.{mjs,wasm}` and
+  `ort-wasm-simd-threaded.asyncify.{mjs,wasm}` files they load.
 
 Set the global **before** the components mount (e.g. in `.storybook/preview` or the host's entry).
 
@@ -94,6 +100,12 @@ Models are cached across app opens so a returning user loads from disk, not the 
   cache (`env.useBrowserCache = true`). `whisperTranscribe.ts` points `env.remoteHost` at the R2 bucket
   (`pub-…r2.dev`, model id `whisper-turbo`, `remotePathTemplate '{model}/'`). Confirmed: loads once cold
   (~85 s), then **~10 s from cache** on later opens. The SW deliberately does NOT touch the Whisper files.
+- **Nemotron 3 Diarization** (int8 ~121 MB or fp32 ~398 MB, experimental) — loaded by the Nemotron worker from
+  `onnx-community/Nemotron-3-Diarization-ONNX` at the pinned `MODEL_REVISION`, and kept in the Cache API
+  (`ozwell-nemotron-<revision>`; older revisions are deleted). `warmNemotron()` downloads and loads the
+  device's default model (`defaultNemotronModel()`) in the background. To serve a copy of that revision's files (same layout), set
+  `window.__ozwellAssets = { nemotron: 'https://…' }`; only the object form moves Nemotron, so an existing
+  string `__ozwellAssets` for the wake and speaker models is unaffected.
 
 **Why R2 and not HuggingFace (the day-long diagnosis):** turbo's weights live on HuggingFace's newer
 **Xet** storage, whose download responses carry **NO `Content-Length`**. transformers.js can't

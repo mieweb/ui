@@ -127,6 +127,18 @@
 }
 
 /*
+ * Kerebron's base.css sets `-webkit-user-modify: read-write` on .kb-editor.
+ * In Chromium that non-standard property makes the element editable even when
+ * ProseMirror renders it with contenteditable="false" — keystrokes bypass the
+ * editor state entirely and splice raw text into the DOM (caught by the
+ * read-only EncounterVisit visual test on mieweb/ui#802). Hand control back
+ * to the contenteditable attribute whenever the view is not editable.
+ */
+.kb-editor[contenteditable='false'] {
+  -webkit-user-modify: read-only;
+}
+
+/*
  * Kerebron leaves headings, lists, links and code to browser defaults, which
  * Tailwind's preflight strips (headings `inherit`, lists `list-style: none`,
  * links `color: inherit`) — so "# " and "- " produced real h1/ul nodes that
@@ -184,6 +196,12 @@
   font-weight: 500;
   text-decoration: none;
   vertical-align: baseline;
+}
+/* The label, cut short inside the chip rather than spilling out of it. */
+.kb-component .ProseMirror [data-slot='reference-chip-label'] {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 [data-theme='dark'] .kb-component .ProseMirror [data-slot='reference-chip'],
 .dark .kb-component .ProseMirror [data-slot='reference-chip'] {
@@ -474,6 +492,21 @@
 [data-slot='textarea-rich'][data-toolbar='hidden']
   .kb-custom-menu__overflow-menu {
   display: none;
+}
+
+/* Kerebron's menu bar has a -8px top overhang (margin: calc(-1 * --kb-space-sm))
+ * sized for document-length editors. Inside the bordered one-comment field the
+ * overhang pokes above the field, painting over its top border, rounded
+ * corners, and anything docked above (the mediaCapture ribbon, mieweb/ui#734).
+ * Zero the overhang and round the top corners to the field's inner radius —
+ * but keep Kerebron's `position: sticky` so the toolbar still pins to the
+ * viewport while scrolling long content, exactly as upstream intends. The
+ * editable's offset (editorTop) is measured from live rects, so it follows
+ * automatically. */
+[data-slot='textarea-rich'] .kb-custom-menu {
+  margin-top: 0;
+  border-start-start-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
+  border-start-end-radius: calc(var(--mieweb-radius-lg, 0.75rem) - 1px);
 }
 
 /* Disabled/readOnly: the toolbar is made `inert` (see TextAreaRichKerebron);

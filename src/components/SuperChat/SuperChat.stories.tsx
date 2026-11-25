@@ -156,7 +156,7 @@ const meta: Meta<typeof SuperChat> = {
       description: {
         component: `### What it's for
 
-**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`scheduledFor\` (a pending, dashed bubble with a "Scheduled · {time}" indicator — prefix via \`messageLabels\`), \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments, sendOption })\` (\`sendOption\`: the id of the \`composerProps.sendOptions\` entry the user sent with), \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\` — among them \`createReferencesPlugin({ triggers })\`, which draws links to people and tickets as \`ReferenceChip\`s (see the **References** story).
+**The single-conversation panel of SuperChat: header (title, participant face-pile, optional back/close), a \`role="log"\` thread ordered by \`time\`, and a mention-aware composer — rendering exactly one \`conversation\` the host owns.** \`SuperChat\` takes \`conversation: SuperChatConversation\` (\`participants: Participant[]\` with \`kind\` \`human\` | \`agent\` | \`system\`, \`color\`, \`avatar\`; \`thread: SuperChatMessage[]\` with \`participantId\`, \`text\` and/or \`content\` blocks, \`time\`, \`status\`, \`editedAt\`, \`scheduledFor\` (a pending, dashed bubble with a "Scheduled · {time}" indicator — prefix via \`messageLabels\`), \`ref\`), \`currentParticipantId\` (drives alignment and compose identity), \`renderPlugins?: SuperChatRenderPlugin[]\` (composed by \`createMarkdownRenderer\` into one \`renderTextContent\`: GFM Markdown + \`rehype-sanitize\` by default), \`renderTextContent\` (replace the renderer entirely), \`trustedContent\` (skip sanitisation), \`readOnly\`, \`order\` \`asc\` | \`desc\`, \`virtualized\` (windowed rows via \`@tanstack/react-virtual\`), \`acceptedFileTypes: AttachmentKind[]\`, \`linkBuilder(ref)\`, and callbacks \`onMessageSent(text, { conversation, mentions, attachments, sendOption })\` (\`sendOption\`: the id of the \`composerProps.sendOptions\` entry the user sent with), \`onMessageEdited(messageId, text, { conversation, removedMedia, removedFiles })\` (enables inline Edit on your own text messages; the editor can also take attachments off), \`onConversationClosed\`, \`onReferenceClick\`, \`onBack\`. A message's \`media\` (pictures, clips, recordings) and \`files\` (documents) follow its text as tiles on the author's side, each fitting \`mediaMaxSize\` (\`renderMessageMedia\` draws your own card); opening one switches to the media view (\`view\`, \`defaultView\`, \`onViewChange\`, \`mediaFeedProps\`, \`mediaLabels\`). See the Inbox [Attachment groups](?path=/story/superchat-inbox--attachment-groups), [Attachments sending](?path=/story/superchat-inbox--attachments-sending) and [Editing attachments](?path=/story/superchat-inbox--editing-attachments) stories. Each message is an \`article\` with a Copy menu (rich + Markdown / Markdown / plain), speaker colour accent via \`ChatBubble\`, and \`MCPToolCallDisplay\` for tool blocks. Also exported from the same entry: \`SuperChatConversations\`, \`SuperChatInbox\`, \`createMarkdownRenderer\`, \`MarkdownLink\` (the default link, for a plugin that overrides \`a\` for only some links), \`TextRenderContext\` / \`useTextRenderContext\`; rich plugins live in \`@mieweb/ui/components/SuperChat/plugins\` — among them \`createReferencesPlugin({ triggers })\`, which draws links to people and tickets as \`ReferenceChip\`s (see the **References** story).
 
 ### Use it when
 
@@ -169,6 +169,7 @@ const meta: Meta<typeof SuperChat> = {
 - You want the list and the panel together with selection handled — \`SuperChatInbox\`.
 - One user talks to one assistant and you do not need Markdown, participants or a conversation model — \`AIChat\` is lighter (no \`react-markdown\` peers).
 - Plain human-to-human messaging with delivery states and read receipts — the Messaging module; SuperChat has no \`status\` icons or read receipts.
+- The messages are rows in a DataVis view (an exported thread, an audit log) that users only read — [DataVisNitroChat](?path=/docs/grids-datavis-chat--docs) maps sender / message / time columns onto this panel in read-only mode, alongside the NITRO grid over the same view.
 - The host cannot install the Markdown-core peers (\`react-markdown\`, \`remark-gfm\`, \`rehype-sanitize\`) — they are required for the default renderer.
 
 ### Example
@@ -220,6 +221,11 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
       peers: ['react-markdown', 'remark-gfm', 'rehype-sanitize'],
       relationships: [
         {
+          type: 'composes with',
+          target: 'editors-referencechip',
+          why: '`createReferencesPlugin({ triggers })` goes in `renderPlugins` and draws the links a trigger claims in message text as ReferenceChips; use ReferenceChip directly to show a reference outside a message.',
+        },
+        {
           type: 'alternative to',
           target: 'chat-aichat',
           why: 'AIChat is one user ↔ one assistant with plain text by default; SuperChat is multi-participant with a Markdown plugin pipeline.',
@@ -238,6 +244,11 @@ An app that opts into [\`@mieweb/ui/motion\`](?path=/docs/foundations-motion--do
           type: 'uses',
           target: 'chat-chatcomposer',
           why: 'The compose box is the shared ChatComposer (attachments behind its `+` menu, `chat-composer-*` data-slots) with mentionOptions built from the participants.',
+        },
+        {
+          type: 'composes with',
+          target: 'media-dictationbutton',
+          why: 'The `dictation` prop puts DictationButton in the composer and appends its transcript to the draft; use DictationButton directly only for host-owned inputs.',
         },
         {
           type: 'composes with',
@@ -727,8 +738,16 @@ export const References: Story = {
         story: [
           'Messages name people and tickets as plain Markdown links;',
           '`createReferencesPlugin({ triggers, onOpen, icon })` draws each link a',
-          'trigger claims as a `ReferenceChip`. “the wiki” is an ordinary link and',
-          'stays one. Without the plugin the same text shows working links.',
+          'trigger claims as a [`ReferenceChip`](?path=/docs/editors-referencechip--docs).',
+          '“the wiki” is an ordinary link and stays one. Without the plugin the same',
+          'text shows working links. The plugin belongs in `renderPlugins`; to show a',
+          'reference outside a message, render `ReferenceChip` directly.',
+          '',
+          'This only draws sent messages; the message box picks references through',
+          'the existing `@mention` list, extended with triggers (ChatComposer',
+          '`triggers`), so the composer here still types plain text. `@mention`',
+          '(`mentionOptions`) keeps addressing participants (`mentions`); a',
+          'reference links to a record.',
         ].join('\n'),
       },
     },
@@ -1076,4 +1095,32 @@ function ComposerSelectorsPanel() {
 
 export const ComposerSelectors: Story = {
   render: () => <ComposerSelectorsPanel />,
+};
+
+const mockTranscribe = (_audio: Blob, signal: AbortSignal) =>
+  new Promise<string>((resolve, reject) => {
+    const timer = window.setTimeout(
+      () => resolve('Please summarize my last visit.'),
+      800
+    );
+    signal.addEventListener('abort', () => {
+      window.clearTimeout(timer);
+      reject(new Error('Dictation cancelled'));
+    });
+  });
+
+export const Dictation: Story = {
+  args: {
+    currentParticipantId: 'u1',
+    dictation: { transcribe: mockTranscribe },
+  },
+  render: (args) => <InteractivePanel {...args} initial={conversation} />,
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Voice typing in the composer. Click the mic, speak, then click again: the transcript is appended to the draft for review and is never sent automatically. Escape discards the take. This story uses a mock `transcribe`; in an app pass a server provider (e.g. an OpenAI-compatible `/v1/audio/transcriptions` call). `dictation={true}` instead uses on-device, English-only Whisper with a large first-use model download. The browser asks for microphone permission; inside an iframe the host must also grant `allow="microphone"`. Denied permission and failures show a status message and leave the draft intact. See [DictationButton](?path=/docs/media-dictationbutton--docs).',
+      },
+    },
+  },
 };

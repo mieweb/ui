@@ -17,7 +17,10 @@ import {
   type SuperChatComposerProps,
   type SuperChatProps,
 } from './SuperChat';
-import { SuperChatConversations } from './SuperChatConversations';
+import {
+  SuperChatConversations,
+  type SuperChatConversationsProps,
+} from './SuperChatConversations';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import type {
   AIRenderTextContent,
@@ -81,18 +84,34 @@ export interface SuperChatInboxProps {
    * Defaults to `['image', 'video', 'audio', 'pdf']`.
    */
   acceptedFileTypes?: AttachmentKind[];
-  /** See {@link SuperChatProps.onComposerError}. */
-  onComposerError?: SuperChatProps['onComposerError'];
   /** See {@link SuperChatProps.attachmentDataUrls}. @default true */
   attachmentDataUrls?: boolean;
   /** See {@link SuperChatProps.maxFileSize}. */
   maxFileSize?: SuperChatProps['maxFileSize'];
+  /** See {@link SuperChatProps.onComposerError}. */
+  onComposerError?: SuperChatProps['onComposerError'];
   /** Thread ordering: `'asc'` (oldest→newest, default) or `'desc'` (feed-style). */
   order?: 'asc' | 'desc';
   /** Virtualize the message thread (windowed rendering) for long histories. */
   virtualized?: boolean;
   /** Show the conversation sidebar. */
   showSidebar?: boolean;
+  /** Heading above the conversation list; `null` hides it. See {@link SuperChatConversationsProps.listTitle}. */
+  listTitle?: SuperChatConversationsProps['listTitle'];
+  /** Host content in the list header, e.g. filters. See {@link SuperChatConversationsProps.listHeader}. */
+  listHeader?: SuperChatConversationsProps['listHeader'];
+  /**
+   * Search box in the list header. The host filters and passes the matches as
+   * `listConversations`. See {@link SuperChatConversationsProps.search}.
+   */
+  search?: SuperChatConversationsProps['search'];
+  /**
+   * The conversations the list shows, e.g. search or filter results. Defaults
+   * to `conversations`. The panel still opens from `conversations`, so
+   * narrowing the list never closes the open conversation or drops its
+   * unsent draft.
+   */
+  listConversations?: SuperChatConversation[];
   /** Content after the last conversation in the sidebar list (see {@link SuperChatConversationsProps.listFooter}). */
   listFooter?: React.ReactNode;
   /**
@@ -113,7 +132,10 @@ export interface SuperChatInboxProps {
    * double-click on the divider restores. Defaults to `256`.
    */
   defaultSidebarWidth?: number;
-  /** Narrowest the divider can make the sidebar, in px. Defaults to `200`. */
+  /**
+   * Narrowest the divider can make the sidebar, in px. Defaults to `200`. An
+   * inbox too narrow for this plus the panel's 240px lowers it to what's left.
+   */
   minSidebarWidth?: number;
   /**
    * Widest the divider can make the sidebar, in px. Defaults to `480`. A narrow
@@ -175,12 +197,16 @@ export function SuperChatInbox({
   readOnly,
   composerProps,
   acceptedFileTypes,
-  onComposerError,
   attachmentDataUrls,
   maxFileSize,
+  onComposerError,
   order,
   virtualized,
   showSidebar = true,
+  listTitle,
+  listHeader,
+  search,
+  listConversations,
   listFooter,
   defaultMobileView = 'list',
   resizableSidebar = false,
@@ -213,9 +239,12 @@ export function SuperChatInbox({
   // On small screens the list and panel can't fit side by side, so we show one
   // at a time (master-detail). `mobileView` tracks which is visible; on `sm`+
   // both are always shown and this state is ignored.
-  const [mobileView, setMobileView] = React.useState<'list' | 'chat'>(
+  const [requestedMobileView, setMobileView] = React.useState<'list' | 'chat'>(
     defaultMobileView
   );
+  // With no conversation to open, the chat pane would be an empty panel with
+  // no way back, so the list shows until there is one.
+  const mobileView = active ? requestedMobileView : 'list';
 
   // The list can't be wider than leaves the panel `MIN_PANEL_WIDTH`, so the
   // width shown, dragged and announced is always the one actually rendered.
@@ -235,14 +264,17 @@ export function SuperChatInbox({
     availableWidth === undefined
       ? maxSidebarWidth
       : Math.max(
-          minSidebarWidth,
+          0,
           Math.min(maxSidebarWidth, availableWidth - MIN_PANEL_WIDTH)
         );
+  // An inbox narrower than both minimums together gives the panel its 240px
+  // first: the list's minimum (and its announced bound) drops to what's left.
+  const narrowestSidebar = Math.min(minSidebarWidth, widestSidebar);
 
   const clampStoredWidth = (w: number) =>
     Math.round(Math.min(maxSidebarWidth, Math.max(minSidebarWidth, w)));
   const clampWidth = (w: number) =>
-    Math.round(Math.min(widestSidebar, Math.max(minSidebarWidth, w)));
+    Math.round(Math.min(widestSidebar, Math.max(narrowestSidebar, w)));
   const [internalWidth, setInternalWidth] = React.useState(defaultSidebarWidth);
   // Width while a drag is in progress; kept here so the host re-renders once
   // per drag, not once per pointermove.
@@ -252,7 +284,9 @@ export function SuperChatInbox({
   // reset compares against it, so a key press that leaves the divider where it
   // is never overwrites the stored width.
   const savedWidth = clampStoredWidth(sidebarWidth ?? internalWidth);
-  const width = dragWidth ?? settledWidth;
+  // Re-clamped every render, so an inbox that shrinks mid-drag never leaves
+  // the panel under its minimum or announces a width past the maximum.
+  const width = dragWidth === null ? settledWidth : clampWidth(dragWidth);
   const resizeSidebar = (next: number, final: boolean, reset = false) => {
     const clamped = clampWidth(next);
     if (!final) {
@@ -290,14 +324,17 @@ export function SuperChatInbox({
     >
       {showSidebar && (
         <SuperChatConversations
-          conversations={conversations}
+          conversations={listConversations ?? conversations}
           activeConversationId={activeId}
           onConversationOpened={handleOpen}
           onNewConversation={onNewConversation}
-          listFooter={listFooter}
           mediaLabels={mediaLabels}
+          listTitle={listTitle}
+          listHeader={listHeader}
+          search={search}
+          listFooter={listFooter}
           className={cn(
-            'w-full sm:w-(--superchat-sidebar-width)',
+            'w-full sm:w-[var(--superchat-sidebar-width)]',
             mobileView === 'chat' && 'hidden sm:flex'
           )}
         />
@@ -305,7 +342,7 @@ export function SuperChatInbox({
       {showSidebar && resizableSidebar && (
         <SidebarResizeHandle
           width={width}
-          minWidth={minSidebarWidth}
+          minWidth={narrowestSidebar}
           maxWidth={widestSidebar}
           onResize={resizeSidebar}
           onReset={() => resizeSidebar(defaultSidebarWidth, true, true)}
@@ -333,9 +370,9 @@ export function SuperChatInbox({
           readOnly={readOnly}
           composerProps={composerProps}
           acceptedFileTypes={acceptedFileTypes}
-          onComposerError={onComposerError}
           attachmentDataUrls={attachmentDataUrls}
           maxFileSize={maxFileSize}
+          onComposerError={onComposerError}
           order={order}
           virtualized={virtualized}
           linkBuilder={linkBuilder}

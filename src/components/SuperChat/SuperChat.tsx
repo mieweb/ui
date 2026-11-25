@@ -22,17 +22,18 @@ import {
   useStreamEndedBelowFold,
 } from '../../hooks/useStickToBottom';
 import { CloseIcon } from '../AI/icons';
-import {
-  ChatComposer,
-  type ChatComposerAgentOption,
-  type ChatComposerProps,
-  type ChatComposerSendMeta,
-  type ChatComposerError,
-  type ChatComposerHandle,
+import { ChatComposer } from '../ChatComposer/ChatComposer';
+import type {
+  ChatComposerAgentOption,
+  ChatComposerError,
+  ChatComposerHandle,
+  ChatComposerProps,
+  ChatComposerSendMeta,
 } from '../ChatComposer/ChatComposer';
 import type { ComposerModelSelectorProps } from '../AI/ComposerModelSelector';
 import { notifyComposerMigrationOnce } from '../ChatComposer/migration-notice';
 import { JumpToBottomButton } from '../ChatComposer/JumpToBottomButton';
+import { DictationButton, type DictationButtonProps } from '../DictationButton';
 import { Button } from '../Button';
 import { ButtonGroup } from '../ButtonGroup';
 import { MediaFeed } from '../MediaFeed';
@@ -50,6 +51,7 @@ import {
   MessageRow,
   byTime,
   detectMentions,
+  matchMentionTokens,
   filesToComposerAttachments,
   acceptTokensFor,
   DEFAULT_ATTACHMENT_LABELS,
@@ -132,7 +134,10 @@ export interface SuperChatProps {
    * Props for the message box (`ChatComposer`), applied over SuperChat's own
    * defaults: e.g. `placeholder`, `leadingSlot` for the host's own buttons
    * beside `+`, `layout: 'stacked'`, `maxFileSize`, `canSendWhenEmpty`, or
-   * `mentionOptions: []` to turn @mentions off. `className` is merged.
+   * `mentionOptions: []` to turn @mentions off. With your own `mentionOptions`,
+   * `onMessageSent`'s `mentions` holds the ids of the options whose token
+   * (`value`, or the first word of `label`) appears in the text. `className`
+   * is merged.
    */
   composerProps?: SuperChatComposerProps;
   /**
@@ -142,12 +147,6 @@ export interface SuperChatProps {
    */
   acceptedFileTypes?: AttachmentKind[];
   /**
-   * Called when the composer refuses a file (too large, a type not accepted,
-   * over the attachment limit) or a send fails, so the host can say why.
-   * `message` is English; `context.reason` lets hosts word it themselves.
-   */
-  onComposerError?: (message: string, context?: ChatComposerError) => void;
-  /**
    * Whether `onMessageSent`'s attachments carry a base64 `dataUrl`. Set
    * `false` when the host uploads each attachment's `file` itself: the read is
    * skipped, so a large video doesn't become a string bigger than a browser —
@@ -156,13 +155,19 @@ export interface SuperChatProps {
    */
   attachmentDataUrls?: boolean;
   /**
-   * Largest file the composer takes, in bytes; a larger one is refused. A
-   * function sets the cap per file, e.g. a higher one for videos than photos
-   * (with `attachmentDataUrls={false}`, so a large file isn't read as base64).
-   * A refused file is reported through `onComposerError`.
+   * Largest file the composer takes, in bytes; a larger one is refused
+   * (reported through `onComposerError`). A function sets the cap per file,
+   * e.g. a higher one for videos than photos (with
+   * `attachmentDataUrls={false}`, so a large file isn't read as base64).
    * @default 26214400 (25 MB)
    */
   maxFileSize?: ChatComposerProps['maxFileSize'];
+  /**
+   * Called when the composer refuses a file (too large, a type not accepted,
+   * over the attachment limit) or a send fails, so the host can say why.
+   * `message` is English; `context.reason` lets hosts word it themselves.
+   */
+  onComposerError?: (message: string, context?: ChatComposerError) => void;
   /**
    * Thread ordering.
    * - `'asc'` (default): oldest → newest, anchored to the bottom like a
@@ -202,11 +207,20 @@ export interface SuperChatProps {
   agentSelectorLabel?: string;
   /** Props for the composer's model selector (shown when provided). */
   modelSelectorProps?: ComposerModelSelectorProps;
+  /** Extra controls at the end of the composer's agent/model row (e.g. a display setting). */
+  composerSelectorsEndSlot?: React.ReactNode;
   /** While true, the send button becomes a stop button (requires `onStop`). */
   isStreaming?: boolean;
   onStop?: () => void;
   /** Localized accessible label for the icon-only stop button. */
   stopLabel?: string;
+  /**
+   * Show a dictation (voice typing) button in the composer. The transcript is
+   * appended to the editable draft and never sent automatically. `true` uses
+   * on-device Whisper (large first-use download); pass `{ transcribe }` to use
+   * a server provider. See the `Dictation` story and `DictationButton`.
+   */
+  dictation?: boolean | Omit<DictationButtonProps, 'onText'>;
 
   // --- callbacks (chat-component-compatible) ---
   /**
@@ -249,11 +263,19 @@ export interface SuperChatProps {
 
 /**
  * Message box props a host may set through `composerProps`. SuperChat owns the
- * draft and the send path, so `value`, `onValueChange` and `onSend` stay its.
+ * draft and the send path, so `value`, `onValueChange`, `onSend` and
+ * `isSending` stay its.
+ * `replyTo` / `onCancelReply` are left out: SuperChat's send path doesn't pass
+ * a reply target on to `onMessageSent` yet.
  */
 export type SuperChatComposerProps = Omit<
   ChatComposerProps,
-  'value' | 'onValueChange' | 'onSend'
+  | 'value'
+  | 'onValueChange'
+  | 'onSend'
+  | 'isSending'
+  | 'replyTo'
+  | 'onCancelReply'
 >;
 
 /**
@@ -367,9 +389,9 @@ export function SuperChat({
   readOnly,
   composerProps,
   acceptedFileTypes,
-  onComposerError,
   attachmentDataUrls = true,
   maxFileSize = 25 * 1024 * 1024,
+  onComposerError,
   order = 'asc',
   virtualized = false,
   linkBuilder,
@@ -383,9 +405,11 @@ export function SuperChat({
   onAgentChange,
   agentSelectorLabel,
   modelSelectorProps,
+  composerSelectorsEndSlot,
   isStreaming,
   onStop,
   stopLabel,
+  dictation,
   onMessageSent,
   onMessageEdited,
   onConversationClosed,
@@ -1101,6 +1125,13 @@ export function SuperChat({
     draftEpochRef.current += 1;
     setDraft(value);
   }, []);
+  const appendDictation = React.useCallback((text: string) => {
+    draftEpochRef.current += 1;
+    setDraft((current) =>
+      !current || /\s$/.test(current) ? current + text : `${current} ${text}`
+    );
+  }, []);
+  const dictationProps = typeof dictation === 'object' ? dictation : undefined;
 
   // Bridge the shared composer's `NewMessage` (File[] attachments) to
   // SuperChat's host callback (mentions + attachments: each one's File, and
@@ -1114,12 +1145,24 @@ export function SuperChat({
   );
   const handleComposerSend = React.useCallback(
     async (message: NewMessage, sendMeta?: ChatComposerSendMeta) => {
+      if (readOnly) return;
       const epoch = draftEpochRef.current;
       const conversationId = conversation.id;
       setSendingIn((current) => new Set(current).add(conversationId));
       try {
         const text = message.content;
-        const mentions = detectMentions(text, conversation.participants);
+        // A host's own `mentionOptions` decide what counts as a mention, by
+        // the token each one inserts; `[]` turns mentions off entirely.
+        const hostOptions = composerProps?.mentionOptions;
+        const mentions = hostOptions
+          ? matchMentionTokens(
+              text,
+              hostOptions.map((o) => ({
+                id: o.id,
+                token: o.value ?? o.label.split(' ')[0],
+              }))
+            )
+          : detectMentions(text, conversation.participants);
         const converted = await filesToComposerAttachments(
           message.attachments ?? [],
           { dataUrls: attachmentDataUrls }
@@ -1170,7 +1213,13 @@ export function SuperChat({
         });
       }
     },
-    [conversation, onMessageSent, attachmentDataUrls]
+    [
+      conversation,
+      onMessageSent,
+      composerProps?.mentionOptions,
+      readOnly,
+      attachmentDataUrls,
+    ]
   );
 
   return (
@@ -1453,9 +1502,7 @@ export function SuperChat({
 
       <ChatComposer
         ref={composerRef}
-        isSending={sendingIn.has(conversation.id)}
         onError={onComposerError}
-        disabled={readOnly}
         placeholder={
           readOnly
             ? 'Read-only conversation'
@@ -1474,14 +1521,31 @@ export function SuperChat({
         agentSelectorLabel={agentSelectorLabel}
         showModelSelector={!!modelSelectorProps}
         modelSelectorProps={modelSelectorProps}
+        selectorsEndSlot={readOnly ? undefined : composerSelectorsEndSlot}
         isStreaming={isStreaming}
         onStop={onStop}
         stopLabel={stopLabel}
+        micSlot={
+          dictation && !readOnly ? (
+            // Keyed by conversation so switching drops any in-flight take.
+            <DictationButton
+              key={conversation.id}
+              showStatus
+              // Pulse rings overflow the composer row; the caption shows it's live.
+              showPulse={false}
+              {...dictationProps}
+              onText={appendDictation}
+            />
+          ) : undefined
+        }
         {...composerProps}
+        // A host may disable a writable composer, never enable a read-only one.
+        disabled={readOnly || composerProps?.disabled}
         // Matches the thread's p-4 gutter so the composer card lines up with
         // the messages instead of running flush against the panel edges.
         className={cn('px-4 pb-4', composerProps?.className)}
         value={draft}
+        isSending={sendingIn.has(conversation.id)}
         onValueChange={handleDraftChange}
         onSend={handleComposerSend}
       />

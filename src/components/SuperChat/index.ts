@@ -21,6 +21,7 @@ export {
 export {
   SuperChatConversations,
   type SuperChatConversationsProps,
+  type SuperChatConversationsSearch,
 } from './SuperChatConversations';
 
 export { SuperChatInbox, type SuperChatInboxProps } from './SuperChatInbox';
@@ -29,6 +30,7 @@ export { getConversationMediaItems } from './media';
 
 export {
   createMarkdownRenderer,
+  MarkdownLink,
   type CreateMarkdownRendererOptions,
 } from './render/createMarkdownRenderer';
 

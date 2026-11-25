@@ -71,8 +71,89 @@ export function activeTriggerQuery(
   return { char: match[2], query, start: caret - query.length - 1 };
 }
 
-/** `label` safe inside a Markdown link's `[…]`. */
-const linkLabel = (label: string) => label.replace(/[[\]\\]/g, '\\$&');
+/**
+ * `[label](href)` that reads back as exactly `label` and `href`. The label
+ * escapes what Markdown would format (`*beta*`, `` `code` ``, `$x$`, `&amp;`);
+ * the destination escapes what would end it early or decode (`issue)`), and
+ * takes angle brackets when it holds whitespace.
+ */
+function referenceLink(label: string, href: string): string {
+  const text = label.replace(/[\\[\]*_`~<>&$]/g, '\\$&');
+  const destination = href.replace(/[\\()<>&]/g, '\\$&');
+  return `[${text}](${/\s/.test(href) ? `<${destination}>` : destination})`;
+}
+
+const NO_RESULTS: ReferenceOption[] = [];
+
+/**
+ * The list half of an autocomplete, shared by {@link useMentionAutocomplete}
+ * and RichEditor's references: the highlighted option, its ids for ARIA, and
+ * arrow / Enter / Tab handling. Where the query comes from and what a pick
+ * inserts stay with each caller.
+ */
+export interface SuggestionList {
+  /** Clamped highlight index (`-1` while the list is closed). */
+  highlight: number;
+  /** Move the highlight (mouse hover); `0` starts a new query at the top. */
+  setHighlight: (index: number) => void;
+  /** id of the listbox element. */
+  listId: string;
+  /** id for the option at `index`. */
+  optionId: (index: number) => string;
+  /** id of the highlighted option while open, for `aria-activedescendant`. */
+  activeOptionId: string | undefined;
+  /**
+   * Arrows move the highlight (wrapping), Enter or Tab picks it. Returns
+   * `true` when the key was consumed (callers skip their own handling).
+   */
+  handleKey: (event: Pick<KeyboardEvent, 'key' | 'preventDefault'>) => boolean;
+}
+
+export function useSuggestionList<T>(
+  suggestions: readonly T[],
+  open: boolean,
+  pick: (option: T) => void
+): SuggestionList {
+  const [highlight, setHighlight] = React.useState(0);
+  const listId = React.useId();
+  const optionId = React.useCallback(
+    (index: number) => `${listId}-option-${index}`,
+    [listId]
+  );
+  // Clamp the highlight to the current suggestion range so the active option
+  // never points at a stale/out-of-range index (the list can shrink while the
+  // menu is open as the query narrows). The same clamped index drives
+  // `aria-activedescendant`, `aria-selected`, the visual highlight and the
+  // keys, so they can never disagree.
+  const clamped = open ? Math.min(highlight, suggestions.length - 1) : -1;
+
+  const handleKey: SuggestionList['handleKey'] = (event) => {
+    if (!open) return false;
+    const count = suggestions.length;
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      setHighlight((h) => (Math.min(h, count - 1) + step + count) % count);
+      return true;
+    }
+    if (event.key === 'Enter' || event.key === 'Tab') {
+      event.preventDefault();
+      const chosen = suggestions[clamped];
+      if (chosen !== undefined) pick(chosen);
+      return true;
+    }
+    return false;
+  };
+
+  return {
+    highlight: clamped,
+    setHighlight,
+    listId,
+    optionId,
+    activeOptionId: open ? optionId(clamped) : undefined,
+    handleKey,
+  };
+}
 
 export interface UseMentionAutocompleteOptions {
   /** Mention candidates. Mentions are disabled when undefined or empty. */
@@ -149,18 +230,35 @@ export function useMentionAutocomplete({
     ],
     [hasOptions, triggers]
   );
-  const [mention, setMention] = React.useState<{
+  const [trackedMention, setMention] = React.useState<{
     char: string;
     query: string;
     start: number;
   } | null>(null);
+  // Only while the draft still holds the query: a send that clears it, or a
+  // host that replaces it, ends the query, so a late search answer can't open
+  // the menu over a draft it no longer belongs to.
+  const mention =
+    trackedMention &&
+    value.startsWith(
+      trackedMention.char + trackedMention.query,
+      trackedMention.start
+    )
+      ? trackedMention
+      : null;
   const activeTrigger =
     (mention && triggers?.find((t) => t.char === mention.char)) || null;
 
   // A reference trigger's search, newest answer only. Keyed by character and
   // query, with the trigger read through a ref, so a host that rebuilds its
-  // `triggers` each render doesn't search again.
-  const [found, setFound] = React.useState<ReferenceOption[]>([]);
+  // `triggers` each render doesn't search again. Each answer carries the
+  // character and query it was for: while a new search runs, an older one's
+  // results (another trigger's records) must not be shown or picked.
+  const [found, setFound] = React.useState<{
+    char: string;
+    query: string;
+    results: ReferenceOption[];
+  } | null>(null);
   const searchSeq = React.useRef(0);
   const activeTriggerRef = React.useRef(activeTrigger);
   activeTriggerRef.current = activeTrigger;
@@ -170,27 +268,32 @@ export function useMentionAutocomplete({
     const seq = ++searchSeq.current;
     const trigger = activeTriggerRef.current;
     if (!trigger || searchQuery === undefined) {
-      setFound([]);
+      setFound(null);
       return;
     }
+    const answer = (results: ReferenceOption[]) => {
+      if (seq === searchSeq.current)
+        setFound({ char: trigger.char, query: searchQuery, results });
+    };
     Promise.resolve()
       .then(() => trigger.search(searchQuery))
-      .then(
-        (results) => {
-          if (seq === searchSeq.current) setFound(results);
-        },
-        () => {
-          if (seq === searchSeq.current) setFound([]);
-        }
-      );
+      .then(answer, () => answer([]));
   }, [searchChar, searchQuery]);
-  const [highlight, setHighlight] = React.useState(0);
-  const listId = React.useId();
-  const optionId = React.useCallback(
-    (index: number) => `${listId}-option-${index}`,
-    [listId]
-  );
+  const results =
+    found &&
+    activeTrigger &&
+    found.char === activeTrigger.char &&
+    found.query === mention?.query
+      ? found.results
+      : NO_RESULTS;
 
+  // A trigger's results as entries of their own (copies), so a pick is a
+  // reference only when it came from them — a host may share one array
+  // between `mentionOptions` and a trigger's search.
+  const referenceEntries = React.useMemo(
+    () => results.map((result) => ({ ...result })),
+    [results]
+  );
   const suggestions = React.useMemo<MentionOption[]>(() => {
     if (!mention) return [];
     const q = mention.query.toLowerCase();
@@ -198,8 +301,8 @@ export function useMentionAutocomplete({
       mention.char === '@' && options
         ? options.filter((o) => o.label.toLowerCase().includes(q))
         : [];
-    return [...listed, ...found];
-  }, [mention, options, found]);
+    return [...listed, ...referenceEntries];
+  }, [mention, options, referenceEntries]);
 
   const menuOpen = enabled && mention !== null && suggestions.length > 0;
 
@@ -215,33 +318,14 @@ export function useMentionAutocomplete({
     maxHeight: 224,
   });
 
-  // Clamp the highlight to the current suggestion range so the active option
-  // never points at a stale/out-of-range index (the list can shrink while the
-  // menu is open as the query narrows). The same clamped index drives
-  // `aria-activedescendant`, `aria-selected`, and the visual highlight so they
-  // can never disagree.
-  const clampedHighlight = menuOpen
-    ? Math.min(highlight, suggestions.length - 1)
-    : -1;
-  const activeOptionId = menuOpen ? optionId(clampedHighlight) : undefined;
-
-  const sync = React.useCallback(
-    (nextValue: string, caret: number) => {
-      if (!enabled) return;
-      setMention(activeTriggerQuery(nextValue, caret, chars));
-      setHighlight(0);
-    },
-    [enabled, chars]
-  );
-
-  const insert = (option: MentionOption) => {
+  function insert(option: MentionOption) {
     if (!mention) return;
     const before = value.slice(0, mention.start);
     const after = value.slice(mention.start + 1 + mention.query.length);
     // A trigger's pick is a link to its record; a listed option is `@value`.
     const insertText =
-      activeTrigger && found.includes(option as ReferenceOption)
-        ? `[${linkLabel(option.label)}](${activeTrigger.toHref(option.id)}) `
+      activeTrigger && referenceEntries.includes(option as ReferenceOption)
+        ? `${referenceLink(option.label, activeTrigger.toHref(option.id))} `
         : `@${option.value ?? option.label.split(' ')[0]} `;
     setValue(before + insertText + after);
     setMention(null);
@@ -254,40 +338,35 @@ export function useMentionAutocomplete({
         el.setSelectionRange(caret, caret);
       }
     });
-  };
+  }
+
+  const list = useSuggestionList(suggestions, menuOpen, insert);
+  const { setHighlight } = list;
+
+  const sync = React.useCallback(
+    (nextValue: string, caret: number) => {
+      if (!enabled) return;
+      setMention(activeTriggerQuery(nextValue, caret, chars));
+      setHighlight(0);
+    },
+    [enabled, chars, setHighlight]
+  );
 
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLTextAreaElement>
   ): boolean => {
-    if (!menuOpen) return false;
-    // All keyboard branches index with the clamped highlight so keyboard
-    // behavior always agrees with the visible/ARIA selection, even when the
-    // list shrank while the menu was open (e.g. the host swapped `options`
-    // asynchronously).
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      setHighlight(
-        (h) => (Math.min(h, suggestions.length - 1) + 1) % suggestions.length
-      );
-      return true;
-    }
-    if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      setHighlight(
-        (h) =>
-          (Math.min(h, suggestions.length - 1) - 1 + suggestions.length) %
-          suggestions.length
-      );
-      return true;
-    }
-    if (event.key === 'Enter' || event.key === 'Tab') {
-      event.preventDefault();
-      const chosen = suggestions[clampedHighlight];
-      if (chosen) insert(chosen);
-      return true;
-    }
+    // An IME composing (CJK input) owns Enter and the arrows: they pick and
+    // confirm its candidates, not the list's options.
+    if (event.nativeEvent.isComposing) return false;
+    // Escape also dismisses a reference query still searching, so its late
+    // answer doesn't open the menu after the user closed it.
+    if (!menuOpen && !(event.key === 'Escape' && activeTrigger)) return false;
+    if (list.handleKey(event)) return true;
     if (event.key === 'Escape') {
       event.preventDefault();
+      // Handled here only: a surrounding Modal's document-level Escape would
+      // otherwise close it too. The next Escape reaches the host.
+      event.stopPropagation();
       setMention(null);
       return true;
     }
@@ -296,8 +375,8 @@ export function useMentionAutocomplete({
 
   const inputProps: React.TextareaHTMLAttributes<HTMLTextAreaElement> = enabled
     ? {
-        'aria-controls': menuOpen ? listId : undefined,
-        'aria-activedescendant': activeOptionId,
+        'aria-controls': menuOpen ? list.listId : undefined,
+        'aria-activedescendant': list.activeOptionId,
         'aria-autocomplete': 'list' as const,
       }
     : {};
@@ -307,9 +386,9 @@ export function useMentionAutocomplete({
     menuOpen,
     activeTrigger,
     suggestions,
-    highlight: clampedHighlight,
-    listId,
-    optionId,
+    highlight: list.highlight,
+    listId: list.listId,
+    optionId: list.optionId,
     anchorRef,
     floatingRef,
     menuStyle,
@@ -355,7 +434,18 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
   label = 'Mention',
   dataSlot = 'composer-mention-list',
 }: MentionMenuProps<T>) {
-  if (!mention.menuOpen) return null;
+  // Keep the highlighted option visible as arrows move it, so a pick is
+  // never made off screen (ArrowUp from the first wraps to the last). Focus
+  // stays in the input; only the list scrolls.
+  const { menuOpen, highlight, optionId } = mention;
+  React.useEffect(() => {
+    if (!menuOpen || highlight < 0) return;
+    document
+      .getElementById(optionId(highlight))
+      ?.scrollIntoView?.({ block: 'nearest' });
+  }, [menuOpen, highlight, optionId]);
+
+  if (!menuOpen) return null;
   return createPortal(
     <ul
       ref={mention.floatingRef}
@@ -367,7 +457,9 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
       className="w-64 overflow-y-auto rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
     >
       {mention.suggestions.map((option, i) => (
-        <li key={option.id}>
+        // By position as well as id: one person can be both a listed mention
+        // and a trigger's result, with the same id.
+        <li key={`${i}:${option.id}`}>
           <button
             type="button"
             id={mention.optionId(i)}
@@ -388,9 +480,12 @@ export function MentionMenu<T extends MentionOption = MentionOption>({
           >
             {option.icon}
             <span className="min-w-0 flex-1 truncate">
-              <span className="font-medium">{option.label}</span>
+              {/* Own direction, so `@Ann Lee` keeps its `@` in an RTL page. */}
+              <span dir="auto" className="font-medium">
+                {option.label}
+              </span>
               {option.description && (
-                <span className="ms-1 text-xs text-neutral-400">
+                <span dir="auto" className="ms-1 text-xs text-neutral-400">
                   {option.description}
                 </span>
               )}

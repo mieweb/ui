@@ -24,6 +24,8 @@ import type { MacroGroup } from '../components/MacroLibrary';
 // the Kerebron-backed TextAreaRich surface rather than the legacy engine
 // exported from the main bundle.
 import { TextAreaRichKerebron as TextAreaRich } from '../components/TextAreaRich/TextAreaRichKerebron';
+import type { MediaCaptureOptions } from '../components/RichMediaCaptureEditor';
+import type { MediaUploadOptions } from '../components/RichEditor';
 import { useMessages } from '../utils/messages';
 import {
   applyNarrativeFinding,
@@ -35,35 +37,210 @@ import {
   type NarrativeFinding,
 } from './narrativeFindings';
 
+export interface NarrativeSanitizeOptions {
+  /**
+   * Allow captured images: `img` with an `https:` or same-origin `src` only.
+   * `data:` and cross-origin URLs are stripped — narratives must carry
+   * uploaded URLs, never embedded image bytes (mieweb/ui#736). A `blob:`
+   * object URL carries its creator's origin, so same-origin blobs pass the
+   * check; they are session-scoped, so durable storage still needs an
+   * `uploadHandler` that returns a persistent URL. Default **off**: without
+   * it the whitelist is unchanged.
+   */
+  media?: boolean;
+}
+
 /**
- * Keep document formatting small: no links, media, styles, or imported
- * document chrome. Every block format the editor's block menu and markdown
- * shortcuts offer (headings 1–3, quote, lists) is allowed, so published
- * formatting survives reopening the field.
+ * Every tag the stock Kerebron toolbar can emit. The field renders the full
+ * standard toolbar (same as TextAreaRich everywhere else), and `value` echoes
+ * the sanitized HTML back into a `strictValue` editor — so the sanitizer must
+ * pass the editor's own output byte-for-byte or every edit triggers a reload
+ * that reverts the formatting. It is an XSS barrier, not a formatting policy.
  */
-export function sanitizeNarrativeHtml(html: string): string {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'div',
-      'br',
-      'strong',
-      'b',
-      'em',
-      'i',
-      'u',
-      'h1',
-      'h2',
-      'h3',
-      'blockquote',
-      'ul',
-      'ol',
-      'li',
-    ],
-    ALLOWED_ATTR: [],
-    ALLOW_DATA_ATTR: false,
-    ALLOW_ARIA_ATTR: false,
+const NARRATIVE_TAGS = [
+  // blocks
+  'p',
+  'div',
+  'br',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'blockquote',
+  'ul',
+  'ol',
+  'li',
+  'pre',
+  'hr',
+  // marks
+  'strong',
+  'b',
+  'em',
+  'i',
+  'u',
+  's',
+  'strike',
+  'del',
+  'mark',
+  'code',
+  'sup',
+  'sub',
+  'a',
+  // tables
+  'table',
+  'thead',
+  'tbody',
+  'tfoot',
+  'tr',
+  'td',
+  'th',
+  'caption',
+  // task-list item chrome (li > label > input[type=checkbox] + span + div)
+  'label',
+  'input',
+  'span',
+];
+
+/**
+ * Attributes those tags carry when Kerebron serializes: link target/tooltip,
+ * code-block language, table spans, task-list state, and the `style` strings
+ * the paragraph (text-align) and highlight (background-color) nodes write.
+ * `style` values are scrubbed to {@link NARRATIVE_STYLE_PROPS} below.
+ */
+const NARRATIVE_ATTRS = [
+  'href',
+  'title',
+  'style',
+  'class',
+  'lang',
+  'colspan',
+  'rowspan',
+  'data-colwidth',
+  'data-type',
+  'data-checked',
+  'type',
+  'checked',
+];
+
+/** The only CSS the editor writes: alignment and highlight colors. */
+const NARRATIVE_STYLE_PROPS = ['text-align', 'background-color', 'color'];
+
+/**
+ * The only class the editor serializes: fixShortcodeRoundTrip (editorKits)
+ * marks merge tokens with `span.kb-shortcode-inline`, and its parse rule
+ * requires that class — dropping it would both change the echoed HTML and
+ * dissolve the atomic token node on the resulting reload. Host/imported
+ * classes are stripped.
+ */
+const NARRATIVE_CLASSES = ['kb-shortcode-inline'];
+
+// An isolated DOMPurify instance (renderEmailMjml precedent): hooks registered
+// on the shared default instance elsewhere in the app (useMarkdown decorates
+// every anchor with target/rel) must not rewrite narrative HTML — any byte
+// they change breaks the editor echo round trip and triggers a reload.
+let narrativePurifier: ReturnType<typeof DOMPurify> | undefined;
+
+function getNarrativePurifier(): ReturnType<typeof DOMPurify> {
+  return (narrativePurifier ??= DOMPurify(window));
+}
+
+/** Only uploaded URLs may render in a narrative: https, or this origin. */
+function allowedNarrativeImageSrc(src: string): boolean {
+  try {
+    const url = new URL(src, window.location.href);
+    if (url.protocol === 'https:') return true;
+    // Opaque origins serialize as 'null': in an opaque-origin host (a
+    // file-based WebView, a sandboxed iframe) a data: URL's origin would
+    // "equal" the host's, re-admitting embedded bytes. DOMPurify exempts
+    // img data: URIs from its URI policy, so this is the only gate — such
+    // hosts may only use https: image URLs.
+    if (url.origin === 'null' || window.location.origin === 'null')
+      return false;
+    return (
+      (url.protocol === 'http:' || url.protocol === 'blob:') &&
+      url.origin === window.location.origin
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Block XSS and document chrome, keep the editor's own vocabulary: every
+ * format the standard toolbar offers (marks, headings, lists, tables, task
+ * lists, alignment, highlight) survives the publish round trip, so the field
+ * behaves exactly like TextAreaRich. Scripts, event handlers, foreign
+ * styles/attributes, and non-checkbox inputs are stripped. Media stays out
+ * unless the host opts in — see {@link NarrativeSanitizeOptions.media}.
+ */
+export function sanitizeNarrativeHtml(
+  html: string,
+  options?: NarrativeSanitizeOptions
+): string {
+  const sanitized = options?.media
+    ? getNarrativePurifier().sanitize(html, {
+        ALLOWED_TAGS: [...NARRATIVE_TAGS, 'img'],
+        ALLOWED_ATTR: [...NARRATIVE_ATTRS, 'src', 'alt'],
+        ALLOW_DATA_ATTR: false,
+        ALLOW_ARIA_ATTR: false,
+        // DOMPurify's default URI policy admits data: images and rejects blob:
+        // outright — the opposite of ours. Keep its safe link schemes (mailto,
+        // tel, …) so ordinary link hrefs survive, add http(s)/blob for images
+        // (relative URLs ride the schemeless branches); the authoritative
+        // uploaded-URL-only check is the pass below.
+        ALLOWED_URI_REGEXP:
+          // eslint-disable-next-line no-useless-escape -- mirrors DOMPurify's default regexp character-for-character outside the scheme list
+          /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|blob):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+      })
+    : getNarrativePurifier().sanitize(html, {
+        ALLOWED_TAGS: NARRATIVE_TAGS,
+        ALLOWED_ATTR: NARRATIVE_ATTRS,
+        ALLOW_DATA_ATTR: false,
+        ALLOW_ARIA_ATTR: false,
+      });
+  const root = document.createElement('div');
+  root.innerHTML = sanitized;
+  // Only the task-list checkbox may ride an `input` — anything else (text,
+  // image, submit…) is injected chrome, not editor output.
+  root.querySelectorAll('input').forEach((input) => {
+    if (input.getAttribute('type') !== 'checkbox') input.remove();
   });
+  // Scrub style values to the props the editor writes. When every declared
+  // prop is allowed the attribute is left untouched — rewriting it would
+  // change the string the editor serialized and re-trigger the reload this
+  // sanitizer exists to avoid.
+  root.querySelectorAll('[style]').forEach((element) => {
+    const { style } = element as HTMLElement;
+    const disallowed = Array.from(style).filter(
+      (prop) => !NARRATIVE_STYLE_PROPS.includes(prop)
+    );
+    if (!disallowed.length) return;
+    disallowed.forEach((prop) => style.removeProperty(prop));
+    if (!style.length) element.removeAttribute('style');
+  });
+  // Scrub class lists the same way: keep only the classes the editor writes,
+  // leaving the attribute byte-identical when nothing was removed.
+  root.querySelectorAll('[class]').forEach((element) => {
+    const kept = Array.from(element.classList).filter((name) =>
+      NARRATIVE_CLASSES.includes(name)
+    );
+    if (kept.length === element.classList.length) return;
+    if (kept.length) element.setAttribute('class', kept.join(' '));
+    else element.removeAttribute('class');
+  });
+  // Enforce uploaded-URL-only in a dedicated pass: https anywhere, or this
+  // origin (a blob: URL carries its creator's origin, so same-origin object
+  // URLs pass; they are session-scoped — persistence is the uploadHandler's
+  // job).
+  if (options?.media) {
+    root.querySelectorAll('img').forEach((img) => {
+      const src = img.getAttribute('src');
+      if (!src || !allowedNarrativeImageSrc(src)) img.remove();
+    });
+  }
+  return root.innerHTML;
 }
 
 function textToHtml(text: string): string {
@@ -76,7 +253,11 @@ function textToHtml(text: string): string {
     .replace(/\n/g, '<br>');
 }
 
-/** Extract readable narrative text without flattening paragraphs or list items together. */
+/**
+ * Extract readable narrative text without flattening paragraphs or list items
+ * together. Images never contribute text — the forgery gate
+ * (`narrativeText(html) === answer`) holds with media present by construction.
+ */
 export function narrativeText(html: string): string {
   const documentBody = document.createElement('div');
   documentBody.innerHTML = sanitizeNarrativeHtml(html);
@@ -100,10 +281,18 @@ export function narrativeText(html: string): string {
       'H1',
       'H2',
       'H3',
+      'H4',
+      'H5',
+      'H6',
       'BLOCKQUOTE',
       'UL',
       'OL',
       'LI',
+      'PRE',
+      'TABLE',
+      'TR',
+      'TD',
+      'TH',
     ].includes(node.tagName);
     if (isBlock) lineBreak();
     if (node.tagName === 'LI') {
@@ -120,7 +309,8 @@ export function narrativeText(html: string): string {
 
 function responseHtml(
   response: FieldResponse | undefined,
-  attributes: NarrativeAttributeNames
+  attributes: NarrativeAttributeNames,
+  sanitizeOptions?: NarrativeSanitizeOptions
 ): string {
   const answer = response?.answer ?? '';
   const responseAttributes = response?.attributes;
@@ -131,7 +321,10 @@ function responseHtml(
     responseAttributes?.[attributes.text] === answer &&
     typeof responseAttributes[attributes.html] === 'string'
   ) {
-    const html = sanitizeNarrativeHtml(responseAttributes[attributes.html]);
+    const html = sanitizeNarrativeHtml(
+      responseAttributes[attributes.html],
+      sanitizeOptions
+    );
     if (narrativeText(html) === answer) return html;
   }
   return textToHtml(answer);
@@ -167,7 +360,38 @@ export interface EsheetNarrativeFieldProps extends FieldComponentProps {
   hideLabelKey?: string;
   /** `data-slot` value for host CSS hooks. */
   slot?: string;
+  /**
+   * Docks the capture ribbon on the field and relaxes the narrative
+   * sanitizer to keep uploaded images (see
+   * {@link NarrativeSanitizeOptions.media}). Requires
+   * `mediaUpload.uploadHandler` — without one every capture would embed as a
+   * base64 `data:` URL, which the sanitizer strips — so when the handler is
+   * missing the opt-in is ignored and the field behaves as today.
+   */
+  mediaCapture?: boolean | MediaCaptureOptions;
+  /**
+   * How captured/pasted media files are handled; `uploadHandler` is what
+   * makes `mediaCapture` effective. See {@link EsheetNarrativeFieldProps.mediaCapture}.
+   */
+  mediaUpload?: MediaUploadOptions;
 }
+
+/** Surface-ready capture config a host provides through context. */
+export interface EsheetNarrativeMedia {
+  capture: MediaCaptureOptions;
+  mediaUpload: MediaUploadOptions;
+  /** Start each field's capture bar hidden; the block (+) menu reveals it. */
+  defaultCaptureBarVisible?: boolean;
+}
+
+/**
+ * Hands media capture to narrative fields a host cannot prop-drill into —
+ * the field type is registered globally with eSheet (mieweb/ui#758, after
+ * EncounterVisit's context in mieweb/ui#736). Explicit props win over the
+ * context.
+ */
+export const EsheetNarrativeMediaContext =
+  React.createContext<EsheetNarrativeMedia | null>(null);
 
 /** A report-like narrative surface that grows with its content, backed by eSheet text. */
 export function EsheetNarrativeField({
@@ -183,12 +407,41 @@ export function EsheetNarrativeField({
   findingsKey = 'narrativeFindings',
   hideLabelKey = 'narrativeHideLabel',
   slot = 'esheet-narrative',
+  mediaCapture,
+  mediaUpload,
 }: EsheetNarrativeFieldProps): React.JSX.Element {
   const m = useMessages();
   const editorRef = React.useRef<HTMLDivElement>(null);
   const responseRef = React.useRef(response);
   responseRef.current = response;
   const labelId = React.useId();
+  // Registered field instances cannot receive props; hosts hand capture
+  // through the context instead. Explicit props win.
+  const contextMedia = React.useContext(EsheetNarrativeMediaContext);
+  const capture = mediaCapture ?? contextMedia?.capture;
+  const upload = mediaUpload ?? contextMedia?.mediaUpload;
+  // No uploadHandler means captures would embed as base64 data: URLs, which
+  // the media sanitizer strips — saving a capture would silently destroy it.
+  // Refuse the opt-in instead so the field keeps today's behavior.
+  const captureEnabled = Boolean(capture && upload?.uploadHandler);
+  const sanitizeOptions = React.useMemo<NarrativeSanitizeOptions | undefined>(
+    () => (captureEnabled ? { media: true } : undefined),
+    [captureEnabled]
+  );
+  const sanitize = React.useCallback(
+    (value: string) => sanitizeNarrativeHtml(value, sanitizeOptions),
+    [sanitizeOptions]
+  );
+  // The narrative sanitizer only admits `img`: a video would upload, report
+  // success, then be stripped on publish. An empty video allowlist makes the
+  // pipeline reject and announce the file instead.
+  const narrativeUpload = React.useMemo<MediaUploadOptions | undefined>(
+    () =>
+      captureEnabled && upload
+        ? { ...upload, allowedVideoTypes: [] }
+        : undefined,
+    [captureEnabled, upload]
+  );
   const definition = field.definition as {
     question?: string;
     unit?: string;
@@ -197,8 +450,8 @@ export function EsheetNarrativeField({
   const question = definition.question || m('Narrative');
   const readOnly = !isPreview || !isEnabled || isReadOnly;
   const html = React.useMemo(
-    () => responseHtml(response, attributes),
-    [response, attributes]
+    () => responseHtml(response, attributes, sanitizeOptions),
+    [response, attributes, sanitizeOptions]
   );
   const findings = validNarrativeFindings(
     definition._sourceData?.[findingsKey]
@@ -227,7 +480,7 @@ export function EsheetNarrativeField({
     previous: FieldResponse | undefined,
     selected: NarrativeFinding[]
   ) => {
-    const sanitized = sanitizeNarrativeHtml(value);
+    const sanitized = sanitize(value);
     const answer = narrativeText(sanitized);
     const nextAttributes = {
       ...previous?.attributes,
@@ -280,7 +533,7 @@ export function EsheetNarrativeField({
         value={html}
         onChange={(value) => {
           if (readOnly) return;
-          const sanitized = sanitizeNarrativeHtml(value);
+          const sanitized = sanitize(value);
           const answer = narrativeText(sanitized);
           const previous = responseRef.current;
           publish(
@@ -302,9 +555,21 @@ export function EsheetNarrativeField({
           const next = applyNarrativeFinding(previous, finding, attributes);
           if (next === previous) return true;
           const answer = previous?.answer ?? '';
+          const previousHtml = responseHtml(
+            previous,
+            attributes,
+            sanitizeOptions
+          );
+          // An image-only narrative has an empty answer (images never
+          // contribute text), so judge existing content by the restored HTML
+          // when media is enabled; without the opt-in the answer alone
+          // decides, exactly as before.
+          const hasContent = answer.trim()
+            ? true
+            : captureEnabled && previousHtml.includes('<img');
           const nextHtml = hasNarrativeFindingText(answer, finding.text)
-            ? responseHtml(previous, attributes)
-            : `${answer.trim() ? responseHtml(previous, attributes) : ''}<p>${textToHtml(finding.text)}</p>`;
+            ? previousHtml
+            : `${hasContent ? previousHtml : ''}<p>${textToHtml(finding.text)}</p>`;
           publish(nextHtml, previous, getNarrativeFindings(next, attributes));
           return true;
         }}
@@ -352,8 +617,17 @@ export function EsheetNarrativeField({
           showMacroLibrary: m('Show macro library'),
           showToolbar: m('Show toolbar'),
           hideToolbar: m('Hide toolbar'),
+          showCaptureBar: m('Show capture bar'),
+          hideCaptureBar: m('Hide capture bar'),
         }}
-        sanitizeHtml={sanitizeNarrativeHtml}
+        sanitizeHtml={sanitize}
+        mediaUpload={narrativeUpload}
+        // Mounted regardless of readOnly: unmounting would swap the
+        // CaptureDock wrapper out and remount the editor (losing undo
+        // history) every time the visit locks to save. The surface already
+        // locks the dock while read-only.
+        mediaCapture={captureEnabled ? capture : undefined}
+        defaultCaptureBarVisible={contextMedia?.defaultCaptureBarVisible}
         className="mt-1"
       />
     </div>

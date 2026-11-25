@@ -7,9 +7,10 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import type { FormDefinition } from '@esheet/core';
 import { EncounterVisit, type EncounterVisitHandle } from './EncounterVisit';
 import { getEncounterFieldId } from './definition';
-import type { EncounterVisitDefinition, EncounterVisitSnapshot } from './types';
+import type { EncounterVisitSnapshot } from './types';
 import { CodeLookupProvider } from '../CodeLookup/context';
 
 // ProseMirror resists jsdom simulation; narrative fields run on the legacy
@@ -19,21 +20,107 @@ vi.mock(
   () => import('../../test/textAreaRichKerebronStub')
 );
 
-const definition: EncounterVisitDefinition = {
+const form = {
   id: 'test-visit',
   title: 'Anonymous exam',
-  sections: [
-    { id: 'hpi', title: 'HPI', kind: 'narrative' },
+  pages: [
     {
-      id: 'exam',
-      title: 'Exam',
-      kind: 'observations',
-      narrative: true,
-      observations: [{ id: 'back', label: 'Back examination' }],
+      id: 'test-visit:visit',
+      title: 'Anonymous exam',
+      fields: [
+        {
+          id: 'encounter:hpi:section',
+          fieldType: 'section',
+          title: 'HPI',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'narrative',
+          },
+          fields: [
+            {
+              id: 'encounter:hpi:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'HPI',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+          ],
+        },
+        {
+          id: 'encounter:exam:section',
+          fieldType: 'section',
+          title: 'Exam',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'observations',
+          },
+          fields: [
+            {
+              id: 'encounter:exam:narrative',
+              fieldType: 'encounterNarrative',
+              question: 'Exam narrative',
+              width: 'full',
+              _sourceData: {
+                encounterHideLabel: true,
+              },
+            },
+            {
+              id: 'encounter:exam:observation:back',
+              question: 'Back examination',
+              width: 'full',
+              fieldType: 'encounterNarrative',
+            },
+          ],
+        },
+        {
+          id: 'encounter:vitals:section',
+          fieldType: 'section',
+          title: 'Vitals',
+          sectionCollapse: 'expanded',
+          width: 'full',
+          _sourceData: {
+            encounterKind: 'vitals',
+          },
+          fields: [
+            {
+              id: 'encounter:vitals:observation:value',
+              fieldType: 'encounterVitals',
+              question: 'Vitals',
+              _sourceData: {},
+              width: 'full',
+            },
+          ],
+        },
+      ],
     },
-    { id: 'vitals', title: 'Vitals', kind: 'vitals' },
   ],
-};
+} as unknown as FormDefinition;
+
+const PLAN_SECTION = {
+  id: 'encounter:plan:section',
+  fieldType: 'section',
+  title: 'Plan',
+  sectionCollapse: 'expanded',
+  width: 'full',
+  _sourceData: {
+    encounterKind: 'narrative',
+  },
+  fields: [
+    {
+      id: 'encounter:plan:narrative',
+      fieldType: 'encounterNarrative',
+      question: 'Plan',
+      width: 'full',
+      _sourceData: {
+        encounterHideLabel: true,
+      },
+    },
+  ],
+} as unknown as NonNullable<FormDefinition['pages'][number]['fields']>[number];
 
 describe('EncounterVisit with the real eSheet renderer', () => {
   it('translates shell labels and counters without resetting the native visit', async () => {
@@ -49,7 +136,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       },
     };
     const { rerender } = render(
-      <EncounterVisit ref={ref} definition={definition} messages={messages} />
+      <EncounterVisit ref={ref} form={form} messages={messages} />
     );
     const hpi = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(hpi, { target: { innerHTML: 'Draft retained' } });
@@ -64,7 +151,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       'role',
       'status'
     );
-    rerender(<EncounterVisit ref={ref} definition={definition} />);
+    rerender(<EncounterVisit ref={ref} form={form} />);
     expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(hpi);
     expect(hpi).toHaveTextContent('Draft retained');
     expect(
@@ -77,7 +164,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     const Lookup = () => <div data-testid="terminology-lookup" />;
     const { rerender } = render(
       <CodeLookupProvider component={Lookup} indexUrl="/ambient">
-        <EncounterVisit ref={ref} definition={definition} />
+        <EncounterVisit ref={ref} form={form} />
       </CodeLookupProvider>
     );
     const input = await screen.findByRole('textbox', { name: 'HPI' });
@@ -90,11 +177,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     ]) {
       rerender(
         <CodeLookupProvider component={Lookup} indexUrl="/ambient">
-          <EncounterVisit
-            ref={ref}
-            definition={definition}
-            codeLookup={codeLookup}
-          />
+          <EncounterVisit ref={ref} form={form} codeLookup={codeLookup} />
         </CodeLookupProvider>
       );
       expect(screen.getByRole('textbox', { name: 'HPI' })).toBe(input);
@@ -109,9 +192,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
   it('keeps unfinished numeric drafts visible to Save and MCP validation', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onSubmit = vi.fn();
-    render(
-      <EncounterVisit ref={ref} definition={definition} onSubmit={onSubmit} />
-    );
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     act(() => {
       ref.current!.getTools().upsertVitals('vitals', { id: 'one', pulse: 76 });
@@ -146,7 +227,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     render(
       <EncounterVisit
         ref={ref}
-        definition={definition}
+        form={form}
         patientContext="45 yo male with back pain"
         onChange={onChange}
       />
@@ -182,10 +263,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       );
       return (
         <EncounterVisit
-          definition={{
-            ...definition,
-            sections: definition.sections.map((section) => ({ ...section })),
-          }}
+          form={globalThis.structuredClone(form)}
           initialResponses={saved?.responses ?? {}}
           onChange={setSaved}
         />
@@ -202,9 +280,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
 
   it('MCP writes update visible fields and user edits return through the same tools', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    const { rerender } = render(
-      <EncounterVisit ref={ref} definition={definition} />
-    );
+    const { rerender } = render(<EncounterVisit ref={ref} form={form} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     let result;
     act(() => {
@@ -223,7 +299,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       snapshot.success &&
         snapshot.data.observations.find((item) => item.label === 'Pulse')?.value
     ).toBe(76);
-    rerender(<EncounterVisit ref={ref} definition={definition} readOnly />);
+    rerender(<EncounterVisit ref={ref} form={form} readOnly />);
     expect(
       ref.current!.getTools().setNarrative('hpi', 'blocked')
     ).toMatchObject({ success: false, error: { code: 'READ_ONLY' } });
@@ -232,7 +308,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
 
   it('retains formatting in the native draft and replaces it when MCP changes the text', async () => {
     const ref = React.createRef<EncounterVisitHandle>();
-    render(<EncounterVisit ref={ref} definition={definition} />);
+    render(<EncounterVisit ref={ref} form={form} />);
     const narrative = await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.input(narrative, {
       target: {
@@ -258,7 +334,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
 
   it('blocks save for partial BP and keeps a rejected save draft', async () => {
     const onSubmit = vi.fn().mockRejectedValue(new Error('Storage is offline'));
-    render(<EncounterVisit definition={definition} onSubmit={onSubmit} />);
+    render(<EncounterVisit form={form} onSubmit={onSubmit} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.click(screen.getByRole('button', { name: 'Add vitals set' }));
     fireEvent.change(screen.getByLabelText('Systolic'), {
@@ -280,22 +356,22 @@ describe('EncounterVisit with the real eSheet renderer', () => {
     const ref = React.createRef<EncounterVisitHandle>();
     const onChange = vi.fn();
     const { rerender } = render(
-      <EncounterVisit ref={ref} definition={definition} onChange={onChange} />
+      <EncounterVisit ref={ref} form={form} onChange={onChange} />
     );
     fireEvent.input(await screen.findByRole('textbox', { name: 'HPI' }), {
       target: { innerHTML: 'Preserved narrative' },
     });
     onChange.mockClear();
     const next = {
-      ...definition,
-      sections: [
-        ...definition.sections,
-        { id: 'plan', title: 'Plan', kind: 'narrative' as const },
+      ...form,
+      pages: [
+        {
+          ...form.pages[0],
+          fields: [...(form.pages[0].fields ?? []), PLAN_SECTION],
+        },
       ],
     };
-    rerender(
-      <EncounterVisit ref={ref} definition={next} onChange={onChange} />
-    );
+    rerender(<EncounterVisit ref={ref} form={next} onChange={onChange} />);
     await screen.findByRole('textbox', { name: 'Plan' });
     expect(screen.getByRole('textbox', { name: 'HPI' })).toHaveTextContent(
       'Preserved narrative'
@@ -305,9 +381,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
       expect(visit.responses[getEncounterFieldId('hpi')].answer).toBe(
         'Preserved narrative'
       );
-    rerender(
-      <EncounterVisit ref={ref} definition={{ ...next, id: 'new-visit' }} />
-    );
+    rerender(<EncounterVisit ref={ref} form={{ ...next, id: 'new-visit' }} />);
     await waitFor(() =>
       expect(screen.getByRole('textbox', { name: 'HPI' })).toBeEmptyDOMElement()
     );
@@ -322,9 +396,7 @@ describe('EncounterVisit with the real eSheet renderer', () => {
           resolveSave = resolve;
         })
     );
-    render(
-      <EncounterVisit ref={ref} definition={definition} onSubmit={onSubmit} />
-    );
+    render(<EncounterVisit ref={ref} form={form} onSubmit={onSubmit} />);
     await screen.findByRole('textbox', { name: 'HPI' });
     fireEvent.click(screen.getByRole('button', { name: 'Save visit' }));
     expect(screen.getByRole('button', { name: 'Saving…' })).toBeDisabled();

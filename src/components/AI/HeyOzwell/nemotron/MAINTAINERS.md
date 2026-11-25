@@ -44,6 +44,16 @@ sequenceDiagram
 - **ONNX Runtime is single-threaded inside the worker** (`numThreads = 1`):
   nested pthread workers deadlock. A failed ORT import clears its cached
   promise so the next request retries.
+- **Hosts with their own transcription** call `listen(stream)`, mirror the
+  recorder's pause and resume on the returned session, then `finish(live)` for a
+  `SpeakerTimeline` and `transcriptFromActivity(words, timeline)` for the
+  transcript. Consumer guidance and the example live in **Modules / Voice /
+  Speaker Scribe → Hosts with their own transcription**. `finish` stops the
+  listener before waiting for stored voices, so a slow or failed voice load
+  never keeps it capturing. `transcriptFromActivity` shares segment grouping
+  with `transcriptFromFrames` (`buildTranscript`); it sees only thresholded
+  activity, so where lanes overlap it can pick a different speaker than the
+  frame path (pinned in `attribution.test.ts`).
 
 ## Coupling between preprocessing, the speaker cache and voiceprints
 

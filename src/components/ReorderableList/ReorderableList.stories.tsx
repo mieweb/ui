@@ -126,7 +126,7 @@ const [tasks, setTasks] = useState(initialTasks);
 - Accessibility: with reordering on, each row is focusable and takes Alt+↑ / Alt+↓ (\`aria-keyshortcuts\`). Every keyboard or button move is announced in a polite live region rendered after the list. The grip is pointer-only and hidden from assistive technology; the keyboard path is the row itself and the move buttons.
 - Dragging uses \`@dnd-kit/sortable\` (a dependency of the library already): other rows slide aside to make room, and the transition is off when the user prefers reduced motion. On touch, the grip drags at once; without \`handle\`, a row drags after a short press-and-hold so the page still scrolls. Keyboard and button moves use \`useDragReorder\`, like the library's clinical lists.
 - Rows move within one list only. For sections inside one list (e.g. Pinned and the rest), make the boundary a row that \`canDrag\` refuses; rows crossing it change section (story: *Sections*). The move announcement counts that row as a position — override \`labels.moved\` to word it for your sections.
-- \`storageKey\` uses localStorage: the order stays in that browser only, and is read once when the list mounts. New ids go to the end and removed ids drop out. Blocked storage falls back to an in-memory order.
+- \`storageKey\` uses localStorage: the order stays in that browser only, and is read once when the list mounts. New ids go to the end and removed ids drop out. If the key can change (another list or user), render \`<ReorderableList key={storageKey} storageKey={storageKey} … />\` so the list remounts; otherwise the previous list's order can be saved under the new key. Blocked storage falls back to an in-memory order.
 - With \`handle\`, only the grip starts a drag, so buttons, links and selectable text inside a row keep working. Without it, the whole row drags (after a 5 px move, so clicks still click) and its text can't be selected.
 - RTL: the layout is yours; the built-in parts use no left/right styling and up/down don't flip.
 - i18n: \`labels\` overrides every string (move up, move down, the moved announcement, the grip's title); the defaults are English.
@@ -158,7 +158,7 @@ const [tasks, setTasks] = useState(initialTasks);
     },
     storageKey: {
       description:
-        'Save the order in this browser under this key and restore it on the next visit. Turns reordering on by itself.',
+        'Save the order in this browser under this key and restore it on the next visit. Turns reordering on by itself. If the key can change, also pass it as `key` so the list remounts.',
       table: { category: 'Data' },
       control: false,
     },

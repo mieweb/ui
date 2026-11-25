@@ -998,9 +998,9 @@ describe('SuperChat media view', () => {
     const editor = screen.getByRole('textbox', { name: 'Edit message' });
     await user.type(editor, 'Gone');
     expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
-    // Enter with nothing left closes the editor as Cancel would.
+    // Ctrl+Enter with nothing left closes the editor as Cancel would.
     await user.clear(editor);
-    await user.type(editor, '{Enter}');
+    await user.keyboard('{Control>}{Enter}{/Control}');
     expect(onMessageEdited).not.toHaveBeenCalled();
     expect(
       screen.getByRole('button', { name: 'Open in media feed, First image' })
@@ -1144,12 +1144,14 @@ describe('SuperChat media view', () => {
   });
 
   it('makes the links in a media item’s caption tappable', () => {
+    // The caption falls back to the message's text, Markdown and all: the
+    // bold around the address stays out of its link.
     const linked: SuperChatConversation = {
       ...conversation,
       thread: [
         {
           ...conversation.thread[0],
-          text: 'Notes at https://example.dev/notes and [the board](https://example.dev/board)',
+          text: 'Notes at **https://example.dev/notes** and [the board](https://example.dev/board)',
           media: [conversation.thread[0].media![0]],
         },
       ],

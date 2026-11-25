@@ -9,7 +9,11 @@ import {
   type FieldResponse,
 } from '@esheet/core';
 import { renderWithTheme } from '../test/test-utils';
-import { EsheetNarrativeField } from './EsheetNarrativeField';
+import {
+  EsheetNarrativeField,
+  narrativeText,
+  sanitizeNarrativeHtml,
+} from './EsheetNarrativeField';
 import { getNarrativeFindings } from './narrativeFindings';
 
 // ProseMirror resists jsdom simulation; field logic runs on the legacy
@@ -95,5 +99,293 @@ describe('EsheetNarrativeField', () => {
       JSON.stringify([finding])
     );
     expect(getNarrativeFindings(latest)).toEqual([finding]);
+  });
+});
+
+describe('sanitizeNarrativeHtml passes the full toolbar vocabulary', () => {
+  // The field renders the standard Kerebron toolbar and echoes sanitized HTML
+  // back into a strictValue editor: any byte the sanitizer changes triggers a
+  // document reload that reverts the user's formatting (and, before the
+  // extension-menu probe guard, corrupted the document mid-reload). Editor
+  // output must round-trip unchanged.
+  it.each([
+    [
+      'highlight',
+      '<p><mark style="background-color: yellow; color: inherit;">x</mark></p>',
+    ],
+    ['strikethrough', '<p><strike>x</strike></p>'],
+    ['code font', '<p><code>x</code></p>'],
+    ['super/subscript', '<p><sup>1</sup><sub>2</sub></p>'],
+    ['link', '<p><a href="https://a.example/b" title="b">x</a></p>'],
+    ['alignment', '<p style="text-align: center;">x</p>'],
+    ['heading 4-6', '<h4>a</h4><h5>b</h5><h6>c</h6>'],
+    ['code block', '<pre lang="js"><code>x</code></pre>'],
+    ['horizontal rule', '<p>a</p><hr><p>b</p>'],
+    [
+      'table',
+      '<table><tbody><tr><th>h</th><td colspan="2">c</td></tr></tbody></table>',
+    ],
+    [
+      'task list',
+      '<ul data-type="task_list"><li data-type="task_item" data-checked="false"><label><input type="checkbox"><span></span></label><div><p>t</p></div></li></ul>',
+    ],
+    [
+      'merge token (fixShortcodeRoundTrip)',
+      '<p><span class="kb-shortcode-inline">{{patient_name}}</span></p>',
+    ],
+  ])('round-trips %s byte-for-byte', (_name, html) => {
+    expect(sanitizeNarrativeHtml(html)).toBe(html);
+  });
+
+  it.each([
+    ['mailto link', '<p><a href="mailto:dr@clinic.example">mail</a></p>'],
+    ['tel link', '<p><a href="tel:+15555550100">call</a></p>'],
+  ])('round-trips a %s under the media URI policy too', (_name, html) => {
+    expect(sanitizeNarrativeHtml(html)).toBe(html);
+    expect(sanitizeNarrativeHtml(html, { media: true })).toBe(html);
+  });
+
+  it('still strips scripts, handlers, and unknown URL schemes', () => {
+    expect(sanitizeNarrativeHtml('<p>a<script>x()</script></p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(
+      sanitizeNarrativeHtml(
+        '<p><a href="javascript:x()" onclick="x()">a</a></p>'
+      )
+    ).toBe('<p><a>a</a></p>');
+    expect(
+      sanitizeNarrativeHtml('<p><iframe src="https://x"></iframe>a</p>')
+    ).toBe('<p>a</p>');
+  });
+
+  it('only the task-list checkbox may ride an input', () => {
+    expect(sanitizeNarrativeHtml('<p><input type="text" value="x">a</p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(sanitizeNarrativeHtml('<p><input type="submit">a</p>')).toBe(
+      '<p>a</p>'
+    );
+  });
+
+  it('scrubs style values to the props the editor writes', () => {
+    // Foreign props go; the editor's own survive.
+    expect(
+      sanitizeNarrativeHtml(
+        '<p style="position: fixed; text-align: right;">a</p>'
+      )
+    ).toBe('<p style="text-align: right;">a</p>');
+    // An all-foreign style loses the attribute entirely.
+    expect(
+      sanitizeNarrativeHtml(
+        '<p style="background-image: url(https://x/y)">a</p>'
+      )
+    ).toBe('<p>a</p>');
+  });
+
+  it('scrubs class lists to the one class the editor writes', () => {
+    // Host/imported classes go; the merge-token class survives alone.
+    expect(sanitizeNarrativeHtml('<p class="overlay sticky">a</p>')).toBe(
+      '<p>a</p>'
+    );
+    expect(
+      sanitizeNarrativeHtml(
+        '<p><span class="fancy kb-shortcode-inline">{{t}}</span></p>'
+      )
+    ).toBe('<p><span class="kb-shortcode-inline">{{t}}</span></p>');
+  });
+
+  it('narrativeText breaks lines at the new block tags', () => {
+    expect(
+      narrativeText(
+        '<h4>Head</h4><table><tbody><tr><td>one</td></tr><tr><td>two</td></tr></tbody></table>'
+      )
+    ).toBe('Head\none\ntwo');
+    // Adjacent cells are text boundaries — their contents must not fuse into
+    // one word in the plain answer.
+    expect(
+      narrativeText(
+        '<table><tbody><tr><th>Weight</th><td>80 kg</td></tr></tbody></table>'
+      )
+    ).toBe('Weight\n80 kg');
+  });
+});
+
+describe('sanitizeNarrativeHtml media opt-in (mieweb/ui#736)', () => {
+  const img = (src: string) => `<p>Note</p><img src="${src}" alt="scan">`;
+
+  it('keeps stripping images without the opt-in (regression)', () => {
+    expect(sanitizeNarrativeHtml(img('https://cdn.example/scan.png'))).toBe(
+      '<p>Note</p>'
+    );
+    expect(sanitizeNarrativeHtml(img('https://cdn.example/scan.png'), {})).toBe(
+      '<p>Note</p>'
+    );
+  });
+
+  it('keeps https and same-origin images, with src and alt only', () => {
+    expect(
+      sanitizeNarrativeHtml(
+        '<p>Note</p><img src="https://cdn.example/scan.png" alt="scan" width="8" onerror="x()">',
+        { media: true }
+      )
+    ).toBe('<p>Note</p><img src="https://cdn.example/scan.png" alt="scan">');
+    expect(
+      sanitizeNarrativeHtml(img('/uploads/scan.png'), { media: true })
+    ).toBe('<p>Note</p><img src="/uploads/scan.png" alt="scan">');
+    // Object URLs carry their creator's origin: same-origin blobs pass the
+    // check (session-scoped; durable storage is the uploadHandler's job).
+    const blob = `blob:${window.location.origin}/0f1e2d3c`;
+    expect(sanitizeNarrativeHtml(img(blob), { media: true })).toBe(
+      `<p>Note</p><img src="${blob}" alt="scan">`
+    );
+  });
+
+  it.each([
+    ['data URI', 'data:image/png;base64,iVBORw0KGgo='],
+    ['cross-origin blob URL', 'blob:https://evil.example/1-2-3'],
+    ['cross-origin http', 'http://evil.example/x.png'],
+    ['javascript URL', 'javascript:alert(1)'],
+  ])('strips %s images', (_name, src) => {
+    expect(sanitizeNarrativeHtml(img(src), { media: true })).toBe(
+      '<p>Note</p>'
+    );
+  });
+
+  it('images never contribute narrative text, so the forgery gate holds', () => {
+    const html = sanitizeNarrativeHtml(img('https://cdn.example/scan.png'), {
+      media: true,
+    });
+    expect(narrativeText(html)).toBe('Note');
+  });
+});
+
+describe('EsheetNarrativeField media capture opt-in (mieweb/ui#736)', () => {
+  const uploadHandler = async () => 'https://cdn.example/uploaded.png';
+  const imgEdit = {
+    target: {
+      innerHTML:
+        '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+    },
+  };
+
+  it('publishes image URLs when opted in with an uploadHandler', () => {
+    const onResponse = vi.fn();
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props({ onResponse })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    expect(screen.getByTestId('capture-ribbon-stub')).toBeInTheDocument();
+    fireEvent.input(screen.getByRole('textbox', { name: 'Summary' }), imgEdit);
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: 'Wound photo:',
+        attributes: expect.objectContaining({
+          narrativeHtml:
+            '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+        }),
+      })
+    );
+  });
+
+  it('ignores the opt-in without an uploadHandler (base64 is impossible)', () => {
+    const onResponse = vi.fn();
+    renderWithTheme(
+      <EsheetNarrativeField {...props({ onResponse })} mediaCapture />
+    );
+    expect(screen.queryByTestId('capture-ribbon-stub')).toBeNull();
+    fireEvent.input(screen.getByRole('textbox', { name: 'Summary' }), imgEdit);
+    expect(onResponse).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        answer: 'Wound photo:',
+        attributes: expect.objectContaining({
+          narrativeHtml: '<p>Wound photo:</p>',
+        }),
+      })
+    );
+  });
+
+  it('restores stored image markup when the forgery gate passes', () => {
+    const { container } = renderWithTheme(
+      <EsheetNarrativeField
+        {...props({
+          response: {
+            answer: 'Wound photo:',
+            attributes: {
+              narrativeText: 'Wound photo:',
+              narrativeHtml:
+                '<p>Wound photo:</p><img src="https://cdn.example/scan.png" alt="scan">',
+            },
+          } as unknown as FieldResponse,
+        })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    expect(
+      container.querySelector('img[src="https://cdn.example/scan.png"]')
+    ).toBeInTheDocument();
+  });
+
+  it('keeps an image-only narrative when a common finding is picked', () => {
+    // Images never contribute to the answer, so an image-only narrative has
+    // an empty answer — the finding must append to the image, not replace it.
+    let latest: FieldResponse | undefined;
+    function Harness() {
+      const [response, setResponse] = React.useState<FieldResponse>({
+        answer: '',
+        attributes: {
+          narrativeText: '',
+          narrativeHtml: '<img src="https://cdn.example/scan.png" alt="scan">',
+        },
+      } as unknown as FieldResponse);
+      latest = response;
+      return (
+        <EsheetNarrativeField
+          {...props()}
+          response={response}
+          onResponse={setResponse}
+          mediaCapture
+          mediaUpload={{ uploadHandler }}
+        />
+      );
+    }
+    renderWithTheme(<Harness />);
+    fireEvent.focus(screen.getByRole('textbox'));
+    fireEvent.click(screen.getByRole('button', { name: /No fever/ }));
+    expect(latest?.answer).toBe('No fever reported.');
+    expect(latest?.attributes?.narrativeHtml).toBe(
+      '<img src="https://cdn.example/scan.png" alt="scan"><p>No fever reported.</p>'
+    );
+  });
+
+  it('disables video uploads: the sanitizer would strip them after upload', () => {
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props()}
+        mediaCapture
+        mediaUpload={{ uploadHandler, allowedVideoTypes: ['^video/'] }}
+      />
+    );
+    expect(screen.getByTestId('capture-ribbon-stub')).toHaveAttribute(
+      'data-videos-disabled',
+      'true'
+    );
+  });
+
+  it('keeps the capture dock mounted while read-only (no editor remount)', () => {
+    renderWithTheme(
+      <EsheetNarrativeField
+        {...props({ isReadOnly: true })}
+        mediaCapture
+        mediaUpload={{ uploadHandler }}
+      />
+    );
+    // The surface locks the dock itself; unmounting it would remount the
+    // editor (losing undo history) on every save lock/unlock.
+    expect(screen.getByTestId('capture-ribbon-stub')).toBeInTheDocument();
   });
 });

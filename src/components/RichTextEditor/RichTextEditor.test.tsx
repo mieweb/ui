@@ -92,8 +92,8 @@ describe('deprecation warning', () => {
   });
 
   it('does not warn for internal consumers on RichTextEditorBase', () => {
-    // EmailEditor and TextAreaRichLegacy render RichTextEditorBase so the
-    // library does not warn about its own supported surfaces.
+    // TextAreaRichLegacy renders RichTextEditorBase so the library does not
+    // warn about its own supported surfaces.
     renderWithTheme(<RichTextEditorBase value="" onChange={() => {}} />);
     expect(console.warn).not.toHaveBeenCalled();
   });

@@ -90,6 +90,38 @@ describe('linkifyCaption', () => {
     );
   });
 
+  it.each([
+    ['bold', '**'],
+    ['italic', '*'],
+    ['underscore italic', '_'],
+    ['bold italic', '***'],
+    ['strikethrough', '~~'],
+  ])('keeps %s markers around an address out of its link', (_, marker) => {
+    const text = `Launch: ${marker}https://example.org/launch${marker} today`;
+    render(<p>{linkifyCaption(text)}</p>);
+    const link = screen.getByRole('link', {
+      name: 'https://example.org/launch',
+    });
+    expect(link).toHaveAttribute('href', 'https://example.org/launch');
+    expect(link.parentElement).toHaveTextContent(text);
+  });
+
+  it('keeps "*", "_" and "~" inside an address, and only drops them at its end', () => {
+    render(
+      <p>
+        {linkifyCaption(
+          'See https://example.org/~ana/a_b*c~d and https://x.dev/file_'
+        )}
+      </p>
+    );
+    expect(
+      screen.getByRole('link', { name: 'https://example.org/~ana/a_b*c~d' })
+    ).toHaveAttribute('href', 'https://example.org/~ana/a_b*c~d');
+    expect(
+      screen.getByRole('link', { name: 'https://x.dev/file' })
+    ).toHaveAttribute('href', 'https://x.dev/file');
+  });
+
   it('links http(s) in any case', () => {
     render(
       <p>

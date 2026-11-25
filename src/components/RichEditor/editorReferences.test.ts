@@ -2,21 +2,30 @@
  * Inline references through the real Kerebron editor and Markdown converter
  * (see markdownRoundTrip.test.ts for why the WASM grammars load from disk).
  */
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { act, renderHook } from '@testing-library/react';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { CoreEditor } from '@kerebron/editor';
-import { TextSelection } from 'prosemirror-state';
+import { DOMParser, DOMSerializer } from 'prosemirror-model';
+import { EditorState, TextSelection } from 'prosemirror-state';
+import type { EditorView } from 'prosemirror-view';
 import { createEditorKits } from './editorKits';
 import {
   REFERENCE_NODE,
   createReferencesKit,
   deleteAdjacentReference,
   insertReference,
+  linksToReferences,
   menuPlacement,
   referenceQueryAt,
+  referencesToLinks,
+  useEditorReferences,
 } from './editorReferences';
-import type { ReferenceTrigger } from '../ReferenceChip/references';
+import type {
+  ReferenceOption,
+  ReferenceTrigger,
+} from '../ReferenceChip/references';
 
 const MARKDOWN_TYPE = 'text/x-markdown';
 const assetsDir = path.join(
@@ -58,6 +67,13 @@ const references = () => {
   });
   return found;
 };
+/** Puts `view`'s caret at the end of its first paragraph. */
+const caretAtEndOf = (view: EditorView) => {
+  const end = view.state.doc.firstChild!.nodeSize - 1;
+  view.dispatch(
+    view.state.tr.setSelection(TextSelection.create(view.state.doc, end))
+  );
+};
 /** Puts the caret at the end of the first paragraph. */
 const caretAtEnd = () => {
   const end = editor.state.doc.firstChild!.nodeSize - 1;
@@ -76,7 +92,13 @@ beforeAll(async () => {
   });
 });
 
-afterAll(() => editor?.destroy());
+afterAll(async () => {
+  // Kerebron's debounced Markdown snapshot (800ms, not cancelled by
+  // destroy()) would fire after jsdom is torn down; let it flush first, as
+  // markdownRoundTrip.test.ts does.
+  await new Promise((resolve) => setTimeout(resolve, 850));
+  editor?.destroy();
+});
 
 describe('references in RichEditor', () => {
   it('loads claimed links as chips and saves them back as the same links', async () => {
@@ -88,6 +110,28 @@ describe('references in RichEditor', () => {
       { kind: 'ticket', id: 't-12', label: 'TH-12: Fix login' },
     ]);
     expect(await save()).toBe(markdown);
+  });
+
+  it('carries formatting around a claimed link onto the chip and back', async () => {
+    const marksOf = (type: string) => {
+      const found: string[] = [];
+      editor.state.doc.descendants((node) => {
+        if (
+          node.type.name === type ||
+          node.marks.some((m) => m.type.name === 'link')
+        )
+          found.push(...node.marks.map((m) => m.type.name));
+      });
+      return found.sort();
+    };
+    await editor.loadDocumentText(
+      MARKDOWN_TYPE,
+      'Ask **[@Ann Lee](/people/u-ann)** today.'
+    );
+    expect(marksOf(REFERENCE_NODE)).toEqual(['strong']);
+
+    referencesToLinks(editor.state, (tr) => editor.view.dispatch(tr));
+    expect(marksOf(REFERENCE_NODE)).toEqual(['link', 'strong']);
   });
 
   it('leaves links no trigger claims as ordinary links', async () => {
@@ -105,6 +149,146 @@ describe('references in RichEditor', () => {
     await editor.loadDocumentText(MARKDOWN_TYPE, 'mail ann@example');
     caretAtEnd();
     expect(referenceQueryAt(editor.state, triggers)).toBeNull();
+  });
+
+  it('opens after a hard break, and never spans a chip', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask\\\n@an');
+    caretAtEnd();
+    const query = referenceQueryAt(editor.state, triggers)!;
+    expect(query.query).toBe('an');
+    expect(editor.state.doc.textBetween(query.from, query.to)).toBe('@an');
+
+    // `@` then a chip: the chip isn't query text, so picking can't replace it.
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask @[@Ann](/people/u-ann)');
+    caretAtEnd();
+    expect(referenceQueryAt(editor.state, triggers)).toBeNull();
+  });
+
+  it('opens no list inside a code block, which takes text alone', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, '```\n@an\n```');
+    caretAtEnd();
+    expect(referenceQueryAt(editor.state, triggers)).toBeNull();
+  });
+
+  it('keeps the formatting being typed with on the chip and after it', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, '**Ask @an**');
+    caretAtEnd();
+    const query = referenceQueryAt(editor.state, triggers)!;
+    editor.view.dispatch(
+      insertReference(editor.state, query, {
+        kind: 'person',
+        id: 'u-ann',
+        label: '@Ann Lee',
+      })
+    );
+    const markNames = (marks: readonly { type: { name: string } }[]) =>
+      marks.map((m) => m.type.name);
+    const { $from } = editor.state.selection;
+    const chip = $from.doc.resolve($from.pos - 1).nodeBefore!;
+    expect(chip.type.name).toBe(REFERENCE_NODE);
+    expect(markNames(chip.marks)).toEqual(['strong']);
+    expect(markNames($from.nodeBefore!.marks)).toEqual(['strong']);
+    expect(markNames(editor.state.storedMarks ?? [])).toEqual(['strong']);
+  });
+
+  it('keeps a claimed link with a break in its text as one chip', async () => {
+    const markdown = '[@Ann<br>Lee](/people/u-ann)';
+    await editor.loadDocumentText(MARKDOWN_TYPE, markdown);
+    expect(references()).toHaveLength(1);
+    expect(await save()).toBe(markdown);
+  });
+
+  it('leaves a link split by a break node a link, not chips of its pieces', () => {
+    // Kerebron's inline-HTML parser can import <br> inside a link without
+    // the link mark, so the link reads as two runs of text around it.
+    const { schema } = editor;
+    const link = schema.marks.link.create({ href: '/people/u-ann' });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, [
+        schema.text('@Ann', [link]),
+        schema.nodes.br.create(),
+        schema.text('Lee', [link]),
+        schema.text(' and '),
+        schema.text('@Raj', [
+          schema.marks.link.create({ href: '/people/u-raj' }),
+        ]),
+      ]),
+    ]);
+    let result = EditorState.create({ doc });
+    linksToReferences(() => triggers)(result, (tr) => {
+      result = result.apply(tr);
+    });
+    const kinds: string[] = [];
+    result.doc.descendants((node) => {
+      kinds.push(node.type.name === REFERENCE_NODE ? node.attrs.id : '');
+    });
+    expect(kinds.filter(Boolean)).toEqual(['u-raj']);
+  });
+
+  it('leaves a link with an image in its text a link, not chips of its pieces', () => {
+    const { schema } = editor;
+    const link = schema.marks.link.create({ href: '/people/u-ann' });
+    const doc = schema.node('doc', null, [
+      schema.node('paragraph', null, [
+        schema.text('@Ann ', [link]),
+        schema.nodes.image.create({ src: '/a.png' }, null, [link]),
+        schema.text(' Lee', [link]),
+      ]),
+    ]);
+    let result = EditorState.create({ doc });
+    linksToReferences(() => triggers)(result, (tr) => {
+      result = result.apply(tr);
+    });
+    let chips = 0;
+    result.doc.descendants((node) => {
+      if (node.type.name === REFERENCE_NODE) chips++;
+    });
+    expect(chips).toBe(0);
+    expect(result.doc.eq(doc)).toBe(true);
+  });
+
+  it('makes a pasted chip only from a link a trigger claims, and never draws an unsafe href', () => {
+    const { schema } = editor;
+    const parse = (html: string) => {
+      const dom = document.createElement('div');
+      dom.innerHTML = html;
+      const found: Record<string, string>[] = [];
+      DOMParser.fromSchema(schema)
+        .parse(dom)
+        .descendants((node) => {
+          if (node.type.name === REFERENCE_NODE) found.push(node.attrs);
+        });
+      return found;
+    };
+    const chip = (href: string) =>
+      `<p><a href="${href}" data-reference-kind="person" data-reference-id="forged">@Ann</a></p>`;
+    expect(parse(chip('javascript:alert(1)'))).toEqual([]);
+    expect(parse(chip('java\tscript:alert(1)'))).toEqual([]);
+    expect(parse(chip('https://example.com/'))).toEqual([]);
+    // Kind and id come from the trigger, not the pasted attributes.
+    expect(parse(chip('/people/u-ann'))).toEqual([
+      { kind: 'person', id: 'u-ann', label: '@Ann', href: '/people/u-ann' },
+    ]);
+
+    const drawn = (href: string) =>
+      (
+        DOMSerializer.fromSchema(schema).serializeNode(
+          schema.nodes[REFERENCE_NODE].create({
+            kind: 'person',
+            id: 'x',
+            label: '@x',
+            href,
+          })
+        ) as HTMLAnchorElement
+      ).getAttribute('href');
+    expect(drawn('javascript:alert(1)')).toBeNull();
+    const drawnChip = DOMSerializer.fromSchema(schema).serializeNode(
+      schema.nodes[REFERENCE_NODE].create({ label: '@Ann', href: '/x' })
+    ) as HTMLElement;
+    const label = drawnChip.querySelector('[data-slot="reference-chip-label"]');
+    expect(label?.textContent).toBe('@Ann');
+    expect(label?.getAttribute('dir')).toBe('auto');
+    expect(drawn('/people/u-ann')).toBe('/people/u-ann');
   });
 
   it('inserts a pick as one chip that Backspace removes whole', async () => {
@@ -128,43 +312,171 @@ describe('references in RichEditor', () => {
     expect(await save()).toBe('Ask');
   });
 
-  const ownLineTriggers = [triggers[0], { ...triggers[1], ownLine: true }];
-  const pickTicket = () => {
-    editor.view.dispatch(
-      editor.state.tr.setSelection(TextSelection.atEnd(editor.state.doc))
-    );
-    const query = referenceQueryAt(editor.state, ownLineTriggers)!;
-    editor.view.dispatch(
-      insertReference(editor.state, query, {
-        kind: 'ticket',
-        id: 't-12',
-        label: 'TH-12: Fix login',
-      })
-    );
-    // What the person types next goes on the line after the chip.
-    editor.view.dispatch(editor.state.tr.insertText('Next'));
-  };
+  it('leaves chips alone on Backspace when the editor is read-only', async () => {
+    await editor.loadDocumentText(MARKDOWN_TYPE, 'Ask [@Ann](/people/u-ann)');
+    caretAtEnd();
+    const view = editor.view as EditorView;
+    const backspace = () =>
+      view.someProp('handleKeyDown', (handle) =>
+        handle(view, new KeyboardEvent('keydown', { key: 'Backspace' }))
+      );
+    editor.view.setProps({ editable: () => false });
+    try {
+      expect(backspace()).toBeFalsy();
+      expect(references()).toHaveLength(1);
+    } finally {
+      editor.view.setProps({ editable: () => true });
+    }
+    expect(backspace()).toBe(true);
+    expect(references()).toEqual([]);
+  });
+});
 
-  it('puts an ownLine pick on a line of its own, the caret on the next', async () => {
-    await editor.loadDocumentText(MARKDOWN_TYPE, 'Fix #lo');
-    pickTicket();
-    expect(await save()).toBe(
-      'Fix\n\n[TH-12: Fix login](/tickets/t-12)\n\nNext'
-    );
+describe('useEditorReferences', () => {
+  // Searches answer only when a test says so, in any order: `${char}${query}`
+  // → its resolver.
+  const pending = new Map<string, (options: ReferenceOption[]) => void>();
+  const deferred = (kind: string, char: string, prefix: string) => ({
+    ...trigger(kind, char, prefix),
+    search: (query: string) =>
+      new Promise<ReferenceOption[]>((resolve) => {
+        pending.set(`${char}${query}`, resolve);
+      }),
+  });
+  const hookTriggers = [
+    deferred('person', '@', '/people/'),
+    deferred('ticket', '#', '/tickets/'),
+  ];
+  const ann = { kind: 'person', id: 'u-ann', label: '@Ann' };
+  const andy = { kind: 'person', id: 'u-andy', label: '@Andy' };
+
+  let hook: ReturnType<
+    typeof renderHook<ReturnType<typeof useEditorReferences>, unknown>
+  >;
+  let refEditor: CoreEditor;
+  let view: EditorView;
+  const menu = () => hook.result.current.menu;
+  const chips = () => {
+    let count = 0;
+    view.state.doc.descendants((node) => {
+      if (node.type.name === REFERENCE_NODE) count++;
+    });
+    return count;
+  };
+  const type = (text: string) =>
+    act(() => {
+      view.dispatch(view.state.tr.insertText(text));
+    });
+  const answer = (key: string, options: ReferenceOption[]) =>
+    act(async () => {
+      pending.get(key)!(options);
+    });
+  const escape = () =>
+    act(() => {
+      view.someProp('handleKeyDown', (handle) =>
+        handle(view, new KeyboardEvent('keydown', { key: 'Escape' }))
+      );
+    });
+
+  const scrollBy = window.scrollBy;
+  let kits: Awaited<ReturnType<typeof createEditorKits>>['kits'];
+  const editors: CoreEditor[] = [];
+  beforeAll(async () => {
+    // A pick scrolls the caret into view, which jsdom doesn't implement.
+    window.scrollBy = () => {};
+    ({ kits } = await createEditorKits());
   });
 
-  it('in a checklist, an ownLine pick is a new unchecked item', async () => {
-    await editor.loadDocumentText(MARKDOWN_TYPE, '- [ ] Fix #lo');
-    pickTicket();
-    expect(await save()).toBe(
-      '- [ ] Fix\n- [ ] [TH-12: Fix login](/tickets/t-12)\n- [ ] Next'
-    );
+  // A hook and editor per test: Testing Library unmounts the hook after each.
+  beforeEach(async () => {
+    pending.clear();
+    hook = renderHook(() => useEditorReferences(hookTriggers));
+    refEditor = CoreEditor.create({
+      element: document.body.appendChild(document.createElement('div')),
+      uri: 'file:///references.md',
+      assetLoad,
+      editorKits: [...kits, hook.result.current.kit],
+    });
+    editors.push(refEditor);
+    await act(async () => {
+      await refEditor.loadDocumentText(MARKDOWN_TYPE, 'Hi ');
+    });
+    view = refEditor.view as EditorView;
+    // jsdom has no focus tracking or layout for the editable.
+    view.hasFocus = () => true;
+    view.coordsAtPos = () => ({ left: 0, right: 0, top: 0, bottom: 16 });
+    await act(async () => caretAtEndOf(view));
+  });
+
+  afterAll(async () => {
+    // Let Kerebron's debounced snapshot flush first (see the suite above).
+    await new Promise((resolve) => setTimeout(resolve, 850));
+    for (const each of editors) each.destroy();
+    window.scrollBy = scrollBy;
+  });
+
+  it('shows and inserts the answer to the current query', async () => {
+    await type('@an');
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(true);
+    expect(menu().suggestions).toEqual([ann]);
+    act(() => menu().insert(ann));
+    expect(chips()).toBe(1);
+  });
+
+  it('never shows or inserts an older query’s answer', async () => {
+    await type('@a');
+    await answer('@a', [andy]);
+    expect(menu().suggestions).toEqual([andy]);
+    // While the next query's search is pending, the last answer is gone…
+    await type('n');
+    expect(menu().suggestions).toEqual([]);
+    expect(menu().menuOpen).toBe(false);
+    act(() => menu().insert(andy));
+    expect(chips()).toBe(0);
+    // …and its own answer replaces it.
+    await answer('@an', [ann]);
+    expect(menu().suggestions).toEqual([ann]);
+  });
+
+  it('never shows another trigger’s answer under the current one', async () => {
+    await type('@a');
+    await answer('@a', [andy]);
+    expect(menu().suggestions).toEqual([andy]);
+    // `@a` becomes `#a`: same spot and query, another trigger.
+    act(() => {
+      const { from } = view.state.selection;
+      view.dispatch(view.state.tr.insertText('#', from - 2, from - 1));
+    });
+    expect(hook.result.current.activeTrigger?.kind).toBe('ticket');
+    expect(menu().suggestions).toEqual([]);
+    act(() => menu().insert(andy));
+    expect(chips()).toBe(0);
+  });
+
+  it('stays closed when a search answers after Escape', async () => {
+    await type('@an');
+    await escape();
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(false);
+    act(() => menu().insert(ann));
+    expect(chips()).toBe(0);
+    // A caret move back onto that spot doesn't search it again and open the
+    // list once that search answers; nor does typing on.
+    await act(async () => caretAtEndOf(view));
+    await answer('@an', [ann]);
+    expect(menu().menuOpen).toBe(false);
+    expect(menu().suggestions).toEqual([]);
+    await type('n');
+    expect(pending.has('@ann')).toBe(false);
+    expect(menu().menuOpen).toBe(false);
   });
 });
 
 describe('menuPlacement', () => {
   const screen = (height: number) => ({
-    width: 1000,
+    visibleLeft: 0,
+    visibleRight: 1000,
     height,
     visibleTop: 0,
     visibleBottom: height,
@@ -173,7 +485,12 @@ describe('menuPlacement', () => {
   it('opens below the caret with its full height when it fits', () => {
     expect(
       menuPlacement({ left: 40, top: 120, bottom: 140 }, 200, screen(800))
-    ).toMatchObject({ top: 144, maxHeight: 224 });
+    ).toMatchObject({
+      position: 'fixed',
+      zIndex: 9999,
+      top: 144,
+      maxHeight: 224,
+    });
   });
 
   it('takes the roomier side and caps its height when neither fits', () => {
@@ -191,11 +508,54 @@ describe('menuPlacement', () => {
     expect(above).not.toHaveProperty('top');
   });
 
+  it('stays on screen when the caret scrolls out of view', () => {
+    // Caret scrolled above the 800px viewport: the list pins to its top.
+    expect(
+      menuPlacement({ left: 40, top: -60, bottom: -40 }, 200, screen(800))
+    ).toMatchObject({ top: 8, maxHeight: 224 });
+    // Caret scrolled below it: the list opens above, pinned to its bottom.
+    const pinned = menuPlacement(
+      { left: 40, top: 900, bottom: 920 },
+      200,
+      screen(800)
+    );
+    expect(pinned).toMatchObject({ bottom: 8, maxHeight: 224 });
+    expect(pinned).not.toHaveProperty('top');
+  });
+
+  it('is never wider than the screen', () => {
+    const narrow = {
+      visibleLeft: 0,
+      visibleRight: 240,
+      height: 600,
+      visibleTop: 0,
+      visibleBottom: 600,
+    };
+    expect(
+      menuPlacement({ left: 100, top: 120, bottom: 140 }, 256, narrow)
+    ).toMatchObject({ left: 8, maxWidth: 224 });
+  });
+
+  it('stays inside the visible area of a pinch-zoomed, panned page', () => {
+    // 390px layout viewport zoomed 2×: only x 95–290 shows.
+    const zoomed = {
+      visibleLeft: 95,
+      visibleRight: 290,
+      height: 844,
+      visibleTop: 0,
+      visibleBottom: 400,
+    };
+    expect(
+      menuPlacement({ left: 200, top: 120, bottom: 140 }, 256, zoomed)
+    ).toMatchObject({ left: 103, maxWidth: 179 });
+  });
+
   it('keeps clear of the status bar and an on-screen keyboard', () => {
     // A phone: 844px layout viewport, a 47px status bar, and a keyboard
     // covering everything below 450px. The caret sits at 165–185px.
     const phone = {
-      width: 390,
+      visibleLeft: 0,
+      visibleRight: 390,
       height: 844,
       visibleTop: 47,
       visibleBottom: 450,

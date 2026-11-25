@@ -248,6 +248,8 @@ export interface AssessmentProps extends Omit<
   orderActions?: readonly AssessmentOrderAction[];
   /** Modes available in the global add row. */
   addModes?: readonly AssessmentAddMode[];
+  /** Hide the mode selector when only one executable mode is available. Default false. */
+  hideSingleAddModeSelector?: boolean;
   /** Accessible label for the global capture form; distinguish multiple editors on one page. */
   addFormLabel?: string;
   /** Rendered at the start of the global add row (e.g. an assertion date input). */
@@ -866,6 +868,7 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
       ] as AssessmentRowAction[],
       orderActions = ['edit', 'remove', 'move'],
       addModes,
+      hideSingleAddModeSelector = false,
       addFormLabel = 'Add concern or order',
       addFormStart,
       onRemoveAssessment,
@@ -1436,29 +1439,33 @@ export const Assessment = React.forwardRef<HTMLDivElement, AssessmentProps>(
                 className="border-border bg-muted/40 flex flex-col items-stretch gap-2 rounded-md border border-dashed p-2 sm:flex-row sm:flex-wrap sm:items-end"
               >
                 {addFormStart}
-                <select
-                  aria-label={m('What to add')}
-                  data-slot="select-trigger"
-                  value={addMode}
-                  onChange={(e) => {
-                    setSelectedAddMode(e.target.value as typeof addMode);
-                    setPendingFreeText(null);
-                  }}
-                  className={cn(
-                    'border-border bg-background text-foreground h-10 rounded-md border px-1.5 text-sm',
-                    'focus:ring-ring focus:ring-2 focus:outline-none'
-                  )}
-                >
-                  {availableAddModes.includes('auto') && (
-                    <option value="auto">{m('Add (auto)')}</option>
-                  )}
-                  {availableAddModes.includes('problem') && onAddAssessment && (
-                    <option value="problem">{m('Add concern')}</option>
-                  )}
-                  {availableAddModes.includes('order') && onAddOrder && (
-                    <option value="order">{m('Add order')}</option>
-                  )}
-                </select>
+                {(!hideSingleAddModeSelector ||
+                  availableAddModes.length > 1) && (
+                  <select
+                    aria-label={m('What to add')}
+                    data-slot="select-trigger"
+                    value={addMode}
+                    onChange={(e) => {
+                      setSelectedAddMode(e.target.value as typeof addMode);
+                      setPendingFreeText(null);
+                    }}
+                    className={cn(
+                      'border-border bg-background text-foreground h-10 rounded-md border px-1.5 text-sm',
+                      'focus:ring-ring focus:ring-2 focus:outline-none'
+                    )}
+                  >
+                    {availableAddModes.includes('auto') && (
+                      <option value="auto">{m('Add (auto)')}</option>
+                    )}
+                    {availableAddModes.includes('problem') &&
+                      onAddAssessment && (
+                        <option value="problem">{m('Add concern')}</option>
+                      )}
+                    {availableAddModes.includes('order') && onAddOrder && (
+                      <option value="order">{m('Add order')}</option>
+                    )}
+                  </select>
+                )}
                 <div className="min-w-64 flex-1">
                   {effectiveRenderOrderSearch ? (
                     effectiveRenderOrderSearch({

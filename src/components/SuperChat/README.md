@@ -352,6 +352,8 @@ uncontrolled).
 | `trustedContent`              | `boolean`                                                                 | `false`            | Skip sanitization — **only** for host-authored content.                                                                                                            |
 | `readOnly`                    | `boolean`                                                                 | `false`            | Disable the composer.                                                                                                                                              |
 | `composerProps`               | `SuperChatComposerProps`                                                  | —                  | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`. |
+| `attachmentDataUrls`          | `boolean`                                                                 | `true`             | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                              |
+| `maxFileSize`                 | `number \| (file) => number \| undefined`                                 | 25 MB              | Largest file the composer takes; a function sets it per file.                                                                                                      |
 | `order`                       | `'asc' \| 'desc'`                                                         | `'asc'`            | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                     |
 | `virtualized`                 | `boolean`                                                                 | `false`            | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                          |
 | `showSidebar`                 | `boolean`                                                                 | `true`             | Show the conversation list.                                                                                                                                        |
@@ -374,8 +376,8 @@ uncontrolled).
 | `onReferenceClick`            | `(ref) => void`                                                           | —                  | Fired when a reference chip is activated.                                                                                                                          |
 
 It also passes `view`, `defaultView`, `onViewChange`, `mediaFeedProps`,
-`mediaLabels`, `renderMessageMedia`, `mediaMaxSize`, `acceptedFileTypes`,
-`attachmentDataUrls`, `maxFileSize` and `onComposerError` to the panel; see
+`mediaLabels`, `renderMessageMedia`, `mediaMaxSize`, `acceptedFileTypes`
+and `onComposerError` to the panel; see
 [`SuperChat`](#superchat-panel).
 
 ### `SuperChat` (panel)
@@ -391,6 +393,8 @@ Renders exactly one conversation.
 | `trustedContent`       | `boolean`                                                                 | `false`                              | Skip sanitization — **only** for host-authored content.                                                                                                                                                                                                                          |
 | `readOnly`             | `boolean`                                                                 | `false`                              | Disable the composer.                                                                                                                                                                                                                                                            |
 | `composerProps`        | `SuperChatComposerProps`                                                  | —                                    | Props for the message box (`ChatComposer`) over SuperChat's defaults: `placeholder`, `leadingSlot`, `layout`, `maxFileSize`, `canSendWhenEmpty`, `mentionOptions`.                                                                                                               |
+| `attachmentDataUrls`   | `boolean`                                                                 | `true`                               | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                                                                                                                                            |
+| `maxFileSize`          | `number \| (file) => number \| undefined`                                 | 25 MB                                | Largest file the composer takes; a function sets it per file.                                                                                                                                                                                                                    |
 | `order`                | `'asc' \| 'desc'`                                                         | `'asc'`                              | Thread ordering: `asc` (oldest→newest, messenger style) or `desc` (newest→oldest, feed style).                                                                                                                                                                                   |
 | `virtualized`          | `boolean`                                                                 | `false`                              | Windowed thread rendering — only mount rows near the viewport. Enable for long histories.                                                                                                                                                                                        |
 | `linkBuilder`          | `SuperChatLinkBuilder`                                                    | —                                    | Build hrefs for `ref` thread items.                                                                                                                                                                                                                                              |
@@ -418,8 +422,6 @@ Renders exactly one conversation.
 | `renderMessageMedia`   | `SuperChatRenderMessageMedia`                                             | —                                    | Draws an attachment in the thread in place of the built-in card. Keep it stable (`useCallback`).                                                                                                                                                                                 |
 | `mediaMaxSize`         | `number \| string`                                                        | `'18rem'`                            | The box an attachment card fits in, both ways.                                                                                                                                                                                                                                   |
 | `acceptedFileTypes`    | `AttachmentKind[]`                                                        | `['image', 'video', 'audio', 'pdf']` | File types the composer takes; see [Attaching files](#attaching-files).                                                                                                                                                                                                          |
-| `maxFileSize`          | `number \| (file) => number \| undefined` (bytes)                         | 25 MB                                | Largest file the composer takes; a function sets it per file.                                                                                                                                                                                                                    |
-| `attachmentDataUrls`   | `boolean`                                                                 | `true`                               | `false`: attachments come as `file` only, without reading them into base64 `dataUrl`.                                                                                                                                                                                            |
 | `onComposerError`      | `(message, context?) => void`                                             | —                                    | Fired when the composer refuses a file or a send fails; `context.reason` says why.                                                                                                                                                                                               |
 
 #### Composer agent & model selectors
@@ -526,8 +528,8 @@ Notes:
 - Only self-authored, non-streaming **text** messages are editable;
   messages with rich `content` blocks, references, and system notices are not.
 - Editing is disabled when `readOnly` is set or `onMessageEdited` is omitted.
-- In the editor, **Enter** saves and **Escape** cancels (Shift+Enter adds a
-  newline).
+- In the editor, **Enter** adds a newline, **Ctrl/Cmd+Enter** or the **Save**
+  button saves, and **Escape** cancels.
 
 ---
 
@@ -627,7 +629,8 @@ To upload, send each attachment's `file` — the `File` as picked — rather tha
 decoding `dataUrl`. A host that only uploads can set `attachmentDataUrls={false}`
 to skip the base64 read altogether (`dataUrl` is then empty): base64 makes a file a
 third larger again in memory, and past a few hundred MB it is more than a browser
-string can hold, so large videos need it off.
+string can hold, so large videos need it off. Raise the cap with `maxFileSize`, which also takes a function, e.g.
+`(file) => (file.type.startsWith('video/') ? 500 : 25) * 1024 * 1024`.
 
 To upload each file **as soon as it's attached**, pass
 `composerProps.uploadAttachment(file, { signal, onProgress })`. The composer
@@ -638,10 +641,7 @@ before sending. Send stays enabled: pressed while files upload, it waits for
 them, then `onMessageSent` gets each attachment's `result`; nothing to upload
 at send. If the send fails, the files go back as uploaded. The same lifecycle
 is exported as `useAttachmentUploads` for composers of your own, and its
-screen-reader announcements as `UploadAnnouncer`.
-
-Pair it with a per-file cap: `maxFileSize` also takes a function, e.g.
-`(file) => (file.type.startsWith('video/') ? 500 : 100) * 1024 * 1024`.
+screen-reader announcements as `UploadAnnouncer`. Pair it with a per-file `maxFileSize`.
 
 ### Rendering video / audio / PDF inline
 

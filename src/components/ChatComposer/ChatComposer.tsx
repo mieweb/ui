@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { flushSync } from 'react-dom';
 import { cn } from '../../utils/cn';
 import { Dropdown, DropdownItem, DropdownSeparator } from '../Dropdown';
 import {
@@ -419,10 +420,23 @@ const LazyRichEditor = React.lazy(() =>
   import('../RichEditor/RichEditor').then((m) => ({ default: m.RichEditor }))
 );
 const NO_MENU = () => [];
+// Pasted or dropped media would embed in the message (a data: URL, or a
+// sender-local blob: URL for video) and skip the attachment checks; until the
+// rich input attaches files the way the textarea does, it takes none.
+const RICH_OMITTED_EXTENSIONS = ['mediaUpload'] as const;
 
 // ============================================================================
 // Styles
 // ============================================================================
+
+/** The enabled items of a menu, in order, for keyboard navigation. */
+function enabledMenuItems(root: HTMLElement | null): HTMLButtonElement[] {
+  return Array.from(
+    root?.querySelectorAll<HTMLButtonElement>(
+      '[role="menuitem"]:not(:disabled)'
+    ) ?? []
+  );
+}
 
 const iconButtonClasses = cn(
   'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
@@ -473,6 +487,21 @@ const CARD_INTERACTIVE_SELECTOR = [
 // ============================================================================
 // Component
 // ============================================================================
+
+/**
+ * Where a send goes, fixed when Send is pressed: the `onSend` and reply
+ * target of that moment, and the draft's generation. A host that reuses the
+ * composer (SuperChatInbox switching conversations) binds `onSend` to what
+ * is on screen, so a send that waits — for uploads or the rich editor —
+ * still goes where it was written, and is dropped if the host swapped in
+ * another draft meanwhile.
+ */
+interface SendTarget {
+  send: ChatComposerProps['onSend'];
+  reply: ChatComposerProps['replyTo'];
+  generation: number;
+  sendOption?: string;
+}
 
 /**
  * Standardized chat input. At `md+` it renders as a single-row pill — `+`
@@ -549,8 +578,36 @@ export const ChatComposer = React.forwardRef<
   },
   ref
 ) {
-  const richEditorRef = React.useRef<RichEditorHandle>(null);
+  const richEditorRef = React.useRef<RichEditorHandle | null>(null);
   const rich = editor === 'rich';
+  // A focus asked for before the lazy rich editor is ready, replayed from its
+  // `onReady`: its `focus()` is a no-op until its setup has started, which is
+  // after the ref attaches.
+  // Ready is kept across ref re-attachment (a rebuilt handle detaches and
+  // re-attaches the ref on a re-render) and dropped only with the editor.
+  const richReadyRef = React.useRef(false);
+  const pendingRichFocusRef = React.useRef(false);
+  React.useEffect(() => {
+    if (!rich) richReadyRef.current = false;
+  }, [rich]);
+  const handleRichReady = React.useCallback(() => {
+    richReadyRef.current = true;
+    if (!pendingRichFocusRef.current) return;
+    pendingRichFocusRef.current = false;
+    richEditorRef.current?.focus();
+  }, []);
+  const focusInput = React.useCallback(() => {
+    if (!rich) {
+      textareaRef.current?.focus();
+      return;
+    }
+    if (richEditorRef.current && richReadyRef.current) {
+      richEditorRef.current.focus();
+    } else {
+      pendingRichFocusRef.current = true;
+    }
+  }, [rich]);
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [internalValue, setInternalValue] = React.useState('');
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : internalValue;
@@ -570,11 +627,48 @@ export const ChatComposer = React.forwardRef<
   const [awaitingUploads, setAwaitingUploads] = React.useState(false);
   const showSending = isSending || awaitingUploads;
 
-  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const [addMenuOpen, setAddMenuOpen] = React.useState(false);
   const [sendMenuOpen, setSendMenuOpen] = React.useState(false);
+  const sendMenuRef = React.useRef<HTMLDivElement>(null);
+  const sendMenuTriggerRef = React.useRef<HTMLButtonElement>(null);
+  // The send options act as a menu: the first option takes focus on open (the
+  // menu is portaled, so Tab alone would wander elsewhere first).
+  React.useEffect(() => {
+    if (!sendMenuOpen) return;
+    const frame = requestAnimationFrame(() =>
+      enabledMenuItems(sendMenuRef.current)[0]?.focus()
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [sendMenuOpen]);
+  const hasEnabledSendOption = !!sendOptions?.some((o) => !o.disabled);
+  const handleSendMenuKeyDown = (event: React.KeyboardEvent) => {
+    // Escape and Tab both leave the menu for its trigger. The menu is portaled
+    // to <body>, so a Tab left to the browser would follow body order — out of
+    // the composer and past a surrounding Modal's focus trap. Tab resumes from
+    // the trigger, in the composer's own tab order.
+    if (event.key === 'Escape' || event.key === 'Tab') {
+      event.preventDefault();
+      // Keep Escape from also reaching a surrounding Modal's document listener.
+      event.stopPropagation();
+      setSendMenuOpen(false);
+      sendMenuTriggerRef.current?.focus();
+      return;
+    }
+    const items = enabledMenuItems(sendMenuRef.current);
+    if (!items.length) return;
+    const current = items.indexOf(document.activeElement as HTMLButtonElement);
+    const next = {
+      ArrowDown: (current + 1) % items.length,
+      ArrowUp: (current - 1 + items.length) % items.length,
+      Home: 0,
+      End: items.length - 1,
+    }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    items[next].focus();
+  };
 
   const isTouchDevice = React.useSyncExternalStore(
     subscribeTouchDevice,
@@ -591,9 +685,9 @@ export const ChatComposer = React.forwardRef<
   // parent render while the user is typing.
   const replyToId = replyTo?.id;
   React.useEffect(() => {
-    if (replyToId !== undefined) {
-      textareaRef.current?.focus();
-    }
+    if (replyToId !== undefined) focusInput();
+    // Keyed on the reply target alone; `focusInput` changes only with `editor`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [replyToId]);
 
   // Host-opt-in autofocus, applied on the client only after confirming a
@@ -603,7 +697,7 @@ export const ChatComposer = React.forwardRef<
   React.useEffect(() => {
     if (!autoFocus) return;
     if (window.matchMedia?.(TOUCH_DEVICE_QUERY).matches) return;
-    textareaRef.current?.focus();
+    focusInput();
     // Mount-only, matching native `autofocus` semantics.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -612,21 +706,37 @@ export const ChatComposer = React.forwardRef<
   const hasContent = hasText || attachments.length > 0;
   const isOverLimit = maxLength !== undefined && value.length > maxLength;
   // Without an onSend handler, sending would silently discard the draft.
-  const canSend =
-    (hasContent || canSendWhenEmpty) &&
+  const readyToSend =
     onSend !== undefined &&
     !disabled &&
+    !readOnly &&
     !isSending &&
-    !awaitingUploads &&
-    !isStreaming &&
-    !isOverLimit;
+    !isStreaming;
+  /** Whether `text` (with `staged` attachments) is a sendable message. */
+  const isSendable = (text: string, staged: readonly unknown[] = attachments) =>
+    (text.trim().length > 0 || staged.length > 0 || canSendWhenEmpty) &&
+    !(maxLength !== undefined && text.length > maxLength);
+  // Pressed while files upload, Send waits for them (see handleSend).
+  const canSend = readyToSend && !awaitingUploads && isSendable(value);
 
   // --------------------------------------------------------------------
   // Input handling
   // --------------------------------------------------------------------
 
+  // The draft's generation: bumped when `value` is replaced from outside
+  // (a host swapping in another conversation's draft), not by the
+  // composer's own edits. A pending rich send belongs to one generation.
+  const emittedValueRef = React.useRef(value);
+  const draftGenerationRef = React.useRef(0);
+  const seenValueRef = React.useRef(value);
+  if (value !== seenValueRef.current) {
+    seenValueRef.current = value;
+    if (value !== emittedValueRef.current) draftGenerationRef.current += 1;
+  }
+
   const setValue = React.useCallback(
     (next: string) => {
+      emittedValueRef.current = next;
       if (!isControlled) setInternalValue(next);
       onValueChange?.(next);
     },
@@ -636,9 +746,11 @@ export const ChatComposer = React.forwardRef<
   // @mention autocomplete (opt-in via `mentionOptions`) — shared with
   // MessageComposer so both composers behave identically.
   const mention = useMentionAutocomplete({
-    options: mentionOptions,
+    // Off while disabled: a list left open, or a search answering late,
+    // must not write into a draft the host has locked.
+    options: disabled ? undefined : mentionOptions,
     // The rich editor handles its own triggers.
-    triggers: rich ? undefined : triggers,
+    triggers: rich || disabled ? undefined : triggers,
     value,
     setValue,
     textareaRef,
@@ -766,25 +878,20 @@ export const ChatComposer = React.forwardRef<
     () => ({
       addFiles,
       restoreAttachments: uploads.restore,
-      focus: () =>
-        rich ? richEditorRef.current?.focus() : textareaRef.current?.focus(),
+      focus: focusInput,
       getTextarea: () => textareaRef.current,
     }),
-    [addFiles, uploads.restore, rich]
+    [addFiles, focusInput, uploads.restore]
   );
 
   // --------------------------------------------------------------------
   // Sending
   // --------------------------------------------------------------------
 
-  // A send that waits for its uploads goes out with the draft as it is when
-  // they finish: the text, reply and send handler as of then, read here.
+  // A send that waits for its uploads goes out with the text as it is when
+  // they finish (the user may keep typing), read here.
   const valueRef = React.useRef(value);
   valueRef.current = value;
-  const replyToRef = React.useRef(replyTo);
-  replyToRef.current = replyTo;
-  const onSendRef = React.useRef(onSend);
-  onSendRef.current = onSend;
   const alive = React.useRef(true);
   React.useEffect(() => {
     alive.current = true;
@@ -799,21 +906,102 @@ export const ChatComposer = React.forwardRef<
       file: failed.file,
     });
 
-  const deliver = (sendOption?: string) => {
-    const send = onSendRef.current;
-    if (!send) return;
-    // Every tile taken off while waiting, and no text: nothing to send.
-    if (
-      !valueRef.current.trim() &&
-      uploads.current().length === 0 &&
-      !canSendWhenEmpty
-    ) {
+  // The rich editor publishes `onChange` after an async serialization, so
+  // `value` can lag the last keystroke or chip: a rich send reads the
+  // editor's own content first. One read at a time, so a second Enter or
+  // click while it is pending can't send the draft twice.
+  const readingDraftRef = React.useRef(false);
+  // Whether the composer can send *now*, for a read that settles after the
+  // host disabled it, made it read-only or removed `onSend`.
+  const readyToSendRef = React.useRef(readyToSend);
+  readyToSendRef.current = readyToSend;
+  const handleSend = (sendOption?: string) => {
+    if (!readyToSend || awaitingUploads || readingDraftRef.current) return;
+    sendWhenUploaded({
+      send: onSend,
+      reply: replyTo,
+      generation: draftGenerationRef.current,
+      sendOption,
+    });
+  };
+
+  // Send stays pressable while files upload: wait for them, keeping the
+  // draft and tiles in place, then send — or stop, keeping the draft, if one
+  // didn't make it. Checked again after every wait and every rich read, so a
+  // file added meanwhile is waited for too.
+  const sendWhenUploaded = (target: SendTarget) => {
+    if (draftGenerationRef.current !== target.generation) return;
+    const staged = uploads.current();
+    const failed = staged.find((item) => item.state === 'failed');
+    if (failed) {
+      reportFailedUpload(failed);
+      focusInput();
       return;
     }
+    if (!hasBusyUpload(staged)) {
+      sendDraft(target);
+      return;
+    }
+    focusInput();
+    setAwaitingUploads(true);
+    void uploads.settle().then(() => {
+      if (!alive.current) return;
+      setAwaitingUploads(false);
+      if (!readyToSendRef.current) return;
+      sendWhenUploaded(target);
+    });
+  };
+
+  const sendDraft = (target: SendTarget) => {
+    const editorHandle = rich ? richEditorRef.current : null;
+    if (!editorHandle) {
+      sendText(valueRef.current, target);
+      return;
+    }
+    readingDraftRef.current = true;
+    editorHandle
+      .getContent()
+      .then(
+        (text) => {
+          // Dropped if, meanwhile, the composer can no longer send (disabled,
+          // read-only, no `onSend`) or its editor unmounted: the draft stays
+          // as it is. (The handle itself may be rebuilt on any re-render.)
+          if (!readyToSendRef.current || !richEditorRef.current) return;
+          // Dropped too if the host replaced the draft meanwhile: the editor
+          // now holds that other draft, which is not this send's to send or
+          // clear.
+          if (draftGenerationRef.current !== target.generation) return;
+          // Publish the read draft first, so clearing it below is a change
+          // the editor sees even while `value` still lagged at ''.
+          if (text !== valueRef.current) flushSync(() => setValue(text));
+          // A file added during the read is still uploading (or has failed):
+          // back through the upload check, which waits and reads again.
+          const staged = uploads.current();
+          if (
+            hasBusyUpload(staged) ||
+            staged.some((item) => item.state === 'failed')
+          ) {
+            sendWhenUploaded(target);
+            return;
+          }
+          sendText(text, target);
+        },
+        () => onError?.(sendFailedLabel, { reason: 'send-failed' })
+      )
+      .finally(() => {
+        readingDraftRef.current = false;
+      });
+  };
+
+  const sendText = (text: string, { send, reply, sendOption }: SendTarget) => {
+    // The attachments staged now, not when the send began: a file added or
+    // removed meanwhile is sent or left out as it shows. Every tile taken off
+    // while Send waited, and no text: nothing to send.
+    if (!send || !isSendable(text, uploads.current())) return;
+    const content = text.trim();
     const staged = uploads.take();
-    const reply = replyToRef.current;
     const message: NewMessage = {
-      content: valueRef.current.trim(),
+      content,
       attachments: staged.map((attachment) => attachment.file),
       // Only with uploadAttachment: what each file's upload resolved to.
       ...(uploadAttachment
@@ -823,8 +1011,9 @@ export const ChatComposer = React.forwardRef<
         : {}),
       // Only add the key when replying — hosts may key-check the payload.
       ...(reply ? { replyToId: reply.id } : {}),
+      // Read from the text actually sent, so the two always agree.
       ...(triggers?.length
-        ? { references: referencesIn(valueRef.current, triggers) }
+        ? { references: referencesIn(content, triggers) }
         : {}),
     };
     setValue('');
@@ -843,33 +1032,7 @@ export const ChatComposer = React.forwardRef<
     } catch {
       onError?.(sendFailedLabel, { reason: 'send-failed' });
     }
-  };
-
-  const handleSend = (sendOption?: string) => {
-    if (!canSend || !onSend) return;
-    if (rich) richEditorRef.current?.focus();
-    else textareaRef.current?.focus();
-    const failed = uploads.current().find((item) => item.state === 'failed');
-    if (failed) {
-      reportFailedUpload(failed);
-      return;
-    }
-    if (!hasBusyUpload(uploads.current())) {
-      deliver(sendOption);
-      return;
-    }
-    // Send stays pressable while files upload: wait for them, keeping the
-    // draft and tiles in place, then send — or stop if one didn't make it.
-    setAwaitingUploads(true);
-    void uploads.settle().then((result) => {
-      if (!alive.current) return;
-      setAwaitingUploads(false);
-      if (result.failed.length > 0) {
-        reportFailedUpload(result.failed[0]);
-        return;
-      }
-      deliver(sendOption);
-    });
+    focusInput();
   };
 
   // Pressing a button moves focus off the textarea, which on mobile starts
@@ -888,8 +1051,7 @@ export const ChatComposer = React.forwardRef<
     const target = event.target as HTMLElement;
     if (target.closest(CARD_INTERACTIVE_SELECTOR)) return;
     event.preventDefault();
-    if (rich) richEditorRef.current?.focus();
-    else textareaRef.current?.focus();
+    focusInput();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -1024,16 +1186,17 @@ export const ChatComposer = React.forwardRef<
                         ? Math.min(99, Math.round(attachment.progress * 100))
                         : undefined,
                 }}
-                // The button goes with the tile (or the retry): focus back to the text.
+                // The button goes with the tile (or the retry): focus back to the
+                // input, the rich editor or the textarea.
                 onRemove={() => {
                   uploads.remove(attachment.id);
-                  textareaRef.current?.focus();
+                  focusInput();
                 }}
                 onRetry={
                   uploadAttachment
                     ? () => {
                         uploads.retry(attachment.id);
-                        textareaRef.current?.focus();
+                        focusInput();
                       }
                     : undefined
                 }
@@ -1098,13 +1261,22 @@ export const ChatComposer = React.forwardRef<
             >
               <React.Suspense
                 fallback={
-                  <div className="text-sm text-neutral-400">{placeholder}</div>
+                  // Real text (not a ::placeholder), so it must meet AA
+                  // contrast: the theme's muted-text token does.
+                  <div className="text-muted-foreground text-sm">
+                    {placeholder}
+                  </div>
                 }
               >
                 <LazyRichEditor
                   ref={richEditorRef}
+                  onReady={handleRichReady}
+                  omitExtensions={RICH_OMITTED_EXTENSIONS}
                   value={value}
                   onChange={setValue}
+                  // A controlled composer keeps native controlled-input
+                  // semantics: an edit the host rejects reverts on screen too.
+                  strictValue={isControlled}
                   triggers={triggers}
                   modifyMenu={NO_MENU}
                   disabled={disabled}
@@ -1357,10 +1529,13 @@ export const ChatComposer = React.forwardRef<
                 onOpenChange={setSendMenuOpen}
                 trigger={
                   <button
+                    ref={sendMenuTriggerRef}
                     type="button"
                     data-slot="chat-composer-send-options"
                     aria-label={sendOptionsLabel}
-                    disabled={!canSend}
+                    // With every option disabled the menu would open with
+                    // nothing to focus, so Escape couldn't reach its handler.
+                    disabled={!canSend || !hasEnabledSendOption}
                     onMouseDown={keepInputFocus}
                     className={cn(iconButtonClasses, 'w-6')}
                   >
@@ -1368,19 +1543,25 @@ export const ChatComposer = React.forwardRef<
                   </button>
                 }
               >
-                {sendOptions.map((option) => (
-                  <DropdownItem
-                    key={option.id}
-                    icon={option.icon}
-                    disabled={option.disabled}
-                    onClick={() => {
-                      setSendMenuOpen(false);
-                      handleSend(option.id);
-                    }}
-                  >
-                    <span className="min-w-0 truncate">{option.label}</span>
-                  </DropdownItem>
-                ))}
+                <div
+                  ref={sendMenuRef}
+                  role="none"
+                  onKeyDown={handleSendMenuKeyDown}
+                >
+                  {sendOptions.map((option) => (
+                    <DropdownItem
+                      key={option.id}
+                      icon={option.icon}
+                      disabled={option.disabled}
+                      onClick={() => {
+                        setSendMenuOpen(false);
+                        handleSend(option.id);
+                      }}
+                    >
+                      <span className="min-w-0 truncate">{option.label}</span>
+                    </DropdownItem>
+                  ))}
+                </div>
               </Dropdown>
             )}
         </div>

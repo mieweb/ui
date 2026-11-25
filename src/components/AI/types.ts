@@ -8,43 +8,80 @@
 import type * as React from 'react';
 
 // ============================================================================
-// MCP Tool Types
+// Tool Call Types (MCP tools, built-in tools and skills)
 // ============================================================================
 
 /**
- * Status of an MCP tool invocation
+ * Status of a tool invocation.
+ *
+ * `awaiting-approval` is a call the user has to allow before it runs;
+ * `denied` and `expired` are calls that never ran because the user refused
+ * or did not answer in time. `uncertain` is a call that may or may not have
+ * run (a timeout or lost connection after the request was sent).
  */
-export type MCPToolStatus =
+export type ToolCallStatus =
   | 'pending'
+  | 'awaiting-approval'
   | 'running'
   | 'success'
   | 'error'
-  | 'cancelled';
+  | 'uncertain'
+  | 'cancelled'
+  | 'denied'
+  | 'expired';
 
 /**
- * MCP Tool parameter definition
+ * Tool parameter definition
  */
-export interface MCPToolParameter {
+export interface ToolCallParameter {
   name: string;
   type: string;
   value: unknown;
+  /** Readable label, e.g. the input schema property's `title`. */
+  label?: string;
   description?: string;
 }
 
 /**
- * MCP Tool invocation
+ * Behavior hints a tool provider declared (MCP tool `annotations`). They only
+ * explain the action; they never establish that it is safe.
  */
-export interface MCPToolCall {
+export interface ToolBehaviorHints {
+  readOnly?: boolean;
+  destructive?: boolean;
+  idempotent?: boolean;
+  openWorld?: boolean;
+}
+
+/**
+ * Tool invocation
+ */
+export interface ToolCall {
   /** Unique identifier for this tool call */
   id: string;
   /** Name of the tool being invoked */
   toolName: string;
+  /**
+   * What the call did in the user's words, e.g. "Read notes.md". Shown in
+   * place of `toolName`, which then moves into the call's details. Omit it to
+   * show `toolName`.
+   */
+  displayName?: string;
+  /**
+   * Who provides the tool — an MCP server's display name, for example. Shown
+   * before the tool name; omit it for first-party tools.
+   */
+  serverName?: string;
+  /** Leading icon for the call. Defaults to a wrench where one is shown. */
+  icon?: React.ReactNode;
   /** Human-readable description of what the tool does */
   description?: string;
+  /** Provider-declared behavior hints, shown as explanation only. */
+  hints?: ToolBehaviorHints;
   /** Parameters passed to the tool */
-  parameters: MCPToolParameter[];
+  parameters: ToolCallParameter[];
   /** Current status of the tool execution */
-  status: MCPToolStatus;
+  status: ToolCallStatus;
   /** Timestamp when tool was invoked */
   startedAt: Date | string;
   /** Timestamp when tool completed */
@@ -52,15 +89,35 @@ export interface MCPToolCall {
   /** Duration in milliseconds */
   duration?: number;
   /** Result data if successful */
-  result?: MCPToolResult;
+  result?: ToolCallResult;
   /** Error message if failed */
   error?: string;
 }
 
+/** Image or audio returned by a tool, as base64 data. */
+export interface ToolCallMedia {
+  type: 'image' | 'audio';
+  mimeType: string;
+  /** Base64 payload. Hosts must bound its size before passing it in. */
+  data: string;
+  /** Accessible description of an image; a generic label is used when absent. */
+  alt?: string;
+}
+
+/** A resource embedded in a tool result. */
+export interface ToolCallEmbeddedResource {
+  uri: string;
+  mimeType?: string;
+  /** Text content, when the resource is textual. */
+  text?: string;
+  /** Base64 content, when the resource is binary and small enough to keep. */
+  blob?: string;
+}
+
 /**
- * Result from an MCP tool execution
+ * Result from a tool execution
  */
-export interface MCPToolResult {
+export interface ToolCallResult {
   /** Type of result data */
   type: 'text' | 'json' | 'link' | 'resource' | 'error';
   /** The result data */
@@ -69,9 +126,32 @@ export interface MCPToolResult {
   summary?: string;
   /** Link to a resource (for link type) */
   link?: MCPResourceLink;
+  /** Additional labeled links returned by the tool */
+  links?: MCPResourceLink[];
   /** Resources created or modified */
   resources?: MCPResource[];
+  /** Structured fields; rendered instead of `data` when present. */
+  structured?: unknown;
+  /** Labels for structured fields, e.g. from an output schema's titles. */
+  fieldLabels?: Record<string, string>;
+  /** Image and audio previews */
+  media?: ToolCallMedia[];
+  /** Embedded resources */
+  embedded?: ToolCallEmbeddedResource[];
+  /** Content types the host could not present */
+  unsupported?: string[];
+  /** True when the host dropped or shortened parts of the result to fit its limits. */
+  truncated?: boolean;
 }
+
+/** @deprecated Use {@link ToolCallStatus}. */
+export type MCPToolStatus = ToolCallStatus;
+/** @deprecated Use {@link ToolCallParameter}. */
+export type MCPToolParameter = ToolCallParameter;
+/** @deprecated Use {@link ToolCall}. */
+export type MCPToolCall = ToolCall;
+/** @deprecated Use {@link ToolCallResult}. */
+export type MCPToolResult = ToolCallResult;
 
 /**
  * Link to a resource
@@ -140,7 +220,8 @@ export interface AIMessageContent {
     | 'image'
     | 'file'
     | 'audio'
-    | 'video';
+    | 'video'
+    | 'custom';
   /** Text content (also used as the label for `audio` and `video` blocks) */
   text?: string;
   /** Tool call reference */
@@ -165,6 +246,11 @@ export interface AIMessageContent {
   videoUrl?: string;
   /** Duration in seconds for `audio` blocks */
   duration?: number;
+  /**
+   * Host-defined payload for `custom` blocks, passed as-is to
+   * `renderCustomContent`. The library never renders or inspects it.
+   */
+  data?: unknown;
 }
 
 /**
@@ -197,7 +283,7 @@ export interface AIMessage {
 // Render Customization Types
 // ============================================================================
 
-/** Context passed to a custom text content renderer. */
+/** Context passed to `renderTextContent` and `renderCustomContent`. */
 export interface AITextRenderContext {
   /** id of the parent message (useful as a render cache key) */
   messageId: string;
@@ -213,6 +299,16 @@ export interface AITextRenderContext {
  */
 export type AIRenderTextContent = (
   text: string,
+  ctx: AITextRenderContext
+) => React.ReactNode;
+
+/**
+ * Render-prop for `custom` content blocks. Receives the block's `data` so the
+ * host can render a typed payload without encoding it as text. The result is
+ * mounted without the `prose` wrapper used for text.
+ */
+export type AIRenderCustomContent = (
+  data: unknown,
   ctx: AITextRenderContext
 ) => React.ReactNode;
 

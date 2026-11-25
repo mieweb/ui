@@ -43,6 +43,8 @@ import {
   dateToDisplayFormat,
   displayFormatToDateString,
   isValidDate,
+  formatRegionalDate,
+  regionalDateLocale,
 } from '../../utils/date';
 
 // =============================================================================
@@ -301,7 +303,7 @@ function ObservationHistory({ concern }: { concern?: ConditionConcern }) {
         {[...observations].reverse().map((o) => (
           <li key={o.id} className="flex flex-wrap gap-x-2 text-sm">
             <span className="text-muted-foreground text-xs tabular-nums">
-              {o.date}
+              {formatRegionalDate(o.date)}
             </span>
             <span className="text-foreground flex-1">{o.text}</span>
             {o.author && (
@@ -370,6 +372,7 @@ export function ConditionEditor({
   const [severity, setSeverity] =
     React.useState<ConditionAssertion['severity']>();
   const [onsetDate, setOnsetDate] = React.useState('');
+  const [onsetEntryValid, setOnsetEntryValid] = React.useState(true);
   const [onsetFuzzy, setOnsetFuzzy] = React.useState('');
   const [note, setNote] = React.useState('');
   const [progression, setProgression] = React.useState(false);
@@ -395,6 +398,7 @@ export function ConditionEditor({
     setSeverity(prior?.severity);
     const priorOnsetDate = prior?.onset?.date;
     setOnsetDate(priorOnsetDate ? dateToDisplayFormat(priorOnsetDate) : '');
+    setOnsetEntryValid(true);
     setOnsetFuzzy(priorOnsetDate ? '' : (prior?.onset?.fuzzy ?? ''));
     setNote('');
     setProgression(false);
@@ -421,8 +425,7 @@ export function ConditionEditor({
   const codingUnknown = fields.coding?.known === false;
   const hasInvalidOnsetDate =
     fields.onset?.known !== false &&
-    Boolean(onsetDate) &&
-    !isValidDate(onsetDate);
+    (!onsetEntryValid || (Boolean(onsetDate) && !isValidDate(onsetDate)));
 
   /** A pick from the injected lookup — appends a coding row, fills an empty
    * name, and clears a contradictory "coding unknown" flag. */
@@ -885,8 +888,11 @@ export function ConditionEditor({
                 </span>
                 <div className="grid grid-cols-1 items-end gap-2 sm:grid-cols-[minmax(10rem,0.8fr)_auto_minmax(14rem,1.2fr)]">
                   <DateInput
+                    key={onsetFuzzy}
+                    locale={regionalDateLocale()}
                     aria-label={m('Onset date (exact)')}
                     value={onsetDate}
+                    onValidityChange={setOnsetEntryValid}
                     onChange={(value) => {
                       setOnsetDate(value);
                       if (value) setOnsetFuzzy('');
@@ -895,7 +901,7 @@ export function ConditionEditor({
                     validateOnBlur
                     error={
                       hasInvalidOnsetDate
-                        ? m('Please enter a valid date (MM/DD/YYYY)')
+                        ? m('Please enter a valid date')
                         : undefined
                     }
                     width="full"
@@ -908,6 +914,7 @@ export function ConditionEditor({
                     value={onsetFuzzy}
                     onChange={(e) => {
                       setOnsetFuzzy(e.target.value);
+                      if (e.target.value) setOnsetEntryValid(true);
                       if (e.target.value) setOnsetDate('');
                     }}
                     disabled={fields.onset?.known === false}

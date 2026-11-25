@@ -347,7 +347,7 @@
                 </div>
                 <div class="new">
                   <span class="title">Nemotron 3 Diarization</span>
-                  <span class="meta">8 lanes, 10 ms frames; ORT 1.30 worker; int8 ~121 MB</span>
+                  <span class="meta">8 lanes, 10 ms frames; ORT 1.30 worker; fp32 WebGPU or int8 WASM</span>
                 </div>
               </div>
               <pre class="lanes" aria-label="Example lane activity: lane 1 and lane 2 overlap between 2 and 3 seconds">
@@ -401,7 +401,7 @@ lane 2 Speaker 3 ░░░░░░░░░░░░░░░░█████
           <tr>
             <th scope="row">Speaker model</th>
             <td>TitaNet (~50 MB, main thread)</td>
-            <td>Nemotron (int8 ~121 MB, worker)</td>
+            <td>Nemotron (worker): fp32 ~398 MB on WebGPU desktops, else int8 ~121 MB</td>
           </tr>
           <tr>
             <th scope="row">Cost that grows with meeting length</th>
@@ -421,7 +421,7 @@ lane 2 Speaker 3 ░░░░░░░░░░░░░░░░█████
           <tr>
             <th scope="row">Hey Ozwell doctor gate</th>
             <td>TitaNet</td>
-            <td>TitaNet (unchanged)</td>
+            <td>Nemotron wake voices (open until one is enrolled)</td>
           </tr>
           <tr>
             <th scope="row">Re-enrollment needed</th>

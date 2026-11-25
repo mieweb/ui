@@ -9,6 +9,7 @@ import { create } from 'storybook/theming/create';
 import { Button } from 'storybook/internal/components';
 import { GithubIcon, MobileIcon, ShareAltIcon } from '@storybook/icons';
 import { buildArgsParam } from 'storybook/internal/router';
+import { githubSourceUrl } from './github-source';
 import { serializeProjectGlobals } from './mobile-preview';
 
 // Brand theme configurations for the Storybook manager UI
@@ -186,7 +187,11 @@ const TAG_BADGES: Record<string, { label: string; color: string }> = {
 function renderSidebarLabel(item: { name: string; tags?: string[]; type: string }) {
   const badges = (item.tags ?? []).filter((tag) => tag in TAG_BADGES);
   // Badge the component node only; its docs/story children repeat the same tags.
-  if (badges.length === 0 || item.type !== 'component') {
+  // Standalone docs pages (unattached MDX, e.g. "AI Design Agents") collapse to
+  // a single docs row carrying the page name — attached docs children are
+  // always named "Docs", so they stay unbadged.
+  const standaloneDocs = item.type === 'docs' && item.name !== 'Docs';
+  if (badges.length === 0 || (item.type !== 'component' && !standaloneDocs)) {
     return item.name;
   }
   return React.createElement(
@@ -384,8 +389,10 @@ function injectBrandCSS(brandKey: BrandKey, isDark = false) {
       background-color: ${brand.primary} !important;
     }
     
-    /* Selected sidebar item text styling */
-    [data-selected="true"] span,
+    /* Selected sidebar item text styling. Badges keep their own white-on-color
+       text (a standalone docs page can be the selected row itself, unlike
+       component nodes whose children get selected). */
+    [data-selected="true"] span:not(.mieweb-sidebar-badge),
     [data-selected="true"] a,
     [data-selected="true"] button {
       color: ${textColor} !important;
@@ -617,6 +624,25 @@ addons.register('mieweb-brand-sync', (api) => {
   });
 });
 
+addons.register('mieweb-loco-locale-reset', (api) => {
+  let previousLocoMode: unknown = api.getGlobals()?.locoMode;
+
+  // 'setGlobals' fires once when the preview boots with the initial globals
+  // (from the URL); 'globalsUpdated' fires on every toolbar change.
+  api.on('setGlobals', ({ globals }: { globals?: Record<string, unknown> }) => {
+    previousLocoMode = globals?.locoMode;
+  });
+  api.on('globalsUpdated', ({ globals }) => {
+    const locoMode = globals?.locoMode;
+    // Changing the Loco mode resets the locale to English so every mode
+    // starts from the untranslated baseline.
+    if (previousLocoMode !== undefined && locoMode !== previousLocoMode && globals?.locale !== 'en') {
+      api.updateGlobals({ locale: 'en' });
+    }
+    previousLocoMode = locoMode;
+  });
+});
+
 // Redirect old/broken story bookmarks to the Introduction page
 addons.register('mieweb-404-redirect', (api) => {
   const FALLBACK_ID = 'introduction--docs';
@@ -667,10 +693,7 @@ function GitHubSourceTool() {
 
   if (!sourcePath) return null;
 
-  const githubUrl = `https://github.com/mieweb/ui/blob/main/${sourcePath
-    .split('/')
-    .map(encodeURIComponent)
-    .join('/')}`;
+  const githubUrl = githubSourceUrl(sourcePath);
 
   return React.createElement(
     Button,

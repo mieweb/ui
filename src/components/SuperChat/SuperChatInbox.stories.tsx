@@ -294,6 +294,22 @@ function InteractiveInbox(
     <SuperChatInbox
       {...rest}
       conversations={conversations}
+      onMessageEdited={(messageId, text, meta) => {
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === meta.conversation.id
+              ? {
+                  ...c,
+                  thread: c.thread.map((m) =>
+                    m.id === messageId
+                      ? { ...m, text, editedAt: new Date().toISOString() }
+                      : m
+                  ),
+                }
+              : c
+          )
+        );
+      }}
       onMessageSent={(text, meta) => {
         const now = new Date().toISOString();
         const images = meta.attachments
@@ -555,7 +571,13 @@ export const CustomComposer: Story = {
     defaultActiveConversationId: 'c1',
   },
   decorators: [fullHeightChat],
-  parameters: { githubSourceFooter: false },
+  parameters: {
+    githubSourceFooter: false,
+    // Storybook's generated source can't print JSX nested in an object prop
+    // (`composerProps.leadingSlot`): it throws "Invalid string length". Show
+    // the story's code as written instead.
+    docs: { source: { type: 'code' } },
+  },
   render: (args) => (
     <InteractiveInbox
       {...args}

@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen } from '@testing-library/react';
 
-import { renderWithTheme } from '../../test/test-utils';
+import { loadTextareaSurface, renderWithTheme } from '../../test/test-utils';
 import { EmailEditor } from './EmailEditor';
 import {
   createEmailBlock,
   type EmailContentTree,
   type EmailDesignSettings,
 } from './types';
+
+beforeAll(loadTextareaSurface);
 
 const heading = { ...createEmailBlock('heading'), text: 'Welcome' };
 const text = createEmailBlock('text');
@@ -298,11 +300,12 @@ describe('EmailEditor', () => {
       ...createEmailBlock('text'),
       content: '<p style="text-align: center;">x</p>',
     };
+    // Controlled round-trip: the Kerebron surface is strictly controlled, so
+    // an edit only sticks once the host echoes it back into `value` — the
+    // caret-preservation guarantee under test is that the echoed value never
+    // rewrites the editor's own DOM.
     renderWithTheme(
-      <EmailEditor
-        value={{ version: '1.0', blocks: [aligned] }}
-        onChange={vi.fn()}
-      />
+      <Harness doc={{ version: '1.0', blocks: [heading, aligned] }} />
     );
     fireEvent.click(screen.getByRole('button', { name: 'Select Text' }));
     const editor = screen.getByRole('textbox', { name: 'Content' });

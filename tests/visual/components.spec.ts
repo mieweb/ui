@@ -89,6 +89,29 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await page.mouse.up();
   });
 
+  test('SuperChat Inbox - Edit message with multi-line draft', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'superchat-inbox--playground');
+    // The first self-authored message carries the overflow menu with Edit.
+    await page.getByRole('button', { name: 'Message actions' }).first().click();
+    await page.getByRole('menuitem', { name: 'Edit message' }).click();
+    const editor = page.getByRole('textbox', { name: 'Edit message' });
+    await editor.fill('First line of the edit');
+    // Plain Enter must add a newline, not save.
+    await editor.press('End');
+    await editor.press('Enter');
+    await editor.pressSequentially('Second line of the edit');
+    await expect(editor).toHaveValue(
+      'First line of the edit\nSecond line of the edit'
+    );
+    // Capture the editor itself: the thread scrolls, so a page shot would
+    // show unrelated messages instead of the edit state.
+    await expect(
+      page.locator('[data-slot="superchat-message-editor"]')
+    ).toHaveScreenshot('superchat-inbox-edit-multiline.png');
+  });
+
   test('Input - Default', async ({ page }) => {
     await gotoStory(page, 'text-inputs-input--default');
     await expect(page).toHaveScreenshot('input-default.png');
@@ -227,10 +250,9 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(ribbon).toHaveCount(0);
 
     await page.locator("[data-slot='chat-composer-add-button']").click();
-    const dockToggle = page.getByRole('menuitemcheckbox', {
+    const dockToggle = page.getByRole('menuitem', {
       name: 'Dock capture ribbon',
     });
-    await expect(dockToggle).toHaveAttribute('aria-checked', 'false');
     await dockToggle.click();
     await expect(ribbon).toBeVisible();
 
@@ -250,6 +272,183 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(
       page.locator("[data-slot='chat-composer-attachments']")
     ).toBeVisible();
+  });
+
+  // Clicking right after mount can land before ProseMirror is interactive,
+  // leaving the caret at the document start (the heading) — and headings drop
+  // images in markdown serialization, so the round-trip silently loses the
+  // capture on slow CI runners. Retry until the caret really sits in the
+  // target paragraph — and stays there through a settle beat, because the
+  // story's async document load can replace the doc right after a verified
+  // click and yank the selection back to the start.
+  async function placeCaretInParagraph(page: Page, text: string) {
+    const paragraph = page.locator('.ProseMirror p', { hasText: text });
+    const caretParagraphText = () =>
+      page.evaluate(() => {
+        const node = window.getSelection()?.anchorNode;
+        const element = node instanceof Element ? node : node?.parentElement;
+        return element?.closest('p')?.textContent ?? '';
+      });
+    await expect(async () => {
+      await paragraph.click();
+      expect(await caretParagraphText()).toContain(text);
+      await page.waitForTimeout(150);
+      expect(await caretParagraphText()).toContain(text);
+    }).toPass();
+  }
+
+  // Real-editor round-trip (mieweb/ui#733): capture → uploadHandler → image
+  // node in the live Kerebron document → serialized markdown. Complements the
+  // unit tests, which mock the editor because tree-sitter WASM can't run in
+  // jsdom.
+  test('RichMediaCaptureEditor - Attach file round-trips into markdown via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(
+      page,
+      'editors-richmediacaptureeditor--with-upload-handler'
+    );
+    // Insertion happens at the caret, exactly like paste — put it in the
+    // paragraph (markdown headings cannot carry images through serialization).
+    await placeCaretInParagraph(page, 'Attach evidence below.');
+    // The unrestricted hidden input backs "Attach file" (the other is
+    // accept="image/*" for Capture image).
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the serialized document; the image node must carry the
+    // uploaded URL (the mock returns an object URL), not a base64 embed.
+    await expect(page.getByTestId('markdown-output')).toContainText(
+      '![note-photo.png](blob:'
+    );
+  });
+
+  // Heading appearance (mieweb/ui#796): the surface must keep Kerebron's
+  // `kb-editor` class when labelling attributes are applied through setProps,
+  // and the story must load kerebron.css — otherwise every `.kb-editor` rule
+  // stops matching and h1–h6 render as body text while the commands keep
+  // "working" in the DOM. The unit tests guard the class string; this guards
+  // the rendered result end to end, "## " input rule included.
+  test('RichMediaCaptureEditor - headings render styled, not as body text', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-richmediacaptureeditor--default');
+    await placeCaretInParagraph(page, 'Capture something');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('## Heading two');
+    await expect(page.locator('.ProseMirror h2')).toHaveText('Heading two');
+
+    const fontOf = (selector: string) =>
+      page
+        .locator(`.ProseMirror ${selector}`)
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el);
+          return {
+            size: parseFloat(style.fontSize),
+            weight: parseInt(style.fontWeight, 10),
+          };
+        });
+    const [h1, h2, p] = await Promise.all([
+      fontOf('h1'),
+      fontOf('h2'),
+      fontOf('p'),
+    ]);
+    // Regressed surfaces render headings at exactly the paragraph's 16px/400.
+    expect(h1.size).toBeGreaterThan(p.size);
+    expect(h2.size).toBeGreaterThan(p.size);
+    expect(h1.weight).toBeGreaterThanOrEqual(700);
+    expect(h2.weight).toBeGreaterThanOrEqual(700);
+
+    await expect(page).toHaveScreenshot(
+      'rich-media-capture-editor-headings.png'
+    );
+  });
+
+  // TextAreaRich (Kerebron) mediaCapture opt-in (mieweb/ui#734): the same
+  // ribbon docked above the comment field, round-tripping through the real
+  // editor into the HTML the field emits.
+  test('TextAreaRich Kerebron - mediaCapture attach round-trips into HTML via uploadHandler', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await placeCaretInParagraph(page, 'Attach evidence below.');
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'note-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from('fake-png-bytes'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // The story echoes the field's HTML: the image carries the uploaded URL
+    // (the mock returns an object URL), not a base64 embed.
+    await expect(page.getByTestId('html-output')).toContainText('src="blob:');
+  });
+
+  // Image annotation (mieweb/ui#735): hover a document image, draw on it in
+  // the dialog, save — the flattened PNG replaces the image node's src
+  // through the same uploadHandler pipeline.
+  test('TextAreaRich Kerebron - annotate flattens and replaces the image', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'editors-textarearich-kerebron--with-media-capture');
+    await page
+      .locator('.ProseMirror p', { hasText: 'Attach evidence below.' })
+      .click();
+    // A real decodable PNG — the annotate canvas has to actually load it.
+    const dataUrl = await page.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = 200;
+      c.height = 120;
+      const ctx = c.getContext('2d')!;
+      ctx.fillStyle = '#cccccc';
+      ctx.fillRect(0, 0, 200, 120);
+      return c.toDataURL('image/png');
+    });
+    await page.locator('input[type="file"]:not([accept])').setInputFiles({
+      name: 'evidence.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(dataUrl.split(',')[1], 'base64'),
+    });
+    await expect(page.getByRole('status')).toHaveText('Attached', {
+      timeout: 15000,
+    });
+    // ProseMirror renders a decorative separator <img> too — pick by alt.
+    const docImage = page.locator('.ProseMirror img[alt="evidence.png"]');
+    const srcBefore = await docImage.getAttribute('src');
+
+    await docImage.hover();
+    await page.waitForTimeout(450); // the affordance's placement settle window
+    await page.locator('[data-slot="annotate-image-button"]').click();
+    const canvas = page.locator('[data-slot="annotate-canvas"]');
+    await expect(canvas).toBeVisible();
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.8, box.y + box.height * 0.7, {
+      steps: 8,
+    });
+    await page.mouse.up();
+    await page.getByRole('button', { name: 'Save annotation' }).click();
+
+    await expect(page.getByRole('status')).toHaveText('Image annotated', {
+      timeout: 15000,
+    });
+    await expect(canvas).not.toBeVisible();
+    // The node kept its alt but carries the flattened PNG's new upload URL.
+    const srcAfter = await docImage.getAttribute('src');
+    expect(srcAfter).toMatch(/^blob:/);
+    expect(srcAfter).not.toBe(srcBefore);
+    await expect(page.getByTestId('html-output')).toContainText(
+      'alt="evidence.png"'
+    );
   });
 
   test('DictationButton - Mock provider', async ({ page }) => {
@@ -649,6 +848,58 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('superchat-playground.png');
   });
 
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`SuperChatConversations - List header${name}`, async ({ page }) => {
+      // Short enough that the list scrolls under the fixed header.
+      await page.setViewportSize({ width: 320, height: 190 });
+      await gotoStory(
+        page,
+        'superchat-conversations-list--list-header',
+        options
+      );
+      const search = page.getByRole('searchbox', {
+        name: 'Search conversations',
+      });
+      await search.waitFor({ state: 'visible' });
+
+      // The icon sits at the input's inline start, and the text clears it.
+      const icon = page.locator(
+        "[data-slot='superchat-conversations-search'] svg"
+      );
+      const [iconBox, inputBox] = await Promise.all([
+        icon.boundingBox(),
+        search.boundingBox(),
+      ]);
+      if (name === '-rtl') {
+        expect(
+          inputBox!.x + inputBox!.width - (iconBox!.x + iconBox!.width)
+        ).toBeLessThan(24);
+      } else {
+        expect(iconBox!.x - inputBox!.x).toBeLessThan(24);
+      }
+      expect(
+        await search.evaluate((el) => getComputedStyle(el).paddingInlineStart)
+      ).toBe('32px');
+
+      // The header stays put while the list scrolls.
+      const list = page.locator("[data-slot='superchat-conversation-list']");
+      const headerTop = (await search.boundingBox())!.y;
+      const scrolled = await list.evaluate((el) => {
+        el.scrollTop = el.scrollHeight;
+        return el.scrollTop;
+      });
+      expect(scrolled).toBeGreaterThan(0);
+      expect((await search.boundingBox())!.y).toBe(headerTop);
+
+      await expect(page).toHaveScreenshot(
+        `superchat-conversations-list-header${name}.png`
+      );
+    });
+  }
+
   test('SuperChat - Composer selectors', async ({ page }) => {
     // Agent + model selector row in the SuperChat composer.
     await gotoStory(page, 'superchat-superchat-panel--composer-selectors');
@@ -775,6 +1026,363 @@ test.describe('Visual Regression Tests - Core Components', () => {
     );
   });
 
+  test('MCPToolCallGroup - Settled run collapses to one line and expands', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'chat-mcptoolcall--group');
+    const header = page.getByRole('button', { name: 'Used 5 tools' });
+    const rows = page.locator("[data-slot='ai-tool-call-row']");
+    await expect(header).toHaveAttribute('aria-expanded', 'false');
+    await expect(rows).toHaveCount(0);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-collapsed.png');
+
+    await header.click();
+    await expect(header).toHaveAttribute('aria-expanded', 'true');
+    await expect(rows).toHaveCount(5);
+    await expect(page).toHaveScreenshot('mcp-tool-call-group-expanded.png');
+  });
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-mobile', {}, { width: 390, height: 844 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Pinned approval and error rows${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-needs-attention', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Collapsing by hand leaves the approval and failed calls listed.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await header.click();
+      await expect(header).toHaveAttribute('aria-expanded', 'false');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(2);
+      await expect(
+        page.getByText('ENOENT: no such file or directory, open notes.txt')
+      ).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      // The status badge sits at the row's inline end: physically right of
+      // the tool name in LTR and left of it in RTL.
+      const approvalRow = rows.filter({ hasText: 'delete_file' });
+      const [toolName, badge] = await Promise.all([
+        approvalRow.locator('code').boundingBox(),
+        approvalRow.getByText('Needs approval', { exact: true }).boundingBox(),
+      ]);
+      if (isRtl) {
+        expect(badge!.x + badge!.width).toBeLessThan(toolName!.x);
+      } else {
+        expect(badge!.x).toBeGreaterThan(toolName!.x + toolName!.width);
+      }
+
+      // The list's guide rule is on the inline-start side.
+      const rule = await page.getByRole('list').evaluate((el) => ({
+        left: getComputedStyle(el).borderLeftWidth,
+        right: getComputedStyle(el).borderRightWidth,
+      }));
+      expect(rule).toEqual(
+        isRtl ? { left: '0px', right: '1px' } : { left: '1px', right: '0px' }
+      );
+
+      // Parameter JSON is an LTR island even in an RTL document.
+      const paramsDirection = await approvalRow
+        .locator('pre')
+        .first()
+        .evaluate((el) => getComputedStyle(el).direction);
+      expect(paramsDirection).toBe('ltr');
+
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-needs-attention${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options] of [
+    ['', {}],
+    ['-rtl', { globals: 'direction:rtl' }],
+  ] as const) {
+    test(`MCPToolCallGroup - Translated labels at narrow width${name}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 320, height: 640 });
+      await gotoStory(page, 'chat-mcptoolcall--group-labels', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      const header = page.getByRole('button', {
+        name: '5 herramientas usadas',
+      });
+      await header.click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(5);
+
+      // Longer labels must not push the badge out of its row.
+      for (const row of await rows.all()) {
+        const [trigger, badge] = await Promise.all([
+          row.getByRole('button').first().boundingBox(),
+          row.getByText('Hecho', { exact: true }).boundingBox(),
+        ]);
+        expect(badge!.x).toBeGreaterThanOrEqual(trigger!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          trigger!.x + trigger!.width + 0.5
+        );
+      }
+      const scrollWidth = await page.evaluate(
+        () => document.documentElement.scrollWidth
+      );
+      expect(scrollWidth).toBeLessThanOrEqual(320);
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-labels-narrow${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 640 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Display names with tool ids${name}`, async ({
+      page,
+    }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-display-names', {
+        ...options,
+      });
+      const isRtl = name === '-rtl';
+      if (isRtl) await expectDocumentDirection(page, 'rtl');
+
+      // Host-supplied names are direction-isolated, so English text keeps
+      // its trailing "/" in place inside an RTL document.
+      const firstLabel = page.getByText('Looked at files in src/', {
+        exact: true,
+      });
+      expect(
+        await firstLabel.evaluate((el) => getComputedStyle(el).direction)
+      ).toBe('ltr');
+
+      // The call awaiting approval keeps the group and its own row open.
+      const header = page.getByRole('button', { name: /^Running 3 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await expect(rows).toHaveCount(3);
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+
+      const longName = 'Read src/components/AI/MCPToolCallGroup.tsx';
+      const readRow = rows.filter({ hasText: longName });
+      await readRow.getByRole('button').first().click();
+
+      const rowNames = [
+        ['Looked at files in src/', 'Done'],
+        [longName, 'Done'],
+        ['Delete the build folder', 'Needs approval'],
+      ] as const;
+      for (const [index, [displayName, status]] of rowNames.entries()) {
+        const trigger = rows.nth(index).getByRole('button').first();
+        // The row shows the display name as plain text, not the tool id.
+        await expect(trigger.locator('code')).toHaveCount(0);
+        const [triggerBox, label, badge] = await Promise.all([
+          trigger.boundingBox(),
+          trigger.getByText(displayName, { exact: true }).boundingBox(),
+          trigger.getByText(status, { exact: true }).boundingBox(),
+        ]);
+        // The badge stays inside the row, at its inline end, and leaves the
+        // name room to show.
+        expect(label!.width).toBeGreaterThan(40);
+        expect(badge!.x).toBeGreaterThanOrEqual(triggerBox!.x);
+        expect(badge!.x + badge!.width).toBeLessThanOrEqual(
+          triggerBox!.x + triggerBox!.width + 0.5
+        );
+        if (isRtl) {
+          expect(badge!.x + badge!.width).toBeLessThan(label!.x);
+        } else {
+          expect(badge!.x).toBeGreaterThan(label!.x + label!.width);
+        }
+      }
+
+      // Expanded rows show the full name and the raw tool id.
+      for (const [row, toolName] of [
+        [readRow, 'read_file'],
+        [rows.nth(2), 'delete_file'],
+      ] as const) {
+        await expect(row.locator("[data-slot='ai-tool-call-id']")).toHaveText(
+          `Tool ID ${toolName}`
+        );
+      }
+      const fullName = readRow.locator(
+        "[data-slot='ai-tool-call-display-name']"
+      );
+      await expect(fullName).toHaveText(longName);
+
+      if (viewport) {
+        // The row truncates the long name; its details wrap it instead.
+        const [rowLabel, details] = await Promise.all([
+          readRow
+            .getByRole('button')
+            .first()
+            .getByText(longName, { exact: true })
+            .evaluate((el) => ({
+              scrollWidth: el.scrollWidth,
+              clientWidth: el.clientWidth,
+            })),
+          fullName.evaluate((el) => ({
+            scrollWidth: el.scrollWidth,
+            clientWidth: el.clientWidth,
+          })),
+        ]);
+        expect(rowLabel.scrollWidth).toBeGreaterThan(rowLabel.clientWidth);
+        expect(details.scrollWidth).toBeLessThanOrEqual(details.clientWidth);
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-display-names${name}.png`
+      );
+    });
+  }
+
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 900 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Approval metadata${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-approval-metadata', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Approval opens the details: description, hints and labeled inputs.
+      await expect(page.getByText('Provider notes:')).toBeVisible();
+      await expect(page.getByText('Host name', { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-approval-metadata${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Outcomes${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-outcomes', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Collapsed, the failed and unconfirmed calls stay listed and counted.
+      await expect(
+        page.getByText('1 not confirmed', { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.locator("[data-slot='ai-tool-call-uncertain']")
+      ).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-outcomes${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Rich results${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-rich-results', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      await page.getByRole('button', { name: /^Used 2 tools/ }).click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      for (const index of [0, 1]) {
+        await rows.nth(index).getByRole('button').first().click();
+      }
+      await expect(rows.locator('table')).toBeVisible();
+      await expect(
+        page.getByRole('img', { name: 'CPU usage per host over 24 hours' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-rich-results${name}.png`
+      );
+    });
+  }
+
+  for (const [name, reducedMotion] of [
+    ['', 'no-preference'],
+    ['-reduced-motion', 'reduce'],
+  ] as const) {
+    test(`MCPToolCallGroup - Live run collapses when it settles${name}`, async ({
+      page,
+    }) => {
+      // A fake, paused clock drives both the story's 700ms call cadence and
+      // the motion runtime's rAF loop, so each frame is stepped explicitly.
+      await page.emulateMedia({ reducedMotion });
+      await page.clock.install({ time: new Date('2026-01-15T12:00:00') });
+      await page.clock.pauseAt(new Date('2026-01-15T12:00:01'));
+      await gotoStory(page, 'chat-mcptoolcall--group-motion');
+
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      await page.getByRole('button', { name: 'Play run' }).click();
+      await expect(rows).toHaveCount(1);
+      for (let count = 2; count <= 5; count++) {
+        await page.clock.runFor(700);
+        await expect(rows).toHaveCount(count);
+      }
+      const header = page.getByRole('button', { name: /^Running 5 tools/ });
+      await expect(header).toHaveAttribute('aria-expanded', 'true');
+      await page.clock.runFor(300); // let the fifth row finish entering
+      const fullHeight = (await rows.first().boundingBox())!.height;
+
+      // The fifth call settles 700ms after it arrived; the group collapses.
+      await page.clock.runFor(400);
+      const settled = page.getByRole('button', { name: 'Used 5 tools' });
+      await expect(settled).toHaveAttribute('aria-expanded', 'false');
+
+      if (reducedMotion === 'reduce') {
+        // No exit animation: rows go without the clock advancing a frame.
+        await expect(rows).toHaveCount(0);
+      } else {
+        // Midway through the 200ms collapse the rows are still shrinking.
+        await page.clock.runFor(100);
+        const midHeight = (await rows.first().boundingBox())!.height;
+        expect(midHeight).toBeGreaterThan(0);
+        expect(midHeight).toBeLessThan(fullHeight);
+        await page.clock.runFor(400);
+        await expect(rows).toHaveCount(0);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-live-settled${name}.png`
+      );
+    });
+  }
+
   test('Avatar - Default', async ({ page }) => {
     await gotoStory(page, 'data-display-avatar--default');
     await expect(page).toHaveScreenshot('avatar-default.png');
@@ -817,6 +1425,91 @@ test.describe('Visual Regression Tests - Core Components', () => {
     await expect(page).toHaveScreenshot('select-default.png');
   });
 
+  test('Select - With descriptions (open, narrow)', async ({ page }) => {
+    // Narrow enough that the longest description wraps to a second line.
+    await page.setViewportSize({ width: 320, height: 480 });
+    await gotoStory(page, 'choice-inputs-select--with-descriptions', {
+      args: 'defaultValue:ticket',
+    });
+    await page.getByRole('combobox').click();
+    const option = page.getByRole('option', { name: 'Ticket' });
+    await expect(option).toHaveAttribute('aria-selected', 'true');
+
+    const description = option.locator(
+      "[data-slot='select-option-description']"
+    );
+    const label = option.getByText('Ticket', { exact: true });
+    const check = option.locator('svg');
+    const [descriptionBox, labelBox, checkBox] = await Promise.all([
+      description.boundingBox(),
+      label.boundingBox(),
+      check.boundingBox(),
+    ]);
+    // Wraps rather than truncating: taller than one line of the label.
+    expect(descriptionBox!.height).toBeGreaterThan(labelBox!.height * 1.5);
+    // Starts under the label, and never runs into the checkmark.
+    expect(Math.abs(descriptionBox!.x - labelBox!.x)).toBeLessThan(1);
+    expect(descriptionBox!.x + descriptionBox!.width).toBeLessThanOrEqual(
+      checkBox!.x
+    );
+
+    await expect(page).toHaveScreenshot('select-with-descriptions-open.png');
+  });
+
+  test('Select - Search stays anchored inside a transformed dialog', async ({
+    page,
+  }) => {
+    await gotoStory(page, 'choice-inputs-select--searchable');
+    const trigger = page.getByRole('combobox').first();
+    await trigger.evaluate((element) => {
+      const wrapper = element.closest<HTMLElement>(
+        '[data-slot="select-wrapper"]'
+      )!;
+      wrapper.setAttribute('role', 'dialog');
+      wrapper.setAttribute('aria-modal', 'true');
+      wrapper.style.transform = 'translate(80px, 40px) scale(0.9)';
+    });
+    await trigger.click();
+    const popup = page.locator('[data-slot="select-dropdown"]');
+    await page.evaluate(() => {
+      const root = document.documentElement;
+      root.setAttribute('data-theme', 'dark');
+      root.classList.add('dark');
+      root.style.colorScheme = 'light';
+      root.style.setProperty('--mieweb-card', '#111827', 'important');
+      root.style.setProperty(
+        '--mieweb-card-foreground',
+        '#f9fafb',
+        'important'
+      );
+    });
+    await popup.evaluate((element) => {
+      element.style.colorScheme = 'light';
+    });
+    await expect(popup).toHaveCSS('background-color', 'rgb(17, 24, 39)');
+    await expect(
+      popup.locator('[role="option"][aria-selected="false"]').first()
+    ).toHaveCSS('color', 'rgb(249, 250, 251)');
+    await expect(
+      page.getByRole('dialog').getByRole('textbox', { name: 'Search options' })
+    ).toBeVisible();
+    await expect(
+      page.getByRole('textbox', { name: 'Search options' })
+    ).toBeFocused();
+    await expect
+      .poll(async () => {
+        const anchor = await trigger.boundingBox();
+        const menu = await popup.boundingBox();
+        if (!anchor || !menu) return Infinity;
+        return Math.max(
+          Math.abs(menu.x - anchor.x),
+          Math.abs(menu.y - anchor.y - anchor.height - 4),
+          Math.abs(menu.width - anchor.width)
+        );
+      })
+      .toBeLessThan(2);
+  });
+
   test('CountryDropdown - Default (empty placeholder)', async ({ page }) => {
     await gotoStory(page, 'choice-inputs-countrydropdown--default');
     await expect(page).toHaveScreenshot('countrydropdown-default.png');
@@ -855,6 +1548,77 @@ test.describe('Visual Regression Tests - Core Components', () => {
       .poll(() => submenu.evaluate((el) => el.getBoundingClientRect().right))
       .toBeLessThanOrEqual(triggerBox.left);
     await expect(page).toHaveScreenshot('dropdown-submenu-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - RTL island on an LTR page keeps its direction', async ({
+    page,
+  }) => {
+    // The panel portals to <body>, so without the carried `dir` it would
+    // inherit the LTR document direction and `bottom-start` would anchor to
+    // the physical left. Inside a local dir="rtl" island both must follow
+    // the trigger: panel direction rtl, start edge = right.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands');
+    const trigger = page
+      .locator('[data-testid="rtl-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'rtl');
+    await expect(menu).toHaveCSS('direction', 'rtl');
+    // Closeness, not one-sided: `right <= trigger.right` would also pass for
+    // a left-anchored panel. Poll so the open animation settles first.
+    const triggerRight = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().right
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().right - expected),
+          triggerRight
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-rtl.png', {
+      animations: 'disabled',
+    });
+  });
+
+  test('Dropdown - LTR island on an RTL page keeps its direction', async ({
+    page,
+  }) => {
+    // The inverse island: on a dir="rtl" document the LTR island's menu must
+    // stay LTR and `bottom-start` must anchor to the physical left.
+    await gotoStory(page, 'choice-inputs-dropdown--direction-islands', {
+      globals: 'direction:rtl',
+    });
+    // Guard the premise: the island sets dir="ltr" itself, so every assertion
+    // below would also pass on an LTR page if the global stopped applying.
+    await expectDocumentDirection(page, 'rtl');
+    const trigger = page
+      .locator('[data-testid="ltr-island"]')
+      .getByRole('button');
+    await trigger.click();
+    const menu = page.locator('[data-slot="dropdown-menu"]');
+    await menu.waitFor({ state: 'visible' });
+    await expect(menu).toHaveAttribute('dir', 'ltr');
+    await expect(menu).toHaveCSS('direction', 'ltr');
+    const triggerLeft = await trigger.evaluate(
+      (el) => el.getBoundingClientRect().left
+    );
+    await expect
+      .poll(() =>
+        menu.evaluate(
+          (el, expected) =>
+            Math.abs(el.getBoundingClientRect().left - expected),
+          triggerLeft
+        )
+      )
+      .toBeLessThanOrEqual(1.5);
+    await expect(page).toHaveScreenshot('dropdown-direction-island-ltr.png', {
       animations: 'disabled',
     });
   });
@@ -2087,6 +2851,108 @@ test.describe('Visual Regression Tests - EmailEditor', () => {
     await gotoEditor(page);
     await expect(page).toHaveScreenshot('emaileditor-mobile.png');
   });
+
+  test('EmailEditor - Text block rides Kerebron and round-trips merge tags', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    // The Kerebron editor mounts asynchronously.
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    // Merge tags render as atomic chips that keep their braces.
+    await expect(editor).toContainText('{{first_name}}');
+    await expect(page).toHaveScreenshot('emaileditor-text-block-kerebron.png');
+    // Typing round-trips through onChange onto the canvas with tags intact.
+    // Click past the end of the last line — a centred click would land on the
+    // atomic merge-tag chip and select it instead of placing the caret.
+    const lastPara = editor.locator('p').last();
+    const paraBox = (await lastPara.boundingBox())!;
+    await lastPara.click({
+      position: { x: paraBox.width - 2, y: paraBox.height / 2 },
+    });
+    await page.keyboard.press('End');
+    await page.keyboard.type(' Cheers!');
+    const canvas = page.getByRole('region', { name: 'Email canvas' });
+    await expect(canvas).toContainText('in October. Cheers!');
+    await expect(canvas).toContainText('{{company_name}}');
+    // In-editor undo reverts the typing and echoes back out.
+    await page.keyboard.press('ControlOrMeta+z');
+    await expect(canvas).not.toContainText('Cheers!');
+  });
+
+  test('EmailEditor - Variables menu inserts a merge tag', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.click();
+    const direct = page.locator('.kb-custom-menu .tar-menu-variables');
+    if (await direct.count()) {
+      await direct.first().click();
+    } else {
+      await page
+        .locator('.kb-custom-menu button[aria-label="More tools"]')
+        .click();
+      await page
+        .locator('.kb-custom-menu__overflow-item[aria-label="Insert variable"]')
+        .click();
+    }
+    await page
+      .locator('[data-slot="dropdown-menu"]')
+      .getByRole('menuitem', { name: 'Sender' })
+      .click();
+    await expect(editor).toContainText('{{sender_name}}');
+    await expect(
+      page.getByRole('region', { name: 'Email canvas' })
+    ).toContainText('{{sender_name}}');
+  });
+
+  test('EmailEditor - Pasted image files route through the host uploader', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoEditor(page);
+    await page.getByText('Here is what shipped').click();
+    const editor = page.locator('.kb-editor');
+    await editor
+      .locator('p')
+      .first()
+      .waitFor({ state: 'visible', timeout: 30000 });
+    await editor.locator('p').first().click();
+    // Paste a real image file. The story's onUploadImage returns an object
+    // URL, so the inserted <img> must be blob: — never the stock pipeline's
+    // base64 data: URL, which the email policy would strip on render.
+    await page.evaluate(() => {
+      const bytes = Uint8Array.from(
+        atob(
+          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ),
+        (c) => c.charCodeAt(0)
+      );
+      const data = new DataTransfer();
+      data.items.add(new File([bytes], 'pixel.png', { type: 'image/png' }));
+      // `.kb-editor` IS the ProseMirror editable (createView's attributes).
+      document.querySelector('.kb-editor')!.dispatchEvent(
+        new ClipboardEvent('paste', {
+          clipboardData: data,
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    await expect(
+      editor.getByRole('img', { name: 'pixel.png' })
+    ).toHaveAttribute('src', /^blob:/);
+  });
 });
 
 test.describe('Visual Regression Tests - RichTextEditor block gutter', () => {
@@ -2381,9 +3247,7 @@ test.describe('Visual Regression Tests - TextAreaRich (Kerebron) variables', () 
     await expect(
       menu.getByRole('menuitem', { name: 'Full Name' })
     ).toBeVisible();
-    await expect(
-      menu.getByPlaceholder('Search variables…')
-    ).toBeFocused();
+    await expect(menu.getByPlaceholder('Search variables…')).toBeFocused();
     await expect(page).toHaveScreenshot(
       'textarearich-kerebron-variables-menu.png',
       { animations: 'disabled' }

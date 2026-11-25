@@ -33,6 +33,7 @@
   },
   "tiers": [
     { "name": "Introduction", "flat": true },
+    { "name": "AI Design Agents", "flat": true },
     { "name": "Branding", "flat": true },
     { "name": "Foundations", "flat": true, "scope": "scope:general-purpose" },
     {

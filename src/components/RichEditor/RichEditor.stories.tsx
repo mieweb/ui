@@ -28,7 +28,9 @@ Ships from the optional **\`@mieweb/ui/kerebron\`** entry, not the main barrel: 
 
 - The stored format is **HTML** — \`TextAreaRich\` (same entry, HTML \`value\`/\`onChange\`, with \`variableGroups\` merge fields and dictation). The legacy \`RichTextEditor\` is deprecated — no new usages (mieweb/ui#692).
 - Plain multi-line text is enough — \`Textarea\`.
+- The text is a **chat message** that is sent and cleared — [ChatComposer](?path=/docs/chat-chatcomposer--docs) with \`editor="rich"\` mounts a compact RichEditor (no toolbar, Enter sends, same \`triggers\`) and still needs the setup above.
 - You only need to **display** Markdown — \`MarkdownRenderer\` (\`editors-markdown\`).
+- Users mostly **read** a file and only occasionally fix it in place — [FileDocument](?path=/docs/files-filedocument--docs) shows it rendered, with a plain-text Edit mode and Save/Cancel, without the Kerebron peers or WASM.
 - The host cannot serve WASM assets or add the Kerebron peers: the editor does not start without them.
 
 ### Example
@@ -61,6 +63,8 @@ async function save() {
 
 \`triggers\` turns on inline references: one \`ReferenceTrigger\` per kind (\`@\` people, \`#\` tickets, …). Typing a trigger's character calls its \`search\`; arrows move, Enter or Tab inserts the pick as an **atomic chip** (the caret steps over it, Backspace removes it whole), Escape closes the list for that spot. The chip is saved in \`value\` as a plain Markdown link (\`[@Ann Lee](/people/u-ann)\`) and links a trigger claims load back as chips, so the stored text needs no new syntax; read the ids back with \`referencesIn\`. The editor is the combobox (\`aria-autocomplete\`, \`aria-controls\`, \`aria-activedescendant\`) and the list a \`listbox\` named by the trigger's \`label\`. See \`ReferenceChip\` (\`editors-referencechip\`) for the trigger contract.
 
+**A reference is not a mention.** Both open an \`@\` list, but a reference only saves a link to a record: it does not address a chat participant, notify anyone, or fill \`SuperChat\`'s \`mentions\` or agent routing. To address someone in a chat, use [ChatComposer](?path=/docs/chat-chatcomposer--docs)'s \`mentionOptions\` (which \`SuperChat\` fills from its participants). Use a trigger when the text should link to a record — a person's profile, a ticket — and the host reads the ids back with \`referencesIn\` to act on them itself.
+
 ### Pasted and dropped files
 
 Images and videos can be pasted or dropped straight onto the surface. **Set \`mediaUpload.uploadHandler\` if the document is persisted anywhere** — without it the file is embedded in the document itself, an image as a base64 \`data:\` URL and a video as an object URL. A 4 MB screenshot becomes roughly 5.8 MB of Markdown, which most APIs will refuse, and an object URL is dead as soon as the page reloads.
@@ -75,7 +79,7 @@ Images and videos can be pasted or dropped straight onto the surface. **Set \`me
 />
 \`\`\`
 
-The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters.
+The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`allowedImageTypes\`, \`allowedVideoTypes\`, \`useObjectURLForVideos\`) are forwarded too. A file that fails a size or type check is skipped with a \`console.warn\` and no user-visible feedback, so validate before the editor sees it if that matters. The handle's \`insertFiles(files)\` runs the same pipeline programmatically — host UI (a capture ribbon, a picker) inserts image/video nodes at the cursor and gets \`{ inserted, skipped }\` back; [RichMediaCaptureEditor](?path=/docs/editors-richmediacaptureeditor--docs) is the packaged version of exactly that.
 
 \`value\`, \`collab\` and \`mediaUpload\` are read on mount (uncontrolled); remount with \`key\` to switch documents or rooms. Pass \`user\` in collab or remote cursors will not render.
 
@@ -92,6 +96,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
       entry: '@mieweb/ui/kerebron',
       peers: ['@kerebron/editor', '@kerebron/editor-kits', '@kerebron/wasm'],
       relationships: [
+        {
+          type: 'composes with',
+          target: 'chat-chatcomposer',
+          why: 'ChatComposer editor="rich" (experimental) mounts a compact RichEditor as its input, with the same triggers and setup; use it for a chat message that is sent and cleared, RichEditor for a document that is saved.',
+        },
         {
           type: 'composes with',
           target: 'editors-referencechip',
@@ -132,6 +141,11 @@ The rest of Kerebron's media options (\`maxFileSize\`, \`maxVideoFileSize\`, \`a
           target: 'editors-emaileditor',
           why: 'RichEditor edits a single formatted body; EmailEditor when the message needs layout blocks and is sent as an email.',
         },
+        {
+          type: 'alternative to',
+          target: 'files-filedocument',
+          why: 'RichEditor for formatted or collaborative Markdown editing; FileDocument when a file is mostly read and only occasionally edited as plain text.',
+        },
       ],
     },
   },
@@ -152,7 +166,7 @@ function BasicExample() {
 
 function ReferencesExample() {
   const [value, setValue] = useState(
-    'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login on phones](/tickets/t-12). Type @ for people or # for tickets.'
+    'Ask [@Ann Lee](/people/u-ann) about [TH-12: Fix login on phones](/tickets/t-12). Type @ for people or # for tickets.\n\nOwner: [@Raj Patel](/people/u-raj)'
   );
   return (
     <div className="max-w-2xl">

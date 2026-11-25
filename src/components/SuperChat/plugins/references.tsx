@@ -40,15 +40,58 @@ export interface ReferencesPluginOptions {
 
 interface HastNode {
   type?: string;
+  tagName?: string;
   value?: string;
+  properties?: { alt?: unknown; ariaHidden?: unknown };
   children?: HastNode[];
 }
 
-/** The plain text of a rendered link, its label. */
+/** The first descendant of `node` (or `node` itself) that is a `tagName`. */
+function findElement(node: HastNode, tagName: string): HastNode | undefined {
+  if (node.tagName === tagName) return node;
+  for (const child of node.children ?? []) {
+    const found = findElement(child, tagName);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+/**
+ * The plain text of a rendered link, its label — read as a screen reader
+ * reads it. An image counts by its alt text: `[![@Ann Lee](/a.png)](/people/u-ann)`
+ * is named "@Ann Lee", not left an empty chip. Anything hidden from
+ * assistive tech is skipped, and a formula reads once, as its TeX source:
+ * KaTeX renders `$x^2$` as MathML, that source and an aria-hidden visual
+ * copy, and MathML's own text drops what its structure says (`x2`), so
+ * `[Ticket $x^2$](…)` reads "Ticket x^2".
+ */
 function textOf(node: HastNode | undefined): string {
   if (!node) return '';
   if (node.type === 'text') return node.value ?? '';
-  return (node.children ?? []).map(textOf).join('');
+  const hidden = node.properties?.ariaHidden;
+  if (hidden === true || hidden === 'true') return '';
+  if (node.tagName === 'math') {
+    const tex = findElement(node, 'annotation');
+    if (tex) return textOf({ children: tex.children });
+  }
+  if (node.tagName === 'annotation') return '';
+  // A hard line break reads as a space, as `referencesIn` reads it.
+  if (node.tagName === 'br') return ' ';
+  if (node.tagName === 'img') {
+    const alt = node.properties?.alt;
+    return typeof alt === 'string' ? alt : '';
+  }
+  // The converter follows each `<br>` with a newline text node; the break
+  // already reads as a space, so that newline (and only it) is dropped.
+  const children = node.children ?? [];
+  return children
+    .map((child, i) => {
+      const text = textOf(child);
+      return children[i - 1]?.tagName === 'br' && child.type === 'text'
+        ? text.replace(/^\r?\n/, '')
+        : text;
+    })
+    .join('');
 }
 
 /** Create the references (link → chip) render plugin. */
@@ -75,7 +118,16 @@ export function createReferencesPlugin({
         onClick={
           onOpen
             ? (event) => {
-                if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+                // A modified click keeps the browser's own link action
+                // (new tab, new window, download).
+                if (
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
                 event.preventDefault();
                 onOpen(reference);
               }
