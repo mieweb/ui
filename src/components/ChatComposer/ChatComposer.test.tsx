@@ -1755,3 +1755,209 @@ describe('ChatComposer', () => {
     });
   });
 });
+
+describe('ChatComposer uploads on attach', () => {
+  /** An upload the test settles by hand. */
+  function fakeUpload() {
+    const calls: {
+      signal: AbortSignal;
+      onProgress: (fraction: number) => void;
+      resolve: (value: unknown) => void;
+      reject: (error: Error) => void;
+    }[] = [];
+    const upload = vi.fn(
+      (
+        _file: File,
+        ctx: { signal: AbortSignal; onProgress: (fraction: number) => void }
+      ) =>
+        new Promise<unknown>((resolve, reject) => {
+          calls.push({ ...ctx, resolve, reject });
+        })
+    );
+    return { upload, calls };
+  }
+  const clip = () => new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+  const sendButton = () =>
+    screen.getByRole('button', { name: /send message/i });
+
+  function setup(
+    props: Partial<React.ComponentProps<typeof ChatComposer>> = {}
+  ) {
+    const { upload, calls } = fakeUpload();
+    const onSend = vi.fn();
+    const onError = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onSend={onSend}
+        onError={onError}
+        uploadAttachment={upload}
+        {...props}
+      />
+    );
+    return { upload, calls, onSend, onError, ref };
+  }
+
+  it('uploads a file as soon as it is attached, showing its progress', () => {
+    const { upload, calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    expect(upload).toHaveBeenCalledTimes(1);
+    React.act(() => calls[0].onProgress(0.42));
+    const bar = screen.getByRole('progressbar', { name: 'Uploading clip.mp4' });
+    expect(bar).toHaveAttribute('aria-valuenow', '42');
+  });
+
+  it('shows Processing once every byte is in', () => {
+    const { calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    React.act(() => calls[0].onProgress(1));
+    expect(screen.getByText('Processing…')).toBeInTheDocument();
+  });
+
+  it('cancels the upload when the tile is removed', () => {
+    const { calls, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    expect(calls[0].signal.aborted).toBe(true);
+    expect(screen.queryByRole('progressbar')).toBeNull();
+  });
+
+  it('keeps Send enabled while uploading and sends once the upload finishes', async () => {
+    const { calls, onSend, ref } = setup();
+    const file = clip();
+    React.act(() => ref.current?.addFiles([file]));
+    fireEvent.change(getInput(), { target: { value: 'Demo' } });
+    expect(sendButton()).not.toBeDisabled();
+    fireEvent.click(sendButton());
+    expect(onSend).not.toHaveBeenCalled();
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: 'Demo',
+        attachments: [file],
+        uploads: [{ file, result: { id: 'v1' } }],
+      })
+    );
+    expect(getInput()).toHaveValue('');
+  });
+
+  it('keeps the draft and reports upload-failed when an upload fails at send', async () => {
+    const { calls, onSend, onError, ref } = setup();
+    const file = clip();
+    React.act(() => ref.current?.addFiles([file]));
+    fireEvent.change(getInput(), { target: { value: 'Demo' } });
+    fireEvent.click(sendButton());
+    await React.act(async () => calls[0].reject(new Error('offline')));
+    expect(onSend).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith("clip.mp4 didn't upload", {
+      reason: 'upload-failed',
+      file,
+    });
+    expect(getInput()).toHaveValue('Demo');
+    expect(
+      screen.getByRole('button', { name: 'Retry clip.mp4' })
+    ).toBeInTheDocument();
+  });
+
+  it('sends nothing when every tile is taken off while Send waits', async () => {
+    const { onSend, ref } = setup();
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('stops waiting for a removed upload even if it ignores its signal', async () => {
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    // Never settles, whatever its signal says.
+    const upload = vi.fn(() => new Promise<unknown>(() => {}));
+    renderWithTheme(
+      <ChatComposer ref={ref} onSend={onSend} uploadAttachment={upload} />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'Text too' } });
+    fireEvent.click(sendButton());
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    await React.act(async () => {});
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'Text too', uploads: [] })
+    );
+  });
+
+  it('sends a waiting send through the onSend and reply of when Send was pressed', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSendA = vi.fn();
+    const onSendB = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        onSend={onSendA}
+        replyTo={{ id: 'm-a', senderName: 'Ann', content: 'Hi' }}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.change(getInput(), { target: { value: 'For A' } });
+    fireEvent.click(sendButton());
+    // The host moves on (another conversation) before the upload finishes.
+    view.rerender(
+      <ChatComposer ref={ref} onSend={onSendB} uploadAttachment={upload} />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSendB).not.toHaveBeenCalled();
+    expect(onSendA).toHaveBeenCalledWith(
+      expect.objectContaining({ content: 'For A', replyToId: 'm-a' })
+    );
+  });
+
+  it('drops a waiting send when the host swaps in another draft', async () => {
+    const { upload, calls } = fakeUpload();
+    const onSend = vi.fn();
+    const ref = React.createRef<ChatComposerHandle>();
+    const view = renderWithTheme(
+      <ChatComposer
+        ref={ref}
+        value="Draft A"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    React.act(() => ref.current?.addFiles([clip()]));
+    fireEvent.click(sendButton());
+    view.rerender(
+      <ChatComposer
+        ref={ref}
+        value="Draft B"
+        onSend={onSend}
+        uploadAttachment={upload}
+      />
+    );
+    await React.act(async () => calls[0].resolve({ id: 'v1' }));
+    expect(onSend).not.toHaveBeenCalled();
+    // The tile stays, for whoever sends it next.
+    expect(screen.getByText('clip.mp4')).toBeInTheDocument();
+  });
+
+  it('restoreAttachments stages uploaded files without uploading them', async () => {
+    const { upload, onSend, ref } = setup();
+    const file = clip();
+    React.act(() =>
+      ref.current?.restoreAttachments([{ file, result: { id: 'v1' } }])
+    );
+    expect(upload).not.toHaveBeenCalled();
+    fireEvent.click(sendButton());
+    expect(onSend).toHaveBeenCalledWith(
+      expect.objectContaining({ uploads: [{ file, result: { id: 'v1' } }] })
+    );
+  });
+});

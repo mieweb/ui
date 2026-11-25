@@ -368,4 +368,54 @@ describe('ChatComposer rich input', () => {
     await renderRich();
     expect(editor.props!.strictValue).toBe(false);
   });
+  it('waits for a file attached while the draft is read', async () => {
+    let finishRead = () => {};
+    editor.reading = new Promise<void>((resolve) => (finishRead = resolve));
+    let finishUpload = (_value: unknown) => {};
+    const upload = vi.fn(
+      () => new Promise<unknown>((resolve) => (finishUpload = resolve))
+    );
+    const ref = React.createRef<ChatComposerHandle>();
+    const { onSend } = await renderRich({ ref, uploadAttachment: upload });
+    editor.draft = 'With a file';
+    act(() => (editor.props!.onChange as (v: string) => void)('W'));
+    fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+    const file = new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+    act(() => ref.current?.addFiles([file]));
+    await act(async () => finishRead());
+    expect(onSend).not.toHaveBeenCalled();
+    await act(async () => finishUpload({ id: 'v1' }));
+    await waitFor(() =>
+      expect(onSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          content: 'With a file',
+          uploads: [{ file, result: { id: 'v1' } }],
+        })
+      )
+    );
+  });
+  it('puts focus back in the editor when a tile is removed or retried', async () => {
+    let failUpload = (_error: Error) => {};
+    const upload = vi.fn(
+      () => new Promise<unknown>((_resolve, reject) => (failUpload = reject))
+    );
+    const ref = React.createRef<ChatComposerHandle>();
+    await renderRich({ ref, uploadAttachment: upload });
+    await waitFor(() => expect(editor.props?.onReady).toBeDefined());
+    await act(async () => {});
+    const clip = () => new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+
+    act(() => ref.current?.addFiles([clip()]));
+    editor.focus.mockClear();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    expect(editor.focus).toHaveBeenCalledTimes(1);
+
+    act(() => ref.current?.addFiles([clip()]));
+    await act(async () => failUpload(new Error('offline')));
+    editor.focus.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry clip.mp4' }));
+    expect(editor.focus).toHaveBeenCalledTimes(1);
+  });
 });

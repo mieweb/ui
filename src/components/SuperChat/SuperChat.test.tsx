@@ -706,6 +706,67 @@ describe('SuperChat', () => {
     );
   });
 
+  it('hands each attachment’s upload result to onMessageSent', async () => {
+    const onMessageSent = vi.fn();
+    const upload = vi.fn(async () => ({ id: 'v1' }));
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        composerProps={{ uploadAttachment: upload }}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    const file = new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+    await user.upload(fileInput, file);
+    expect(upload).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() =>
+      expect(onMessageSent).toHaveBeenCalledWith(
+        '',
+        expect.objectContaining({
+          attachments: [
+            expect.objectContaining({ file, result: { id: 'v1' } }),
+          ],
+        })
+      )
+    );
+  });
+
+  it('restores uploaded attachments without re-uploading when onMessageSent rejects', async () => {
+    const onMessageSent = vi.fn(() => Promise.reject(new Error('down')));
+    const upload = vi.fn(async () => ({ id: 'v1' }));
+    const { default: userEvent } = await import('@testing-library/user-event');
+    const user = userEvent.setup();
+    const { container } = render(
+      <SuperChat
+        conversation={conversation}
+        currentParticipantId="u1"
+        attachmentDataUrls={false}
+        composerProps={{ uploadAttachment: upload }}
+        onMessageSent={onMessageSent}
+      />
+    );
+    const fileInput = container.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
+    await user.upload(
+      fileInput,
+      new File(['x'], 'clip.mp4', { type: 'video/mp4' })
+    );
+    await user.click(screen.getByLabelText('Send message'));
+    await waitFor(() => expect(onMessageSent).toHaveBeenCalledTimes(1));
+    // Back in the composer as uploaded, not uploading again.
+    expect(await screen.findByLabelText('Remove clip.mp4')).toBeInTheDocument();
+    expect(upload).toHaveBeenCalledTimes(1);
+  });
+
   it('attaches a file chosen via the + menu file picker and sends it', async () => {
     const onMessageSent = vi.fn();
     const { default: userEvent } = await import('@testing-library/user-event');
