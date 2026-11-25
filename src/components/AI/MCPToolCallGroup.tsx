@@ -544,7 +544,7 @@ function ToolCallRow({
         <Collapsible open={detailsOpen} onOpenChange={toggleDetails}>
           <CollapsibleTrigger
             ref={triggerRef}
-            className="focus-visible:ring-primary-500 flex w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
+            className="focus-visible:ring-primary-500 flex w-fit max-w-full min-w-0 items-center gap-2 rounded px-1.5 py-1 text-start hover:bg-neutral-100 focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset dark:hover:bg-neutral-800"
           >
             <span
               aria-hidden="true"
@@ -574,7 +574,7 @@ function ToolCallRow({
             <Badge
               variant={STATUS_BADGE_VARIANT[toolCall.status]}
               size="sm"
-              className="ms-auto shrink-0"
+              className="shrink-0"
             >
               {labels.status[toolCall.status]}
             </Badge>
