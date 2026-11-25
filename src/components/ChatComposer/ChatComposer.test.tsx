@@ -1653,6 +1653,25 @@ describe('ChatComposer', () => {
         expect(options[0]).toHaveAccessibleName(/Sam Clerk/);
       });
 
+      it('hides the results of an earlier query while the new one is searching', async () => {
+        const onMentionSearch = (query: string) =>
+          query === 'sam'
+            ? Promise.resolve([mentionOptions[2]])
+            : new Promise<typeof mentionOptions>(() => {});
+        renderWithTheme(<ChatComposer onMentionSearch={onMentionSearch} />);
+        const input = getInput();
+
+        fireEvent.change(input, { target: { value: 'Hi @sam' } });
+        expect(
+          await screen.findByRole('option', { name: /Sam Clerk/ })
+        ).toBeInTheDocument();
+        fireEvent.change(input, { target: { value: 'Hi @jor' } });
+
+        expect(screen.queryByRole('option')).not.toBeInTheDocument();
+        fireEvent.keyDown(input, { key: 'Enter' });
+        expect(input).toHaveValue('Hi @jor');
+      });
+
       it('lists the picked mentions still in the text when sending', async () => {
         const onSend = vi.fn();
         renderWithTheme(
