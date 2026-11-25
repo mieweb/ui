@@ -1259,6 +1259,81 @@ test.describe('Visual Regression Tests - Core Components', () => {
     });
   }
 
+  for (const [name, options, viewport] of [
+    ['', {}, null],
+    ['-dark', { globals: 'theme:dark' }, null],
+    ['-rtl', { globals: 'direction:rtl' }, null],
+    ['-narrow', {}, { width: 320, height: 900 }],
+  ] as const) {
+    test(`MCPToolCallGroup - Approval metadata${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-approval-metadata', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Approval opens the details: description, hints and labeled inputs.
+      await expect(page.getByText('Provider notes:')).toBeVisible();
+      await expect(page.getByText('Host name', { exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Allow once' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-approval-metadata${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Outcomes${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-outcomes', { ...options });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      // Collapsed, the failed and unconfirmed calls stay listed and counted.
+      await expect(
+        page.getByText('1 not confirmed', { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.locator("[data-slot='ai-tool-call-uncertain']")
+      ).toBeVisible();
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-outcomes${name}.png`
+      );
+    });
+
+    test(`MCPToolCallGroup - Rich results${name}`, async ({ page }) => {
+      if (viewport) await page.setViewportSize(viewport);
+      await gotoStory(page, 'chat-mcptoolcall--group-rich-results', {
+        ...options,
+      });
+      if (name === '-rtl') await expectDocumentDirection(page, 'rtl');
+
+      await page.getByRole('button', { name: /^Used 2 tools/ }).click();
+      const rows = page.locator("[data-slot='ai-tool-call-row']");
+      for (const index of [0, 1]) {
+        await rows.nth(index).getByRole('button').first().click();
+      }
+      await expect(rows.locator('table')).toBeVisible();
+      await expect(
+        page.getByRole('img', { name: 'CPU usage per host over 24 hours' })
+      ).toBeVisible();
+      if (viewport) {
+        const scrollWidth = await page.evaluate(
+          () => document.documentElement.scrollWidth
+        );
+        expect(scrollWidth).toBeLessThanOrEqual(viewport.width);
+      }
+      await expect(page).toHaveScreenshot(
+        `mcp-tool-call-group-rich-results${name}.png`
+      );
+    });
+  }
+
   for (const [name, reducedMotion] of [
     ['', 'no-preference'],
     ['-reduced-motion', 'reduce'],
