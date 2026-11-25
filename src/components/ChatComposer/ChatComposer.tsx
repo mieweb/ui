@@ -1186,16 +1186,17 @@ export const ChatComposer = React.forwardRef<
                         ? Math.min(99, Math.round(attachment.progress * 100))
                         : undefined,
                 }}
-                // The button goes with the tile (or the retry): focus back to the text.
+                // The button goes with the tile (or the retry): focus back to the
+                // input, the rich editor or the textarea.
                 onRemove={() => {
                   uploads.remove(attachment.id);
-                  textareaRef.current?.focus();
+                  focusInput();
                 }}
                 onRetry={
                   uploadAttachment
                     ? () => {
                         uploads.retry(attachment.id);
-                        textareaRef.current?.focus();
+                        focusInput();
                       }
                     : undefined
                 }

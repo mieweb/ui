@@ -394,4 +394,28 @@ describe('ChatComposer rich input', () => {
       )
     );
   });
+  it('puts focus back in the editor when a tile is removed or retried', async () => {
+    let failUpload = (_error: Error) => {};
+    const upload = vi.fn(
+      () => new Promise<unknown>((_resolve, reject) => (failUpload = reject))
+    );
+    const ref = React.createRef<ChatComposerHandle>();
+    await renderRich({ ref, uploadAttachment: upload });
+    await waitFor(() => expect(editor.props?.onReady).toBeDefined());
+    await act(async () => {});
+    const clip = () => new File(['x'], 'clip.mp4', { type: 'video/mp4' });
+
+    act(() => ref.current?.addFiles([clip()]));
+    editor.focus.mockClear();
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Cancel upload of clip.mp4' })
+    );
+    expect(editor.focus).toHaveBeenCalledTimes(1);
+
+    act(() => ref.current?.addFiles([clip()]));
+    await act(async () => failUpload(new Error('offline')));
+    editor.focus.mockClear();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry clip.mp4' }));
+    expect(editor.focus).toHaveBeenCalledTimes(1);
+  });
 });
