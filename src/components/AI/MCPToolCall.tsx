@@ -20,6 +20,7 @@ import {
   type ToolCallResultLabels,
   isSafeHref,
   linkHost,
+  containsSummary,
   resultLinks,
   ToolCallResultContent,
 } from './ToolCallResultContent';
@@ -538,11 +539,13 @@ function ToolResultDisplay({
           </p>
         </div>
       )}
-      {result.type !== 'error' && result.summary && !wrappedText && (
-        <p className="text-sm text-neutral-700 dark:text-neutral-300">
-          {result.summary}
-        </p>
-      )}
+      {result.type !== 'error' &&
+        result.summary &&
+        !containsSummary(wrappedText, result.summary) && (
+          <p className="text-sm text-neutral-700 dark:text-neutral-300">
+            {result.summary}
+          </p>
+        )}
       {wrappedText && (
         // The structured copy is hidden as a duplicate, so the text shows here.
         <p className="text-sm whitespace-pre-wrap text-neutral-700 dark:text-neutral-300">

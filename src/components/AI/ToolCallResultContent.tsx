@@ -107,6 +107,13 @@ export function isStructuredTwin(result: ToolCallResult): boolean {
  * True when the structured content is only the result text wrapped in one
  * field, e.g. `{ result: "<same text>" }`; the text alone says it all.
  */
+/** True when `text` already carries the summary, which hosts may shorten with "…". */
+export function containsSummary(text: string | null, summary: string): boolean {
+  if (!text) return false;
+  const core = summary.replace(/…$/, '').trim();
+  return core !== '' && text.includes(core);
+}
+
 export function isWrappedText(result: ToolCallResult): boolean {
   const { structured, data } = result;
   if (!isPlainObject(structured) || typeof data !== 'string') return false;

@@ -100,6 +100,37 @@ describe('review follow-ups', () => {
     expect(screen.queryByText('Fields')).toBeNull();
   });
 
+  it('ToolCallDisplay keeps a summary the wrapped text does not contain', () => {
+    renderWithTheme(
+      <ToolCallDisplay
+        toolCall={call({
+          result: {
+            type: 'json',
+            data: 'Done.',
+            structured: { result: 'Done.' },
+            summary: 'Check the deploy log before retrying.',
+          },
+        })}
+      />
+    );
+    // Once in the pill header, once in the result body.
+    expect(
+      screen.getAllByText('Check the deploy log before retrying.')
+    ).toHaveLength(2);
+  });
+
+  it('shows approval controls when only onApproveAll is given', () => {
+    renderWithTheme(
+      <MCPToolCallGroup
+        toolCalls={[call({ status: 'awaiting-approval' })]}
+        onApproveAll={() => {}}
+      />
+    );
+    expect(
+      screen.getByRole('button', { name: 'More allow options' })
+    ).toBeInTheDocument();
+  });
+
   it('keeps a row the user opened before approval open after it settles', () => {
     const details = { description: 'Creates a container.', result: undefined };
     const { rerender } = renderWithTheme(

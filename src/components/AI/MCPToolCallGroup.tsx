@@ -23,6 +23,7 @@ import { Spinner } from '../Spinner';
 import { hasToolResultLinks, ToolResultLinks } from './MCPToolCall';
 import {
   defaultToolCallResultLabels,
+  containsSummary,
   defaultToolHintLabels,
   hasRichResult,
   hasToolCallMetadata,
@@ -335,13 +336,6 @@ function formatData(data: unknown): string | null {
   return typeof data === 'string' ? data : safeStringify(data, 2);
 }
 
-/** True when `text` already carries the summary, which hosts may shorten with "…". */
-function containsSummary(text: string | null, summary: string): boolean {
-  if (!text) return false;
-  const core = summary.replace(/…$/, '').trim();
-  return core !== '' && text.includes(core);
-}
-
 function formatResult(toolCall: MCPToolCall): string | null {
   const { result } = toolCall;
   if (!result) return null;
@@ -526,13 +520,12 @@ function ToolCallRow({
   };
 
   // Closing details removes whatever had focus inside them; keep it on the row.
+  // Checked by ref, not activeElement: an exit animation keeps the control mounted.
   const focusInDetailsRef = React.useRef(false);
   React.useLayoutEffect(() => {
     if (detailsOpen || !focusInDetailsRef.current) return;
     focusInDetailsRef.current = false;
-    if (!document.activeElement || document.activeElement === document.body) {
-      triggerRef.current?.focus();
-    }
+    triggerRef.current?.focus();
   }, [detailsOpen]);
 
   const act = async (action: () => void | Promise<void>) => {
@@ -755,7 +748,7 @@ function ToolCallRow({
           </p>
         )}
 
-        {isAwaitingApproval && (onApprove || onDeny) && (
+        {isAwaitingApproval && (onApprove || onApproveAll || onDeny) && (
           <div
             className="ms-6 mt-2 flex flex-wrap gap-2 border-t border-neutral-200 pt-2 pb-1 dark:border-neutral-700"
             onFocus={() => {
