@@ -346,7 +346,7 @@ export const GroupApprovalMetadata: Story = {
       ]}
       onApprove={fn()}
       onDeny={fn()}
-      onApproveServer={fn()}
+      onApproveAll={fn()}
       labels={{ allowAlways: 'Allow this tool for this chat' }}
     />
   ),

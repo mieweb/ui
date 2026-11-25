@@ -140,37 +140,43 @@ describe('review follow-ups', () => {
   });
 });
 
-describe('MCPToolCallGroup allow-all-server-tools button', () => {
-  it('hands the call to onApproveServer, not onApprove', () => {
-    const onApproveServer = vi.fn();
+describe('MCPToolCallGroup allow-all-tools option', () => {
+  it('approves once from the main Allow button', () => {
+    const onApprove = vi.fn();
+    const pending = call({ status: 'awaiting-approval' });
+    renderWithTheme(
+      <MCPToolCallGroup toolCalls={[pending]} onApprove={onApprove} />
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Allow' }));
+    expect(onApprove).toHaveBeenCalledWith(pending, { always: false });
+  });
+  it('hands the call to onApproveAll, not onApprove', () => {
+    const onApproveAll = vi.fn();
     const onApprove = vi.fn();
     renderWithTheme(
       <MCPToolCallGroup
-        toolCalls={[
-          call({ status: 'awaiting-approval', serverName: 'DeepWiki' }),
-        ]}
+        toolCalls={[call({ status: 'awaiting-approval' })]}
         onApprove={onApprove}
-        onApproveServer={onApproveServer}
+        onApproveAll={onApproveAll}
       />
     );
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
     fireEvent.click(
-      screen.getByRole('button', {
-        name: 'Allow all DeepWiki tools in this chat',
-      })
+      screen.getByRole('menuitem', { name: 'Allow all tools in this chat' })
     );
-    expect(onApproveServer).toHaveBeenCalledTimes(1);
+    expect(onApproveAll).toHaveBeenCalledTimes(1);
     expect(onApprove).not.toHaveBeenCalled();
   });
 
-  it('is absent for calls without a server', () => {
+  it('is absent without onApproveAll', () => {
     renderWithTheme(
       <MCPToolCallGroup
         toolCalls={[call({ status: 'awaiting-approval' })]}
         onApprove={() => {}}
-        onApproveServer={() => {}}
       />
     );
-    expect(screen.queryByRole('button', { name: /Allow all/ })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'More allow options' }));
+    expect(screen.queryByRole('menuitem', { name: /Allow all/ })).toBeNull();
   });
 });
 

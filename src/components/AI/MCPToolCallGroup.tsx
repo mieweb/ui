@@ -13,6 +13,7 @@ import { Animated, AnimatedPresence } from '../../motion';
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 import { Badge, type BadgeProps } from '../Badge';
 import { Button } from '../Button';
+import { Dropdown, DropdownItem } from '../Dropdown';
 import {
   Collapsible,
   CollapsibleContent,
@@ -69,8 +70,14 @@ export interface MCPToolCallGroupLabels {
   toolId: string;
   /** Disclosure for a successful call's output. */
   showResult: string;
+  /** Disclosure for a call's inputs when they have no labels. */
+  showInput: string;
   /** Disclosure for a failed call's full error. */
   showError: string;
+  /** Opens the menu of approval options. */
+  allow: string;
+  /** Accessible name of the menu button beside Allow. */
+  moreAllowOptions: string;
   /** Approve this call only. */
   allowOnce: string;
   /** Approve this call and stop asking for it. */
@@ -85,8 +92,8 @@ export interface MCPToolCallGroupLabels {
   expiredNotice?: string;
   /** Header badge for calls that may or may not have run. */
   notConfirmed?: (count: number) => string;
-  /** Approve every tool from the call's server for this chat. */
-  allowServer?: (serverName: string) => string;
+  /** Approve every tool for the rest of this chat. */
+  allowAll?: string;
   /** Accessible name of the copy button next to raw output. */
   copy?: string;
   /** Announced once text has been copied. */
@@ -153,7 +160,10 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   },
   toolId: 'Tool ID',
   showResult: 'Show result',
+  showInput: 'Show input',
   showError: 'Show error',
+  allow: 'Allow',
+  moreAllowOptions: 'More allow options',
   allowOnce: 'Allow once',
   allowAlways: 'Always allow',
   deny: 'Deny',
@@ -162,7 +172,7 @@ export const defaultMCPToolCallGroupLabels: ResolvedLabels = {
   deniedNotice: "You denied this call, so it didn't run.",
   expiredNotice: "No decision was made in time, so this call didn't run.",
   notConfirmed: (count) => `${count} not confirmed`,
-  allowServer: (serverName) => `Allow all ${serverName} tools in this chat`,
+  allowAll: 'Allow all tools in this chat',
   copy: 'Copy',
   copied: 'Copied',
   arguments: 'Inputs',
@@ -434,7 +444,7 @@ interface ToolCallRowProps {
   labels: ResolvedLabels;
   onApprove?: MCPToolCallGroupProps['onApprove'];
   onDeny?: MCPToolCallGroupProps['onDeny'];
-  onApproveServer?: MCPToolCallGroupProps['onApproveServer'];
+  onApproveAll?: MCPToolCallGroupProps['onApproveAll'];
   onLinkClick?: MCPToolCallGroupProps['onLinkClick'];
 }
 
@@ -451,7 +461,7 @@ function ToolCallRow({
   labels,
   onApprove,
   onDeny,
-  onApproveServer,
+  onApproveAll,
   onLinkClick,
 }: ToolCallRowProps) {
   // `collapse` animates height, which `MotionConfig reducedMotion="user"`
@@ -577,7 +587,14 @@ function ToolCallRow({
             {toolCall.displayName ? (
               // Host text may be in another script than the page; isolate it so
               // neutral characters such as a trailing "/" keep their place.
-              <bdi className="min-w-0 truncate">{toolCall.displayName}</bdi>
+              <bdi
+                className={cn(
+                  'min-w-0',
+                  detailsOpen ? 'break-words' : 'truncate'
+                )}
+              >
+                {toolCall.displayName}
+              </bdi>
             ) : (
               <code className="min-w-0 truncate font-mono text-xs">
                 {toolCall.toolName}
@@ -612,23 +629,22 @@ function ToolCallRow({
               }
             }}
           >
+            {toolCall.status === 'uncertain' && (
+              <p
+                data-slot="ai-tool-call-uncertain"
+                className="text-xs text-amber-700 dark:text-amber-400"
+              >
+                {labels.uncertainNotice}
+              </p>
+            )}
             {toolCall.displayName && (
-              <>
-                {/* The row truncates the name; here it wraps so it can be read in full. */}
-                <p
-                  data-slot="ai-tool-call-display-name"
-                  className="break-words"
-                >
-                  <bdi>{toolCall.displayName}</bdi>
-                </p>
-                <p
-                  data-slot="ai-tool-call-id"
-                  className="text-xs break-words text-neutral-600 dark:text-neutral-400"
-                >
-                  <span className="font-medium">{labels.toolId}</span>{' '}
-                  <code className="font-mono">{toolCall.toolName}</code>
-                </p>
-              </>
+              <p
+                data-slot="ai-tool-call-id"
+                className="text-xs break-words text-neutral-600 dark:text-neutral-400"
+              >
+                <span className="font-medium">{labels.toolId}</span>{' '}
+                <code className="font-mono">{toolCall.toolName}</code>
+              </p>
             )}
             <ToolCallMetadata
               toolCall={toolCall}
@@ -691,13 +707,12 @@ function ToolCallRow({
               </>
             ) : (
               toolCall.parameters.length > 0 && (
-                // JSON keeps its left-to-right order in RTL documents.
-                <pre
+                <OutputDisclosure
+                  label={labels.showInput}
+                  text={formatParameters(toolCall)}
+                  labels={labels}
                   dir="ltr"
-                  className="max-h-40 overflow-auto rounded bg-neutral-100 p-2 text-xs break-words whitespace-pre-wrap dark:bg-neutral-900"
-                >
-                  {formatParameters(toolCall)}
-                </pre>
+                />
               )
             )}
             {toolCall.result && hasRich && (
@@ -729,15 +744,6 @@ function ToolCallRow({
           </p>
         )}
 
-        {toolCall.status === 'uncertain' && (
-          <p
-            data-slot="ai-tool-call-uncertain"
-            className="ms-6 line-clamp-2 text-xs text-amber-700 dark:text-amber-400"
-          >
-            {labels.uncertainNotice}
-          </p>
-        )}
-
         {(toolCall.status === 'denied' || toolCall.status === 'expired') && (
           <p
             data-slot="ai-tool-call-not-run"
@@ -761,39 +767,57 @@ function ToolCallRow({
               }
             }}
           >
-            {onApprove && (
-              <>
-                <Button
-                  size="sm"
-                  onClick={() =>
-                    void act(() => onApprove(toolCall, { always: false }))
-                  }
+            {(onApprove || onApproveAll) && (
+              <div role="group" className="inline-flex">
+                {onApprove && (
+                  <Button
+                    size="sm"
+                    className="rounded-e-none"
+                    title={labels.allowOnce}
+                    onClick={() =>
+                      void act(() => onApprove(toolCall, { always: false }))
+                    }
+                    disabled={acting}
+                    isLoading={acting}
+                  >
+                    {labels.allow}
+                  </Button>
+                )}
+                <Dropdown
+                  placement="bottom-end"
                   disabled={acting}
-                  isLoading={acting}
-                >
-                  {labels.allowOnce}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    void act(() => onApprove(toolCall, { always: true }))
+                  trigger={
+                    <Button
+                      size="sm"
+                      aria-label={labels.moreAllowOptions}
+                      className={cn(
+                        'px-2',
+                        onApprove && 'rounded-s-none border-s border-s-white/40'
+                      )}
+                      disabled={acting}
+                    >
+                      <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
+                    </Button>
                   }
-                  disabled={acting}
                 >
-                  {labels.allowAlways}
-                </Button>
-              </>
-            )}
-            {onApproveServer && toolCall.serverName && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => void act(() => onApproveServer(toolCall))}
-                disabled={acting}
-              >
-                {labels.allowServer(toolCall.serverName)}
-              </Button>
+                  {onApprove && (
+                    <DropdownItem
+                      onClick={() =>
+                        void act(() => onApprove(toolCall, { always: true }))
+                      }
+                    >
+                      {labels.allowAlways}
+                    </DropdownItem>
+                  )}
+                  {onApproveAll && (
+                    <DropdownItem
+                      onClick={() => void act(() => onApproveAll(toolCall))}
+                    >
+                      {labels.allowAll}
+                    </DropdownItem>
+                  )}
+                </Dropdown>
+              </div>
             )}
             {onDeny && (
               <Button
@@ -830,11 +854,8 @@ export interface MCPToolCallGroupProps {
   ) => void | Promise<void>;
   /** Deny a call that is `awaiting-approval`. */
   onDeny?: (toolCall: MCPToolCall) => void | Promise<void>;
-  /**
-   * Approve this call and every other tool from its server for the rest of the
-   * chat. Shown as a button when the call has a `serverName`.
-   */
-  onApproveServer?: (toolCall: MCPToolCall) => void | Promise<void>;
+  /** Approve this call and every other tool for the rest of the chat. */
+  onApproveAll?: (toolCall: MCPToolCall) => void | Promise<void>;
   /** Intercept clicks on a result's `link` and `resources`. */
   onLinkClick?: (link: MCPResourceLink) => void;
   /** Overrides for the English default strings. */
@@ -862,7 +883,7 @@ export function MCPToolCallGroup({
   toolCalls,
   onApprove,
   onDeny,
-  onApproveServer,
+  onApproveAll,
   onLinkClick,
   labels: labelOverrides,
   className,
@@ -920,12 +941,12 @@ export function MCPToolCallGroup({
               {labels.needsApproval(summary.awaitingApproval)}
             </Badge>
           )}
-          {summary.failed > 0 && (
+          {!expanded && summary.failed > 0 && (
             <Badge variant="danger" size="sm" className="shrink-0">
               {labels.failed(summary.failed)}
             </Badge>
           )}
-          {summary.uncertain > 0 && (
+          {!expanded && summary.uncertain > 0 && (
             <Badge variant="warning" size="sm" className="shrink-0">
               {labels.notConfirmed(summary.uncertain)}
             </Badge>
@@ -956,7 +977,7 @@ export function MCPToolCallGroup({
               labels={labels}
               onApprove={onApprove}
               onDeny={onDeny}
-              onApproveServer={onApproveServer}
+              onApproveAll={onApproveAll}
               onLinkClick={onLinkClick}
             />
           ))}

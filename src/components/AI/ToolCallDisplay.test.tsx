@@ -138,13 +138,13 @@ describe('ToolCallResultContent', () => {
 });
 
 describe('MCPToolCallGroup outcomes', () => {
-  it('shows the uncertain notice without expanding', () => {
+  it('shows only the badge until the uncertain row is opened', () => {
     renderWithTheme(
       <MCPToolCallGroup toolCalls={[call({ status: 'uncertain' })]} />
     );
     expect(
       document.querySelector('[data-slot="ai-tool-call-uncertain"]')
-    ).toHaveTextContent(/Could not confirm completion/);
+    ).toBeNull();
     expect(screen.getByText('Not confirmed')).toBeInTheDocument();
   });
 
