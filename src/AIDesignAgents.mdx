@@ -1,0 +1,90 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="AI Design Agents" tags={['maturity:beta']} />
+
+# AI Design Agents
+
+> **Beta** — the agent team is new and its commands and installed layout may
+> still change. Expect rough edges; [tell us about them](#reporting-bad-guidance).
+
+@mieweb/ui ships an installable **AI agent team** that teaches your coding
+agent this design system: which component to pick, how to wire it, and the
+house rules (theming, accessibility, RTL, Tailwind setup). Instead of your
+agent guessing from source code, it works from the same curated guidance this
+Storybook is built on.
+
+## What you get
+
+One entry in your editor's agent picker — the **MIE UI Design Agent** — backed
+by a team of specialists (catalog selection, forms, grids, theming, charts,
+migration, and more). The orchestrator routes your request to the right
+specialist, so you never have to know which one to ask.
+
+## Install it in your project
+
+From a project that already uses (or will use) @mieweb/ui:
+
+```bash
+npm install @mieweb/ui
+npx mieweb-ui init-agent --experimental-agents
+```
+
+No install needed — you can also run it straight from the registry:
+
+```bash
+npx @mieweb/ui init-agent --experimental-agents
+```
+
+> Requires @mieweb/ui **0.12.1 or later**. While the team is in beta it is
+> opt-in behind `--experimental-agents`; without the flag only the base
+> instructions install.
+
+### What lands in your repo
+
+- `.github/agents/` — the MIE UI Design Agent and its specialist team
+- `.github/skills/` — focused, on-demand knowledge (component APIs, theming,
+  Tailwind integration, domain guides)
+- `.github/instructions/` — always-on ground rules for the design system
+- A managed block in your `AGENTS.md` pointing any agent (not just VS Code)
+  at the above
+
+Everything sits between clearly marked managed-block comments. Re-running
+`init-agent` after a package upgrade refreshes the managed content in place —
+it is idempotent and never touches your own files or edits outside the
+markers.
+
+## Got a project zip from a web-based AI?
+
+If a browser agent (ChatGPT and friends) built you an app with @mieweb/ui and
+handed you a zip:
+
+1. **Unzip it** and open the folder in your editor.
+2. **Tell your local coding agent:** _"Install the dependencies and set up the
+   MIE UI agent team"_ — well-behaved web agents seed the project's
+   `AGENTS.md` with exactly those steps, so your agent will find them. If it
+   doesn't, have it run `npx @mieweb/ui init-agent --experimental-agents`
+   directly.
+3. **Switch to the MIE UI Design Agent** in your agent picker and keep
+   building.
+
+## Using it without installing anything
+
+Web-based agents (or quick one-off sessions) can use the hosted corpus
+directly — point your agent at:
+
+- [https://ui.mieweb.org/agent.md](https://ui.mieweb.org/agent.md) — the
+  fetch-first entry point with routing to every skill and guide
+- [https://ui.mieweb.org/llms.txt](https://ui.mieweb.org/llms.txt) — the
+  standard llms.txt index of the same corpus
+
+Agents that generate downloadable projects are asked to seed the scaffold's
+`AGENTS.md` with the bootstrap steps above, so the project self-installs the
+team the first time an IDE agent opens it.
+
+## Reporting bad guidance
+
+If an agent gives wrong or outdated design-system advice, that is a bug in
+this package. Please
+[open an issue](https://github.com/mieweb/ui/issues/new?labels=agent) with the
+prompt, the answer you got, and what you expected — issues labeled `agent`
+feed the team's eval suite.
