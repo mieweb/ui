@@ -138,6 +138,14 @@ export interface CodeLookupProps extends Omit<
   /** Called when a result is picked */
   onSelect?: (result: CodifyResult) => void;
   /**
+   * Called shortly after a pick with the picked row's family members — the
+   * same list the → drill-down shows (a med's forms & strengths, a
+   * condition's specific codes, …). Only requested when this prop is set;
+   * lets a form offer a drug-level pick's products (e.g. Xanax → its
+   * strength / dose-form combinations) without the user drilling in.
+   */
+  onSelectFamily?: (members: CodifyResult[], picked: CodifyResult) => void;
+  /**
    * Seed the search box with this query on mount. By default the search
    * runs as soon as the index is ready and the results open — lets an
    * editor opened on an uncoded entry immediately offer the closest coded
@@ -214,6 +222,27 @@ const DETAIL_NOUN: Record<string, string> = {
 /** Domains whose drill-down resolves a curated program order set. */
 const PROGRAM_DOMAINS = new Set(['occupational', 'quality']);
 
+/**
+ * A row's family members from a family-member query's results: the
+ * curated order set as-is for programs, otherwise the same-family entries
+ * (excluding the row itself), alphabetized.
+ */
+function familyMembersOf(
+  parent: CodifyResult,
+  results: CodifyResult[]
+): CodifyResult[] {
+  if (PROGRAM_DOMAINS.has(parent.domain)) return results;
+  const pKey = familyKey(parent.domain, parent.label, parent.fullcode);
+  return results
+    .filter(
+      (r) =>
+        r.domain === parent.domain &&
+        r.fullid !== parent.fullid &&
+        familyKey(r.domain, r.label, r.fullcode) === pKey
+    )
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
 /** A remembered entry as a result row (`score` carries the pick count). */
 function toMemoryResult(e: MemoryEntry): CodifyResult {
   return {
@@ -254,6 +283,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       codetypeOptions,
       programsUrl,
       onSelect,
+      onSelectFamily,
       onFreeText,
       initialQuery,
       initialSearch = true,
@@ -287,12 +317,22 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     const drillIdRef = React.useRef(0);
     /** Parent of the in-flight drill-down search (for family filtering) */
     const drillParentRef = React.useRef<CodifyResult | null>(null);
+    /** In-flight `onSelectFamily` request (shares the drill id space) */
+    const familyRequestRef = React.useRef<{
+      id: number;
+      picked: CodifyResult;
+    } | null>(null);
+    const onSelectFamilyRef = React.useRef(onSelectFamily);
+    onSelectFamilyRef.current = onSelectFamily;
     /** billableOnly for the stable openDrill callback */
     const billableOnlyRef = React.useRef(billableOnly);
     billableOnlyRef.current = billableOnly;
     /** Set when a pick writes the query — suppresses the follow-up auto-search.
      * Starts set when a seeded initialQuery should not search on mount. */
     const skipSearchRef = React.useRef(Boolean(initialQuery) && !initialSearch);
+    /** Set by a pick / free-text commit until the user types again: late
+     * search results are then dropped instead of reopening the list. */
+    const committedRef = React.useRef(false);
     // Per-instance element ids so multiple CodeLookups on a page don't break
     // aria-controls / aria-activedescendant relationships.
     const baseId = React.useId();
@@ -406,34 +446,31 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         } else if (msg.type === 'error') {
           setStatus({ state: 'error', message: msg.message });
         } else if (msg.type === 'results') {
+          const familyRequest = familyRequestRef.current;
           if (msg.id === searchIdRef.current) {
+            // a search still in flight when the user picked / committed
+            // free text must not reopen the list
+            if (committedRef.current) return;
             setResults(msg.results);
             setTookMs(msg.tookMs);
             setActiveIndex(-1);
             setOpen(true);
+          } else if (familyRequest && msg.id === familyRequest.id) {
+            const { picked } = familyRequest;
+            familyRequestRef.current = null;
+            onSelectFamilyRef.current?.(
+              familyMembersOf(picked, msg.results as CodifyResult[]),
+              picked
+            );
           } else if (msg.id === drillIdRef.current) {
             // family members: the parent's forms & strengths / specific
             // codes / test variants, excluding the parent row itself.
             // Occupational drills resolve a curated order set instead — the
             // results already are the members, in curated order.
             const parent = drillParentRef.current;
-            let members: CodifyResult[];
-            if (parent && PROGRAM_DOMAINS.has(parent.domain)) {
-              members = msg.results as CodifyResult[];
-            } else {
-              const pKey = parent
-                ? familyKey(parent.domain, parent.label, parent.fullcode)
-                : '';
-              members = (msg.results as CodifyResult[])
-                .filter(
-                  (r) =>
-                    parent !== null &&
-                    r.domain === parent.domain &&
-                    r.fullid !== parent.fullid &&
-                    familyKey(r.domain, r.label, r.fullcode) === pKey
-                )
-                .sort((a, b) => a.label.localeCompare(b.label));
-            }
+            const members = parent
+              ? familyMembersOf(parent, msg.results as CodifyResult[])
+              : [];
             setDrill((prev) => (prev ? { ...prev, results: members } : prev));
             setActiveIndex(members.length > 0 ? 0 : -1);
           }
@@ -496,36 +533,47 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
     /** A row that can be drilled into (→) to list its family members */
     const isDrillable = (r: CodifyResult) => r.domain in DETAIL_NOUN;
 
-    const openDrill = React.useCallback((parent: CodifyResult) => {
-      drillParentRef.current = parent;
-      setDrill({ parent, results: null });
-      const id = --drillIdRef.current; // negative ids: never collide with searches
-      if (PROGRAM_DOMAINS.has(parent.domain)) {
-        // Programs (occupational surveillance, quality measures) drill into
-        // their curated order set (the orders that satisfy the requirement),
-        // resolved from whichever shards are loaded — load lab/procedure/
-        // vaccine alongside.
+    /** Ask the worker for a row's family members, answered under `id`. */
+    const requestFamily = React.useCallback(
+      (parent: CodifyResult, id: number) => {
+        if (PROGRAM_DOMAINS.has(parent.domain)) {
+          // Programs (occupational surveillance, quality measures) drill into
+          // their curated order set (the orders that satisfy the requirement),
+          // resolved from whichever shards are loaded — load lab/procedure/
+          // vaccine alongside.
+          workerRef.current?.postMessage({
+            type: 'orders',
+            id,
+            key: `${parent.codetype}|${parent.fullcode}`,
+          });
+          return;
+        }
+        // Search the family term uncollapsed and filter to the parent's family.
+        // Aliases make Lasix → furosemide forms work because the parent row
+        // already carries the canonical label. (Planned: condition drill-down
+        // will also surface suggested orders for the condition via order-sets.)
         workerRef.current?.postMessage({
-          type: 'orders',
+          type: 'search',
           id,
-          key: `${parent.codetype}|${parent.fullcode}`,
+          query: familyTerm(parent.domain, parent.label) || parent.label,
+          limit: 300,
+          domains: [parent.domain],
+          codetypes: codetypesRef.current,
+          billableOnly: billableOnlyRef.current,
         });
-        return;
-      }
-      // Search the family term uncollapsed and filter to the parent's family.
-      // Aliases make Lasix → furosemide forms work because the parent row
-      // already carries the canonical label. (Planned: condition drill-down
-      // will also surface suggested orders for the condition via order-sets.)
-      workerRef.current?.postMessage({
-        type: 'search',
-        id,
-        query: familyTerm(parent.domain, parent.label) || parent.label,
-        limit: 300,
-        domains: [parent.domain],
-        codetypes: codetypesRef.current,
-        billableOnly: billableOnlyRef.current,
-      });
-    }, []);
+      },
+      []
+    );
+
+    const openDrill = React.useCallback(
+      (parent: CodifyResult) => {
+        drillParentRef.current = parent;
+        setDrill({ parent, results: null });
+        // negative ids: never collide with searches
+        requestFamily(parent, --drillIdRef.current);
+      },
+      [requestFamily]
+    );
 
     const closeDrill = () => {
       setDrill(null);
@@ -566,6 +614,12 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         });
       }
       onSelect?.(r);
+      committedRef.current = true;
+      if (onSelectFamily && isDrillable(r)) {
+        const id = --drillIdRef.current; // supersedes any in-flight drill
+        familyRequestRef.current = { id, picked: r };
+        requestFamily(r, id);
+      }
       setOpen(false);
       setDrill(null);
       setResults([]);
@@ -583,6 +637,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
       const text = query.trim();
       if (!text || !onFreeText) return;
       onFreeText(text);
+      committedRef.current = true;
       setOpen(false);
       setDrill(null);
       setResults([]);
@@ -643,15 +698,19 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
         Boolean(onFreeText && query.trim() !== ''));
 
     // Portal + fixed positioning so the dropdown escapes overflow-hidden
-    // ancestors (Cards, scroll containers, …).
+    // ancestors (Cards, scroll containers, …). `matchMinWidth` (not
+    // `matchWidth`) lets it grow past a narrow anchor (e.g. a compound
+    // ingredient's Drug column) to fit the label and code instead of
+    // truncating to the input's width.
     const { anchorRef, floatingRef, style } = useAnchoredPosition<
       HTMLDivElement,
       HTMLDivElement
-    >({ open: dropdownOpen, matchWidth: true });
+    >({ open: dropdownOpen, matchMinWidth: true });
 
     // user-facing coding-system filter (e.g. All | ICD-10 | SNOMED)
     const codetypeBtnRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
     const selectCodetype = (i: number) => {
+      committedRef.current = false; // a new filter is a request to search
       setCodetypeIdx(i);
       setDrill(null);
     };
@@ -744,6 +803,7 @@ export const CodeLookup = React.forwardRef<HTMLDivElement, CodeLookupProps>(
             // User edits always search — clear any pending suppression
             // (unconsumed initialSearch=false seed, or a pick's write-back).
             skipSearchRef.current = false;
+            committedRef.current = false;
             setQuery(e.target.value);
             setDrill(null);
           }}
