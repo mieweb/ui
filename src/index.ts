@@ -117,6 +117,7 @@ export * from './components/LogoUploader';
 export * from './components/MacroLibrary';
 export * from './components/Markdown';
 export * from './components/MedicationList';
+export * from './components/MedHistoryReconciliation';
 export * from './components/MediaEditor';
 export * from './components/MediaPlayer';
 export * from './components/MediaFeed';

@@ -70,6 +70,11 @@ const [scan, setScan] = useState<LicenseFields | null>(null);
       entry: '@mieweb/ui',
       relationships: [
         {
+          type: 'alternative to',
+          target: 'clinical-lists-medhistoryreconciliation',
+          why: 'This panel reviews proposed field changes to one record; MedHistoryReconciliation compares two lists of medication records and imports chosen ones.',
+        },
+        {
           type: 'composes with',
           target: 'files-documentscanner',
           why: 'Hand the fields from onResult to AIReconciliationPanel so the user reviews AI-extracted values before they are saved.',

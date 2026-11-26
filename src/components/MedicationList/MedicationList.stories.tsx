@@ -53,6 +53,7 @@ The **presenting-medications list with medication reconciliation**: review a pat
 - You need the **allergy** list — [AllergyList](?path=/docs/clinical-lists-allergylist--docs); same three-layer pattern, different model (NKA tri-state, allergy vs intolerance).
 - You are placing a **new medication order** inside the visit's plan — [Assessment](?path=/docs/encounter-orders-assessment--docs) with [OrderEditor](?path=/docs/encounter-orders-ordereditor--docs), which morphs into this folder's \`MedicationEditor\` for \`type: 'medication'\` orders.
 - You just need a read-only medication summary in a banner — [PatientHeader](?path=/docs/encounter-orders-patientheader--docs)'s \`showMedicationBanner\` renders name / dose pills; use \`MedicationList readOnly\` only when the grouped status view matters.
+- You are importing an **outside medication history** (pharmacy fill history, HIE, another provider) and need to find duplicates against the chart before anything is written — [MedHistoryReconciliation](?path=/docs/clinical-lists-medhistoryreconciliation--docs). Its imported records arrive here as Unreconciled.
 - You need drug–drug interaction, dose-range or formulary checks — nothing here validates clinical content.
 
 ### Example
@@ -94,6 +95,11 @@ const [meds, setMeds] = useState<Medication[]>(encounter.presentingMedications);
     catalog: {
       entry: '@mieweb/ui',
       relationships: [
+        {
+          type: 'composes with',
+          target: 'clinical-lists-medhistoryreconciliation',
+          why: 'MedHistoryReconciliation imports outside medication history into the chart first (records arrive unreconciled); MedicationReconciliation then records whether the patient is taking them.',
+        },
         {
           type: 'composes with',
           target: 'encounter-orders-encountervisit',
